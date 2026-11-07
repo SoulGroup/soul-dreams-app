@@ -5,6 +5,8 @@
 Spec and plan in one file, as `docs/workflow.md` step 5 allows for a small task. Written by Claude Code (Opus) on
 2026-11-07, after the read-only investigation and the owner's rulings D1 to D14. **Nothing here is implemented yet.**
 The owner answered every question in Part 4 on 2026-11-07, and the plan was amended to match the answers (Part 5).
+After the review of Task 2, the owner's ruling D16 added Task 2a, the lexer and library fixes (Part 5, second
+amendment).
 
 ---
 
@@ -23,7 +25,7 @@ it should, a mutation check for every guard, the pre-commit hook, `tool/check_al
   - `tool/checks/guards.py` runs the guards.
   - `tool/checks/g1_words.py` to `g9_hosts.py` hold one guard each.
   - `tool/checks/lex.py` holds the lexers. They find string literals and comments in Dart, TypeScript or
-    JavaScript, Python and shell.
+    JavaScript, Swift, Python and shell.
   - `tool/checks/guardlib.py` decides which files are read and what kind each one is.
   - `tool/checks/awaiting-import` is the marker from D5.
   - The guard tests are in `tool/checks/tests/`, with `mutations.py`.
@@ -35,12 +37,13 @@ it should, a mutation check for every guard, the pre-commit hook, `tool/check_al
   guard, the path, the line and a reason code. An internal error prints only the exception's type. Exit codes: 0 all
   passed, 1 findings, 2 internal error.
 - **Files the guards cannot read fail closed.** A code file that cannot be lexed is a finding (`unlexable`).
-  Binary files are skipped. Files with secret names are never opened.
+  Binary files are skipped. Files with secret names, in any case, are never opened. A tracked path that is not
+  valid UTF-8 is the finding `bad-path` (D16).
 - **Forbidden tokens in the guards' own source** are built from pieces (`'client_' + 'reference_id'`). This lets the
   guards scan themselves with no exclusion. Test controls are built the same way, at run time.
 - **Mutation checks never touch the repository.** `mutations.py` copies `tool/checks` to `$TMPDIR` and runs the named
   tests on the unbroken copy, where they must pass. It then breaks the copy and runs them again, and they must fail.
-  `check_all.sh` runs all 16 mutations every time.
+  `check_all.sh` runs all 20 mutations every time.
 
 ### What branch 1 does not build
 
@@ -70,6 +73,7 @@ it should, a mutation check for every guard, the pre-commit hook, `tool/check_al
 | D12 | G5 adds `stdout.write`, `stderr.write`, `process.stdout.write` and `FlutterError.dumpErrorToConsole`. `Math.log(` is allowed | Task 6 |
 | D13 | The safe loggers are `app/lib/core/safe_log.dart` and `server/src/safe-log.ts` | Task 6 |
 | D14 | Installing or pinning Flutter stays the owner's | Nothing here touches FVM |
+| D16 | After the review of Task 2: the lexer and library fixes F1 to F11, with mutations for F1, F2, F3 and F6. It amends D8's reading: `.mjs .cjs .tsx .jsx .swift`, every `.json .yaml .yml` but lockfiles, and code under `docs/` are scanned; only Markdown and lockfiles are not | Task 2a; Tasks 4, 8, 11, 15 |
 
 ### How each guard reads its rule
 
@@ -104,7 +108,7 @@ Where this reading goes beyond the words of `CLAUDE.md`, Part 4 asks about it.
 - **G6 identifiers.** It refuses the four names in code and config, ignoring case, `_` and `-`, so `clientReferenceId`
   and `device_info_plus` are refused too (Q6).
 - **G7 secrets.** It refuses a file named `.env` or `.env.*`, or ending `.p8`, `.pem`, `.p12` or `.mobileprovision`,
-  anywhere. In every text file, Markdown included, it refuses:
+  anywhere, in any case (D16). In every text file, Markdown included, it refuses:
   - AWS access keys;
   - PEM blocks of any kind;
   - `sk-` or `sk_` tokens, GitHub, Slack and Google key shapes, and JWTs;
@@ -127,17 +131,19 @@ Where this reading goes beyond the words of `CLAUDE.md`, Part 4 asks about it.
 |---|---|---|---|
 | G1 | marker beside SOURCES; no marker and no SOURCES; register hash mismatch; register unlisted; armed without generator | marker alone (NOT ARMED) | 1: drop the marker-with-sources refusal. 2: compare the hash with itself |
 | G2 | marker beside SOURCES or any copy; no SOURCES; hash mismatch; unlisted copy; listed but missing; malformed line; unknown path | marker alone; a matching copy | 3: skip the hash compare. 4: ignore copies under the marker |
-| G3 | literal in `Text`, `Text.rich(TextSpan(text:))`, each named argument; marked dreamer literal; 3 unmarked words; marker with no reason; marker on another line; unlexable file | `app/lib/words/`; two words; three marked words; `Text(lines['k'])`; files outside `app/lib/` | 5: three words become four. 6: stop exempting `words/`. 7: drop `tooltip` |
+| G3 | literal in `Text`, `Text.rich(TextSpan(text:))`, each named argument; a named argument in a bare parenthesis; `m.Text`; marked dreamer literal; 3 unmarked words; marker with no reason; marker on another line; unlexable file | `app/lib/words/`; two words; three marked words; `Text(lines['k'])`; files outside `app/lib/` | 5: three words become four. 6: stop exempting `words/`. 7: drop `tooltip` |
 | G4 | 12 words in `.ts`, `.dart` (tests too), `.py`, `.sh`; in `package.json`, `Info.plist`, `pubspec.yaml` | 11 words; fixtures, `words/`, Markdown, comments | 8: limit 13 |
 | G5 | each of the seven writers, in Dart, TypeScript and Python | the safe loggers; writers inside strings and comments; `showDialog(`, `catalog(`, `Math.log(` | 9: drop `console.`. 10: stop allowing `Math.log(` |
 | G6 | each name in `.dart`, `.ts`, `pubspec.yaml`, `Info.plist`; `clientReferenceId`; `device_info_plus` | `device` and `info` apart | 11: misspell one name |
-| G7 | each secret file name; each key shape in Markdown; an integrity line outside a lockfile; other lockfile lines | hex hashes; SOURCES; lockfile integrity; ordinary code; binary files | 12: drop the PEM rule. 13: exempt integrity lines everywhere |
+| G7 | each secret file name, in either case; each key shape in Markdown; an integrity line outside a lockfile; other lockfile lines | hex hashes; SOURCES; lockfile integrity; ordinary code; binary files | 12: drop the PEM rule. 13: exempt integrity lines everywhere |
 | G8 | `main.dart`; another file, by package, relative, `export`, `part` and conditional URI | the four allowed places; look-alike names | 14: allow `main.dart` |
 | G9 | each scheme in Dart, in any case; in TypeScript; unquoted in shell | both hosts files; test folders; comments; DOCTYPE | 15: exempt every path |
-| Lexer | quotes, raw, triple, escapes, nested interpolation, nested comments, call frames and named arguments; TypeScript template and regex; Python f-strings; shell quotes, substitution and heredocs; unterminated input refused | | 16: let a string run past its line |
-| Hook | a staged writer; a bad file staged then fixed only in the working tree | a clean index; a good file staged then broken only in the working tree | (end-to-end tests) |
+| Lexer | quotes, raw, triple, escapes, nested interpolation, nested comments, call frames and named arguments; TypeScript template and regex; Python f-strings; shell quotes, substitution and heredocs; unterminated input refused. Task 2a: `/` after `x++` and after `if (…)`; an unterminated regex; Python with no final newline; deep nesting; Swift strings, interpolation and nested comments; bare parentheses; shell arithmetic and hyphenated heredoc words | | 16: let a string run past its line. 17: `/` after `++` starts a regex. 18: `/` after `if (…)` divides. 19: an unterminated regex passes |
+| Library (Task 2a) | secret names in upper case; a lexer's `RecursionError`; a path that is not UTF-8 | file kinds by extension and shebang; YAML block scalars and quoted `#` | 20: compare secret names case-sensitively |
+| Hook | a staged writer; a bad file staged then fixed only in the working tree; a staged path that is not UTF-8 | a clean index; a good file staged then broken only in the working tree | (end-to-end tests) |
 
-Totals once built: **73 tests and 16 mutations.** Every control is invented: placeholder words (`word word word`),
+Totals once built: **94 tests and 20 mutations** (Task 2a added 18 tests and 4 mutations, and Tasks 4 and 11
+three more tests). Every control is invented: placeholder words (`word word word`),
 placeholder hosts (`x.example`) and key-shaped strings assembled at run time. No dream, night or dreamer line appears
 anywhere (R1, R2).
 
@@ -1218,6 +1224,1199 @@ Run the same command. Expected: `Ran 14 tests`, `OK`.
 
     git add tool/checks && git commit -m "Guards: lexers, shared library, test and mutation runners" -m "<trailer>"
 
+### Task 2a · Lexer and library fixes (D16)
+
+Task 2 is committed as `d95607d`, identical to the plan above, and stays as written. The Opus reviewer of Task 2
+found the cases below, and the owner ruled on them in D16 (2026-11-07). This task fixes them in `tool/checks/lex.py`
+and `tool/checks/guardlib.py`, red then green: each case is a failing test first, with the exact input of the ruling
+where it gives one.
+
+| | Fix | Test (red first) |
+|---|---|---|
+| F1 | TypeScript: `/` after postfix `++` or `--` is division | `TypeScript.test_slash_after_postfix_is_division` |
+| F2 | TypeScript: `/` after `)` is a regex only when that `(` followed `if`, `while`, `for` or `with`; otherwise division | `TypeScript.test_slash_after_condition_is_regex` |
+| F3 | An unterminated regex at the end of input raises `LexError` | `TypeScript.test_unterminated_regex_raises` |
+| F4 | Python without a trailing newline: one is appended before tokenizing; positions unchanged | `Python.test_no_trailing_newline` |
+| F5 | Nesting deeper than `MAX_NESTING` (100) raises `LexError`; any lexer exception, `RecursionError` included, makes the file unlexable | `Nesting.test_deep_nesting_raises_lex_error`; `Library.test_any_lexer_exception_is_unlexable` |
+| F6 | `is_secret_name` ignores case: `.ENV`, `x.PEM`, `AuthKey.P8` are refused by name and never opened | `Library.test_secret_names_ignore_case` |
+| F7 | `kind()`: `.mjs .cjs .tsx .jsx` are `ts`; `.swift` is `swift`; every `.json .yaml .yml` but lockfiles is `config`; shebangs by interpreter name (env and flags skipped); code under `docs/` is scanned | `Library.test_kind_by_extension`; `Library.test_kind_by_shebang`; `Swift.test_multiline_string`, `Swift.test_interpolation_keeps_code`, `Swift.test_nested_block_comment` |
+| F8 | YAML: block scalars (`\|` and `>`) are joined into one string; a comment is stripped only when its `#` is outside quotes | `Library.test_yaml_block_scalars_joined`; `Library.test_yaml_comment_only_outside_quotes` |
+| F9 | A literal in a bare parenthesis keeps the enclosing call and named argument | `Frames.test_bare_parenthesis_keeps_call_and_named` (the G3 tests come in Task 4) |
+| F10 | Shell: `$(( ))` is arithmetic code, not a heredoc or substitution; heredoc words may contain `-` | `Shell.test_arithmetic_is_code`; `Shell.test_heredoc_word_with_hyphen` |
+| F11 | A tracked path that is not valid UTF-8 does not crash `Source`: it becomes the finding `bad-path` | `Library.test_undecodable_path_is_a_finding` (Task 11 reports it) |
+
+The lexer tests are in a new file, `test_lex_fixes.py`, and the library tests in another, `test_guardlib.py`, so
+Task 2's `test_lex.py` is not touched.
+
+**How the fixes work.**
+- **F1, F2:** the TypeScript lexer reads `++` and `--` as one token, after which `/` divides. A `)` now records the
+  frame it closes: `/` after it starts a regex only when that frame is `if`, `while`, `for` or `with`.
+- **F3:** the regex reader raises unless it found the closing `/`.
+- **F4:** `lex_python` tokenizes the source with a newline appended, and returns code cut back to the original
+  length. Every position is unchanged, because the newline comes after the last character.
+- **F5:** each string interpolation (Dart, TypeScript, Swift) and each shell substitution inside a string counts one
+  level of nesting. Past `MAX_NESTING` the lexer raises `LexError('nesting')`, well before Python's recursion limit.
+  `Source.lexed` turns any exception from a lexer into `None` (unlexable), never a crash.
+- **F6:** `is_secret_name` lowers the file name before comparing.
+- **F7:** Swift is read by the same lexer as Dart and TypeScript, in a third mode, `swift`:
+  - strings `"…"` and `"""…"""` (multiline), and the extended `#"…"#` forms;
+  - escapes with `\`, and interpolation `\( … )`, read as code up to its matching `)`;
+  - nested `/* */` comments, as in Dart;
+  - a `'` outside a string or comment is not Swift, and raises `LexError`.
+
+  The guards that read code (G4, G5, G6 and G9) read `.swift` files from now on. G3 and G8 stay Dart-only.
+  Swift's regex literals (`/…/`, `#/…/#`) are not read as regexes: a `"` inside one makes the file unlexable, which
+  fails closed. Shebangs: `env`, its flags and its `VAR=value` settings are skipped, and the program is read by the
+  last part of its path. `sh`, `bash`, `dash` and `zsh` are `sh`, `python*` is `py`, and `node` is `ts`. Only
+  Markdown and lockfiles are left unscanned, wherever they are. Extensions are compared in lower case.
+- **F8:** the YAML reader is `yaml_strings`. A value of `|` or `>` (with any `-`, `+` or digit after it) takes every
+  following line indented deeper than its key, blank lines included. Their stripped text is joined with spaces into
+  one string, given the key's line number. `#` starts a comment only at the start of a line, or after a space or tab,
+  and only outside quotes.
+- **F9:** a frame is now `(name, named, bare)`. A call's `(` takes the call's name, as before. A bare `(` keeps the
+  enclosing frame's name and the named argument it is the value of. So in `f(tooltip: ('x'))` the literal is `f`'s
+  `tooltip`, and in `Text(('y'))` it is `Text`'s.
+- **F10:** `$((` starts arithmetic, read as code up to its matching `))`, in code and inside double quotes. Heredoc
+  words may contain `-`.
+- **F11:** `Source` reads git's paths as bytes and decodes each one alone. A path that is not UTF-8 is left out of
+  `paths` and added to `Source.findings` as `bad-path`, named with its bytes escaped (for example `app/a\xff.txt`).
+
+**Red.** Write the two test files and add the four mutation rows:
+
+**File `tool/checks/tests/test_lex_fixes.py`**
+
+~~~~python
+# Task 2a (D16): the lexer fixes, each with its exact input.
+import unittest
+
+import helpers  # noqa: F401
+import lex
+
+
+def texts(lx):
+    return [l.text for l in lx.lits]
+
+
+def nested(n):
+    # n Dart strings, each inside the last one's interpolation.
+    return "'${" * n + '1' + "}'" * n
+
+
+def nested_shell(n):
+    # n shell strings, each inside the last one's substitution.
+    return 'echo ' + '"$(' * n + 'x' + ')"' * n + '\n'
+
+
+class TypeScript(unittest.TestCase):
+    def test_slash_after_postfix_is_division(self):
+        lx = lex.lex_ts('a = x++ / 2; console.log(y); z = w / 3;')
+        self.assertEqual(texts(lx), [])
+        self.assertIn('console.log(y)', lx.code)
+
+    def test_slash_after_condition_is_regex(self):
+        lx = lex.lex_ts('if (a) /"/.test(b); console.log(x);')
+        self.assertEqual(texts(lx), [])
+        self.assertIn('console.log(x)', lx.code)
+        self.assertEqual(texts(lex.lex_ts("f(a) / 2; g('x') / h(1) / 3;")), ['x'])
+
+    def test_unterminated_regex_raises(self):
+        with self.assertRaises(lex.LexError):
+            lex.lex_ts('f(); /console.log(1)')
+
+
+class Python(unittest.TestCase):
+    def test_no_trailing_newline(self):
+        src = "a = 'x'  # c"
+        lx = lex.lex_python(src)
+        self.assertEqual(texts(lx), ['x'])
+        self.assertEqual(lx.lits[0].pos, 4)
+        self.assertEqual(len(lx.comments), 1)
+        self.assertEqual(len(lx.code), len(src))
+
+
+class Nesting(unittest.TestCase):
+    def test_deep_nesting_raises_lex_error(self):
+        for n in (150, 600):
+            with self.assertRaises(lex.LexError):
+                lex.lex_dart(nested(n))
+            with self.assertRaises(lex.LexError):
+                lex.lex_ts(nested(n))
+            with self.assertRaises(lex.LexError):
+                lex.lex_shell(nested_shell(n))
+        self.assertEqual(len(lex.lex_dart(nested(20)).lits), 20)
+
+
+class Swift(unittest.TestCase):
+    def test_multiline_string(self):
+        lx = lex.lex_swift('let a = """\none "two"\n"""\nf("b")\n')
+        self.assertEqual(texts(lx), ['\none "two"\n', 'b'])
+        self.assertEqual(lx.lits[0].end_line, 3)
+
+    def test_interpolation_keeps_code(self):
+        lx = lex.lex_swift('f("a \\(g("b")) c")\n')
+        self.assertEqual(texts(lx), ['a \\(g("b")) c', 'b'])
+        self.assertIn('g(', lx.code)
+        self.assertNotIn('a ', lx.code)
+
+    def test_nested_block_comment(self):
+        lx = lex.lex_swift('/* a /* b */ "c" */ f("d")\n')
+        self.assertEqual(texts(lx), ['d'])
+        self.assertEqual(len(lx.comments), 1)
+
+
+class Frames(unittest.TestCase):
+    def test_bare_parenthesis_keeps_call_and_named(self):
+        lx = lex.lex_dart("f(tooltip: ('x')); Text(('y')); if (a) g('z');")
+        got = [(l.text, l.frame, l.named) for l in lx.lits]
+        self.assertEqual(got, [('x', 'f', 'tooltip'), ('y', 'Text', ''), ('z', 'g', '')])
+
+
+class Shell(unittest.TestCase):
+    def test_arithmetic_is_code(self):
+        lx = lex.lex_shell('x=$((1 << 2))\necho "$((3<<1))"\n')
+        self.assertEqual(texts(lx), ['$((3<<1))'])
+        self.assertIn('x=$((1 << 2))', lx.code)
+
+    def test_heredoc_word_with_hyphen(self):
+        lx = lex.lex_shell('cat <<END-OF\nbody\nEND-OF\necho done\n')
+        self.assertEqual(texts(lx), ['body\n'])
+        self.assertIn('echo done', lx.code)
+
+
+if __name__ == '__main__':
+    unittest.main()
+~~~~
+
+**File `tool/checks/tests/test_guardlib.py`**
+
+~~~~python
+# Task 2a (D16): the library fixes.
+import os
+import shutil
+import subprocess
+import tempfile
+import unittest
+from unittest import mock
+
+from helpers import make_tree, sentence
+import guardlib
+import lex
+
+
+def kinds(files):
+    root = make_tree(files)
+    try:
+        src = guardlib.Source(root, 'walk')
+        return {p: src.kind(p) for p in src.paths}
+    finally:
+        shutil.rmtree(root)
+
+
+class Library(unittest.TestCase):
+    def test_secret_names_ignore_case(self):
+        for name in ('.ENV', '.Env.Local', 'x.PEM', 'AuthKey.P8', 'k.P12', 'a.MobileProvision'):
+            self.assertTrue(guardlib.is_secret_name('app/' + name), name)
+        root = make_tree({'app/x.PEM': 'canary\n'})
+        try:
+            os.chmod(os.path.join(root, 'app', 'x.PEM'), 0)
+            src = guardlib.Source(root, 'walk')
+            self.assertEqual(src.paths, ['app/x.PEM'])
+            self.assertIsNone(src.read('app/x.PEM'))
+        finally:
+            shutil.rmtree(root)
+
+    def test_kind_by_extension(self):
+        got = kinds({'a.mjs': '', 'a.cjs': '', 'a.tsx': '', 'a.jsx': '', 'a.swift': '',
+                     'a.json': '', 'a.yaml': '', 'a.yml': '',
+                     'package-lock.json': '', 'pnpm-lock.yaml': '',
+                     'docs/tool.py': '', 'docs/a.dart': '', 'docs/a.md': ''})
+        self.assertEqual(got, {'a.mjs': 'ts', 'a.cjs': 'ts', 'a.tsx': 'ts', 'a.jsx': 'ts',
+                               'a.swift': 'swift', 'a.json': 'config', 'a.yaml': 'config',
+                               'a.yml': 'config', 'package-lock.json': None,
+                               'pnpm-lock.yaml': None, 'docs/tool.py': 'py',
+                               'docs/a.dart': 'dart', 'docs/a.md': None})
+
+    def test_kind_by_shebang(self):
+        got = kinds({'a': '#!/bin/sh -eu\n', 'b': '#!/usr/bin/env bash\n', 'c': '#!/bin/dash\n',
+                     'd': '#!/bin/zsh\n', 'e': '#!/usr/bin/env -S python3 -u\n',
+                     'f': '#!/usr/bin/python3.12\n', 'g': '#!/usr/bin/env node\n',
+                     'h': '#!/usr/bin/perl\n', 'i': 'no shebang\n'})
+        self.assertEqual(got, {'a': 'sh', 'b': 'sh', 'c': 'sh', 'd': 'sh', 'e': 'py',
+                               'f': 'py', 'g': 'ts', 'h': None, 'i': None})
+
+    def test_yaml_block_scalars_joined(self):
+        half = sentence(6)
+        for mark in ('|', '>-', '|2'):
+            text = 'description: ' + mark + '\n  ' + half + '\n\n  ' + half + '\nname: x\n'
+            got = guardlib.config_strings('app/pubspec.yaml', text)
+            self.assertIn((1, sentence(12)), got)
+            self.assertIn((5, 'x'), got)
+            self.assertEqual(max(guardlib.words(t) for _, t in got), 12)
+        got = guardlib.config_strings('a.yml', '- |\n  ' + half + '\n  ' + half + '\n')
+        self.assertIn((1, sentence(12)), got)
+
+    def test_yaml_comment_only_outside_quotes(self):
+        text = '\n'.join(['a: "p # q r"', 'b: s # t u', "c: 'v # w'", '# x y', ''])
+        got = guardlib.config_strings('app/pubspec.yaml', text)
+        self.assertEqual(got[:4], [(1, '"p # q r"'), (2, 's'), (3, "'v # w'"), (4, '')])
+
+    def test_any_lexer_exception_is_unlexable(self):
+        root = make_tree({'app/lib/a.dart': 'f() {}\n'})
+        try:
+            src = guardlib.Source(root, 'walk')
+            with mock.patch.object(lex, 'lex_dart', side_effect=RecursionError):
+                self.assertIsNone(src.lexed('app/lib/a.dart'))
+        finally:
+            shutil.rmtree(root)
+
+    def test_undecodable_path_is_a_finding(self):
+        root = tempfile.mkdtemp(prefix='guards-')
+        env = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM='1')
+
+        def git(*args, data=None):
+            return subprocess.run(('git',) + args, cwd=root, env=env, input=data,
+                                  check=True, capture_output=True).stdout
+
+        try:
+            git('init', '-q')
+            blob = git('hash-object', '-w', '--stdin', data=b'x\n').strip()
+            for name in (b'app/a\xff.txt', b'app/b.txt'):
+                git('update-index', '--add', '--cacheinfo', b'100644,' + blob + b',' + name)
+            for mode in ('tracked', 'staged'):
+                src = guardlib.Source(root, mode)
+                self.assertEqual(src.paths, ['app/b.txt'])
+                self.assertEqual([f.key() for f in src.findings],
+                                 [('app/a\\xff.txt', 0, 'bad-path')])
+        finally:
+            shutil.rmtree(root)
+
+
+if __name__ == '__main__':
+    unittest.main()
+~~~~
+
+**Edit `tool/checks/tests/mutations.py`.** Replace
+
+~~~~python
+     ['test_lex.Dart.test_unterminated_raises']),
+]
+~~~~
+
+with
+
+~~~~python
+     ['test_lex.Dart.test_unterminated_raises']),
+    ('lex.py', "return value not in (']', '++', '--')", "return value not in (']',)",
+     ['test_lex_fixes.TypeScript.test_slash_after_postfix_is_division']),
+    ('lex.py', "return value in PAREN_KEYWORDS", "return False",
+     ['test_lex_fixes.TypeScript.test_slash_after_condition_is_regex']),
+    ('lex.py', "if not closed:\n            raise LexError('regex')",
+     "if False:\n            raise LexError('regex')",
+     ['test_lex_fixes.TypeScript.test_unterminated_regex_raises']),
+    ('guardlib.py', "b = posixpath.basename(path).lower()", "b = posixpath.basename(path)",
+     ['test_guardlib.Library.test_secret_names_ignore_case']),
+]
+~~~~
+
+Run `python3 -I -B tool/checks/tests/run_tests.py test_lex_fixes test_guardlib`. Expected: exit 1, `Ran 18 tests`,
+`FAILED (failures=9, errors=9)`:
+- **Failures (9):** `test_slash_after_postfix_is_division`, `test_unterminated_regex_raises`,
+  `test_deep_nesting_raises_lex_error`, `test_bare_parenthesis_keeps_call_and_named`, `test_secret_names_ignore_case`,
+  `test_kind_by_extension`, `test_kind_by_shebang`, `test_yaml_block_scalars_joined`,
+  `test_yaml_comment_only_outside_quotes`.
+- **Errors (9):**
+  - `test_slash_after_condition_is_regex`, `test_no_trailing_newline`, `test_arithmetic_is_code` and
+    `test_heredoc_word_with_hyphen`: `LexError`.
+  - The three Swift tests: `AttributeError`, because `lex` has no `lex_swift` yet.
+  - `test_any_lexer_exception_is_unlexable`: `RecursionError`.
+  - `test_undecodable_path_is_a_finding`: `UnicodeDecodeError`.
+
+**Green.** Replace both files whole:
+
+**File `tool/checks/lex.py`**
+
+~~~~python
+# Small lexers for the guards: string literals, comments, and the code
+# with both blanked out. Standard library only. Dart, TypeScript or
+# JavaScript, Swift, Python and POSIX shell. Unclear input raises
+# LexError, which the guards turn into a finding (they fail closed).
+import bisect
+import io
+import tokenize
+
+
+class LexError(Exception):
+    pass
+
+
+# How deep strings may nest inside interpolations or substitutions.
+# Deeper input is refused, well before Python's own recursion limit.
+MAX_NESTING = 100
+
+
+class Lit:
+    # One string literal. text is the source between the quotes,
+    # interpolations included. frame is the call (or bracket) it sits
+    # directly inside; named is the named argument it is the value of.
+    def __init__(self, text, pos, line, end_line, frame='', named=''):
+        self.text = text
+        self.pos = pos
+        self.line = line
+        self.end_line = end_line
+        self.frame = frame
+        self.named = named
+
+
+class Comment:
+    def __init__(self, text, start, end, line, end_line):
+        self.text = text
+        self.start = start
+        self.end = end
+        self.line = line
+        self.end_line = end_line
+
+
+class Lexed:
+    def __init__(self, src, lits, comments, code):
+        self.src = src
+        self.lits = sorted(lits, key=lambda x: x.pos)
+        self.comments = comments
+        self.code = code  # strings and comments blanked
+
+    def without_comments(self):
+        out = list(self.src)
+        for c in self.comments:
+            _blank(out, c.start, c.end)
+        return ''.join(out)
+
+
+def _blank(out, a, b):
+    for k in range(a, b):
+        if out[k] != '\n':
+            out[k] = ' '
+
+
+class _Lines:
+    def __init__(self, src):
+        self.starts = [0]
+        for i, ch in enumerate(src):
+            if ch == '\n':
+                self.starts.append(i + 1)
+
+    def line(self, pos):
+        return bisect.bisect_right(self.starts, pos)
+
+
+IDENT_START = set('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_$')
+IDENT = IDENT_START | set('0123456789')
+REGEX_KEYWORDS = {
+    'return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void',
+    'throw', 'case', 'do', 'else', 'yield', 'await',
+}
+# A '/' after the ')' of one of these starts a regex: if (a) /x/.test(b)
+PAREN_KEYWORDS = {'if', 'while', 'for', 'with'}
+NO_FRAME = ('', '', False)
+
+
+class _CLike:
+    # Dart, TypeScript and JavaScript ('ts'), or Swift. A frame is
+    # (name, named, bare): the call or bracket a literal sits in, the
+    # named argument a bare parenthesis stands for, and whether the
+    # '(' was bare rather than a call.
+    def __init__(self, src, lang):
+        self.s = src
+        self.n = len(src)
+        self.i = 0
+        self.lang = lang
+        self.out = list(src)
+        self.lines = _Lines(src)
+        self.lits = []
+        self.comments = []
+        self.frames = []
+        self.prev = []
+        self.chain = ''
+        self.nesting = 0
+
+    def run(self):
+        self.code(None)
+        return Lexed(self.s, self.lits, self.comments, ''.join(self.out))
+
+    def push(self, kind, value):
+        self.prev.append((kind, value))
+        del self.prev[:-3]
+
+    def comment(self, a, b):
+        ln = self.lines.line
+        self.comments.append(Comment(self.s[a:b], a, b, ln(a), ln(max(a, b - 1))))
+        _blank(self.out, a, b)
+        self.i = b
+
+    def block_end(self, a):
+        s = self.s
+        if self.lang == 'ts':
+            j = s.find('*/', a + 2)
+            if j < 0:
+                raise LexError('comment')
+            return j + 2
+        depth = 0
+        j = a
+        while j < self.n:
+            if s.startswith('/*', j):
+                depth += 1
+                j += 2
+            elif s.startswith('*/', j):
+                depth -= 1
+                j += 2
+                if depth == 0:
+                    return j
+            else:
+                j += 1
+        raise LexError('comment')
+
+    def regex_allowed(self):
+        # A '/' starts a regex where an operand may begin, and divides
+        # where one has just ended.
+        if not self.prev:
+            return True
+        kind, value = self.prev[-1]
+        if kind == 'close':
+            return value in PAREN_KEYWORDS
+        if kind == 'p':
+            return value not in (']', '++', '--')
+        if kind == 'id':
+            return value in REGEX_KEYWORDS
+        return False
+
+    def regex(self):
+        s = self.s
+        a = self.i
+        j = a + 1
+        in_class = False
+        closed = False
+        while j < self.n:
+            c = s[j]
+            if c == '\\':
+                j += 2
+                continue
+            if c == '\n':
+                raise LexError('regex')
+            if c == '[':
+                in_class = True
+            elif c == ']':
+                in_class = False
+            elif c == '/' and not in_class:
+                j += 1
+                closed = True
+                break
+            j += 1
+        if not closed:
+            raise LexError('regex')
+        while j < self.n and s[j] in IDENT:
+            j += 1
+        _blank(self.out, a, j)
+        self.i = j
+        self.push('re', '')
+
+    def named_here(self):
+        if (len(self.prev) >= 2 and self.prev[-1] == ('p', ':')
+                and self.prev[-2][0] == 'id'):
+            return self.prev[-2][1]
+        return ''
+
+    def where(self):
+        # (frame, named) for a literal or a bare '(' at this point.
+        top = self.frames[-1] if self.frames else NO_FRAME
+        return top[0], self.named_here() or (top[1] if top[2] else '')
+
+    def paren(self):
+        # A call's '(' takes the call's name. A bare '(' keeps the
+        # enclosing call and named argument: f(tooltip: ('x')) is
+        # still f's tooltip.
+        if self.prev and self.prev[-1][0] == 'id':
+            return (self.chain, '', False)
+        name, named = self.where()
+        return (name or '(', named, True)
+
+    def swift_string_at(self, i):
+        j = i
+        while j < self.n and self.s[j] == '#':
+            j += 1
+        return j < self.n and self.s[j] == '"'
+
+    def code(self, close):
+        # close is None at the top level, or the character that ends
+        # the interpolation being read: '}' after '${', ')' after '\('.
+        s = self.s
+        opener = {'}': '{', ')': '('}.get(close)
+        depth = 0
+        while self.i < self.n:
+            i = self.i
+            c = s[i]
+            if c in ' \t\r\n':
+                self.i += 1
+                continue
+            if s.startswith('//', i):
+                j = s.find('\n', i)
+                self.comment(i, self.n if j < 0 else j)
+                continue
+            if s.startswith('/*', i):
+                self.comment(i, self.block_end(i))
+                continue
+            if self.lang == 'ts' and c == '/' and self.regex_allowed():
+                self.regex()
+                continue
+            if self.lang == 'swift':
+                if c in '"#' and self.swift_string_at(i):
+                    self.swift_string(i)
+                    continue
+                if c == "'":
+                    raise LexError('quote')
+            elif c in '\'"' or (self.lang == 'ts' and c == '`'):
+                self.dart_ts_string(i, i, False)
+                continue
+            if (self.lang == 'dart' and c == 'r' and i + 1 < self.n and s[i + 1] in '\'"'
+                    and (i == 0 or s[i - 1] not in IDENT)):
+                self.dart_ts_string(i, i + 1, True)
+                continue
+            if c in IDENT_START:
+                j = i
+                while j < self.n and s[j] in IDENT:
+                    j += 1
+                word = s[i:j]
+                if (len(self.prev) >= 2 and self.prev[-1] == ('p', '.')
+                        and self.prev[-2][0] == 'id'):
+                    self.chain = self.chain + '.' + word
+                else:
+                    self.chain = word
+                self.push('id', word)
+                self.i = j
+                continue
+            if c.isdigit():
+                j = i
+                while j < self.n and (s[j] in IDENT or s[j] == '.'):
+                    j += 1
+                self.push('num', s[i:j])
+                self.i = j
+                continue
+            if c in '+-' and s.startswith(c * 2, i):
+                self.push('p', c * 2)
+                self.i += 2
+                continue
+            if c == close and depth == 0:
+                self.i += 1
+                return
+            if c == opener:
+                depth += 1
+            elif c == close:
+                depth -= 1
+            if c == '(':
+                self.frames.append(self.paren())
+            elif c in '[{':
+                self.frames.append((c, '', False))
+            elif c in ')]}':
+                top = self.frames.pop() if self.frames else NO_FRAME
+                if c == ')':
+                    self.push('close', '' if top[2] else top[0])
+                    self.i += 1
+                    continue
+            self.push('p', c)
+            self.i += 1
+        if close:
+            raise LexError('interpolation')
+
+    def dart_ts_string(self, start, q_pos, raw):
+        s = self.s
+        q = s[q_pos]
+        triple = self.lang == 'dart' and s.startswith(q * 3, q_pos)
+        delim = q * 3 if triple else q
+        self.string(start, q_pos + len(delim), delim, triple or q == '`',
+                    None if raw else '\\', None if raw else '${', '}')
+
+    def swift_string(self, start):
+        s = self.s
+        j = start
+        while s[j] == '#':
+            j += 1
+        hashes = s[start:j]
+        q = '"""' if s.startswith('"""', j) else '"'
+        self.string(start, j + len(q), q + hashes, q == '"""',
+                    '\\' + hashes, '\\' + hashes + '(', ')')
+
+    def string(self, start, content, delim, multiline, escape, interp, close):
+        s = self.s
+        frame, named = self.where()
+        j = content
+        mark = start
+        end = None
+        while j < self.n:
+            if s.startswith(delim, j):
+                end = j
+                j += len(delim)
+                break
+            c = s[j]
+            if c == '\n' and not multiline:
+                raise LexError('string')
+            if interp and s.startswith(interp, j):
+                _blank(self.out, mark, j + len(interp))
+                self.i = j + len(interp)
+                self.nesting += 1
+                if self.nesting > MAX_NESTING:
+                    raise LexError('nesting')
+                saved = self.prev
+                self.prev = []
+                self.frames.append((interp, '', False))
+                self.code(close)
+                self.frames.pop()
+                self.prev = saved
+                self.nesting -= 1
+                j = self.i
+                mark = j - 1
+                continue
+            if escape and s.startswith(escape, j):
+                j += len(escape) + 1
+                continue
+            j += 1
+        if end is None:
+            raise LexError('string')
+        _blank(self.out, mark, j)
+        ln = self.lines.line
+        self.lits.append(Lit(s[content:end], start, ln(start), ln(end), frame, named))
+        self.i = j
+        self.push('s', '')
+
+
+def lex_dart(src):
+    return _CLike(src, 'dart').run()
+
+
+def lex_ts(src):
+    return _CLike(src, 'ts').run()
+
+
+def lex_swift(src):
+    return _CLike(src, 'swift').run()
+
+
+def _py_body(tok):
+    k = 0
+    while k < len(tok) and tok[k] not in '\'"':
+        k += 1
+    body = tok[k:]
+    q = body[:3] if body[:3] in ('"""', "'''") else body[:1]
+    return body[len(q):len(body) - len(q)]
+
+
+def lex_python(src):
+    # tokenize wants a final newline. One is added after the last
+    # character, so no position moves, and it is dropped again.
+    padded = src if src.endswith('\n') else src + '\n'
+    lines = _Lines(padded)
+    out = list(padded)
+    lits = []
+    comments = []
+    open_strings = []
+
+    def pos(rc):
+        return lines.starts[rc[0] - 1] + rc[1]
+
+    try:
+        for tok in tokenize.generate_tokens(io.StringIO(padded).readline):
+            name = tokenize.tok_name[tok.type]
+            a, b = pos(tok.start), pos(tok.end)
+            if name == 'COMMENT':
+                comments.append(Comment(tok.string, a, b, tok.start[0], tok.end[0]))
+                _blank(out, a, b)
+            elif name == 'STRING':
+                lits.append(Lit(_py_body(tok.string), a, tok.start[0], tok.end[0]))
+                _blank(out, a, b)
+            elif name.endswith('STRING_START'):
+                open_strings.append((a, tok.start[0]))
+            elif name.endswith('STRING_END'):
+                a0, l0 = open_strings.pop()
+                lits.append(Lit(_py_body(padded[a0:b]), a0, l0, tok.end[0]))
+                _blank(out, a0, b)
+            elif name == 'ERRORTOKEN' and tok.string.strip():
+                raise LexError('python')
+    except (tokenize.TokenError, SyntaxError, IndexError):
+        raise LexError('python')
+    return Lexed(src, lits, comments, ''.join(out[:len(src)]))
+
+
+class _Shell:
+    def __init__(self, src):
+        self.s = src
+        self.n = len(src)
+        self.i = 0
+        self.out = list(src)
+        self.lines = _Lines(src)
+        self.lits = []
+        self.comments = []
+        self.heredocs = []
+        self.nesting = 0
+
+    def run(self):
+        self.code(False)
+        if self.heredocs:
+            raise LexError('heredoc')
+        return Lexed(self.s, self.lits, self.comments, ''.join(self.out))
+
+    def lit(self, a, content, end):
+        ln = self.lines.line
+        self.lits.append(Lit(self.s[content:end], a, ln(a), ln(max(a, end))))
+
+    def arithmetic_end(self, a):
+        # $(( ... )) is arithmetic, which is code: '<<' in it is a
+        # shift, not a heredoc. Returns the position after the '))'.
+        s = self.s
+        depth = 0
+        j = a + 3
+        while j < self.n:
+            if s[j] == '(':
+                depth += 1
+            elif s[j] == ')':
+                if depth == 0:
+                    if s.startswith('))', j):
+                        return j + 2
+                    raise LexError('arithmetic')
+                depth -= 1
+            j += 1
+        raise LexError('arithmetic')
+
+    def code(self, until_paren):
+        s = self.s
+        depth = 0
+        while self.i < self.n:
+            i = self.i
+            c = s[i]
+            if c == '\\':
+                self.i += 2
+                continue
+            if c == '\n':
+                self.i += 1
+                if self.heredocs:
+                    self.read_heredocs()
+                continue
+            if c == '#' and (i == 0 or s[i - 1] in ' \t\n;&|()'):
+                j = s.find('\n', i)
+                j = self.n if j < 0 else j
+                ln = self.lines.line
+                self.comments.append(Comment(s[i:j], i, j, ln(i), ln(i)))
+                _blank(self.out, i, j)
+                self.i = j
+                continue
+            if c == "'":
+                j = s.find("'", i + 1)
+                if j < 0:
+                    raise LexError('quote')
+                self.lit(i, i + 1, j)
+                _blank(self.out, i, j + 1)
+                self.i = j + 1
+                continue
+            if s.startswith("$'", i):
+                self.double(i, i + 1, "'")
+                continue
+            if c == '"':
+                self.double(i, i, '"')
+                continue
+            if s.startswith('$((', i):
+                self.i = self.arithmetic_end(i)
+                continue
+            if s.startswith('<<', i) and not s.startswith('<<<', i):
+                self.heredoc_start()
+                continue
+            if until_paren:
+                if c == '(':
+                    depth += 1
+                elif c == ')':
+                    if depth == 0:
+                        self.i += 1
+                        return
+                    depth -= 1
+            self.i += 1
+        if until_paren:
+            raise LexError('paren')
+
+    def double(self, a, q_pos, q):
+        s = self.s
+        j = q_pos + 1
+        mark = a
+        while j < self.n:
+            c = s[j]
+            if c == '\\':
+                j += 2
+                continue
+            if c == q:
+                self.lit(a, q_pos + 1, j)
+                _blank(self.out, mark, j + 1)
+                self.i = j + 1
+                return
+            if q == '"' and s.startswith('$((', j):
+                j = self.arithmetic_end(j)
+                continue
+            if q == '"' and s.startswith('$(', j):
+                _blank(self.out, mark, j + 2)
+                self.i = j + 2
+                self.nesting += 1
+                if self.nesting > MAX_NESTING:
+                    raise LexError('nesting')
+                self.code(True)
+                self.nesting -= 1
+                j = self.i
+                mark = j - 1
+                continue
+            j += 1
+        raise LexError('quote')
+
+    def heredoc_start(self):
+        s = self.s
+        j = self.i + 2
+        strip = False
+        if j < self.n and s[j] == '-':
+            strip = True
+            j += 1
+        while j < self.n and s[j] in ' \t':
+            j += 1
+        if j < self.n and s[j] in '\'"':
+            q = s[j]
+            k = s.find(q, j + 1)
+            if k < 0:
+                raise LexError('heredoc')
+            word = s[j + 1:k]
+            j = k + 1
+        else:
+            k = j
+            while k < self.n and (s[k].isalnum() or s[k] in '_-'):
+                k += 1
+            word = s[j:k]
+            j = k
+        if not word:
+            raise LexError('heredoc')
+        self.heredocs.append((word, strip))
+        self.i = j
+
+    def read_heredocs(self):
+        s = self.s
+        for word, strip in self.heredocs:
+            a = self.i
+            j = a
+            while True:
+                if j >= self.n:
+                    raise LexError('heredoc')
+                k = s.find('\n', j)
+                k = self.n if k < 0 else k
+                line = s[j:k]
+                if (line.lstrip('\t') if strip else line) == word:
+                    ln = self.lines.line
+                    self.lits.append(Lit(s[a:j], a, ln(a), ln(max(a, j - 1))))
+                    _blank(self.out, a, j)
+                    self.i = min(k + 1, self.n)
+                    break
+                j = k + 1
+        self.heredocs = []
+
+
+def lex_shell(src):
+    return _Shell(src).run()
+~~~~
+
+**File `tool/checks/guardlib.py`**
+
+~~~~python
+# Shared by the guards: which files to read, what kind each one is,
+# and the one place the checks write their results.
+import hashlib
+import os
+import posixpath
+import re
+import subprocess
+import sys
+
+import lex
+
+MARKER = 'tool/checks/awaiting-import'
+SOURCES = 'docs/source/SOURCES'
+CSV = 'app/assets/words/places-register.csv'
+LISTS = 'app/assets/words/founder-lists-for-technology.md'
+
+CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
+            '.tsx': 'ts', '.jsx': 'ts', '.swift': 'swift', '.py': 'py', '.sh': 'sh'}
+CONFIG_EXT = ('.json', '.yaml', '.yml', '.plist', '.entitlements', '.pbxproj',
+              '.xcconfig', '.xcscheme')
+SHELLS = ('sh', 'bash', 'dash', 'zsh')
+LOCKFILES = ('pubspec.lock', 'package-lock.json', 'npm-shrinkwrap.json',
+             'Podfile.lock', 'yarn.lock', 'pnpm-lock.yaml')
+SKIP_DIRS = ('.git', '.scratch')
+
+
+def report(line):
+    # The checks' only writer (G5 exempts this file). It is given guard
+    # codes, repository paths, line numbers and reason codes, never the
+    # content of a file.
+    sys.stdout.write(line + '\n')
+    sys.stdout.flush()
+
+
+class Finding:
+    def __init__(self, path, line, reason):
+        self.path = path
+        self.line = line
+        self.reason = reason
+
+    def key(self):
+        return (self.path, self.line, self.reason)
+
+
+def is_secret_name(path):
+    b = posixpath.basename(path).lower()
+    return (b == '.env' or b.startswith('.env.')
+            or b.endswith(('.p8', '.pem', '.p12', '.mobileprovision')))
+
+
+def sha256(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def _git(root, *args):
+    r = subprocess.run(('git',) + args, cwd=root, capture_output=True)
+    if r.returncode != 0:
+        raise RuntimeError('git')
+    return r.stdout
+
+
+def interpreter(first):
+    # The program a '#!' line names: env, its flags and its VAR=value
+    # settings are skipped, and a path is read by its last part.
+    words = first[2:].split()
+    if words and posixpath.basename(words[0]) == 'env':
+        words = [w for w in words[1:] if not w.startswith('-') and '=' not in w]
+    return posixpath.basename(words[0]) if words else ''
+
+
+class Source:
+    # mode 'walk': every file under root (the guard tests use this).
+    # mode 'tracked': the files git tracks, read from the working tree.
+    # mode 'staged': the index, the snapshot a commit would record.
+    # A path that is not valid UTF-8 cannot be checked: it is left out
+    # of paths and becomes the finding 'bad-path' in findings.
+    def __init__(self, root, mode):
+        self.root = root
+        self.mode = mode
+        self.findings = []
+        self._blobs = {}
+        self._cache = {}
+        self._lexed = {}
+        paths = []
+        if mode == 'walk':
+            for d, dirs, files in os.walk(root):
+                dirs[:] = sorted(x for x in dirs if x not in SKIP_DIRS)
+                for f in files:
+                    full = os.path.join(d, f)
+                    rel = os.path.relpath(full, root).replace(os.sep, '/')
+                    rel = self._name(rel.encode('utf-8', 'surrogateescape'))
+                    if rel is not None and not os.path.islink(full):
+                        paths.append(rel)
+        elif mode == 'tracked':
+            for raw in _git(root, 'ls-files', '-z').split(b'\0'):
+                path = self._name(raw) if raw else None
+                if path is not None:
+                    paths.append(path)
+        elif mode == 'staged':
+            for entry in _git(root, 'ls-files', '-s', '-z').split(b'\0'):
+                if not entry:
+                    continue
+                meta, raw = entry.split(b'\t', 1)
+                fmode, blob, _ = meta.decode('ascii').split(' ')
+                path = self._name(raw)
+                if path is None or fmode in ('120000', '160000'):
+                    continue
+                self._blobs[path] = blob
+                paths.append(path)
+        else:
+            raise ValueError(mode)
+        self.paths = sorted(set(paths))
+        self._set = set(self.paths)
+
+    def _name(self, raw):
+        try:
+            return raw.decode('utf-8')
+        except UnicodeDecodeError:
+            shown = raw.decode('utf-8', 'backslashreplace')
+            self.findings.append(Finding(shown, 0, 'bad-path'))
+            return None
+
+    def has(self, path):
+        return path in self._set
+
+    def read(self, path):
+        if path not in self._set or is_secret_name(path):
+            return None
+        if path not in self._cache:
+            if self.mode == 'staged':
+                data = _git(self.root, 'cat-file', 'blob', self._blobs[path])
+            else:
+                full = os.path.join(self.root, path)
+                if os.path.islink(full) or not os.path.isfile(full):
+                    data = None
+                else:
+                    with open(full, 'rb') as f:
+                        data = f.read()
+            self._cache[path] = data
+        return self._cache[path]
+
+    def text(self, path):
+        data = self.read(path)
+        if data is None or b'\0' in data:
+            return None
+        try:
+            return data.decode('utf-8')
+        except UnicodeDecodeError:
+            return None
+
+    def kind(self, path):
+        # 'dart', 'ts', 'swift', 'py', 'sh', 'config' or None (not
+        # scanned by G3 to G6, G8 and G9). Markdown and lockfiles are
+        # None; code under docs/ is scanned like code anywhere else.
+        b = posixpath.basename(path)
+        ext = posixpath.splitext(b)[1].lower()
+        if ext == '.md' or b in LOCKFILES:
+            return None
+        if ext in CODE_EXT:
+            return CODE_EXT[ext]
+        if ext in CONFIG_EXT:
+            return 'config'
+        if ext == '':
+            text = self.text(path)
+            first = text.split('\n', 1)[0] if text else ''
+            if first.startswith('#!'):
+                prog = interpreter(first)
+                if prog in SHELLS:
+                    return 'sh'
+                if prog.startswith('python'):
+                    return 'py'
+                if prog == 'node':
+                    return 'ts'
+        return None
+
+    def lexed(self, path):
+        # A Lexed, or None when the file cannot be lexed (fail closed).
+        # Any exception from a lexer, RecursionError included, is None.
+        if path not in self._lexed:
+            text = self.text(path)
+            fn = {'dart': lex.lex_dart, 'ts': lex.lex_ts, 'swift': lex.lex_swift,
+                  'py': lex.lex_python, 'sh': lex.lex_shell}[self.kind(path)]
+            try:
+                self._lexed[path] = None if text is None else fn(text)
+            except Exception:
+                self._lexed[path] = None
+        return self._lexed[path]
+
+
+def words(text):
+    return len(text.replace('\\n', ' ').replace('\\t', ' ').split())
+
+
+QUOTED = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
+PLIST_STRING = re.compile(r'<string>(.*?)</string>', re.S)
+YAML_BLOCK = re.compile(r'[|>][-+0-9]*')
+
+
+def _line_at(text, pos):
+    return text.count('\n', 0, pos) + 1
+
+
+def _indent(line):
+    return len(line) - len(line.lstrip(' '))
+
+
+def yaml_uncomment(line):
+    # The line less its comment. '#' starts a comment at the start of
+    # the line or after a space or tab, and only outside quotes.
+    quote = ''
+    for k, ch in enumerate(line):
+        if quote:
+            if ch == quote:
+                quote = ''
+        elif ch in '\'"':
+            quote = ch
+        elif ch == '#' and (k == 0 or line[k - 1] in ' \t'):
+            return line[:k]
+    return line
+
+
+def yaml_strings(text):
+    # (line, string) pairs. A block scalar (| or >) is joined into one
+    # string, given the line of its key; its lines hold no comments.
+    out = []
+    lines = text.split('\n')
+    k = 0
+    while k < len(lines):
+        body = yaml_uncomment(lines[k]).strip()
+        if body.startswith('- '):
+            body = body[2:]
+        key, sep, value = body.partition(': ')
+        value = value.strip() if sep else body
+        if YAML_BLOCK.fullmatch(value):
+            parts = []
+            j = k + 1
+            while j < len(lines) and (not lines[j].strip()
+                                      or _indent(lines[j]) > _indent(lines[k])):
+                parts.append(lines[j].strip())
+                j += 1
+            out.append((k + 1, ' '.join(p for p in parts if p)))
+            k = j
+            continue
+        out.append((k + 1, value))
+        k += 1
+    return out
+
+
+def config_strings(path, text):
+    # (line, string) pairs: what counts as a string literal in config.
+    b = posixpath.basename(path)
+    out = []
+    if b.endswith(('.plist', '.entitlements')):
+        for m in PLIST_STRING.finditer(text):
+            out.append((_line_at(text, m.start()), m.group(1)))
+    elif b.endswith(('.yaml', '.yml')):
+        out = yaml_strings(text)
+    elif b.endswith('.xcconfig'):
+        for n, line in enumerate(text.split('\n'), 1):
+            body = line.split('//', 1)[0]
+            out.append((n, body.partition('=')[2]))
+    else:
+        for m in QUOTED.finditer(text):
+            out.append((_line_at(text, m.start()), m.group(1)))
+    return out
+
+
+SOURCES_LINE = re.compile(r'^([0-9a-f]{64})  (\S+)  (\S.*)$')
+
+
+def parse_sources(src):
+    # {path: (sha256, line)} and findings for malformed or repeated lines.
+    entries = {}
+    findings = []
+    text = src.text(SOURCES) or ''
+    for n, line in enumerate(text.split('\n'), 1):
+        if not line.strip() or line.startswith('#'):
+            continue
+        m = SOURCES_LINE.match(line)
+        if not m:
+            findings.append(Finding(SOURCES, n, 'sources-malformed'))
+        elif m.group(2) in entries:
+            findings.append(Finding(SOURCES, n, 'sources-repeated'))
+        else:
+            entries[m.group(2)] = (m.group(1), n)
+    return entries, findings
+~~~~
+
+Run `python3 -I -B tool/checks/tests/run_tests.py`. Expected: `Ran 32 tests`, `OK` (Task 2's 14 and these 18).
+
+**Mutations:** `python3 -I -B tool/checks/tests/mutations.py lex.py guardlib.py`. Expected: mutations 16 to 20 each
+`caught`, then `mutations: 5 run, all caught`.
+
+    git add tool/checks && git commit -m "Guards: lexer and library fixes (D16)" -m "<trailer>"
+
 ### Task 3 · G1 words and G2 copies, with the awaiting-import marker (D5)
 
 **Red.**
@@ -1426,6 +2625,12 @@ class G3(GuardTest):
         for name in ('semanticsLabel', 'semanticLabel', 'tooltip', 'label', 'title', 'hintText'):
             self.refused({A: 'w() => f(%s: "x");\n' % name}, 'dreamer-literal')
 
+    def test_parenthesised_named_argument_refused(self):
+        self.refused({A: "w() => f(tooltip: ('x'));\n"}, 'dreamer-literal')
+
+    def test_prefixed_text_refused(self):
+        self.refused({A: "w() => m.Text('x');\n"}, 'dreamer-literal')
+
     def test_marker_does_not_excuse_dreamer_literal(self):
         self.refused({A: "w() => Text('a b c'); " + MARK + '\n'}, 'dreamer-literal')
 
@@ -1514,7 +2719,7 @@ def check(src):
     return findings, []
 ~~~~
 
-Expected: `Ran 13 tests`, `OK`. **Mutations:** `… mutations.py g3_literals.py`. Expected: 3 run, all caught.
+Expected: `Ran 15 tests`, `OK`. **Mutations:** `… mutations.py g3_literals.py`. Expected: 3 run, all caught.
 
     git add tool/checks && git commit -m "Guards: G3 no literal words" -m "<trailer>"
 
@@ -1824,7 +3029,8 @@ class G7(GuardTest):
     guard = g7_secrets
 
     def test_secret_file_names_refused(self):
-        for name in ('.env', '.env.local', 'k.p8', 'k.pem', 'k.p12', 'x.mobileprovision'):
+        for name in ('.env', '.env.local', 'k.p8', 'k.pem', 'k.p12', 'x.mobileprovision',
+                     '.ENV', 'x.PEM', 'AuthKey.P8'):
             self.refused({'app/' + name: b''}, 'secret-file')
 
     def test_key_shapes_refused_markdown_included(self):
@@ -2195,12 +3401,21 @@ class Hook(unittest.TestCase):
         self.write(GOOD)
         self.assertEqual(self.hook().returncode, 1)
 
+    def test_undecodable_path_refused(self):
+        blob = subprocess.run(('git', 'hash-object', '-w', '--stdin'), cwd=self.tmp, env=self.env,
+                              input=b'x\n', check=True, capture_output=True).stdout.strip()
+        self.git('update-index', '--add', '--cacheinfo', b'100644,' + blob + b',app/a\xff.txt')
+        r = self.hook()
+        self.assertEqual(r.returncode, 1)
+        self.assertIn('source app/a\\xff.txt:0 bad-path', r.stdout)
+
+
 
 if __name__ == '__main__':
     unittest.main()
 ~~~~
 
-`run_tests.py test_hook`. Expected: exit 1, four errors, each `No such file or directory` naming
+`run_tests.py test_hook`. Expected: exit 1, five errors, each `No such file or directory` naming
 `.githooks/pre-commit`.
 
 **Green.**
@@ -2244,6 +3459,11 @@ def main(argv):
     try:
         src = guardlib.Source(root, mode)
         failed = 0
+        for f in src.findings:
+            guardlib.report('source %s:%d %s' % (f.path, f.line, f.reason))
+        if src.findings:
+            guardlib.report('source: FAIL')
+            failed += 1
         for g in GUARDS:
             if only and g.CODE not in only:
                 continue
@@ -2275,9 +3495,9 @@ top=$(git rev-parse --show-toplevel)
 exec python3 -I -B "$top/tool/checks/guards.py" --staged
 ~~~~
 
-Expected: `Ran 4 tests`, `OK`. Then, on the repository:
-- `python3 -I -B tool/checks/tests/run_tests.py`: `Ran 73 tests`, `OK`.
-- `python3 -I -B tool/checks/tests/mutations.py`: `mutations: 16 run, all caught`.
+Expected: `Ran 5 tests`, `OK`. Then, on the repository:
+- `python3 -I -B tool/checks/tests/run_tests.py`: `Ran 94 tests`, `OK`.
+- `python3 -I -B tool/checks/tests/mutations.py`: `mutations: 20 run, all caught`.
 - `python3 -I -B tool/checks/guards.py`: G1 and G2 `NOT ARMED (awaiting import)`, every guard `ok`, and
   `guards (tracked): all passed`.
 
@@ -2351,7 +3571,7 @@ Run `sh tool/check_all.sh`. Expected, until Task 13:
 - the Python path and version;
 - `FAILED LOUDLY: core.hooksPath is not .githooks`;
 - `FAILED: not-executable:.githooks/pre-commit` and `FAILED: not-executable:tool/check_all.sh`;
-- the guards, `Ran 73 tests`, `OK` and `mutations: 16 run, all caught`;
+- the guards, `Ran 94 tests`, `OK` and `mutations: 20 run, all caught`;
 - `SKIPPED: app/ is not present yet` and `SKIPPED: server/ is not present yet`;
 - last line `check_all: FAILED: hooks-path not-executable:.githooks/pre-commit not-executable:tool/check_all.sh`,
   exit 1.
@@ -2496,8 +3716,8 @@ Last updated: <date>, at the end of branch `scaffold-1-guards`, by Claude Code.
 *No matter where you are on your journey, the steps you take are equally important.*
 
 Status is not the record. Rulings live in `technology/technology-change-record.md` in the documents repository; this
-file points to them and never restates them. The rulings for branch 1 (D1 to D14) were given in the Build chat and are
-listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4.
+file points to them and never restates them. The rulings for branch 1 (D1 to D14, and D16) were given in the Build
+chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4.
 
 ## Current branch
 
@@ -2518,7 +3738,7 @@ listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its ques
 - G3 to G9: armed, on every commit (`.githooks/pre-commit`) and in `tool/check_all.sh`.
 - The hook runs once `core.hooksPath` is `.githooks`, which the owner sets on each clone. `check_all.sh` fails loudly
   if it is not.
-- Totals: 73 guard tests and 16 mutation checks.
+- Totals: 94 guard tests and 20 mutation checks.
 
 ## Banked
 
@@ -2528,6 +3748,10 @@ listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its ques
 2. The safe loggers named in G5 (`app/lib/core/safe_log.dart`, `server/src/safe-log.ts`) and the hosts files named
    in G9 (`app/lib/core/hosts.dart`, `server/src/hosts.ts`) do not exist yet; they arrive with `app/` and `server/`.
 3. The analyzer baseline the workflow asks for is saved by the branch that creates `app/` or `server/`.
+4. In tracked mode (`check_all.sh`), G7 does not scan tracked symlinks, or tracked files deleted from the working
+   tree. The hook reads the index, so every commit is covered (D16).
+5. Replace the hand-written lexers in `tool/checks/lex.py` with the official Dart analyzer and TypeScript scanner,
+   once branches 2 and 4 bring them (D16).
 
 ## Documents as last imported
 
@@ -2649,5 +3873,30 @@ pointer to Part 4); Part 4 (the answers); and this part. Nothing in Tasks 0 to 1
 - Task 15 committed.
 
 Every staged commit passed the hook. The worktree was then removed.
+
+**Second amendment, 2026-11-07 (D16).** After the Opus reviewer of Task 2, the owner's ruling D16 added Task 2a, the
+lexer and library fixes F1 to F11, between Task 2 (committed as `d95607d`, identical to the plan) and Task 3. Task 2
+is unchanged. What else changed:
+- **Part 1:** D16 in the decisions; Swift among the lexers; secret names in any case, and `bad-path`; the test plan's
+  G3, G7, Lexer and Hook rows and a new Library row; totals of 94 tests and 20 mutations.
+- **Task 4:** two more G3 tests, a named argument in a bare parenthesis and `m.Text('x')`, both refused (15 tests).
+- **Task 8:** G7's secret-file test also names `.ENV`, `x.PEM` and `AuthKey.P8` (still 8 tests).
+- **Task 11:** `guards.py` reports `Source.findings` (`source <path>:0 bad-path`, then `source: FAIL`), and a fifth
+  hook test proves a staged path that is not UTF-8 is refused. The repository totals are 94 tests and 20 mutations.
+- **Task 12:** the same totals.
+- **Task 15:** Status.md's totals, the pointer to D16, and banked items 4 (G7 in tracked mode) and 5 (the official
+  lexers).
+
+The files were first built and run in a scratch worktree, `./.scratch/build`. The whole plan was then replayed from
+this file on a clean worktree, `./.scratch/replay`, detached at `5ca866c`, the commit before Task 2:
+- Tasks 1 to 12 and Task 2a, as stated: every red run failed as stated, every green run passed with the stated
+  count, all 20 mutations were caught, and every commit passed the hook, run by hand.
+- Task 2's files, extracted from this plan, were byte-identical to `d95607d`.
+- Task 13, as far as the sandbox allows: `check_all.sh` failed on `hooks-path` alone, the canary was refused by the
+  hook, and the clean-up left `git status --short` empty.
+- Task 14: all six edits applied exactly once.
+- Task 15 committed.
+
+The guards were then run over the replayed tree with this file in it, and all passed. The worktrees were removed.
 
 *No matter where you are on your journey, the steps you take are equally important.*
