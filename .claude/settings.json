@@ -1,0 +1,82 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(~/Developer/soul-dreams-docs/**)",
+      "Read(~/Developer/soul-dreams/**)",
+      "Read(~/.soul-dreams/**)",
+      "Read(~/.aws/**)",
+      "Read(~/.ssh/**)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.p8)",
+      "Read(**/*.pem)",
+      "Read(**/*.p12)",
+      "Read(**/*.mobileprovision)",
+      "Edit(/app/assets/words/**)",
+      "Edit(/app/lib/words/**)",
+      "Edit(/docs/source/**)",
+      "Bash(git push)",
+      "Bash(git push *)",
+      "Bash(git merge *)",
+      "Bash(git rebase *)",
+      "Bash(git reset --hard *)",
+      "Bash(git branch -D *)",
+      "Bash(git config *)",
+      "Bash(git commit -n *)",
+      "Bash(* --no-verify*)",
+      "Bash(flutter run *)",
+      "Bash(flutter install *)",
+      "Bash(xcrun simctl *)",
+      "Bash(open -a Simulator*)",
+      "Bash(aws *)",
+      "Bash(npx cdk *)",
+      "Bash(cdk *)",
+      "Bash(curl *)",
+      "Bash(wget *)"
+    ],
+    "ask": [
+      "Edit(/CLAUDE.md)",
+      "Edit(/docs/workflow.md)",
+      "Edit(/.githooks/**)",
+      "Edit(/tool/checks/**)",
+      "Edit(/tool/check_all.sh)",
+      "Edit(/fixtures/**)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": [
+        "~/Developer/soul-dreams-docs",
+        "~/Developer/soul-dreams",
+        "~/.soul-dreams",
+        "~/.aws",
+        "~/.ssh"
+      ],
+      "denyWrite": [
+        "./.githooks",
+        "./tool/checks",
+        "./tool/check_all.sh",
+        "./app/assets/words",
+        "./app/lib/words",
+        "./docs/source",
+        "./fixtures"
+      ],
+      "allowWrite": [
+        "~/.pub-cache",
+        "~/fvm",
+        "~/.dartServer",
+        "~/.npm"
+      ]
+    },
+    "network": {
+      "allowedDomains": [
+        "pub.dev",
+        "*.pub.dev",
+        "storage.googleapis.com",
+        "registry.npmjs.org"
+      ]
+    }
+  }
+}
