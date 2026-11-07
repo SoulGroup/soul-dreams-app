@@ -4,8 +4,7 @@
 
 Spec and plan in one file, as `docs/workflow.md` step 5 allows for a small task. Written by Claude Code (Opus) on
 2026-11-07, after the read-only investigation and the owner's rulings D1 to D14. **Nothing here is implemented yet.**
-Open questions are in Part 4. Implementation does not start until the owner has answered them. An answer that
-differs from the lean changes the plan, and the plan is proven again before it is used.
+The owner answered every question in Part 4 on 2026-11-07, and the plan was amended to match the answers (Part 5).
 
 ---
 
@@ -2382,18 +2381,21 @@ Then Claude Code:
   - writes `app/lib/__canary.dart` holding `f() { ` + `print` + `(1); }`;
   - stages it and runs `git commit -m canary`;
   - expects the commit to be **refused** with `G5 app/lib/__canary.dart:1 writer-print`;
-  - then runs `git rm --cached -q app/lib/__canary.dart && rm -r app`, and expects `git status --short` to print
-    nothing.
+  - then removes only what the task made, with `git rm --cached -q app/lib/__canary.dart && rm app/lib/__canary.dart
+    && rmdir app/lib app`, and expects `git status --short` to print nothing.
 
 Nothing is committed in this task.
 
-### Task 14 · The CLAUDE.md lines (D11; Q7)
+**Watch item.** If `check_all.sh` fails on `hooks-path` after the owner has set `core.hooksPath`, stop and report.
+Do not change the check.
 
-The owner approves this edit at the prompt. It makes four replacements in `CLAUDE.md`, each applying exactly once.
-D11 asked only for the hosts line. The G5 and G8 lines are in this task only if the owner says yes to Q7, and the
-G5 line's last clause only if Q1 is answered yes.
+### Task 14 · CLAUDE.md and docs/workflow.md (D11; Q1, Q7)
 
-**Edit 1 of 4 · `CLAUDE.md`, R10, the hosts files (D11).** Replace
+The owner approves each edit at the prompt. There are six replacements, each applying exactly once: five in
+`CLAUDE.md` and one in `docs/workflow.md`. Edits 1 to 4 bring the rules up to date with the guards as built.
+Edit 5 adds R15. Edit 6 adds where reports for the Build chat go.
+
+**Edit 1 of 6 · `CLAUDE.md`, R10, the hosts files (D11).** Replace
 
 ~~~~text
 live in one file, `app/lib/core/hosts.dart`. No package that sends data anywhere: no analytics, crash reporting,
@@ -2406,7 +2408,7 @@ live in one file, `app/lib/core/hosts.dart`; the server's live in `server/src/ho
 anywhere: no analytics, crash reporting,
 ~~~~
 
-**Edit 2 of 4 · `CLAUDE.md`, G5 (D12, D13; Q1, Q7).** Replace
+**Edit 2 of 6 · `CLAUDE.md`, G5 (D12, D13; Q1, Q7).** Replace
 
 ~~~~text
 - **G5 logging** — no `print(`, `debugPrint(`, `log(` or `console.` outside the two safe loggers.
@@ -2420,7 +2422,7 @@ with
   `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`).
 ~~~~
 
-**Edit 3 of 4 · `CLAUDE.md`, G8 (D7; Q7).** Replace
+**Edit 3 of 6 · `CLAUDE.md`, G8 (D7; Q7).** Replace
 
 ~~~~text
 - **G8 export** — nothing but `main_founder.dart` and `main_dev.dart` imports `lib/founder/`.
@@ -2433,7 +2435,7 @@ with
   and tests in `app/test/founder/`.
 ~~~~
 
-**Edit 4 of 4 · `CLAUDE.md`, G9 (D11).** Replace
+**Edit 4 of 6 · `CLAUDE.md`, G9 (D11).** Replace
 
 ~~~~text
 - **G9 hosts** — no `http://`, `https://` or `wss://` literal outside `hosts.dart` and tests.
@@ -2446,9 +2448,39 @@ with
   `server/src/hosts.ts` and tests.
 ~~~~
 
+**Edit 5 of 6 · `CLAUDE.md`, R15 (Q7).** Replace
+
+~~~~text
+check refusing: stop and report. Never improvise around it, never weaken a test or a check.
+~~~~
+
+with
+
+~~~~text
+check refusing: stop and report. Never improvise around it, never weaken a test or a check.
+
+**R15 · No connectors.** Never sign in to, connect or use any claude.ai connector (email,
+drive, calendar or any other) in a session in this repository.
+~~~~
+
+**Edit 6 of 6 · `docs/workflow.md`, reports for the Build chat (Q7).** Replace
+
+~~~~text
+- Anything longer than a few lines is a downloadable script, never pasted by hand.
+~~~~
+
+with
+
+~~~~text
+- Anything longer than a few lines is a downloadable script, never pasted by hand.
+- Reports for the Build chat (investigations, plan summaries, reviews, long outputs) are
+  written by Claude Code to `.scratch/for-build-chat/`, which git ignores; the owner attaches
+  the file to the Build chat. Plans and specs are still committed under `docs/`.
+~~~~
+
 Then `tool/check_all.sh` (expected: all passed), and:
 
-    git add CLAUDE.md && git commit -m "CLAUDE.md: server hosts file and the guards as built" -m "<trailer>"
+    git add CLAUDE.md docs/workflow.md && git commit -m "CLAUDE.md and workflow.md: guards as built, R15, Build chat reports" -m "<trailer>"
 
 Expected: the hook prints `guards (staged): all passed` before the commit is recorded.
 
@@ -2465,7 +2497,7 @@ Last updated: <date>, at the end of branch `scaffold-1-guards`, by Claude Code.
 
 Status is not the record. Rulings live in `technology/technology-change-record.md` in the documents repository; this
 file points to them and never restates them. The rulings for branch 1 (D1 to D14) were given in the Build chat and are
-listed in `docs/plans/scaffold-1-guards.md`, Part 1.
+listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4.
 
 ## Current branch
 
@@ -2473,10 +2505,12 @@ listed in `docs/plans/scaffold-1-guards.md`, Part 1.
 
 ## Road ahead
 
-- Branch 2: [to confirm]
-- Branch 3: [to confirm]. It must build the import script and the words generator, and arm G1 and G2 by deleting
-  `tool/checks/awaiting-import`.
-- Branch 4: [to confirm]
+- Branch 2, `scaffold-2-app`: the empty Flutter app, SoulDreams (`app.souldreams`) and SoulDreams Dev
+  (`app.souldreams.dev`), three entry points (`main.dart`, `main_founder.dart`, `main_dev.dart`), Flutter pinned
+  through FVM.
+- Branch 3, `scaffold-3-import`: the import script, the words generator (`lines.g.dart` and the iOS permission-text
+  files from EM·3), the docs copies, and arming G1 and G2 by deleting `tool/checks/awaiting-import`.
+- Branch 4, `scaffold-4-server`: the empty TypeScript server for Lambda, with its tests; nothing deployed.
 
 ## The guards
 
@@ -2488,8 +2522,9 @@ listed in `docs/plans/scaffold-1-guards.md`, Part 1.
 
 ## Banked
 
-1. Dreamer-facing words in `Info.plist` (the microphone permission text) cannot come from `lines.g.dart` as R1
-   requires, and G3 cannot see them. Settle this with the branch that adds the iOS project (plan Part 4, Q3).
+1. The microphone permission text is place EM·3 in the register (status "written", English and Swedish). Branch 3's
+   generator writes the iOS permission-text files from EM·3 (`InfoPlist.strings`, en and sv, and the base value),
+   and G1 then checks them as it checks `lines.g.dart`. Branch 2 adds no microphone setting (plan Part 4, Q3).
 2. The safe loggers named in G5 (`app/lib/core/safe_log.dart`, `server/src/safe-log.ts`) and the hosts files named
    in G9 (`app/lib/core/hosts.dart`, `server/src/hosts.ts`) do not exist yet; they arrive with `app/` and `server/`.
 3. The analyzer baseline the workflow asks for is saved by the branch that creates `app/` or `server/`.
@@ -2499,14 +2534,17 @@ listed in `docs/plans/scaffold-1-guards.md`, Part 1.
 None yet. `docs/source/SOURCES` does not exist.
 ~~~~
 
-`<date>` is that day's date. Before committing, the owner gives the names of branches 2 to 4 (Q9); until then they
-stay as written. Then `tool/check_all.sh` (expected: all passed), and:
+`<date>` is that day's date. Then `tool/check_all.sh` (expected: all passed), and:
 
     git add docs/Status.md && git commit -m "Status.md: created at the end of scaffold-1-guards" -m "<trailer>"
 
 ---
 
 ## Part 4 · Questions for the owner (numbered; a blank is not a yes)
+
+**Answered by the owner on 2026-11-07.** Q1, Q2, Q4, Q5, Q6, Q8 and Q10: yes, each lean accepted. Q3, Q7 and Q9
+were answered differently from, or beyond, the lean; each answer is written under its question. The plan above
+follows every answer.
 
 1. **G5 and the checks' own output.** The checks are `.py` files, and D8 puts `.py` under G5. They have to print
    their findings.
@@ -2524,6 +2562,10 @@ stay as written. Then `tool/check_all.sh` (expected: all passed), and:
    - *Lean:* bank it in Status.md. When the iOS project arrives, the generator also writes the plist strings from the
      register, and a guard checks they match.
    - *If you'd rather:* settle it now with Product & Design.
+   - **Answer: not a conflict.** The register already holds the microphone text: place EM·3, status "written",
+     English and Swedish. Branch 3's generator writes the iOS permission-text files (`InfoPlist.strings`, en and sv,
+     and the base value) from EM·3, and G1 then checks them as it checks `lines.g.dart`. Branch 2 adds no microphone
+     setting. Status.md's banked item 1 says exactly this.
 4. **How config and scopes are read.**
    - *G4 in config:* strings are read as
      - `<string>` elements in plists;
@@ -2554,6 +2596,8 @@ stay as written. Then `tool/check_all.sh` (expected: all passed), and:
    - *Lean:* also bring the G5, G8 and G9 lines up to date with D7, D12 and D13 (and Q1), so CLAUDE.md describes the
      guards as built.
    - *If not:* Task 14 changes only R10 and G9, and the G5 and G8 lines stay as worded.
+   - **Answer: yes, all four edits, plus two more in Task 14:** Edit 5 adds R15 (no connectors) to `CLAUDE.md`, and
+     Edit 6 adds to `docs/workflow.md` where reports for the Build chat go.
 8. **Method details.**
    - `-B` beside `-I` keeps `__pycache__` out of the repository.
    - `git update-index --chmod=+x` records the executable modes in the commits.
@@ -2562,6 +2606,8 @@ stay as written. Then `tool/check_all.sh` (expected: all passed), and:
 9. **Branches 2 to 4.** Status.md's "Road ahead" needs their names and scope. I know only that branch 3 delivers the
    import and arms G1 and G2.
    - *Lean:* the Build chat supplies them before Task 15. Until then they stay `[to confirm]`.
+   - **Answer:** `scaffold-2-app`, `scaffold-3-import` and `scaffold-4-server`, as now written in Task 15's
+     Status.md.
 10. **"Nothing else outside the repo is touched" (D2).**
     - *Lean:* this covers the settings proofs. S3's canaries move into `./.scratch/`, and the investigation's
       home-folder `allowWrite` proofs are dropped.
@@ -2588,5 +2634,20 @@ On 2026-11-07, before this file was committed:
 5. Both scratch worktrees were then removed.
 
 Task 0 and Task 13 were not replayed: they need the owner.
+
+**Amendment, 2026-11-07.** After the owner's answers, the following changed: the header; Task 13 (narrower clean-up
+and the watch item); Task 14 (six edits, Edits 5 and 6 new); Task 15's Status.md (road ahead, banked item 1, and a
+pointer to Part 4); Part 4 (the answers); and this part. Nothing in Tasks 0 to 12 changed. On a clean worktree,
+`./.scratch/replay`, the whole plan was replayed again from this file:
+- Tasks 1 to 12 as before.
+- Task 13, as far as the sandbox allows:
+  - the owner's `chmod +x` was run;
+  - `git config` is the owner's, so `check_all.sh` was expected to fail on `hooks-path` alone, and did;
+  - the canary was refused by the hook, run by hand;
+  - the new clean-up left `git status --short` empty.
+- Task 14: all six edits applied exactly once.
+- Task 15 committed.
+
+Every staged commit passed the hook. The worktree was then removed.
 
 *No matter where you are on your journey, the steps you take are equally important.*
