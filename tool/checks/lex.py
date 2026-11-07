@@ -1,7 +1,7 @@
 # Small lexers for the guards: string literals, comments, and the code
 # with both blanked out. Standard library only. Dart, TypeScript or
-# JavaScript, Python and POSIX shell. Unclear input raises LexError,
-# which the guards turn into a finding (they fail closed).
+# JavaScript, Swift, Python and POSIX shell. Unclear input raises
+# LexError, which the guards turn into a finding (they fail closed).
 import bisect
 import io
 import tokenize
@@ -9,6 +9,11 @@ import tokenize
 
 class LexError(Exception):
     pass
+
+
+# How deep strings may nest inside interpolations or substitutions.
+# Deeper input is refused, well before Python's own recursion limit.
+MAX_NESTING = 100
 
 
 class Lit:
@@ -70,15 +75,21 @@ REGEX_KEYWORDS = {
     'return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void',
     'throw', 'case', 'do', 'else', 'yield', 'await',
 }
+# A '/' after the ')' of one of these starts a regex: if (a) /x/.test(b)
+PAREN_KEYWORDS = {'if', 'while', 'for', 'with'}
+NO_FRAME = ('', '', False)
 
 
 class _CLike:
-    # Dart (dart=True) or TypeScript and JavaScript (dart=False).
-    def __init__(self, src, dart):
+    # Dart, TypeScript and JavaScript ('ts'), or Swift. A frame is
+    # (name, named, bare): the call or bracket a literal sits in, the
+    # named argument a bare parenthesis stands for, and whether the
+    # '(' was bare rather than a call.
+    def __init__(self, src, lang):
         self.s = src
         self.n = len(src)
         self.i = 0
-        self.dart = dart
+        self.lang = lang
         self.out = list(src)
         self.lines = _Lines(src)
         self.lits = []
@@ -86,9 +97,10 @@ class _CLike:
         self.frames = []
         self.prev = []
         self.chain = ''
+        self.nesting = 0
 
     def run(self):
-        self.code(False)
+        self.code(None)
         return Lexed(self.s, self.lits, self.comments, ''.join(self.out))
 
     def push(self, kind, value):
@@ -103,7 +115,7 @@ class _CLike:
 
     def block_end(self, a):
         s = self.s
-        if not self.dart:
+        if self.lang == 'ts':
             j = s.find('*/', a + 2)
             if j < 0:
                 raise LexError('comment')
@@ -124,11 +136,15 @@ class _CLike:
         raise LexError('comment')
 
     def regex_allowed(self):
+        # A '/' starts a regex where an operand may begin, and divides
+        # where one has just ended.
         if not self.prev:
             return True
         kind, value = self.prev[-1]
+        if kind == 'close':
+            return value in PAREN_KEYWORDS
         if kind == 'p':
-            return value not in ')]'
+            return value not in (']', '++', '--')
         if kind == 'id':
             return value in REGEX_KEYWORDS
         return False
@@ -138,6 +154,7 @@ class _CLike:
         a = self.i
         j = a + 1
         in_class = False
+        closed = False
         while j < self.n:
             c = s[j]
             if c == '\\':
@@ -151,21 +168,48 @@ class _CLike:
                 in_class = False
             elif c == '/' and not in_class:
                 j += 1
+                closed = True
                 break
             j += 1
+        if not closed:
+            raise LexError('regex')
         while j < self.n and s[j] in IDENT:
             j += 1
         _blank(self.out, a, j)
         self.i = j
         self.push('re', '')
 
-    def call_name(self):
-        if self.prev and self.prev[-1][0] == 'id':
-            return self.chain
-        return '('
+    def named_here(self):
+        if (len(self.prev) >= 2 and self.prev[-1] == ('p', ':')
+                and self.prev[-2][0] == 'id'):
+            return self.prev[-2][1]
+        return ''
 
-    def code(self, interp):
+    def where(self):
+        # (frame, named) for a literal or a bare '(' at this point.
+        top = self.frames[-1] if self.frames else NO_FRAME
+        return top[0], self.named_here() or (top[1] if top[2] else '')
+
+    def paren(self):
+        # A call's '(' takes the call's name. A bare '(' keeps the
+        # enclosing call and named argument: f(tooltip: ('x')) is
+        # still f's tooltip.
+        if self.prev and self.prev[-1][0] == 'id':
+            return (self.chain, '', False)
+        name, named = self.where()
+        return (name or '(', named, True)
+
+    def swift_string_at(self, i):
+        j = i
+        while j < self.n and self.s[j] == '#':
+            j += 1
+        return j < self.n and self.s[j] == '"'
+
+    def code(self, close):
+        # close is None at the top level, or the character that ends
+        # the interpolation being read: '}' after '${', ')' after '\('.
         s = self.s
+        opener = {'}': '{', ')': '('}.get(close)
         depth = 0
         while self.i < self.n:
             i = self.i
@@ -180,15 +224,21 @@ class _CLike:
             if s.startswith('/*', i):
                 self.comment(i, self.block_end(i))
                 continue
-            if not self.dart and c == '/' and self.regex_allowed():
+            if self.lang == 'ts' and c == '/' and self.regex_allowed():
                 self.regex()
                 continue
-            if c in '\'"' or (not self.dart and c == '`'):
-                self.string(i, i, False)
+            if self.lang == 'swift':
+                if c in '"#' and self.swift_string_at(i):
+                    self.swift_string(i)
+                    continue
+                if c == "'":
+                    raise LexError('quote')
+            elif c in '\'"' or (self.lang == 'ts' and c == '`'):
+                self.dart_ts_string(i, i, False)
                 continue
-            if (self.dart and c == 'r' and i + 1 < self.n and s[i + 1] in '\'"'
+            if (self.lang == 'dart' and c == 'r' and i + 1 < self.n and s[i + 1] in '\'"'
                     and (i == 0 or s[i - 1] not in IDENT)):
-                self.string(i, i + 1, True)
+                self.dart_ts_string(i, i + 1, True)
                 continue
             if c in IDENT_START:
                 j = i
@@ -210,40 +260,53 @@ class _CLike:
                 self.push('num', s[i:j])
                 self.i = j
                 continue
-            if c == '(':
-                self.frames.append(self.call_name())
-            elif c == '[':
-                self.frames.append('[')
-            elif c == '{':
-                self.frames.append('{')
+            if c in '+-' and s.startswith(c * 2, i):
+                self.push('p', c * 2)
+                self.i += 2
+                continue
+            if c == close and depth == 0:
+                self.i += 1
+                return
+            if c == opener:
                 depth += 1
-            elif c in ')]':
-                if self.frames:
-                    self.frames.pop()
-            elif c == '}':
-                if interp and depth == 0:
-                    self.i += 1
-                    return
+            elif c == close:
                 depth -= 1
-                if self.frames:
-                    self.frames.pop()
+            if c == '(':
+                self.frames.append(self.paren())
+            elif c in '[{':
+                self.frames.append((c, '', False))
+            elif c in ')]}':
+                top = self.frames.pop() if self.frames else NO_FRAME
+                if c == ')':
+                    self.push('close', '' if top[2] else top[0])
+                    self.i += 1
+                    continue
             self.push('p', c)
             self.i += 1
-        if interp:
+        if close:
             raise LexError('interpolation')
 
-    def string(self, start, q_pos, raw):
+    def dart_ts_string(self, start, q_pos, raw):
         s = self.s
         q = s[q_pos]
-        triple = self.dart and s.startswith(q * 3, q_pos)
+        triple = self.lang == 'dart' and s.startswith(q * 3, q_pos)
         delim = q * 3 if triple else q
-        multiline = triple or q == '`'
-        frame = self.frames[-1] if self.frames else ''
-        named = ''
-        if (len(self.prev) >= 2 and self.prev[-1] == ('p', ':')
-                and self.prev[-2][0] == 'id'):
-            named = self.prev[-2][1]
-        content = q_pos + len(delim)
+        self.string(start, q_pos + len(delim), delim, triple or q == '`',
+                    None if raw else '\\', None if raw else '${', '}')
+
+    def swift_string(self, start):
+        s = self.s
+        j = start
+        while s[j] == '#':
+            j += 1
+        hashes = s[start:j]
+        q = '"""' if s.startswith('"""', j) else '"'
+        self.string(start, j + len(q), q + hashes, q == '"""',
+                    '\\' + hashes, '\\' + hashes + '(', ')')
+
+    def string(self, start, content, delim, multiline, escape, interp, close):
+        s = self.s
+        frame, named = self.where()
         j = content
         mark = start
         end = None
@@ -255,20 +318,24 @@ class _CLike:
             c = s[j]
             if c == '\n' and not multiline:
                 raise LexError('string')
-            if not raw and c == '\\':
-                j += 2
-                continue
-            if not raw and c == '$' and j + 1 < self.n and s[j + 1] == '{':
-                _blank(self.out, mark, j + 2)
-                self.i = j + 2
+            if interp and s.startswith(interp, j):
+                _blank(self.out, mark, j + len(interp))
+                self.i = j + len(interp)
+                self.nesting += 1
+                if self.nesting > MAX_NESTING:
+                    raise LexError('nesting')
                 saved = self.prev
                 self.prev = []
-                self.frames.append('${')
-                self.code(True)
+                self.frames.append((interp, '', False))
+                self.code(close)
                 self.frames.pop()
                 self.prev = saved
+                self.nesting -= 1
                 j = self.i
                 mark = j - 1
+                continue
+            if escape and s.startswith(escape, j):
+                j += len(escape) + 1
                 continue
             j += 1
         if end is None:
@@ -281,11 +348,15 @@ class _CLike:
 
 
 def lex_dart(src):
-    return _CLike(src, True).run()
+    return _CLike(src, 'dart').run()
 
 
 def lex_ts(src):
-    return _CLike(src, False).run()
+    return _CLike(src, 'ts').run()
+
+
+def lex_swift(src):
+    return _CLike(src, 'swift').run()
 
 
 def _py_body(tok):
@@ -298,8 +369,11 @@ def _py_body(tok):
 
 
 def lex_python(src):
-    lines = _Lines(src)
-    out = list(src)
+    # tokenize wants a final newline. One is added after the last
+    # character, so no position moves, and it is dropped again.
+    padded = src if src.endswith('\n') else src + '\n'
+    lines = _Lines(padded)
+    out = list(padded)
     lits = []
     comments = []
     open_strings = []
@@ -308,7 +382,7 @@ def lex_python(src):
         return lines.starts[rc[0] - 1] + rc[1]
 
     try:
-        for tok in tokenize.generate_tokens(io.StringIO(src).readline):
+        for tok in tokenize.generate_tokens(io.StringIO(padded).readline):
             name = tokenize.tok_name[tok.type]
             a, b = pos(tok.start), pos(tok.end)
             if name == 'COMMENT':
@@ -321,13 +395,13 @@ def lex_python(src):
                 open_strings.append((a, tok.start[0]))
             elif name.endswith('STRING_END'):
                 a0, l0 = open_strings.pop()
-                lits.append(Lit(_py_body(src[a0:b]), a0, l0, tok.end[0]))
+                lits.append(Lit(_py_body(padded[a0:b]), a0, l0, tok.end[0]))
                 _blank(out, a0, b)
             elif name == 'ERRORTOKEN' and tok.string.strip():
                 raise LexError('python')
     except (tokenize.TokenError, SyntaxError, IndexError):
         raise LexError('python')
-    return Lexed(src, lits, comments, ''.join(out))
+    return Lexed(src, lits, comments, ''.join(out[:len(src)]))
 
 
 class _Shell:
@@ -340,6 +414,7 @@ class _Shell:
         self.lits = []
         self.comments = []
         self.heredocs = []
+        self.nesting = 0
 
     def run(self):
         self.code(False)
@@ -350,6 +425,24 @@ class _Shell:
     def lit(self, a, content, end):
         ln = self.lines.line
         self.lits.append(Lit(self.s[content:end], a, ln(a), ln(max(a, end))))
+
+    def arithmetic_end(self, a):
+        # $(( ... )) is arithmetic, which is code: '<<' in it is a
+        # shift, not a heredoc. Returns the position after the '))'.
+        s = self.s
+        depth = 0
+        j = a + 3
+        while j < self.n:
+            if s[j] == '(':
+                depth += 1
+            elif s[j] == ')':
+                if depth == 0:
+                    if s.startswith('))', j):
+                        return j + 2
+                    raise LexError('arithmetic')
+                depth -= 1
+            j += 1
+        raise LexError('arithmetic')
 
     def code(self, until_paren):
         s = self.s
@@ -387,6 +480,9 @@ class _Shell:
             if c == '"':
                 self.double(i, i, '"')
                 continue
+            if s.startswith('$((', i):
+                self.i = self.arithmetic_end(i)
+                continue
             if s.startswith('<<', i) and not s.startswith('<<<', i):
                 self.heredoc_start()
                 continue
@@ -416,10 +512,17 @@ class _Shell:
                 _blank(self.out, mark, j + 1)
                 self.i = j + 1
                 return
+            if q == '"' and s.startswith('$((', j):
+                j = self.arithmetic_end(j)
+                continue
             if q == '"' and s.startswith('$(', j):
                 _blank(self.out, mark, j + 2)
                 self.i = j + 2
+                self.nesting += 1
+                if self.nesting > MAX_NESTING:
+                    raise LexError('nesting')
                 self.code(True)
+                self.nesting -= 1
                 j = self.i
                 mark = j - 1
                 continue
@@ -444,7 +547,7 @@ class _Shell:
             j = k + 1
         else:
             k = j
-            while k < self.n and (s[k].isalnum() or s[k] == '_'):
+            while k < self.n and (s[k].isalnum() or s[k] in '_-'):
                 k += 1
             word = s[j:k]
             j = k

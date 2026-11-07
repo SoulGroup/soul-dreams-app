@@ -50,6 +50,15 @@ MUTATIONS = [
     ('lex.py', "if c == '\\n' and not multiline:\n                raise LexError('string')",
      "if c == '\\n' and not multiline:\n                pass",
      ['test_lex.Dart.test_unterminated_raises']),
+    ('lex.py', "return value not in (']', '++', '--')", "return value not in (']',)",
+     ['test_lex_fixes.TypeScript.test_slash_after_postfix_is_division']),
+    ('lex.py', "return value in PAREN_KEYWORDS", "return False",
+     ['test_lex_fixes.TypeScript.test_slash_after_condition_is_regex']),
+    ('lex.py', "if not closed:\n            raise LexError('regex')",
+     "if False:\n            raise LexError('regex')",
+     ['test_lex_fixes.TypeScript.test_unterminated_regex_raises']),
+    ('guardlib.py', "b = posixpath.basename(path).lower()", "b = posixpath.basename(path)",
+     ['test_guardlib.Library.test_secret_names_ignore_case']),
 ]
 
 

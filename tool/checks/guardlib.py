@@ -14,9 +14,11 @@ SOURCES = 'docs/source/SOURCES'
 CSV = 'app/assets/words/places-register.csv'
 LISTS = 'app/assets/words/founder-lists-for-technology.md'
 
-CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.py': 'py', '.sh': 'sh'}
-CONFIG_NAMES = ('pubspec.yaml', 'package.json')
-CONFIG_EXT = ('.plist', '.entitlements', '.pbxproj', '.xcconfig', '.xcscheme')
+CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
+            '.tsx': 'ts', '.jsx': 'ts', '.swift': 'swift', '.py': 'py', '.sh': 'sh'}
+CONFIG_EXT = ('.json', '.yaml', '.yml', '.plist', '.entitlements', '.pbxproj',
+              '.xcconfig', '.xcscheme')
+SHELLS = ('sh', 'bash', 'dash', 'zsh')
 LOCKFILES = ('pubspec.lock', 'package-lock.json', 'npm-shrinkwrap.json',
              'Podfile.lock', 'yarn.lock', 'pnpm-lock.yaml')
 SKIP_DIRS = ('.git', '.scratch')
@@ -41,7 +43,7 @@ class Finding:
 
 
 def is_secret_name(path):
-    b = posixpath.basename(path)
+    b = posixpath.basename(path).lower()
     return (b == '.env' or b.startswith('.env.')
             or b.endswith(('.p8', '.pem', '.p12', '.mobileprovision')))
 
@@ -57,37 +59,51 @@ def _git(root, *args):
     return r.stdout
 
 
+def interpreter(first):
+    # The program a '#!' line names: env, its flags and its VAR=value
+    # settings are skipped, and a path is read by its last part.
+    words = first[2:].split()
+    if words and posixpath.basename(words[0]) == 'env':
+        words = [w for w in words[1:] if not w.startswith('-') and '=' not in w]
+    return posixpath.basename(words[0]) if words else ''
+
+
 class Source:
     # mode 'walk': every file under root (the guard tests use this).
     # mode 'tracked': the files git tracks, read from the working tree.
     # mode 'staged': the index, the snapshot a commit would record.
+    # A path that is not valid UTF-8 cannot be checked: it is left out
+    # of paths and becomes the finding 'bad-path' in findings.
     def __init__(self, root, mode):
         self.root = root
         self.mode = mode
+        self.findings = []
         self._blobs = {}
         self._cache = {}
         self._lexed = {}
+        paths = []
         if mode == 'walk':
-            paths = []
             for d, dirs, files in os.walk(root):
                 dirs[:] = sorted(x for x in dirs if x not in SKIP_DIRS)
                 for f in files:
                     full = os.path.join(d, f)
                     rel = os.path.relpath(full, root).replace(os.sep, '/')
-                    if not os.path.islink(full):
+                    rel = self._name(rel.encode('utf-8', 'surrogateescape'))
+                    if rel is not None and not os.path.islink(full):
                         paths.append(rel)
         elif mode == 'tracked':
-            out = _git(root, 'ls-files', '-z').decode('utf-8')
-            paths = [p for p in out.split('\0') if p]
+            for raw in _git(root, 'ls-files', '-z').split(b'\0'):
+                path = self._name(raw) if raw else None
+                if path is not None:
+                    paths.append(path)
         elif mode == 'staged':
-            out = _git(root, 'ls-files', '-s', '-z').decode('utf-8')
-            paths = []
-            for entry in out.split('\0'):
+            for entry in _git(root, 'ls-files', '-s', '-z').split(b'\0'):
                 if not entry:
                     continue
-                meta, path = entry.split('\t', 1)
-                fmode, blob, _ = meta.split(' ')
-                if fmode in ('120000', '160000'):
+                meta, raw = entry.split(b'\t', 1)
+                fmode, blob, _ = meta.decode('ascii').split(' ')
+                path = self._name(raw)
+                if path is None or fmode in ('120000', '160000'):
                     continue
                 self._blobs[path] = blob
                 paths.append(path)
@@ -95,6 +111,14 @@ class Source:
             raise ValueError(mode)
         self.paths = sorted(set(paths))
         self._set = set(self.paths)
+
+    def _name(self, raw):
+        try:
+            return raw.decode('utf-8')
+        except UnicodeDecodeError:
+            shown = raw.decode('utf-8', 'backslashreplace')
+            self.findings.append(Finding(shown, 0, 'bad-path'))
+            return None
 
     def has(self, path):
         return path in self._set
@@ -125,35 +149,40 @@ class Source:
             return None
 
     def kind(self, path):
-        # 'dart', 'ts', 'py', 'sh', 'config' or None (not scanned by
-        # G3 to G6, G8 and G9). Markdown, docs/ and lockfiles are None.
+        # 'dart', 'ts', 'swift', 'py', 'sh', 'config' or None (not
+        # scanned by G3 to G6, G8 and G9). Markdown and lockfiles are
+        # None; code under docs/ is scanned like code anywhere else.
         b = posixpath.basename(path)
-        if path.endswith('.md') or path.startswith('docs/') or b in LOCKFILES:
+        ext = posixpath.splitext(b)[1].lower()
+        if ext == '.md' or b in LOCKFILES:
             return None
-        ext = posixpath.splitext(b)[1]
         if ext in CODE_EXT:
             return CODE_EXT[ext]
-        if b in CONFIG_NAMES or ext in CONFIG_EXT:
+        if ext in CONFIG_EXT:
             return 'config'
         if ext == '':
             text = self.text(path)
             first = text.split('\n', 1)[0] if text else ''
             if first.startswith('#!'):
-                if 'python' in first:
-                    return 'py'
-                if first.rstrip().endswith(('sh', 'bash')):
+                prog = interpreter(first)
+                if prog in SHELLS:
                     return 'sh'
+                if prog.startswith('python'):
+                    return 'py'
+                if prog == 'node':
+                    return 'ts'
         return None
 
     def lexed(self, path):
         # A Lexed, or None when the file cannot be lexed (fail closed).
+        # Any exception from a lexer, RecursionError included, is None.
         if path not in self._lexed:
             text = self.text(path)
-            fn = {'dart': lex.lex_dart, 'ts': lex.lex_ts,
+            fn = {'dart': lex.lex_dart, 'ts': lex.lex_ts, 'swift': lex.lex_swift,
                   'py': lex.lex_python, 'sh': lex.lex_shell}[self.kind(path)]
             try:
                 self._lexed[path] = None if text is None else fn(text)
-            except lex.LexError:
+            except Exception:
                 self._lexed[path] = None
         return self._lexed[path]
 
@@ -164,10 +193,57 @@ def words(text):
 
 QUOTED = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 PLIST_STRING = re.compile(r'<string>(.*?)</string>', re.S)
+YAML_BLOCK = re.compile(r'[|>][-+0-9]*')
 
 
 def _line_at(text, pos):
     return text.count('\n', 0, pos) + 1
+
+
+def _indent(line):
+    return len(line) - len(line.lstrip(' '))
+
+
+def yaml_uncomment(line):
+    # The line less its comment. '#' starts a comment at the start of
+    # the line or after a space or tab, and only outside quotes.
+    quote = ''
+    for k, ch in enumerate(line):
+        if quote:
+            if ch == quote:
+                quote = ''
+        elif ch in '\'"':
+            quote = ch
+        elif ch == '#' and (k == 0 or line[k - 1] in ' \t'):
+            return line[:k]
+    return line
+
+
+def yaml_strings(text):
+    # (line, string) pairs. A block scalar (| or >) is joined into one
+    # string, given the line of its key; its lines hold no comments.
+    out = []
+    lines = text.split('\n')
+    k = 0
+    while k < len(lines):
+        body = yaml_uncomment(lines[k]).strip()
+        if body.startswith('- '):
+            body = body[2:]
+        key, sep, value = body.partition(': ')
+        value = value.strip() if sep else body
+        if YAML_BLOCK.fullmatch(value):
+            parts = []
+            j = k + 1
+            while j < len(lines) and (not lines[j].strip()
+                                      or _indent(lines[j]) > _indent(lines[k])):
+                parts.append(lines[j].strip())
+                j += 1
+            out.append((k + 1, ' '.join(p for p in parts if p)))
+            k = j
+            continue
+        out.append((k + 1, value))
+        k += 1
+    return out
 
 
 def config_strings(path, text):
@@ -178,12 +254,7 @@ def config_strings(path, text):
         for m in PLIST_STRING.finditer(text):
             out.append((_line_at(text, m.start()), m.group(1)))
     elif b.endswith(('.yaml', '.yml')):
-        for n, line in enumerate(text.split('\n'), 1):
-            body = re.sub(r'(^|\s)#.*$', '', line).strip()
-            if body.startswith('- '):
-                body = body[2:]
-            key, sep, value = body.partition(': ')
-            out.append((n, value if sep else body))
+        out = yaml_strings(text)
     elif b.endswith('.xcconfig'):
         for n, line in enumerate(text.split('\n'), 1):
             body = line.split('//', 1)[0]
