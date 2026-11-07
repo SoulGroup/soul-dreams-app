@@ -19,7 +19,6 @@
       "Bash(git push *)",
       "Bash(git merge *)",
       "Bash(git rebase *)",
-      "Bash(git reset --hard *)",
       "Bash(git branch -D *)",
       "Bash(git config *)",
       "Bash(git commit -n *)",
@@ -32,7 +31,18 @@
       "Bash(npx cdk *)",
       "Bash(cdk *)",
       "Bash(curl *)",
-      "Bash(wget *)"
+      "Bash(wget *)",
+      "Bash(git reset *)",
+      "Bash(git commit -n*)",
+      "Bash(git -c *)",
+      "Bash(git -C *)",
+      "Bash(fvm flutter run *)",
+      "Bash(fvm flutter install *)",
+      "Bash(fvm use *)",
+      "Bash(fvm install *)",
+      "Bash(fvm global *)",
+      "Edit(/.git/config)",
+      "Edit(/.git/hooks/**)"
     ],
     "ask": [
       "Edit(/CLAUDE.md)",
@@ -61,7 +71,9 @@
         "./app/assets/words",
         "./app/lib/words",
         "./docs/source",
-        "./fixtures"
+        "./fixtures",
+        "./.git/config",
+        "./.git/hooks"
       ],
       "allowWrite": [
         "~/.pub-cache",
