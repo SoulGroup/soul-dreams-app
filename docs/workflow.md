@@ -76,6 +76,9 @@ the Build chat believes and what changes if the owner disagrees. "All fine" is a
 - Every command is a labelled copy-paste block: "Paste 1 — Terminal", "Paste 2 — Claude Code", "Paste 3 — CloudShell".
   Terminal commands start with `cd ~/Developer/soul-dreams-app`.
 - Anything longer than a few lines is a downloadable script, never pasted by hand.
+- Reports for the Build chat (investigations, plan summaries, reviews, long outputs) are
+  written by Claude Code to `.scratch/for-build-chat/`, which git ignores; the owner attaches
+  the file to the Build chat. Plans and specs are still committed under `docs/`.
 - Opening a Claude Code session:
   `cd ~/Developer/soul-dreams-app && git branch --show-current && git status --short && PATH="$PWD/app/.fvm/flutter_sdk/bin:$PATH" claude --model opus`
   (or `sonnet`). The `PATH` part makes the session, and the Dart and Flutter plugin, use the app's pinned Flutter rather
@@ -106,12 +109,13 @@ for the owner to commit. A copy is never edited; a difference found in it goes u
 
 - **SoulDreams Dev** (`app.souldreams.dev`): every test. Invented nights only. Debug builds, so the Flutter tools can
   look at it.
-- **SoulDreams** (`app.souldreams`), the owner's Cohort 0 app: **release builds only**, built from `main_founder.dart`.
+- **SoulDreams** (`app.souldreams.founder`), the owner's Cohort 0 app: **release builds only**, built from
+  `main_founder.dart`, installed from Xcode only.
   Release mode has debugging and service extensions turned off, so no tool can attach to it.
 - **Never delete the Cohort 0 app**, not even to fix a signing problem: the journal has no backup (C2-T). If an install
   fails, stop and bring the error to the Build chat.
-- **Never install the TestFlight build on the owner's phone.** It shares the Cohort 0 app's identifier and would
-  replace it.
+- **Never install the TestFlight build on the owner's phone.** It is the testers' app (`app.souldreams`), built
+  without the export; the owner's two apps stay the only SoulDreams apps on his phone.
 - **Nothing from the Cohort 0 app is ever pasted into a Product or Technology chat or into Claude Code**: no screenshot,
   screen recording, console output or crash log (head's message 2, item 10).
 
@@ -123,7 +127,9 @@ The journal lives only on the phone, with no backup (C2-T). Any change to how it
 2. It is rehearsed in SoulDreams Dev, on the simulator and on the owner's phone, holding invented nights in the old
    format, then updated. The owner checks by eye against the checklist.
 3. A storage change ships alone, in a build that changes nothing else.
-4. Only then does it reach the Cohort 0 app, and only then any tester.
+4. Before it reaches the Cohort 0 app, the owner exports each night as C142-I item 3 rules the export (AirDrop to his
+   Mac, into restricted/), as a safety copy, and deletes that copy once the updated app is checked.
+5. Only then does it reach the Cohort 0 app, and only then any tester.
 
 The server's small storage (feedback and combined totals) keeps the original method: written and rehearsed locally, read
 together, a dry run, then applied by the owner, with checks before and after. An applied change is never edited; a fix
@@ -133,15 +139,15 @@ is a new change.
 
 The original's "Deleting live data" does not apply to a dreamer's data. When a dreamer deletes a night or the journal,
 it is gone, with no copy kept anywhere. Tests prove it: after deletion, nothing of that night remains in storage, in any
-cache or temporary file, or in anything the app can open. The original's method applies only to the server's feedback
-and totals, when a cohort's review ends: back up first, list exactly what goes, delete by exact ID, check every count
-moved as expected.
+cache or temporary file, or in anything the app can open. At a cohort's review, the server's feedback is deleted with
+no backup or copy kept; only the combined totals are kept. The original's method (back up first, list exactly what
+goes, delete by exact ID, check every count moved as expected) applies to the totals only.
 
 ## Invented dreams only (e)
 
 Every example and test night is in `fixtures/invented-nights.json`, written to cover the cases (several dreams in one
 night, a late telling, a split, a merge, both languages, an empty night) without being anyone's. The standing guards in
-`CLAUDE.md` run on every commit: words (G1), copies (G2), no literal words (G3), invented only (G4), logging (G5), no
-identifier (G6), no secrets (G7), the export (G8), hosts (G9).
+`CLAUDE.md` run on every commit: file kinds (G0), words (G1), copies (G2), no literal words (G3), invented only (G4),
+logging (G5), no identifier (G6), no secrets (G7), the export (G8), hosts (G9).
 
 *No matter where you are on your journey, the steps you take are equally important.*

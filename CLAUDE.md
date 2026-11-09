@@ -50,13 +50,15 @@ list words in R1.
 
 **R8 · The founder's export.** Its code lives only in `app/lib/founder/`. Only `app/lib/main_founder.dart` (his Cohort 0
 build) and `app/lib/main_dev.dart` (SoulDreams Dev, invented nights) may import it. `app/lib/main.dart` (testers) never
-does: in a tester build it is not hidden, it is not built in. It shares one night by AirDrop, leaves out the distress
-results, and goes through no server or service.
+does: in a tester build it is not hidden, it is not built in. It shares one night by AirDrop and goes through no server
+or service.
 
-**R9 · The distress check's result stays on the phone.** It is never sent anywhere, never exported, never logged.
+**R9 · No crisis material, crisis check or Help.** All three are scrapped indefinitely (owner, 2026-11-07). There is no
+screen, placeholder, stub, flag, setting or name for any of them anywhere in `app/` or `server/`.
 
 **R10 · What the app talks to.** Our server and Soniox's EU domain (`stt-rt.eu.soniox.com`), and nothing else. All hosts
-live in one file, `app/lib/core/hosts.dart`. No package that sends data anywhere: no analytics, crash reporting,
+live in one file, `app/lib/core/hosts.dart`; the server's live in `server/src/hosts.ts`. No package that sends data
+anywhere: no analytics, crash reporting,
 advertising or Firebase. Every new dependency, app or server, is listed in the plan as a question for the owner.
 
 **R11 · The journal.** On the phone only, excluded from the phone's backups, and deleted completely when the dreamer
@@ -73,11 +75,17 @@ app is a release build, which debugging tools cannot attach to.
 **R14 · Stop on any mismatch.** A plan block that won't apply, an off count, a test failing for an unexpected reason, a
 check refusing: stop and report. Never improvise around it, never weaken a test or a check.
 
+**R15 · No connectors.** Never sign in to, connect or use any claude.ai connector (email,
+drive, calendar or any other) in a session in this repository.
+
 ## The checks
 
 `tool/check_all.sh` runs every guard, the analyzers and the tests. The pre-commit hook runs the guards; the owner's
 merge command runs all of it. The guards (built in the first task, each with a mutation check):
 
+- **G0 file kinds** — every tracked file is a kind the guards know: code, config, or an unscanned type, name or path
+  listed in `tool/checks/g0_kinds.py`. Anything else, an unknown `#!` interpreter included, is refused. A branch that
+  brings a new kind of file extends the list, and the owner approves it.
 - **G1 words** — `lines.g.dart` is exactly what the generator makes from the CSV, and the CSV's and lists' hashes match
   `docs/source/SOURCES`.
 - **G2 copies** — every file in `docs/source/` matches its listed hash.
@@ -85,11 +93,15 @@ merge command runs all of it. The guards (built in the first task, each with a m
   than two words needs `// not-dreamer-facing: <reason>` on its line.
 - **G4 invented only** — no string literal of twelve words or more outside `fixtures/invented-nights.json` and
   `app/lib/words/`.
-- **G5 logging** — no `print(`, `debugPrint(`, `log(` or `console.` outside the two safe loggers.
+- **G5 logging** — no `print(`, `debugPrint(`, `log(` (`Math.log(` allowed), `console.`, `stdout.write`, `stderr.write`
+  or `FlutterError.dumpErrorToConsole` outside the two safe loggers (`app/lib/core/safe_log.dart`,
+  `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`).
 - **G6 identifiers** — none of `client_reference_id`, `identifierForVendor`, `advertisingIdentifier`, `device_info`.
 - **G7 secrets** — no key-shaped string, no `.env`, `.p8`, `.pem`, `.p12` or `.mobileprovision` file.
-- **G8 export** — nothing but `main_founder.dart` and `main_dev.dart` imports `lib/founder/`.
-- **G9 hosts** — no `http://`, `https://` or `wss://` literal outside `hosts.dart` and tests.
+- **G8 export** — nothing but `main_founder.dart` and `main_dev.dart` imports `lib/founder/`, besides files inside it
+  and tests in `app/test/founder/`.
+- **G9 hosts** — no `http://`, `https://`, `ws://` or `wss://` literal outside `app/lib/core/hosts.dart`,
+  `server/src/hosts.ts` and tests.
 
 A check is a floor, not the rule. What it cannot see, the rule still forbids.
 
