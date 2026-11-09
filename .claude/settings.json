@@ -45,7 +45,13 @@
       "Bash(fvm install *)",
       "Bash(fvm global *)",
       "Edit(/.git/config)",
-      "Edit(/.git/hooks/**)"
+      "Edit(/.git/hooks/**)",
+      "Bash(fvm flutter config *)",
+      "Bash(flutter config *)",
+      "Bash(fvm flutter --enable-analytics*)",
+      "Bash(flutter --enable-analytics*)",
+      "Bash(fvm dart --enable-analytics*)",
+      "Bash(dart --enable-analytics*)"
     ],
     "ask": [
       "Edit(/CLAUDE.md)",
@@ -87,7 +93,8 @@
         "~/.pub-cache",
         "~/fvm",
         "~/.dartServer",
-        "~/.npm"
+        "~/.npm",
+        "~/.config/flutter"
       ]
     },
     "network": {
