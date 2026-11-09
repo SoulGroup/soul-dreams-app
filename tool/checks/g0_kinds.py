@@ -1,7 +1,7 @@
 # G0 file kinds: every file must be of a kind the guards know, so that
-# nothing goes unread by mistake. Known: guardlib's code kinds and
-# config, binary files (a NUL byte), and the unscanned types, names and
-# paths below when they read as UTF-8 text. A file with an
+# nothing goes unread by mistake. Known: guardlib's code kinds, config,
+# and the unscanned types, names and paths below, each only when it
+# reads as UTF-8 text; and binary files (a NUL byte). A file with an
 # unknown '#!' interpreter, or of any other kind, is refused as
 # unknown-kind. A branch that brings a new kind of file extends these
 # lists, and the owner approves the change at the prompt.
@@ -17,6 +17,11 @@ UNSCANNED_PATHS = (SOURCES, MARKER)
 
 
 def known(src, path):
+    if src.kind(path) is not None and src.text(path) is None:
+        # Code and config are read as text. One that is not UTF-8 with no
+        # NUL byte is skipped by G6 and G7, and config is read as empty by
+        # G4, G5 and G9: refused (fail closed; Task 2d, D1 and D3).
+        return False
     if src.kind(path) is not None:
         return True
     b = posixpath.basename(path)

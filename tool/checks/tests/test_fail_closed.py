@@ -32,8 +32,10 @@ class Swift(unittest.TestCase):
             self.assertEqual(lx.lits, [])
             self.assertEqual(lx.code, src)
         # TypeScript is unchanged: there, a '/' after try divides.
-        lx = lex.lex_ts('let d = o.try / 2 / 3\n')
+        src = 'let d = o.try / 2 / 3\n'
+        lx = lex.lex_ts(src)
         self.assertEqual(lx.lits, [])
+        self.assertEqual(lx.code, src)
 
 
 class Shell(unittest.TestCase):

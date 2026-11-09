@@ -1,4 +1,5 @@
 # Task 2b (D17): G0 file kinds.
+import plistlib
 import unittest
 
 from helpers import GuardTest
@@ -48,6 +49,34 @@ class G0(GuardTest):
     def test_utf8_unscanned_pass(self):
         self.passed({'docs/a.md': 'word é\n',
                      'app/assets/words/places-register.csv': 'word,€\n'})
+
+    def test_undecodable_config_refused(self):
+        # Task 2d (D1): config is known only as UTF-8 text with no NUL
+        # byte. G4, G5 and G9 would read it as empty; G6 and G7 skip it.
+        cases = {'server/package.json': '{"name": "word"}\n'.encode('utf-16'),
+                 'app/pubspec.yaml': 'name: word é\n'.encode('latin-1'),
+                 'app/ios/Runner/Info.plist': plistlib.dumps({'k': 'word'},
+                                                             fmt=plistlib.FMT_BINARY)}
+        for path, body in cases.items():
+            found = self.refused({path: body})
+            self.assertEqual(found, [(path, 0, 'unknown-kind')])
+
+    def test_utf8_config_passes(self):
+        self.passed({'server/package.json': '{"name": "word"}\n',
+                     'app/pubspec.yaml': 'name: word é\n',
+                     'app/ios/Runner/Info.plist': plistlib.dumps({'k': 'word'})})
+
+    def test_undecodable_code_refused(self):
+        # Task 2d (D3): code too. G4 and G5 call it unlexable, but G6 and
+        # G7 skip a file that does not decode.
+        cases = {'app/lib/a.dart': "const s = 'é';\n".encode('latin-1'),
+                 'server/src/a.ts': 'let a = 1;\n'.encode('utf-16'),
+                 'app/ios/a.swift': b'let a = 1\0\n',
+                 'tool/a.py': b'a = 1 \xff\n',
+                 'tool/a.sh': b'a=1\0\n'}
+        for path, body in cases.items():
+            found = self.refused({path: body})
+            self.assertEqual(found, [(path, 0, 'unknown-kind')])
 
 
 if __name__ == '__main__':

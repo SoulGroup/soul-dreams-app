@@ -66,6 +66,10 @@ MUTATIONS = [
      ['test_fail_closed.Swift.test_slash_where_regex_could_start_raises']),
     ('g0_kinds.py', "return src.text(path) is not None", "return True",
      ['test_g0.G0.test_undecodable_unscanned_refused']),
+    ('g0_kinds.py', "if src.kind(path) is not None and src.text(path) is None:", "if False:",
+     ['test_g0.G0.test_undecodable_config_refused']),
+    ('lex.py', "self.lang == 'swift' and value in", "value in",
+     ['test_fail_closed.Swift.test_division_near_try_still_lexes']),
 ]
 
 
