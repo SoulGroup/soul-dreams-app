@@ -32,6 +32,22 @@ class G5(GuardTest):
         self.passed({'app/lib/a.dart': "f() { showDialog(); catalog(); } // " + P + "\nconst s = '" + P + "';\n",
                      'server/src/a.ts': 'const y = Math.log(2);\n'})
 
+    def test_apple_writers_refused_in_swift_and_headers(self):
+        # D20 Q13: Apple's loggers, in Swift code and in headers.
+        cases = [
+            ('app/ios/Runner/a.swift', 'NSLog("%d", 1)\n', 'writer-NSLog'),
+            ('app/ios/Runner/a.swift', 'os_log("%d", 1)\n', 'writer-os_log'),
+            ('app/ios/Runner/a.swift', 'let l = Logger(subsystem: "a", category: "b")\n',
+             'writer-Logger'),
+            ('app/ios/Runner/a.h', 'void f(void) { NSLog(@"x"); }\n', 'writer-NSLog'),
+        ]
+        for path, body, reason in cases:
+            self.refused({path: body}, reason)
+
+    def test_apple_writers_only_in_apple_code(self):
+        self.passed({'app/lib/a.dart': 'final l = Logger();\n',
+                     'app/ios/Runner/a.swift': '// NSLog(1)\nlet s = "os_log(1)"\nlet m = MyLogger(1)\n'})
+
 
 if __name__ == '__main__':
     unittest.main()

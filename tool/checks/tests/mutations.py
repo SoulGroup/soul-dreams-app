@@ -82,6 +82,8 @@ MUTATIONS = [
      ['test_g0.G0.test_flutter_kinds_pass']),
     ('guardlib.py', ", '.metadata')", ")",
      ['test_g0.G0.test_flutter_kinds_pass']),
+    ('g5_logging.py', "    ('NSLog', re.compile(B + r'NSLog\\s*\\(')),\n", "",
+     ['test_g5.G5.test_apple_writers_refused_in_swift_and_headers']),
 ]
 
 
