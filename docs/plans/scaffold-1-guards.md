@@ -9,7 +9,8 @@ After the review of Task 2, the owner's ruling D16 added Task 2a, the lexer and 
 amendment). After the review of Task 2a, the owner's ruling D17 added Task 2b, which makes the guards fail closed on
 what they don't understand (Part 5, third amendment). The owner's rulings of 2026-11-07 on that amendment's questions,
 and on the Cohort 0 app, the distress check and Help, changed Tasks 2a (prose only), 2b (prose only), 14 and 15 (Part 5,
-fourth amendment).
+fourth amendment). The owner's ruling that crisis material, the crisis check and the Help page are scrapped
+indefinitely, filed upstream (C147-I, C15-P), changed Tasks 14 and 15 (Part 5, fifth amendment).
 
 ---
 
@@ -3910,14 +3911,15 @@ Do not change the check.
 
 ### Task 14 · CLAUDE.md and docs/workflow.md (D11, D17; Q1, Q7; the owner's rulings of 2026-11-07)
 
-The owner approves each edit at the prompt. There are twelve replacements, made in order, each applying exactly once:
-six in `CLAUDE.md` and six in `docs/workflow.md`. Edits 1 to 4 bring the rules up to date with the guards as built.
-Edit 5 adds R15. Edit 6 adds where reports for the Build chat go. Edit 7 adds G0 to the list of checks (D17), and
-Edit 8 adds it to `docs/workflow.md` (e). Edits 9 to 12 are the owner's rulings of 2026-11-07: the server's feedback
-at a cohort's review (d), the safety copy before a storage change (c), and the Cohort 0 app's own identifier (i).
-`CLAUDE.md` R8, R9 and R10 stay as they are, apart from Edit 1's hosts line.
+The owner approves each edit at the prompt. There are fourteen replacements, made in order, each applying exactly
+once: eight in `CLAUDE.md` and six in `docs/workflow.md`. Edits 1 to 4 bring the rules up to date with the guards as
+built. Edit 5 adds R15. Edit 6 adds where reports for the Build chat go. Edit 7 adds G0 to the list of checks (D17),
+and Edit 8 adds it to `docs/workflow.md` (e). Edits 9 to 12 are the owner's rulings of 2026-11-07: the server's
+feedback at a cohort's review (d), the safety copy before a storage change (c), and the Cohort 0 app's own identifier
+(i). Edits 13 and 14 are the owner's ruling of 2026-11-07, filed upstream (C147-I, C15-P): crisis material, the crisis
+check and the Help page are scrapped indefinitely, so R8 no longer names the distress results and R9 is replaced.
 
-**Edit 1 of 12 · `CLAUDE.md`, R10, the hosts files (D11).** Replace
+**Edit 1 of 14 · `CLAUDE.md`, R10, the hosts files (D11).** Replace
 
 ~~~~text
 live in one file, `app/lib/core/hosts.dart`. No package that sends data anywhere: no analytics, crash reporting,
@@ -3930,7 +3932,7 @@ live in one file, `app/lib/core/hosts.dart`; the server's live in `server/src/ho
 anywhere: no analytics, crash reporting,
 ~~~~
 
-**Edit 2 of 12 · `CLAUDE.md`, G5 (D12, D13; Q1, Q7).** Replace
+**Edit 2 of 14 · `CLAUDE.md`, G5 (D12, D13; Q1, Q7).** Replace
 
 ~~~~text
 - **G5 logging** — no `print(`, `debugPrint(`, `log(` or `console.` outside the two safe loggers.
@@ -3944,7 +3946,7 @@ with
   `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`).
 ~~~~
 
-**Edit 3 of 12 · `CLAUDE.md`, G8 (D7; Q7).** Replace
+**Edit 3 of 14 · `CLAUDE.md`, G8 (D7; Q7).** Replace
 
 ~~~~text
 - **G8 export** — nothing but `main_founder.dart` and `main_dev.dart` imports `lib/founder/`.
@@ -3957,7 +3959,7 @@ with
   and tests in `app/test/founder/`.
 ~~~~
 
-**Edit 4 of 12 · `CLAUDE.md`, G9 (D11).** Replace
+**Edit 4 of 14 · `CLAUDE.md`, G9 (D11).** Replace
 
 ~~~~text
 - **G9 hosts** — no `http://`, `https://` or `wss://` literal outside `hosts.dart` and tests.
@@ -3970,7 +3972,7 @@ with
   `server/src/hosts.ts` and tests.
 ~~~~
 
-**Edit 5 of 12 · `CLAUDE.md`, R15 (Q7).** Replace
+**Edit 5 of 14 · `CLAUDE.md`, R15 (Q7).** Replace
 
 ~~~~text
 check refusing: stop and report. Never improvise around it, never weaken a test or a check.
@@ -3985,7 +3987,7 @@ check refusing: stop and report. Never improvise around it, never weaken a test 
 drive, calendar or any other) in a session in this repository.
 ~~~~
 
-**Edit 6 of 12 · `docs/workflow.md`, reports for the Build chat (Q7).** Replace
+**Edit 6 of 14 · `docs/workflow.md`, reports for the Build chat (Q7).** Replace
 
 ~~~~text
 - Anything longer than a few lines is a downloadable script, never pasted by hand.
@@ -4000,7 +4002,7 @@ with
   the file to the Build chat. Plans and specs are still committed under `docs/`.
 ~~~~
 
-**Edit 7 of 12 · `CLAUDE.md`, G0 in "The checks" (D17).** Replace
+**Edit 7 of 14 · `CLAUDE.md`, G0 in "The checks" (D17).** Replace
 
 ~~~~text
 - **G1 words** — `lines.g.dart` is exactly what the generator makes from the CSV, and the CSV's and lists' hashes match
@@ -4015,7 +4017,7 @@ with
 - **G1 words** — `lines.g.dart` is exactly what the generator makes from the CSV, and the CSV's and lists' hashes match
 ~~~~
 
-**Edit 8 of 12 · `docs/workflow.md` (e), G0 among the guards (D17; owner, 2026-11-07).** Replace
+**Edit 8 of 14 · `docs/workflow.md` (e), G0 among the guards (D17; owner, 2026-11-07).** Replace
 
 ~~~~text
 `CLAUDE.md` run on every commit: words (G1), copies (G2), no literal words (G3), invented only (G4), logging (G5), no
@@ -4029,7 +4031,7 @@ with
 logging (G5), no identifier (G6), no secrets (G7), the export (G8), hosts (G9).
 ~~~~
 
-**Edit 9 of 12 · `docs/workflow.md` (d), the server's feedback at a cohort's review (owner, 2026-11-07).** Replace
+**Edit 9 of 14 · `docs/workflow.md` (d), the server's feedback at a cohort's review (owner, 2026-11-07).** Replace
 
 ~~~~text
 cache or temporary file, or in anything the app can open. The original's method applies only to the server's feedback
@@ -4045,7 +4047,7 @@ no backup or copy kept; only the combined totals are kept. The original's method
 goes, delete by exact ID, check every count moved as expected) applies to the totals only.
 ~~~~
 
-**Edit 10 of 12 · `docs/workflow.md` (c), the safety copy before a storage change (owner, 2026-11-07).** Replace
+**Edit 10 of 14 · `docs/workflow.md` (c), the safety copy before a storage change (owner, 2026-11-07).** Replace
 
 ~~~~text
 4. Only then does it reach the Cohort 0 app, and only then any tester.
@@ -4059,7 +4061,7 @@ with
 5. Only then does it reach the Cohort 0 app, and only then any tester.
 ~~~~
 
-**Edit 11 of 12 · `docs/workflow.md` (i), the Cohort 0 app's identifier (owner, 2026-11-07).** Replace
+**Edit 11 of 14 · `docs/workflow.md` (i), the Cohort 0 app's identifier (owner, 2026-11-07).** Replace
 
 ~~~~text
 - **SoulDreams** (`app.souldreams`), the owner's Cohort 0 app: **release builds only**, built from `main_founder.dart`.
@@ -4072,7 +4074,7 @@ with
   `main_founder.dart`, installed from Xcode only.
 ~~~~
 
-**Edit 12 of 12 · `docs/workflow.md` (i), the TestFlight build (owner, 2026-11-07).** Replace
+**Edit 12 of 14 · `docs/workflow.md` (i), the TestFlight build (owner, 2026-11-07).** Replace
 
 ~~~~text
 - **Never install the TestFlight build on the owner's phone.** It shares the Cohort 0 app's identifier and would
@@ -4084,6 +4086,33 @@ with
 ~~~~text
 - **Never install the TestFlight build on the owner's phone.** It is the testers' app (`app.souldreams`), built
   without the export; the owner's two apps stay the only SoulDreams apps on his phone.
+~~~~
+
+**Edit 13 of 14 · `CLAUDE.md` R8, no distress results (owner, 2026-11-07; C147-I, C15-P).** Replace
+
+~~~~text
+does: in a tester build it is not hidden, it is not built in. It shares one night by AirDrop, leaves out the distress
+results, and goes through no server or service.
+~~~~
+
+with
+
+~~~~text
+does: in a tester build it is not hidden, it is not built in. It shares one night by AirDrop and goes through no server
+or service.
+~~~~
+
+**Edit 14 of 14 · `CLAUDE.md` R9, crisis material, check and Help scrapped (owner, 2026-11-07; C147-I, C15-P).** Replace
+
+~~~~text
+**R9 · The distress check's result stays on the phone.** It is never sent anywhere, never exported, never logged.
+~~~~
+
+with
+
+~~~~text
+**R9 · No crisis material, crisis check or Help.** All three are scrapped indefinitely (owner, 2026-11-07). There is no
+screen, placeholder, stub, flag, setting or name for any of them anywhere in `app/` or `server/`.
 ~~~~
 
 Then `tool/check_all.sh` (expected: all passed), and:
@@ -4155,7 +4184,6 @@ owner's rulings of 2026-11-07 on the third amendment's questions are listed in i
 10. The reviewer's seven minor notes on Task 2a, C1 to C7 in `scaffold-1-review-2a.md` (D17).
 11. Shell: inside double quotes, `$(( ))` is blanked as string, so a command substitution in it, as in `"$(( $(cmd) + 1 ))"`, is hidden from the guards (D17; `scaffold-1-review-2a.md`, A/B-1).
 12. The model's instructions need their own home, exempt from G4; defined when they arrive.
-13. The distress check and Help's Call, Chat and Read are gone (owner, 2026-11-07). CLAUDE.md R8 and R9 still name the distress check; amend them when the ruling is filed upstream.
 
 ## Documents as last imported
 
@@ -4357,6 +4385,27 @@ Downloads and iCloud folders"), where Tasks 1, 2 and 2a are already committed:
   hook, and the clean-up left `git status --short` empty.
 - Task 14: all twelve edits applied exactly once, in order.
 - Task 15 committed.
+
+The guards were then run over the replayed tree with this file in it, and all passed. The worktree was removed.
+
+**Fifth amendment, 2026-11-09 (the owner's ruling of 2026-11-07, filed upstream as C147-I and C15-P).** The owner
+accepted all four of the fourth amendment's leans. Crisis material, the crisis check and the Help page are scrapped
+indefinitely. No code changed. What changed:
+- **The header:** this amendment.
+- **Task 14:** fourteen edits, numbered of 14, eight in `CLAUDE.md`. Edit 13: R8 no longer names the distress results.
+  Edit 14: R9 is replaced by "No crisis material, crisis check or Help". The intro says so, in place of "R8, R9 and
+  R10 stay as they are".
+- **Task 15:** banked item 13 (the distress check and Help) is removed, resolved by Edits 13 and 14.
+
+The whole plan was replayed from this file on a clean worktree, `./.scratch/replay`, detached at `96c2787`, as in the
+fourth amendment:
+- Tasks 1, 2 and 2a: byte-identical to `d95607d` and `61dcd57`, `Ran 32 tests`, `OK`, and mutations 16 to 20 caught.
+- Tasks 2b to 12, as stated: every red run failed as stated, every green run passed with the stated count, all 22
+  mutations were caught, and every commit from Task 11 on passed the hook, run by hand.
+- Task 13, as far as the sandbox allows: `check_all.sh` failed on `hooks-path` alone, the canary was refused by the
+  hook, and the clean-up left `git status --short` empty.
+- Task 14: all fourteen edits applied exactly once, in order.
+- Task 15 committed, with banked items 1 to 12.
 
 The guards were then run over the replayed tree with this file in it, and all passed. The worktree was removed.
 
