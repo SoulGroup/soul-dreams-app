@@ -31,6 +31,10 @@ def main(argv):
         else:
             guardlib.report('guards: unknown argument')
             return 2
+    for code in sorted(only - {g.CODE for g in GUARDS}):
+        # A typo must not run nothing and pass (final review, F1).
+        guardlib.report('guards: unknown guard ' + code)
+        return 2
     try:
         src = guardlib.Source(root, mode)
         failed = 0
