@@ -70,6 +70,18 @@ MUTATIONS = [
      ['test_g0.G0.test_undecodable_config_refused']),
     ('lex.py', "self.lang == 'swift' and value in", "value in",
      ['test_fail_closed.Swift.test_division_near_try_still_lexes']),
+    ('guardlib.py', "'.xcworkspacedata', ", "",
+     ['test_g0.G0.test_flutter_kinds_pass']),
+    ('guardlib.py', "'.xcsettings', ", "",
+     ['test_g0.G0.test_flutter_kinds_pass']),
+    ('guardlib.py', "'.storyboard', ", "",
+     ['test_g0.G0.test_flutter_kinds_pass']),
+    ('guardlib.py', ", '.h')", ")",
+     ['test_g0.G0.test_flutter_kinds_pass']),
+    ('guardlib.py', "('.fvmrc', ", "(",
+     ['test_g0.G0.test_flutter_kinds_pass']),
+    ('guardlib.py', ", '.metadata')", ")",
+     ['test_g0.G0.test_flutter_kinds_pass']),
 ]
 
 

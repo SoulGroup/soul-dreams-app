@@ -44,6 +44,25 @@ class Library(unittest.TestCase):
                                'pnpm-lock.yaml': None, 'docs/tool.py': 'py',
                                'docs/a.dart': 'dart', 'docs/a.md': None})
 
+    def test_flutter_kinds_are_config(self):
+        # scaffold-2-app (D20 Q13): by extension, and two by whole name.
+        got = kinds({'a.xcworkspacedata': '', 'a.xcsettings': '', 'a.storyboard': '',
+                     'a.h': '', 'app/.fvmrc': '', 'app/.metadata': '',
+                     'app/x.fvmrc': '', 'app/metadata': ''})
+        self.assertEqual(got, {'a.xcworkspacedata': 'config', 'a.xcsettings': 'config',
+                               'a.storyboard': 'config', 'a.h': 'config',
+                               'app/.fvmrc': 'config', 'app/.metadata': 'config',
+                               'app/x.fvmrc': None, 'app/metadata': None})
+
+    def test_flutter_config_strings(self):
+        # .xcsettings reads as a plist, .metadata as YAML (D20 Q13).
+        self.assertEqual(guardlib.config_strings(
+            'a.xcsettings', '<dict>\n<key>k</key>\n<string>word word</string>\n</dict>\n'),
+            [(3, 'word word')])
+        self.assertEqual(guardlib.config_strings(
+            'app/.metadata', '# word word\nversion:\n  channel: "stable"\n'),
+            [(1, ''), (2, 'version:'), (3, '"stable"'), (4, '')])
+
     def test_kind_by_shebang(self):
         got = kinds({'a': '#!/bin/sh -eu\n', 'b': '#!/usr/bin/env bash\n', 'c': '#!/bin/dash\n',
                      'd': '#!/bin/zsh\n', 'e': '#!/usr/bin/env -S python3 -u\n',

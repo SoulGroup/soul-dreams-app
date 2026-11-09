@@ -17,7 +17,13 @@ LISTS = 'app/assets/words/founder-lists-for-technology.md'
 CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
             '.swift': 'swift', '.py': 'py', '.sh': 'sh'}
 CONFIG_EXT = ('.json', '.yaml', '.yml', '.plist', '.entitlements', '.pbxproj',
-              '.xcconfig', '.xcscheme')
+              '.xcconfig', '.xcscheme',
+              # Flutter's iOS project (scaffold-2-app, D20 Q13). XML, an
+              # XML plist, and a header with no lexer: read whole.
+              '.xcworkspacedata', '.xcsettings', '.storyboard', '.h')
+# Config known by its whole name: FVM's pin (JSON) and Flutter's
+# project record (YAML). Neither has an extension (D20 Q13).
+CONFIG_NAMES = ('.fvmrc', '.metadata')
 SHELLS = ('sh', 'bash', 'dash', 'zsh')
 LOCKFILES = ('pubspec.lock', 'package-lock.json', 'npm-shrinkwrap.json',
              'Podfile.lock', 'yarn.lock', 'pnpm-lock.yaml')
@@ -159,7 +165,7 @@ class Source:
             return None
         if ext in CODE_EXT:
             return CODE_EXT[ext]
-        if ext in CONFIG_EXT:
+        if ext in CONFIG_EXT or b in CONFIG_NAMES:
             return 'config'
         if ext == '':
             text = self.text(path)
@@ -251,10 +257,10 @@ def config_strings(path, text):
     # (line, string) pairs: what counts as a string literal in config.
     b = posixpath.basename(path)
     out = []
-    if b.endswith(('.plist', '.entitlements')):
+    if b.endswith(('.plist', '.entitlements', '.xcsettings')):
         for m in PLIST_STRING.finditer(text):
             out.append((_line_at(text, m.start()), m.group(1)))
-    elif b.endswith(('.yaml', '.yml')):
+    elif b.endswith(('.yaml', '.yml')) or b == '.metadata':
         out = yaml_strings(text)
     elif b.endswith('.xcconfig'):
         for n, line in enumerate(text.split('\n'), 1):

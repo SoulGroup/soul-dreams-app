@@ -19,10 +19,22 @@ class G0(GuardTest):
                      'app/pubspec.lock': '', 'app/icon.png': b'\x89PNG\r\n\x1a\n\0\0'})
 
     def test_unknown_kinds_refused(self):
-        for path in ('a.tsx', 'a.jsx', 'a.mts', 'a.m', 'a.h', 'a.kt', 'a.txt', 'Makefile',
+        for path in ('a.tsx', 'a.jsx', 'a.mts', 'a.m', 'a.c', 'a.kt', 'a.txt', 'Makefile',
                      'docs/SOURCES', 'app/awaiting-import'):
             found = self.refused({path: 'x\n'})
             self.assertEqual(found, [(path, 0, 'unknown-kind')])
+
+    def test_flutter_kinds_pass(self):
+        # scaffold-2-app (D20 Q13): the kinds FVM and Flutter's iOS
+        # project bring are config.
+        self.passed({'app/.fvmrc': '{\n  "flutter": "3.47.9"\n}',
+                     'app/.metadata': 'version:\n  channel: "stable"\n',
+                     'app/ios/Runner.xcworkspace/contents.xcworkspacedata':
+                         '<?xml version="1.0" encoding="UTF-8"?>\n<Workspace>\n</Workspace>\n',
+                     'app/ios/Runner.xcworkspace/WorkspaceSettings.xcsettings':
+                         plistlib.dumps({'k': False}),
+                     'app/ios/Runner/Base.lproj/Main.storyboard': '<?xml version="1.0"?>\n<document/>\n',
+                     'app/ios/Runner/Runner-Bridging-Header.h': '#import "a.h"\n'})
 
     def test_unknown_shebang_refused(self):
         for body in ('#!/usr/bin/perl\n', '#!/usr/bin/env deno\n',
