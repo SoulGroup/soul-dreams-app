@@ -77,6 +77,9 @@ REGEX_KEYWORDS = {
 }
 # A '/' after the ')' of one of these starts a regex: if (a) /x/.test(b)
 PAREN_KEYWORDS = {'if', 'while', 'for', 'with'}
+# Swift only: a '/' after one of these can start a regex, as in
+# try /x/.wholeMatch(in: s). TypeScript is unchanged.
+SWIFT_REGEX_KEYWORDS = {'try'}
 NO_FRAME = ('', '', False)
 
 
@@ -146,7 +149,8 @@ class _CLike:
         if kind == 'p':
             return value not in (']', '++', '--')
         if kind == 'id':
-            return value in REGEX_KEYWORDS
+            return value in REGEX_KEYWORDS or (
+                self.lang == 'swift' and value in SWIFT_REGEX_KEYWORDS)
         return False
 
     def regex(self):

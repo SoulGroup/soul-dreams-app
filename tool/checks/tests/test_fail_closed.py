@@ -20,6 +20,21 @@ class Swift(unittest.TestCase):
             self.assertEqual(lx.lits, [])
             self.assertEqual(lx.code, src)
 
+    def test_slash_after_try_raises(self):
+        # Task 2c (C2): Apple's own form puts a regex after try.
+        with self.assertRaises(lex.LexError):
+            lex.lex_swift('if let m = try /(\\d+)x/.wholeMatch(in: s) {}\n')
+
+    def test_division_near_try_still_lexes(self):
+        for src in ('let a = try f(x) / 2\n', 'let b = retry / 2\n',
+                    'let c = tryCount / 2\n'):
+            lx = lex.lex_swift(src)
+            self.assertEqual(lx.lits, [])
+            self.assertEqual(lx.code, src)
+        # TypeScript is unchanged: there, a '/' after try divides.
+        lx = lex.lex_ts('let d = o.try / 2 / 3\n')
+        self.assertEqual(lx.lits, [])
+
 
 class Shell(unittest.TestCase):
     def test_heredoc_word_starting_with_digit_raises(self):

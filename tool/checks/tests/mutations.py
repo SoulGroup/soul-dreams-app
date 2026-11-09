@@ -64,6 +64,8 @@ MUTATIONS = [
     ('lex.py', "if c == '/' and self.regex_allowed():\n                    raise LexError('regex')",
      "if False:\n                    raise LexError('regex')",
      ['test_fail_closed.Swift.test_slash_where_regex_could_start_raises']),
+    ('g0_kinds.py', "return src.text(path) is not None", "return True",
+     ['test_g0.G0.test_undecodable_unscanned_refused']),
 ]
 
 

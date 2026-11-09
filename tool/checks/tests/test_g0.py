@@ -33,6 +33,22 @@ class G0(GuardTest):
         self.passed({'a.bin': b'\0\xff'})
         self.refused({'a.bin': b'\xff\xfe'}, 'unknown-kind')
 
+    def test_undecodable_unscanned_refused(self):
+        # Task 2c (C1): a listed kind is known only as UTF-8 text with no
+        # NUL byte. The euro sign has no Latin-1 byte: the CSV is cp1252.
+        self.refused({'docs/a.md': 'word é\n'.encode('latin-1')}, 'unknown-kind')
+        self.refused({'app/assets/words/places-register.csv': 'word,€\n'.encode('cp1252')},
+                     'unknown-kind')
+        for path in ('docs/a.md', 'a.CSV', '.gitignore', 'server/package-lock.json',
+                     'docs/source/SOURCES', 'tool/checks/awaiting-import'):
+            for body in (b'word\0\n', b'word \xff\n', 'word\n'.encode('utf-16')):
+                found = self.refused({path: body})
+                self.assertEqual(found, [(path, 0, 'unknown-kind')])
+
+    def test_utf8_unscanned_pass(self):
+        self.passed({'docs/a.md': 'word é\n',
+                     'app/assets/words/places-register.csv': 'word,€\n'})
+
 
 if __name__ == '__main__':
     unittest.main()
