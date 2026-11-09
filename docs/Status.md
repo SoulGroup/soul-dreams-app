@@ -36,7 +36,7 @@ ruling on the review of Task 2b in its sixth, and the ruling on the review of Ta
 - G0 and G3 to G9: armed, on every commit (`.githooks/pre-commit`) and in `tool/check_all.sh`.
 - The hook runs once `core.hooksPath` is `.githooks`, which the owner sets on each clone. `check_all.sh` fails loudly
   if it is not.
-- Totals: 111 guard tests and 25 mutation checks.
+- Totals: 112 guard tests and 25 mutation checks.
 
 ## Banked
 

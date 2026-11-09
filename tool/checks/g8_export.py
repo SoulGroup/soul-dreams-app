@@ -15,12 +15,14 @@ DIRECTIVE = re.compile(r'(?<![\w$.])(?:import|export|part)\b')
 
 
 def into_founder(importer, uri):
+    # Case is ignored: the Mac's disk does, so 'Founder/' reaches it too.
+    uri = uri.lower()
     if uri.startswith('package:'):
         return uri[len('package:'):].partition('/')[2].startswith('founder/')
     if ':' in uri.split('/', 1)[0]:
         return False
     target = posixpath.normpath(posixpath.join(posixpath.dirname(importer), uri))
-    return (target + '/').startswith(FOUNDER)
+    return (target + '/').lower().startswith(FOUNDER)
 
 
 def check(src):

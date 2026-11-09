@@ -20,6 +20,13 @@ class G8(GuardTest):
         self.refused({'app/lib/a.dart': "import 'x.dart'\n  if (dart.library.io) 'founder/y.dart';\n"},
                      'founder-import')
 
+    def test_case_variants_refused(self):
+        # The Mac's disk ignores case, so these reach app/lib/founder/.
+        self.refused({'app/lib/main.dart': "import 'Founder/export.dart';\n"}, 'founder-import')
+        self.refused({'app/lib/main.dart': "import 'package:souldreams/FOUNDER/export.dart';\n"},
+                     'founder-import')
+        self.refused({'app/Lib/main.dart': "import 'founder/export.dart';\n"}, 'founder-import')
+
     def test_allowed_importers_pass(self):
         self.passed({'app/lib/main_founder.dart': IMP, 'app/lib/main_dev.dart': IMP,
                      'app/lib/founder/a.dart': "import 'b.dart';\n",
