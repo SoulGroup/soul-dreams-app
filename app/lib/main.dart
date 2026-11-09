@@ -3,7 +3,11 @@
 import 'package:flutter/widgets.dart';
 
 import 'app.dart';
+import 'core/flavour.dart';
+import 'core/safe_log.dart';
 
 void main() {
+  requireFlavour(Flavour.tester);
+  SafeLog.event(LogEvent.appStarted);
   runApp(const SoulDreamsApp());
 }
