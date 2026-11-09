@@ -7,7 +7,9 @@ Spec and plan in one file, as `docs/workflow.md` step 5 allows for a small task.
 The owner answered every question in Part 4 on 2026-11-07, and the plan was amended to match the answers (Part 5).
 After the review of Task 2, the owner's ruling D16 added Task 2a, the lexer and library fixes (Part 5, second
 amendment). After the review of Task 2a, the owner's ruling D17 added Task 2b, which makes the guards fail closed on
-what they don't understand (Part 5, third amendment).
+what they don't understand (Part 5, third amendment). The owner's rulings of 2026-11-07 on that amendment's questions,
+and on the Cohort 0 app, the distress check and Help, changed Tasks 2a (prose only), 2b (prose only), 14 and 15 (Part 5,
+fourth amendment).
 
 ---
 
@@ -1275,10 +1277,12 @@ Task 2's `test_lex.py` is not touched.
   - a `'` outside a string or comment is not Swift, and raises `LexError`.
 
   The guards that read code (G4, G5, G6 and G9) read `.swift` files from now on. G3 and G8 stay Dart-only.
-  Swift's regex literals (`/…/`, `#/…/#`) are not read as regexes: a `"` inside one makes the file unlexable, which
-  fails closed. Shebangs: `env`, its flags and its `VAR=value` settings are skipped, and the program is read by the
-  last part of its path. `sh`, `bash`, `dash` and `zsh` are `sh`, `python*` is `py`, and `node` is `ts`. Only
-  Markdown and lockfiles are left unscanned, wherever they are. Extensions are compared in lower case.
+  Swift's regex literals (`/…/`, `#/…/#`) are not read as regexes, and a `"`, `//` or `/*` inside one can hide code
+  without making the file unlexable (finding B1; Task 2b's R3 closes it). Shebangs: `env`, its flags and its
+  `VAR=value` settings are skipped, and the program is read by the last part of its path. `sh`, `bash`, `dash` and
+  `zsh` are `sh`, `python*` is `py`, and `node` is `ts`. Markdown and lockfiles are left unscanned, wherever they are,
+  and so is every file whose kind is not known (finding B3; Task 2b's G0 refuses those). Extensions are compared in
+  lower case. (Prose corrected by the owner's ruling of 2026-11-07, fourth amendment.)
 - **F8:** the YAML reader is `yaml_strings`. A value of `|` or `>` (with any `-`, `+` or digit after it) takes every
   following line indented deeper than its key, blank lines included. Their stripped text is joined with spaces into
   one string, given the key's line number. `#` starts a comment only at the start of a line, or after a space or tab,
@@ -2458,16 +2462,15 @@ are in two new files, `test_g0.py` and `test_fail_closed.py`.
 
   The lists are built for this branch's tree only. A branch that brings a new kind of file (an Objective-C header, an
   XML file, an image without a NUL byte) extends them in `g0_kinds.py`, and the owner approves the change at the
-  prompt. G0 names the path only, like every guard. `guards.py` runs it first (Task 11). This replaces Task 2a's
-  statement that only Markdown and lockfiles are left unscanned (finding B3): any other kind was silently unscanned,
-  and is now refused.
+  prompt. G0 names the path only, like every guard. `guards.py` runs it first (Task 11). As Task 2a's F7 prose says,
+  a file of an unknown kind was silently unscanned (finding B3); it is now refused.
 - **R2:** `.tsx` and `.jsx` leave `CODE_EXT`. JSX is not TypeScript: the `/` of `</b>` reads as a regex start and can
   hide code (finding B2). They now fall to G0. `test_kind_by_extension` is changed to expect `None` for both. This
   is the rule changing by the owner's ruling, not a test weakened: the changed test fails until the code changes.
 - **R3:** In Swift, a `/` where `regex_allowed()` says an operand may begin raises `LexError('regex')`: at the start,
   after an operator, `(`, `,`, `=`, `#`, a keyword such as `return`, or the `)` of `if`, `while`, `for` or `with`.
-  After a name, a number, a string, `]` or any other `)` it divides, as before. This replaces Task 2a's statement that
-  a `"` inside a Swift regex makes the file unlexable: the review showed it does not (finding B1).
+  After a name, a number, a string, `]` or any other `)` it divides, as before. As Task 2a's F7 prose says, a regex
+  literal could hide code without making the file unlexable (finding B1); now its opening `/` does.
 - **R4:** `heredoc_start` raises `LexError('heredoc')` when the word, quoted or not, starts with a digit. So
   `(( y = 1 << 3 ))`, `let x=1<<2` and `$[1<<2]` make the file unlexable, instead of hiding every line up to one
   that reads `3` or `2` (finding B5). `$(( ))` is still read as arithmetic (F10).
@@ -3905,13 +3908,16 @@ Nothing is committed in this task.
 **Watch item.** If `check_all.sh` fails on `hooks-path` after the owner has set `core.hooksPath`, stop and report.
 Do not change the check.
 
-### Task 14 · CLAUDE.md and docs/workflow.md (D11, D17; Q1, Q7)
+### Task 14 · CLAUDE.md and docs/workflow.md (D11, D17; Q1, Q7; the owner's rulings of 2026-11-07)
 
-The owner approves each edit at the prompt. There are seven replacements, each applying exactly once: six in
-`CLAUDE.md` and one in `docs/workflow.md`. Edits 1 to 4 bring the rules up to date with the guards as built.
-Edit 5 adds R15. Edit 6 adds where reports for the Build chat go. Edit 7 adds G0 to the list of checks (D17).
+The owner approves each edit at the prompt. There are twelve replacements, made in order, each applying exactly once:
+six in `CLAUDE.md` and six in `docs/workflow.md`. Edits 1 to 4 bring the rules up to date with the guards as built.
+Edit 5 adds R15. Edit 6 adds where reports for the Build chat go. Edit 7 adds G0 to the list of checks (D17), and
+Edit 8 adds it to `docs/workflow.md` (e). Edits 9 to 12 are the owner's rulings of 2026-11-07: the server's feedback
+at a cohort's review (d), the safety copy before a storage change (c), and the Cohort 0 app's own identifier (i).
+`CLAUDE.md` R8, R9 and R10 stay as they are, apart from Edit 1's hosts line.
 
-**Edit 1 of 7 · `CLAUDE.md`, R10, the hosts files (D11).** Replace
+**Edit 1 of 12 · `CLAUDE.md`, R10, the hosts files (D11).** Replace
 
 ~~~~text
 live in one file, `app/lib/core/hosts.dart`. No package that sends data anywhere: no analytics, crash reporting,
@@ -3924,7 +3930,7 @@ live in one file, `app/lib/core/hosts.dart`; the server's live in `server/src/ho
 anywhere: no analytics, crash reporting,
 ~~~~
 
-**Edit 2 of 7 · `CLAUDE.md`, G5 (D12, D13; Q1, Q7).** Replace
+**Edit 2 of 12 · `CLAUDE.md`, G5 (D12, D13; Q1, Q7).** Replace
 
 ~~~~text
 - **G5 logging** — no `print(`, `debugPrint(`, `log(` or `console.` outside the two safe loggers.
@@ -3938,7 +3944,7 @@ with
   `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`).
 ~~~~
 
-**Edit 3 of 7 · `CLAUDE.md`, G8 (D7; Q7).** Replace
+**Edit 3 of 12 · `CLAUDE.md`, G8 (D7; Q7).** Replace
 
 ~~~~text
 - **G8 export** — nothing but `main_founder.dart` and `main_dev.dart` imports `lib/founder/`.
@@ -3951,7 +3957,7 @@ with
   and tests in `app/test/founder/`.
 ~~~~
 
-**Edit 4 of 7 · `CLAUDE.md`, G9 (D11).** Replace
+**Edit 4 of 12 · `CLAUDE.md`, G9 (D11).** Replace
 
 ~~~~text
 - **G9 hosts** — no `http://`, `https://` or `wss://` literal outside `hosts.dart` and tests.
@@ -3964,7 +3970,7 @@ with
   `server/src/hosts.ts` and tests.
 ~~~~
 
-**Edit 5 of 7 · `CLAUDE.md`, R15 (Q7).** Replace
+**Edit 5 of 12 · `CLAUDE.md`, R15 (Q7).** Replace
 
 ~~~~text
 check refusing: stop and report. Never improvise around it, never weaken a test or a check.
@@ -3979,7 +3985,7 @@ check refusing: stop and report. Never improvise around it, never weaken a test 
 drive, calendar or any other) in a session in this repository.
 ~~~~
 
-**Edit 6 of 7 · `docs/workflow.md`, reports for the Build chat (Q7).** Replace
+**Edit 6 of 12 · `docs/workflow.md`, reports for the Build chat (Q7).** Replace
 
 ~~~~text
 - Anything longer than a few lines is a downloadable script, never pasted by hand.
@@ -3994,7 +4000,7 @@ with
   the file to the Build chat. Plans and specs are still committed under `docs/`.
 ~~~~
 
-**Edit 7 of 7 · `CLAUDE.md`, G0 in "The checks" (D17).** Replace
+**Edit 7 of 12 · `CLAUDE.md`, G0 in "The checks" (D17).** Replace
 
 ~~~~text
 - **G1 words** — `lines.g.dart` is exactly what the generator makes from the CSV, and the CSV's and lists' hashes match
@@ -4009,9 +4015,80 @@ with
 - **G1 words** — `lines.g.dart` is exactly what the generator makes from the CSV, and the CSV's and lists' hashes match
 ~~~~
 
+**Edit 8 of 12 · `docs/workflow.md` (e), G0 among the guards (D17; owner, 2026-11-07).** Replace
+
+~~~~text
+`CLAUDE.md` run on every commit: words (G1), copies (G2), no literal words (G3), invented only (G4), logging (G5), no
+identifier (G6), no secrets (G7), the export (G8), hosts (G9).
+~~~~
+
+with
+
+~~~~text
+`CLAUDE.md` run on every commit: file kinds (G0), words (G1), copies (G2), no literal words (G3), invented only (G4),
+logging (G5), no identifier (G6), no secrets (G7), the export (G8), hosts (G9).
+~~~~
+
+**Edit 9 of 12 · `docs/workflow.md` (d), the server's feedback at a cohort's review (owner, 2026-11-07).** Replace
+
+~~~~text
+cache or temporary file, or in anything the app can open. The original's method applies only to the server's feedback
+and totals, when a cohort's review ends: back up first, list exactly what goes, delete by exact ID, check every count
+moved as expected.
+~~~~
+
+with
+
+~~~~text
+cache or temporary file, or in anything the app can open. At a cohort's review, the server's feedback is deleted with
+no backup or copy kept; only the combined totals are kept. The original's method (back up first, list exactly what
+goes, delete by exact ID, check every count moved as expected) applies to the totals only.
+~~~~
+
+**Edit 10 of 12 · `docs/workflow.md` (c), the safety copy before a storage change (owner, 2026-11-07).** Replace
+
+~~~~text
+4. Only then does it reach the Cohort 0 app, and only then any tester.
+~~~~
+
+with
+
+~~~~text
+4. Before it reaches the Cohort 0 app, the owner exports each night as C142-I item 3 rules the export (AirDrop to his
+   Mac, into restricted/), as a safety copy, and deletes that copy once the updated app is checked.
+5. Only then does it reach the Cohort 0 app, and only then any tester.
+~~~~
+
+**Edit 11 of 12 · `docs/workflow.md` (i), the Cohort 0 app's identifier (owner, 2026-11-07).** Replace
+
+~~~~text
+- **SoulDreams** (`app.souldreams`), the owner's Cohort 0 app: **release builds only**, built from `main_founder.dart`.
+~~~~
+
+with
+
+~~~~text
+- **SoulDreams** (`app.souldreams.founder`), the owner's Cohort 0 app: **release builds only**, built from
+  `main_founder.dart`, installed from Xcode only.
+~~~~
+
+**Edit 12 of 12 · `docs/workflow.md` (i), the TestFlight build (owner, 2026-11-07).** Replace
+
+~~~~text
+- **Never install the TestFlight build on the owner's phone.** It shares the Cohort 0 app's identifier and would
+  replace it.
+~~~~
+
+with
+
+~~~~text
+- **Never install the TestFlight build on the owner's phone.** It is the testers' app (`app.souldreams`), built
+  without the export; the owner's two apps stay the only SoulDreams apps on his phone.
+~~~~
+
 Then `tool/check_all.sh` (expected: all passed), and:
 
-    git add CLAUDE.md docs/workflow.md && git commit -m "CLAUDE.md and workflow.md: guards as built, R15, Build chat reports" -m "<trailer>"
+    git add CLAUDE.md docs/workflow.md && git commit -m "CLAUDE.md and workflow.md: guards as built, R15, Build chat reports, owner's rulings of 2026-11-07" -m "<trailer>"
 
 Expected: the hook prints `guards (staged): all passed` before the commit is recorded.
 
@@ -4028,7 +4105,8 @@ Last updated: <date>, at the end of branch `scaffold-1-guards`, by Claude Code.
 
 Status is not the record. Rulings live in `technology/technology-change-record.md` in the documents repository; this
 file points to them and never restates them. The rulings for branch 1 (D1 to D14, D16 and D17) were given in the Build
-chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4.
+chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4. The
+owner's rulings of 2026-11-07 on the third amendment's questions are listed in its Part 5, fourth amendment.
 
 ## Current branch
 
@@ -4036,11 +4114,18 @@ chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answer
 
 ## Road ahead
 
-- Branch 2, `scaffold-2-app`: the empty Flutter app, SoulDreams (`app.souldreams`) and SoulDreams Dev
-  (`app.souldreams.dev`), three entry points (`main.dart`, `main_founder.dart`, `main_dev.dart`), Flutter pinned
-  through FVM.
+- Branch 2, `scaffold-2-app`: the empty Flutter app in three flavours, each with its entry point: the testers'
+  SoulDreams (`app.souldreams`, `main.dart`), the owner's Cohort 0 SoulDreams (`app.souldreams.founder`,
+  `main_founder.dart`, release builds only, installed from Xcode), and SoulDreams Dev (`app.souldreams.dev`,
+  `main_dev.dart`); Flutter pinned through FVM. Confirm that an Xcode-installed release build needs no App Store
+  Connect record.
 - Branch 3, `scaffold-3-import`: the import script, the words generator (`lines.g.dart` and the iOS permission-text
-  files from EM·3), the docs copies, and arming G1 and G2 by deleting `tool/checks/awaiting-import`.
+  files from EM·3), the docs copies, and arming G1 and G2 by deleting `tool/checks/awaiting-import`. The docs copies
+  are the handover, main path, how the AI appears, design system, experience map, product principles, requirements
+  list and tester disclosure specification, plus read-only copies of `interpretation/change-record.md`,
+  `product/product-change-record.md`, `technology/technology-change-record.md` and
+  `technology/technical-answers.md` once filed. Claude Code reads only the entries a spec cites, by ordinal.
+  `privacy-ethics-safety.md` stays out.
 - Branch 4, `scaffold-4-server`: the empty TypeScript server for Lambda, with its tests; nothing deployed.
 
 ## The guards
@@ -4068,6 +4153,9 @@ chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answer
 8. Shell: backticks inside double quotes are blanked as string, so the guards can miss code there (D17; `scaffold-1-review-2a.md`, finding 7, B6).
 9. Shell: substitutions in an unquoted heredoc's body are blanked as string, so the guards can miss them (D17; `scaffold-1-review-2a.md`, finding 7, B6).
 10. The reviewer's seven minor notes on Task 2a, C1 to C7 in `scaffold-1-review-2a.md` (D17).
+11. Shell: inside double quotes, `$(( ))` is blanked as string, so a command substitution in it, as in `"$(( $(cmd) + 1 ))"`, is hidden from the guards (D17; `scaffold-1-review-2a.md`, A/B-1).
+12. The model's instructions need their own home, exempt from G4; defined when they arrive.
+13. The distress check and Help's Call, Chat and Read are gone (owner, 2026-11-07). CLAUDE.md R8 and R9 still name the distress check; amend them when the ruling is filed upstream.
 
 ## Documents as last imported
 
@@ -4239,5 +4327,37 @@ file on a clean worktree, `./.scratch/replay`, detached at `5ca866c`, the commit
 - Task 15 committed.
 
 The guards were then run over the replayed tree with this file in it, and all passed. The worktrees were removed.
+
+**Fourth amendment, 2026-11-09 (the owner's rulings of 2026-11-07).** The owner answered the third amendment's
+questions: CLAUDE.md needs no "G1 to G9" replacement beyond Edit 7; G0 is added to `docs/workflow.md` (e); the hidden
+substitution in quoted arithmetic (A/B-1) is banked; and Task 2a's two untrue F7 sentences are corrected in place. The
+owner also ruled that the distress check and Help's Call, Chat and Read are gone, with nothing built for them, and that
+`CLAUDE.md` R8, R9 and R10 stay as they are. No code changed. What changed:
+- **The header:** this amendment.
+- **Task 2a:** F7's prose on Swift regex literals (finding B1) and on unscanned kinds (finding B3), corrected to match
+  its code.
+- **Task 2b:** the two sentences of R1 and R3 that pointed at those statements, reworded to match.
+- **Task 14:** twelve edits, numbered of 12. Edit 8 adds G0 to `docs/workflow.md` (e). Edit 9: the server's feedback
+  is deleted at a cohort's review with no copy, and only the totals keep the original's method (d). Edit 10: a safety
+  export before a storage change reaches the Cohort 0 app (c). Edits 11 and 12: the Cohort 0 app is
+  `app.souldreams.founder`, installed from Xcode only, and the TestFlight build is the testers' `app.souldreams` (i).
+  The commit message names the rulings.
+- **Task 15:** Status.md's rulings pointer names this amendment; branch 2 is the app in three flavours; branch 3 names
+  the docs copies; banked items 11 (A/B-1), 12 (the model's instructions and G4) and 13 (the distress check and Help
+  are gone; R8 and R9 to be amended once the ruling is filed upstream).
+
+The whole plan was replayed from this file on a clean worktree, `./.scratch/replay`, detached at `96c2787` ("Read-block
+Downloads and iCloud folders"), where Tasks 1, 2 and 2a are already committed:
+- Tasks 1, 2 and 2a: `.gitignore` matched and both paths were ignored; Task 2's six files, extracted from this plan,
+  were byte-identical to `d95607d`; with Task 2a's applied, the eight files were byte-identical to `61dcd57` and to the
+  start commit, with nothing else under `tool/`; `Ran 32 tests`, `OK`; mutations 16 to 20 caught.
+- Tasks 2b to 12, as stated: every red run failed as stated, every green run passed with the stated count, all 22
+  mutations were caught, and every commit from Task 11 on passed the hook, run by hand.
+- Task 13, as far as the sandbox allows: `check_all.sh` failed on `hooks-path` alone, the canary was refused by the
+  hook, and the clean-up left `git status --short` empty.
+- Task 14: all twelve edits applied exactly once, in order.
+- Task 15 committed.
+
+The guards were then run over the replayed tree with this file in it, and all passed. The worktree was removed.
 
 *No matter where you are on your journey, the steps you take are equally important.*
