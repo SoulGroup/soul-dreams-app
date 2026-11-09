@@ -49,7 +49,9 @@
     ],
     "ask": [
       "Edit(/CLAUDE.md)",
-      "Edit(/docs/workflow.md)",
+      "Edit(/docs/workflow.md)"
+    ],
+    "allow": [
       "Edit(/.githooks/**)",
       "Edit(/tool/checks/**)",
       "Edit(/tool/check_all.sh)",
