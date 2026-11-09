@@ -59,6 +59,11 @@ MUTATIONS = [
      ['test_lex_fixes.TypeScript.test_unterminated_regex_raises']),
     ('guardlib.py', "b = posixpath.basename(path).lower()", "b = posixpath.basename(path)",
      ['test_guardlib.Library.test_secret_names_ignore_case']),
+    ('g0_kinds.py', "return data is not None and b'\\0' in data", "return True",
+     ['test_g0.G0.test_unknown_kinds_refused']),
+    ('lex.py', "if c == '/' and self.regex_allowed():\n                    raise LexError('regex')",
+     "if False:\n                    raise LexError('regex')",
+     ['test_fail_closed.Swift.test_slash_where_regex_could_start_raises']),
 ]
 
 

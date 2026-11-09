@@ -38,7 +38,7 @@ class Library(unittest.TestCase):
                      'a.json': '', 'a.yaml': '', 'a.yml': '',
                      'package-lock.json': '', 'pnpm-lock.yaml': '',
                      'docs/tool.py': '', 'docs/a.dart': '', 'docs/a.md': ''})
-        self.assertEqual(got, {'a.mjs': 'ts', 'a.cjs': 'ts', 'a.tsx': 'ts', 'a.jsx': 'ts',
+        self.assertEqual(got, {'a.mjs': 'ts', 'a.cjs': 'ts', 'a.tsx': None, 'a.jsx': None,
                                'a.swift': 'swift', 'a.json': 'config', 'a.yaml': 'config',
                                'a.yml': 'config', 'package-lock.json': None,
                                'pnpm-lock.yaml': None, 'docs/tool.py': 'py',

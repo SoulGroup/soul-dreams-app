@@ -15,7 +15,7 @@ CSV = 'app/assets/words/places-register.csv'
 LISTS = 'app/assets/words/founder-lists-for-technology.md'
 
 CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
-            '.tsx': 'ts', '.jsx': 'ts', '.swift': 'swift', '.py': 'py', '.sh': 'sh'}
+            '.swift': 'swift', '.py': 'py', '.sh': 'sh'}
 CONFIG_EXT = ('.json', '.yaml', '.yml', '.plist', '.entitlements', '.pbxproj',
               '.xcconfig', '.xcscheme')
 SHELLS = ('sh', 'bash', 'dash', 'zsh')
@@ -152,6 +152,7 @@ class Source:
         # 'dart', 'ts', 'swift', 'py', 'sh', 'config' or None (not
         # scanned by G3 to G6, G8 and G9). Markdown and lockfiles are
         # None; code under docs/ is scanned like code anywhere else.
+        # G0 refuses a None file unless its kind is listed as unscanned.
         b = posixpath.basename(path)
         ext = posixpath.splitext(b)[1].lower()
         if ext == '.md' or b in LOCKFILES:

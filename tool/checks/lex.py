@@ -228,6 +228,10 @@ class _CLike:
                 self.regex()
                 continue
             if self.lang == 'swift':
+                # Swift's regex literals are not read: a '/' where one
+                # could start makes the file unlexable (fail closed).
+                if c == '/' and self.regex_allowed():
+                    raise LexError('regex')
                 if c in '"#' and self.swift_string_at(i):
                     self.swift_string(i)
                     continue
@@ -551,7 +555,9 @@ class _Shell:
                 k += 1
             word = s[j:k]
             j = k
-        if not word:
+        # A word that starts with a digit is a shift in arithmetic, as
+        # in (( 1 << 3 )), let x=1<<2 or $[1<<2]. Refused (fail closed).
+        if not word or word[0].isdigit():
             raise LexError('heredoc')
         self.heredocs.append((word, strip))
         self.i = j
