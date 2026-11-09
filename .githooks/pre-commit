@@ -1,0 +1,5 @@
+#!/bin/sh
+# Runs the standing guards on the staged snapshot (the index).
+set -eu
+top=$(git rev-parse --show-toplevel)
+exec python3 -I -B "$top/tool/checks/guards.py" --staged
