@@ -12,7 +12,9 @@ and on the Cohort 0 app, the distress check and Help, changed Tasks 2a (prose on
 fourth amendment). The owner's ruling that crisis material, the crisis check and the Help page are scrapped
 indefinitely, filed upstream (C147-I, C15-P), changed Tasks 14 and 15 (Part 5, fifth amendment). After the review of Task 2b, the owner's ruling of 2026-11-07 added
 Task 2c, which makes G0 refuse undecodable text and reads a Swift `/` after `try` as a possible regex, and banked the
-review's other findings in Task 15 (Part 5, sixth amendment).
+review's other findings in Task 15 (Part 5, sixth amendment). After the review of Task 2c, the owner's ruling of
+2026-11-09 added Task 2d, which makes G0 know code and config only when they decode, sharpens one of Task 2c's
+controls, and lists every place a guard can read nothing (Part 5, seventh amendment).
 
 ---
 
@@ -46,12 +48,13 @@ should and passes what it should, a mutation check for every guard, the pre-comm
 - **Files the guards cannot read fail closed.** A code file that cannot be lexed is a finding (`unlexable`).
   Binary files are skipped. Files with secret names, in any case, are never opened. A tracked path that is not
   valid UTF-8 is the finding `bad-path` (D16). A file of a kind the guards do not know is refused by G0 as
-  `unknown-kind` (D17), and so is a Markdown, CSV or other listed unscanned file that is not UTF-8 text (Task 2c).
+  `unknown-kind` (D17), and so is a Markdown, CSV or other listed unscanned file that is not UTF-8 text (Task 2c), and
+  a code or config file that is not UTF-8 text (Task 2d).
 - **Forbidden tokens in the guards' own source** are built from pieces (`'client_' + 'reference_id'`). This lets the
   guards scan themselves with no exclusion. Test controls are built the same way, at run time.
 - **Mutation checks never touch the repository.** `mutations.py` copies `tool/checks` to `$TMPDIR` and runs the named
   tests on the unbroken copy, where they must pass. It then breaks the copy and runs them again, and they must fail.
-  `check_all.sh` runs all 23 mutations every time.
+  `check_all.sh` runs all 25 mutations every time.
 
 ### What branch 1 does not build
 
@@ -84,6 +87,7 @@ should and passes what it should, a mutation check for every guard, the pre-comm
 | D16 | After the review of Task 2: the lexer and library fixes F1 to F11, with mutations for F1, F2, F3 and F6. It amends D8's reading: `.mjs .cjs .tsx .jsx .swift`, every `.json .yaml .yml` but lockfiles, and code under `docs/` are scanned; only Markdown and lockfiles are not | Task 2a; Tasks 4, 8, 11, 15 |
 | D17 | "Guards catch mistakes, not deliberate evasion; the sandbox and settings are the hard boundary (Task 0). From Task 3 on, a reviewer finding that ordinary code would slip through, or that the plan contradicts itself, stops the build. A finding that needs a deliberately constructed input to evade a guard is banked in Status.md, and the build continues." With it, after the review of Task 2a: G0 file kinds (R1); `.tsx` and `.jsx` out of TypeScript (R2); a Swift `/` where a regex could start (R3) and a heredoc word starting with a digit (R4) unlexable; F10's prose corrected (R5); mutations for R1 and R3 | Task 2b; Tasks 11, 12, 14, 15 |
 | 2b review | The owner's ruling of 2026-11-07 on the review of Task 2b: `.md`, `.csv` and every listed name or path are known to G0 only as UTF-8 text with no NUL byte (C1); in Swift, `try` joins the words after which a `/` starts a regex (C2); a mutation for C1; K1 to K4 and the reviewer's named notes banked | Task 2c; Tasks 11, 12, 15 |
+| 2c review | The owner's ruling of 2026-11-09 on the review of Task 2c: config is known to G0 only when `src.text()` reads it (D1), with a mutation; `test_division_near_try_still_lexes` compares TypeScript's code whole, with a mutation dropping the Swift-only condition (D2); every place a guard can read nothing listed, and each that reads nothing for a file G0 accepts fixed (D3) | Task 2d; Tasks 11, 12, 15 |
 
 ### How each guard reads its rule
 
@@ -91,7 +95,8 @@ Where this reading goes beyond the words of `CLAUDE.md`, Part 4 asks about it.
 
 - **G0 file kinds (D17).** It runs first. Every file must be code, config, or an unscanned kind listed in
   `g0_kinds.py`: Markdown and CSV, `.gitignore`, lockfiles, `docs/source/SOURCES`, the marker, and binary files (a
-  NUL byte). The listed kinds are known only when they read as UTF-8 text with no NUL byte (Task 2c). Anything else
+  NUL byte). The listed kinds are known only when they read as UTF-8 text with no NUL byte (Task 2c), and so are
+  code and config (Task 2d). Anything else
   is refused as `unknown-kind`, and so is an extensionless file whose `#!` names an
   interpreter the guards don't know. A later branch that brings a new kind extends the lists, and the owner approves
   the change at the prompt.
@@ -145,7 +150,7 @@ Where this reading goes beyond the words of `CLAUDE.md`, Part 4 asks about it.
 
 | Guard | Refused (control) | Passed (clean case) | Mutation that must be caught |
 |---|---|---|---|
-| G0 | `.tsx`, `.jsx`, `.mts`, `.m`, `.h`, `.kt`, `.txt`, `Makefile`; a listed name at another path; an unknown `#!` interpreter, even on a listed path; text with no NUL byte. Task 2c: Markdown, CSV and each listed name or path in Latin-1, cp1252 or UTF-16, or with a NUL byte | each code kind and config; Markdown, CSV, `.gitignore`, `SOURCES`, the marker, lockfiles; a binary file. Task 2c: UTF-8 Markdown and CSV | 21: every file is known. 23: a listed kind is known without being read |
+| G0 | `.tsx`, `.jsx`, `.mts`, `.m`, `.h`, `.kt`, `.txt`, `Makefile`; a listed name at another path; an unknown `#!` interpreter, even on a listed path; text with no NUL byte. Task 2c: Markdown, CSV and each listed name or path in Latin-1, cp1252 or UTF-16, or with a NUL byte. Task 2d: a UTF-16 `package.json`, a Latin-1 `pubspec.yaml`, a binary `Info.plist`; Dart, TypeScript, Swift, Python and shell in Latin-1 or UTF-16, or with a NUL byte | each code kind and config; Markdown, CSV, `.gitignore`, `SOURCES`, the marker, lockfiles; a binary file. Task 2c: UTF-8 Markdown and CSV. Task 2d: UTF-8 `package.json`, `pubspec.yaml` and `Info.plist` | 21: every file is known. 23: a listed kind is known without being read. 24: code and config are known without being read |
 | G1 | marker beside SOURCES; no marker and no SOURCES; register hash mismatch; register unlisted; armed without generator | marker alone (NOT ARMED) | 1: drop the marker-with-sources refusal. 2: compare the hash with itself |
 | G2 | marker beside SOURCES or any copy; no SOURCES; hash mismatch; unlisted copy; listed but missing; malformed line; unknown path | marker alone; a matching copy | 3: skip the hash compare. 4: ignore copies under the marker |
 | G3 | literal in `Text`, `Text.rich(TextSpan(text:))`, each named argument; a named argument in a bare parenthesis; `m.Text`; marked dreamer literal; 3 unmarked words; marker with no reason; marker on another line; unlexable file | `app/lib/words/`; two words; three marked words; `Text(lines['k'])`; files outside `app/lib/` | 5: three words become four. 6: stop exempting `words/`. 7: drop `tooltip` |
@@ -155,12 +160,12 @@ Where this reading goes beyond the words of `CLAUDE.md`, Part 4 asks about it.
 | G7 | each secret file name, in either case; each key shape in Markdown; an integrity line outside a lockfile; other lockfile lines | hex hashes; SOURCES; lockfile integrity; ordinary code; binary files | 12: drop the PEM rule. 13: exempt integrity lines everywhere |
 | G8 | `main.dart`; another file, by package, relative, `export`, `part` and conditional URI | the four allowed places; look-alike names | 14: allow `main.dart` |
 | G9 | each scheme in Dart, in any case; in TypeScript; unquoted in shell | both hosts files; test folders; comments; DOCTYPE | 15: exempt every path |
-| Lexer | quotes, raw, triple, escapes, nested interpolation, nested comments, call frames and named arguments; TypeScript template and regex; Python f-strings; shell quotes, substitution and heredocs; unterminated input refused. Task 2a: `/` after `x++` and after `if (…)`; an unterminated regex; Python with no final newline; deep nesting; Swift strings, interpolation and nested comments; bare parentheses; shell arithmetic and hyphenated heredoc words. Task 2b: a Swift `/` where a regex could start; a heredoc word starting with a digit. Task 2c: a Swift regex after `try` | Task 2b: Swift division. Task 2c: Swift division after `try f(x)`, `retry` and `tryCount`; TypeScript's `try` unchanged | 16: let a string run past its line. 17: `/` after `++` starts a regex. 18: `/` after `if (…)` divides. 19: an unterminated regex passes. 22: a Swift `/` never raises |
+| Lexer | quotes, raw, triple, escapes, nested interpolation, nested comments, call frames and named arguments; TypeScript template and regex; Python f-strings; shell quotes, substitution and heredocs; unterminated input refused. Task 2a: `/` after `x++` and after `if (…)`; an unterminated regex; Python with no final newline; deep nesting; Swift strings, interpolation and nested comments; bare parentheses; shell arithmetic and hyphenated heredoc words. Task 2b: a Swift `/` where a regex could start; a heredoc word starting with a digit. Task 2c: a Swift regex after `try` | Task 2b: Swift division. Task 2c: Swift division after `try f(x)`, `retry` and `tryCount`; TypeScript's `try` unchanged, its code compared whole since Task 2d | 16: let a string run past its line. 17: `/` after `++` starts a regex. 18: `/` after `if (…)` divides. 19: an unterminated regex passes. 22: a Swift `/` never raises. 25: `try` starts a regex in TypeScript too |
 | Library (Task 2a) | secret names in upper case; a lexer's `RecursionError`; a path that is not UTF-8 | file kinds by extension and shebang (`.tsx` and `.jsx` none since Task 2b); YAML block scalars and quoted `#` | 20: compare secret names case-sensitively |
 | Hook | a staged writer; a bad file staged then fixed only in the working tree; a staged path that is not UTF-8 | a clean index; a good file staged then broken only in the working tree | (end-to-end tests) |
 
-Totals once built: **105 tests and 23 mutations** (Task 2a added 18 tests and 4 mutations, Task 2b 7 tests and 2
-mutations, Task 2c 4 tests and 1 mutation, and Tasks 4 and 11 three more tests). Every control is invented: placeholder words (`word word word`),
+Totals once built: **108 tests and 25 mutations** (Task 2a added 18 tests and 4 mutations, Task 2b 7 tests and 2
+mutations, Task 2c 4 tests and 1 mutation, Task 2d 3 tests and 2 mutations, and Tasks 4 and 11 three more tests). Every control is invented: placeholder words (`word word word`),
 placeholder hosts (`x.example`) and key-shaped strings assembled at run time. No dream, night or dreamer line appears
 anywhere (R1, R2).
 
@@ -2914,6 +2919,214 @@ Run `python3 -I -B tool/checks/tests/run_tests.py`. Expected: `Ran 43 tests`, `O
 
     git add tool/checks && git commit -m "Guards: fail closed on undecodable text; try before a Swift regex (Task 2c)" -m "<trailer>"
 
+### Task 2d · Every readable kind must decode
+
+Task 2c is committed as `18c428b`, identical to the plan above, and stays as written. The Opus reviewer of Task 2c
+found that a config file that does not decode passes G0 while no later guard reads it, and that one of Task 2c's
+controls does not catch the break it is there for. The owner ruled on 2026-11-09. The reviewer's report is
+`.scratch/for-build-chat/scaffold-1-review-2c.md`. This task is red then green: each case is a failing test, or a
+surviving mutation, first.
+
+| | Change | Review finding | Test (red first) |
+|---|---|---|---|
+| D1 | G0: a config file is known only when `src.text(path)` is not `None`: it decodes as UTF-8 and holds no NUL byte. Otherwise `unknown-kind` | S1 | `G0.test_undecodable_config_refused`; control `G0.test_utf8_config_passes`; mutation 24 |
+| D2 | `test_division_near_try_still_lexes`: its TypeScript case also asserts `lx.code == src` | Weak test | Mutation 25, which drops `self.lang == 'swift' and`, survives the test as it was, then is caught |
+| D3 | The sweep below. Its one place that read nothing for a file G0 accepts, G6 and G7 on code that does not decode, is closed by the same G0 line as D1: code too is known only when it decodes | Owner's sweep | `G0.test_undecodable_code_refused` |
+
+The new tests go into the existing `test_g0.py` and `test_fail_closed.py`.
+
+**The sweep (D3).** Every place in `tool/checks`, as built by this plan to Task 11, where `src.text()`, `src.read()`
+or `src.lexed()` can return `None`, and what happens there. `read()` is `None` for a secret name, and in `walk` and
+`tracked` modes for a symlink or a file missing from the working tree; `text()` also for a NUL byte or bytes that are
+not UTF-8; `lexed()` also when the lexer raises.
+
+| # | Place | On `None` |
+|---|---|---|
+| 1 | `guardlib.Source.kind`, an extensionless file (`self.text`) | No kind; G0 decides (rows 4 to 7) |
+| 2 | `guardlib.Source.lexed` (`self.text`) | `None`; every caller reports `unlexable` |
+| 3 | `guardlib.parse_sources` (`src.text(SOURCES) or ''`) | Reads nothing; G0 refuses that `SOURCES` (row 6) |
+| 4 | G0 step 1, code and config (`src.kind`) | **Read nothing until this task**: known without being read. Now refused (D1, D3) |
+| 5 | G0 step 2, the `#!` test (`src.read`) | Not a `#!` file; falls to steps 3 and 4 |
+| 6 | G0 step 3, the listed kinds (`src.text`) | Refused, `unknown-kind` (Task 2c) |
+| 7 | G0 step 4, binary (`data`) | Refused, `unknown-kind` |
+| 8 | G1 and G2, `parse_sources` | As row 3 |
+| 9 | G1 and G2, `sha256(src.read(path))` | A `TypeError`: `guards.py` stops with `internal error`, exit 2. Fails closed, with no finding |
+| 10 | G3, G4, G5, G8 and G9 on code (`src.lexed`) | Finding, `unlexable` |
+| 11 | G4, G5 and G9 on config (`src.text(path) or ''`) | Reads nothing; G0 refuses the file (row 4, D1) |
+| 12 | G6, code and config (`if text is None: continue`) | Reads nothing; G0 refuses the file (row 4, D1 and D3) |
+| 13 | G7, every file (`if text is None: continue`) | Reads nothing. G0 refuses every such file but one kind: binary files (a NUL byte), skipped by design (Part 1; Part 4, Q4; banked K4) |
+
+**How the changes work.**
+- **D1 and D3:** a new first test in G0's `known()`: a file with a code kind or `config` whose `src.text()` is `None`
+  is refused. For config this is the reviewer's rule (`return src.kind(path) != 'config' or src.text(path) is not
+  None`), written as a refusal before step 1 so that one line also covers code (D3) and mutation 23's pattern stays
+  unique. A UTF-16 `package.json`, a Latin-1 `pubspec.yaml` or a binary `Info.plist`, and a code file in Latin-1,
+  UTF-16 or with a NUL byte, are refused as `unknown-kind`. An undecodable code file was already refused as
+  `unlexable` by G4 or G5, which between them read every code path; it is now also refused by G0, so G6 and G7 no
+  longer skip a file G0 accepts. Extensionless scripts are unchanged: they have a kind only when they decode.
+- **D2:** with `self.lang == 'swift' and` removed, `try` starts a regex in TypeScript too, and in
+  `let d = o.try / 2 / 3` the regex `/ 2 /` swallows the division. There are no literals either way, so the test as it
+  was passes. Comparing the code whole catches it.
+
+**Red.** Make two replacements in `test_g0.py` and add the two mutation rows:
+
+**Edit `tool/checks/tests/test_g0.py`, the imports (D1).** Replace
+
+~~~~python
+import unittest
+
+from helpers import GuardTest
+import g0_kinds
+~~~~
+
+with
+
+~~~~python
+import plistlib
+import unittest
+
+from helpers import GuardTest
+import g0_kinds
+~~~~
+
+**Edit `tool/checks/tests/test_g0.py`, the tests (D1, D3).** Replace
+
+~~~~python
+    def test_utf8_unscanned_pass(self):
+        self.passed({'docs/a.md': 'word é\n',
+                     'app/assets/words/places-register.csv': 'word,€\n'})
+~~~~
+
+with
+
+~~~~python
+    def test_utf8_unscanned_pass(self):
+        self.passed({'docs/a.md': 'word é\n',
+                     'app/assets/words/places-register.csv': 'word,€\n'})
+
+    def test_undecodable_config_refused(self):
+        # Task 2d (D1): config is known only as UTF-8 text with no NUL
+        # byte. G4, G5 and G9 would read it as empty; G6 and G7 skip it.
+        cases = {'server/package.json': '{"name": "word"}\n'.encode('utf-16'),
+                 'app/pubspec.yaml': 'name: word é\n'.encode('latin-1'),
+                 'app/ios/Runner/Info.plist': plistlib.dumps({'k': 'word'},
+                                                             fmt=plistlib.FMT_BINARY)}
+        for path, body in cases.items():
+            found = self.refused({path: body})
+            self.assertEqual(found, [(path, 0, 'unknown-kind')])
+
+    def test_utf8_config_passes(self):
+        self.passed({'server/package.json': '{"name": "word"}\n',
+                     'app/pubspec.yaml': 'name: word é\n',
+                     'app/ios/Runner/Info.plist': plistlib.dumps({'k': 'word'})})
+
+    def test_undecodable_code_refused(self):
+        # Task 2d (D3): code too. G4 and G5 call it unlexable, but G6 and
+        # G7 skip a file that does not decode.
+        cases = {'app/lib/a.dart': "const s = 'é';\n".encode('latin-1'),
+                 'server/src/a.ts': 'let a = 1;\n'.encode('utf-16'),
+                 'app/ios/a.swift': b'let a = 1\0\n',
+                 'tool/a.py': b'a = 1 \xff\n',
+                 'tool/a.sh': b'a=1\0\n'}
+        for path, body in cases.items():
+            found = self.refused({path: body})
+            self.assertEqual(found, [(path, 0, 'unknown-kind')])
+~~~~
+
+**Edit `tool/checks/tests/mutations.py`.** Replace
+
+~~~~python
+     ['test_g0.G0.test_undecodable_unscanned_refused']),
+]
+~~~~
+
+with
+
+~~~~python
+     ['test_g0.G0.test_undecodable_unscanned_refused']),
+    ('g0_kinds.py', "if src.kind(path) is not None and src.text(path) is None:", "if False:",
+     ['test_g0.G0.test_undecodable_config_refused']),
+    ('lex.py', "self.lang == 'swift' and value in", "value in",
+     ['test_fail_closed.Swift.test_division_near_try_still_lexes']),
+]
+~~~~
+
+Run `python3 -I -B tool/checks/tests/run_tests.py test_g0 test_fail_closed`. Expected: exit 1, `Ran 14 tests`,
+`FAILED (failures=2)`: `test_undecodable_config_refused` and `test_undecodable_code_refused`, each `expected a
+refusal`. `test_utf8_config_passes` passes here and after: it is the control that proves D1 does not refuse UTF-8
+config.
+
+Run `python3 -I -B tool/checks/tests/mutations.py lex.py`. Expected: exit 1, mutations 16 to 19 and 22 each `caught`,
+`mutation 25 lex.py: SURVIVED`, then `mutations: 6 run, FAILED`. This is the reviewer's finding: the test does not
+catch the break.
+
+**Edit `tool/checks/tests/test_fail_closed.py` (D2).** Replace
+
+~~~~python
+        # TypeScript is unchanged: there, a '/' after try divides.
+        lx = lex.lex_ts('let d = o.try / 2 / 3\n')
+        self.assertEqual(lx.lits, [])
+~~~~
+
+with
+
+~~~~python
+        # TypeScript is unchanged: there, a '/' after try divides.
+        src = 'let d = o.try / 2 / 3\n'
+        lx = lex.lex_ts(src)
+        self.assertEqual(lx.lits, [])
+        self.assertEqual(lx.code, src)
+~~~~
+
+Run `python3 -I -B tool/checks/tests/mutations.py lex.py`. Expected: mutations 16 to 19, 22 and 25 each `caught`, then
+`mutations: 6 run, all caught`.
+
+**Green.** Make two replacements in `g0_kinds.py`:
+
+**Edit `tool/checks/g0_kinds.py`, the header (D1, D3).** Replace
+
+~~~~python
+# nothing goes unread by mistake. Known: guardlib's code kinds and
+# config, binary files (a NUL byte), and the unscanned types, names and
+# paths below when they read as UTF-8 text. A file with an
+~~~~
+
+with
+
+~~~~python
+# nothing goes unread by mistake. Known: guardlib's code kinds, config,
+# and the unscanned types, names and paths below, each only when it
+# reads as UTF-8 text; and binary files (a NUL byte). A file with an
+~~~~
+
+**Edit `tool/checks/g0_kinds.py`, `known` (D1, D3).** Replace
+
+~~~~python
+def known(src, path):
+    if src.kind(path) is not None:
+        return True
+~~~~
+
+with
+
+~~~~python
+def known(src, path):
+    if src.kind(path) is not None and src.text(path) is None:
+        # Code and config are read as text. One that is not UTF-8 with no
+        # NUL byte is skipped by G6 and G7, and config is read as empty by
+        # G4, G5 and G9: refused (fail closed; Task 2d, D1 and D3).
+        return False
+    if src.kind(path) is not None:
+        return True
+~~~~
+
+Run `python3 -I -B tool/checks/tests/run_tests.py`. Expected: `Ran 46 tests`, `OK` (Task 2c's 43 and these 3).
+
+**Mutations:** `python3 -I -B tool/checks/tests/mutations.py g0_kinds.py lex.py guardlib.py`. Expected: mutations 16 to
+25 each `caught`, then `mutations: 10 run, all caught`.
+
+    git add tool/checks && git commit -m "Guards: every readable kind must decode (Task 2d)" -m "<trailer>"
+
 ### Task 3 · G1 words and G2 copies, with the awaiting-import marker (D5)
 
 **Red.**
@@ -3993,8 +4206,8 @@ exec python3 -I -B "$top/tool/checks/guards.py" --staged
 ~~~~
 
 Expected: `Ran 5 tests`, `OK`. Then, on the repository:
-- `python3 -I -B tool/checks/tests/run_tests.py`: `Ran 105 tests`, `OK`.
-- `python3 -I -B tool/checks/tests/mutations.py`: `mutations: 23 run, all caught`.
+- `python3 -I -B tool/checks/tests/run_tests.py`: `Ran 108 tests`, `OK`.
+- `python3 -I -B tool/checks/tests/mutations.py`: `mutations: 25 run, all caught`.
 - `python3 -I -B tool/checks/guards.py`: first `G0 file kinds: ok`, then G1 and G2 `NOT ARMED (awaiting import)`,
   every guard `ok`, and `guards (tracked): all passed`.
 
@@ -4068,7 +4281,7 @@ Run `sh tool/check_all.sh`. Expected, until Task 13:
 - the Python path and version;
 - `FAILED LOUDLY: core.hooksPath is not .githooks`;
 - `FAILED: not-executable:.githooks/pre-commit` and `FAILED: not-executable:tool/check_all.sh`;
-- the guards, `Ran 105 tests`, `OK` and `mutations: 23 run, all caught`;
+- the guards, `Ran 108 tests`, `OK` and `mutations: 25 run, all caught`;
 - `SKIPPED: app/ is not present yet` and `SKIPPED: server/ is not present yet`;
 - last line `check_all: FAILED: hooks-path not-executable:.githooks/pre-commit not-executable:tool/check_all.sh`,
   exit 1.
@@ -4332,8 +4545,8 @@ Last updated: <date>, at the end of branch `scaffold-1-guards`, by Claude Code.
 Status is not the record. Rulings live in `technology/technology-change-record.md` in the documents repository; this
 file points to them and never restates them. The rulings for branch 1 (D1 to D14, D16 and D17) were given in the Build
 chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4. The
-owner's rulings of 2026-11-07 on the third amendment's questions are listed in its Part 5, fourth amendment, and the
-ruling on the review of Task 2b in its sixth.
+owner's rulings of 2026-11-07 on the third amendment's questions are listed in its Part 5, fourth amendment, the
+ruling on the review of Task 2b in its sixth, and the ruling on the review of Task 2c in its seventh.
 
 ## Current branch
 
@@ -4361,7 +4574,7 @@ ruling on the review of Task 2b in its sixth.
 - G0 and G3 to G9: armed, on every commit (`.githooks/pre-commit`) and in `tool/check_all.sh`.
 - The hook runs once `core.hooksPath` is `.githooks`, which the owner sets on each clone. `check_all.sh` fails loudly
   if it is not.
-- Totals: 105 guard tests and 23 mutation checks.
+- Totals: 108 guard tests and 25 mutation checks.
 
 ## Banked
 
@@ -4631,6 +4844,35 @@ already committed:
   `Ran 39 tests`, `OK`; mutations 16 to 22 caught.
 - Tasks 2c to 12, as stated: every red run failed as stated, every green run passed with the stated count, all 23
   mutations were caught, and every commit from Task 11 on passed the hook, run by hand.
+- Task 13, as far as the sandbox allows: `check_all.sh` failed on `hooks-path` alone, the canary was refused by the
+  hook, and the clean-up left `git status --short` empty.
+- Task 14: all fourteen edits applied exactly once, in order.
+- Task 15 committed, with banked items 1 to 15.
+
+The guards were then run over the replayed tree with this file in it, and all passed. The worktree was removed.
+
+**Seventh amendment, 2026-11-09 (the owner's ruling of 2026-11-09 on the review of Task 2c).** Task 2c is committed as
+`18c428b`, identical to the plan. The reviewer's report is `.scratch/for-build-chat/scaffold-1-review-2c.md`. What
+changed:
+- **The header:** this amendment.
+- **Part 1:** the ruling in the decisions; G0's reading and the fail-closed rule (code and config only as UTF-8
+  text); the test plan's G0 and Lexer rows; totals of 108 tests and 25 mutations.
+- **Task 2d, new**, between Task 2c and Task 3: D1, G0 knows config only when `src.text(path)` is not `None`; D2,
+  `test_division_near_try_still_lexes` compares TypeScript's code whole; D3, the sweep of every place a guard can read
+  nothing, whose one gap (G6 and G7 on code that does not decode) the same G0 line closes; three new tests (two
+  failing first, one control) and mutations 24 (D1) and 25 (D2, which survives first).
+- **Tasks 11 and 12:** totals of 108 tests and 25 mutations.
+- **Task 15:** Status.md's totals and the pointer to this ruling. The banked items are unchanged.
+
+Task 2d was first built and run in a scratch worktree, `./.scratch/build`, detached at `18c428b`. The whole plan was
+then replayed from this file on a clean worktree, `./.scratch/replay`, detached at `18c428b`, where Tasks 1 to 2c are
+already committed:
+- Tasks 1 to 2c: `.gitignore` matched; Task 2's files, extracted from this plan, were byte-identical to `d95607d`, with
+  Task 2a's to `61dcd57`, with Task 2b's to `ef4360c`, and with Task 2c's to `18c428b` and to the start commit, with
+  nothing else under `tool/`; `Ran 43 tests`, `OK`; mutations 16 to 23 caught.
+- Tasks 2d to 12, as stated: every red run failed as stated, mutation 25 survived and then was caught as stated, every
+  green run passed with the stated count, all 25 mutations were caught, and every commit from Task 11 on passed the
+  hook, run by hand. The build tree's `tool/` was byte-identical to the replayed Task 2d commit.
 - Task 13, as far as the sandbox allows: `check_all.sh` failed on `hooks-path` alone, the canary was refused by the
   hook, and the clean-up left `git status --short` empty.
 - Task 14: all fourteen edits applied exactly once, in order.
