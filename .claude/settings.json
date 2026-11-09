@@ -6,6 +6,9 @@
       "Read(~/.soul-dreams/**)",
       "Read(~/.aws/**)",
       "Read(~/.ssh/**)",
+      "Read(~/Library/CloudStorage/**)",
+      "Read(~/Library/Mobile Documents/**)",
+      "Read(~/Downloads/**)",
       "Read(**/.env)",
       "Read(**/.env.*)",
       "Read(**/*.p8)",
@@ -62,7 +65,10 @@
         "~/Developer/soul-dreams",
         "~/.soul-dreams",
         "~/.aws",
-        "~/.ssh"
+        "~/.ssh",
+        "~/Downloads",
+        "~/Library/Mobile Documents",
+        "~/Library/CloudStorage"
       ],
       "denyWrite": [
         "./.githooks",
