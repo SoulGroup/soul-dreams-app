@@ -133,7 +133,9 @@ Where this reading goes beyond the words of `CLAUDE.md`, Part 4 asks about it.
   - AWS access keys;
   - PEM blocks of any kind;
   - `sk-` or `sk_` tokens, GitHub, Slack and Google key shapes, and JWTs;
-  - a key, secret, token or password name assigned a value of 16 or more characters with letters and digits;
+  - a name containing `apikey`, `api_key`, `api-key`, `secret`, `token`, `password` or `passwd`, in any case,
+    assigned a value of 16 or more characters with letters and digits. These are the only names: a bare `key`,
+    as in `sonioxKey`, is not one (D18; corrected after the branch to match `g7_secrets.py`);
   - any run of 32 or more key characters that mixes upper case, lower case and digits, has high entropy and is not
     pure hex. Pure hex is left alone so that Status.md can hold hashes.
 - **G8 export.** It refuses any Dart `import`, `export` or `part` directive whose URI resolves into
@@ -4315,6 +4317,9 @@ Then Claude Code:
     && rmdir app/lib app`, and expects `git status --short` to print nothing.
 
 Nothing is committed in this task.
+
+**Note (after the branch).** The clean-up's `rmdir app/lib app` is the owner's step: the sandbox refuses `rmdir` (and
+`mkdir app`) to Claude Code. When it was run, the owner removed the two empty directories.
 
 **Watch item.** If `check_all.sh` fails on `hooks-path` after the owner has set `core.hooksPath`, stop and report.
 Do not change the check.

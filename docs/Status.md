@@ -36,7 +36,7 @@ ruling on the review of Task 2b in its sixth, and the ruling on the review of Ta
 - G0 and G3 to G9: armed, on every commit (`.githooks/pre-commit`) and in `tool/check_all.sh`.
 - The hook runs once `core.hooksPath` is `.githooks`, which the owner sets on each clone. `check_all.sh` fails loudly
   if it is not.
-- Totals: 108 guard tests and 25 mutation checks.
+- Totals: 111 guard tests and 25 mutation checks.
 
 ## Banked
 
@@ -46,8 +46,10 @@ ruling on the review of Task 2b in its sixth, and the ruling on the review of Ta
 2. The safe loggers named in G5 (`app/lib/core/safe_log.dart`, `server/src/safe-log.ts`) and the hosts files named
    in G9 (`app/lib/core/hosts.dart`, `server/src/hosts.ts`) do not exist yet; they arrive with `app/` and `server/`.
 3. The analyzer baseline the workflow asks for is saved by the branch that creates `app/` or `server/`.
-4. In tracked mode (`check_all.sh`), G7 does not scan tracked symlinks, or tracked files deleted from the working
-   tree. The hook reads the index, so every commit is covered (D16).
+4. In tracked mode (`check_all.sh`), a tracked symlink, or a tracked file deleted from the working tree, is refused
+   by G0 as `unknown-kind` whatever its kind (fails closed; the reason code is misleading for a missing file), and no
+   other guard reads it. The hook reads the index, but skips staged symlinks and gitlinks with no finding; tracked
+   mode refuses them before a merge (D16).
 5. Replace the hand-written lexers in `tool/checks/lex.py` with the official Dart analyzer and TypeScript scanner,
    once branches 2 and 4 bring them (D16).
 6. YAML: G4 reads multi-line plain and quoted scalars line by line, so a long one can pass (D17; `scaffold-1-review-2a.md`, finding 5, B4).
@@ -58,8 +60,11 @@ ruling on the review of Task 2b in its sixth, and the ruling on the review of Ta
 11. Shell: inside double quotes, `$(( ))` is blanked as string, so a command substitution in it, as in `"$(( $(cmd) + 1 ))"`, is hidden from the guards (D17; `scaffold-1-review-2a.md`, A/B-1).
 12. The model's instructions need their own home, exempt from G4; defined when they arrive.
 13. Plan Part 2 S1/S2 expectations amended by D15 during implementation (S1 proved by the sandbox on a real canary; S2's shell results on missing files are not evidence).
-14. Banked by D17 at Task 2b's review: K1 (two Swift regexes after try with quotes on one line), K2 (shell <<< read as a heredoc), K3 (shift by a variable name in (( )) read as a heredoc), K4 (a NUL-byte file with an unlisted extension counts as binary). See scaffold-1-review-2b.md.
+14. Banked by D17 at Task 2b's review: K1 (two Swift regexes after try with quotes on one line; closed by Task 2c's C2), K2 (shell <<< read as a heredoc), K3 (shift by a variable name in (( )) read as a heredoc), K4 (a NUL-byte file with an unlisted extension counts as binary). See scaffold-1-review-2b.md.
 15. G0 refuses .gitkeep and .fvmrc: branch 2 extends g0_kinds.py when it adds app/. These fail closed as unlexable (false findings, safe): Swift 'x! / y' and '} / n'; shell '<<=' and '<<\EOF'.
+16. G1/G2 stop with an internal error (exit 2, no file named) when a file they hash cannot be read: fails closed, banked.
+17. D18: G7's assigned-secret rule knows only the names in g7_secrets.py; the beta key will be 48 characters of A-Z, a-z and 0-9 so the high-entropy rule catches it.
+18. D19: /simplify skipped for branch 1.
 
 ## Documents as last imported
 
