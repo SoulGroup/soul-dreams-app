@@ -103,7 +103,8 @@
         "*.pub.dev",
         "storage.googleapis.com",
         "registry.npmjs.org"
-      ]
+      ],
+      "allowLocalBinding": true
     }
   }
 }
