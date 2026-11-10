@@ -110,7 +110,7 @@ for the owner to commit. A copy is never edited; a difference found in it goes u
 - **SoulDreams Dev** (`app.souldreams.dev`): every test. Invented nights only. Debug builds, so the Flutter tools can
   look at it.
 - **SoulDreams** (`app.souldreams.founder`), the owner's Cohort 0 app: **release builds only**, built from
-  `main_founder.dart`, installed from Xcode only.
+  `main_founder.dart`, installed from the Mac by the CLI command only (never Xcode's Run button, never TestFlight).
   Release mode has debugging and service extensions turned off, so no tool can attach to it.
 - **Never delete the Cohort 0 app**, not even to fix a signing problem: the journal has no backup (C2-T). If an install
   fails, stop and bring the error to the Build chat.
