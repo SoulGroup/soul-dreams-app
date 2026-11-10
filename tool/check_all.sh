@@ -29,7 +29,18 @@ python3 -I -B tool/checks/tests/run_tests.py || fail guard-tests
 python3 -I -B tool/checks/tests/mutations.py || fail mutations
 
 if [ -d app ]; then
-  (cd app && fvm flutter analyze && fvm flutter test) || fail app
+  # The pinned Flutter first, then the locked packages (offline: nothing
+  # is fetched), the analyzer and the tests (D20 Q15).
+  pin=$(sed -n 's/.*"flutter": *"\([^"]*\)".*/\1/p' app/.fvmrc)
+  ran=$(cd app && fvm flutter --version --machine 2>/dev/null \
+    | sed -n 's/.*"frameworkVersion": *"\([^"]*\)".*/\1/p')
+  echo "flutter: pinned ${pin:-none}, running ${ran:-none}"
+  if [ -z "$pin" ] || [ "$pin" != "$ran" ]; then
+    fail flutter-version
+  else
+    (cd app && fvm flutter pub get --offline --enforce-lockfile \
+      && fvm flutter analyze && fvm flutter test) || fail app
+  fi
 else
   echo "SKIPPED: app/ is not present yet"
 fi
