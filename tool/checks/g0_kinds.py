@@ -7,13 +7,14 @@
 # lists, and the owner approves the change at the prompt.
 import posixpath
 
-from guardlib import LOCKFILES, MARKER, SOURCES, Finding
+from guardlib import LOCKFILES, MARKER, SOURCES, STRINGS_EN, STRINGS_SV, Finding
 
 CODE = 'G0'
 NAME = 'file kinds'
 UNSCANNED_EXT = ('.md', '.csv')
 UNSCANNED_NAMES = ('.gitignore',) + LOCKFILES
-UNSCANNED_PATHS = (SOURCES, MARKER)
+# The two generated InfoPlist.strings, by exact path: G1 proves them (D32).
+UNSCANNED_PATHS = (SOURCES, MARKER, STRINGS_EN, STRINGS_SV)
 
 
 def known(src, path):

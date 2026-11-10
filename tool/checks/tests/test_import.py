@@ -10,6 +10,7 @@ import tempfile
 import unittest
 
 from helpers import CHECKS
+import test_wordsgen as invented
 
 ENV = dict(os.environ, GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM='1',
            GIT_AUTHOR_NAME='t', GIT_AUTHOR_EMAIL='t@x.example',
@@ -47,7 +48,7 @@ class Import(unittest.TestCase):
         self.put('product/handover.md', BODY)
         self.put('product/register.csv', b'a,b\n')
         self.put('product/odd.md', BODY)
-        self.put('product/lists.md', b'# Lists\n')
+        self.put('product/lists.md', invented.lists())
         self.put('restricted/a.md', BODY)
         git(self.docs, 'add', '-A')
         git(self.docs, 'commit', '-q', '-m', 'docs')
@@ -131,6 +132,30 @@ class Import(unittest.TestCase):
         rc, out = self.run_import('product/handover.md', digest(BODY), ORDINAL)
         self.assertEqual(rc, 0)
         self.assertIn('import: unchanged docs/source/handover.md', out)
+
+    def test_words_run_the_generator(self):
+        register = invented.register()
+        self.put('product/register.csv', register)
+        git(self.docs, 'commit', '-q', '-am', 'register')
+        git(self.docs, 'push', '-q')
+        rc, out = self.run_import('product/register.csv', digest(register), ORDINAL)
+        self.assertEqual(rc, 0, out)
+        self.assertIn('import: the generator waits for the register and the lists', out)
+        rc, out = self.run_import('product/lists.md', digest(invented.lists()), ORDINAL)
+        self.assertEqual(rc, 0, out)
+        self.assertIn('wordsgen: wrote app/lib/words/lines.g.dart', out)
+        self.assertIn('app/ios/Runner/sv.lproj/InfoPlist.strings', self.app_files())
+
+    def test_generator_refusal_is_reported(self):
+        register = invented.register(invented.row('A' + invented.DOT + '1', 'unheard of'))
+        self.put('product/register.csv', register)
+        git(self.docs, 'commit', '-q', '-am', 'register')
+        git(self.docs, 'push', '-q')
+        self.run_import('product/lists.md', digest(invented.lists()), ORDINAL)
+        rc, out = self.run_import('product/register.csv', digest(register), ORDINAL)
+        self.assertEqual(rc, 1)
+        self.assertIn('import: generator refused register unknown-status row 4', out)
+        self.assertNotIn('app/lib/words/lines.g.dart', self.app_files())
 
     def test_wrapper_needs_the_documents_location(self):
         self.assertTrue(os.path.exists(WRAPPER))

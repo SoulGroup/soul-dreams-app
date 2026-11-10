@@ -137,6 +137,20 @@ MUTATIONS = [
     # Branch 3, Task 4a (D37): prose closes a list.
     ('wordsgen.py', "        elif line.strip():", "        elif False:",
      ['test_wordsgen.Generator.test_prose_closes_a_list_and_a_later_item_stops']),
+    # Branch 3, Task 5 (D32): G1 armed, G0, G2 and G4.
+    ('g1_words.py', "elif src.read(path) != outputs[path]:", "elif False:",
+     ['test_g1_g2.G1.test_generated_differs_refuses']),
+    ('g1_words.py', "and p not in KNOWN]", "and False]",
+     ['test_g1_g2.G1.test_unknown_words_file_refuses']),
+    ('g1_words.py', "return [Finding(where, e.row, 'generator-refused:' + e.code)] + unknown, []",
+     "outputs = {}",
+     ['test_g1_g2.G1.test_generator_refusal_refuses']),
+    ('g2_copies.py', "REFUSED_NAMES = ('privacy-ethics-safety.md',)", "REFUSED_NAMES = ()",
+     ['test_g1_g2.G2.test_refused_documents_refused']),
+    ('g0_kinds.py', ", STRINGS_EN, STRINGS_SV)\n", ")\n",
+     ['test_g0.G0.test_generated_strings_pass']),
+    ('g4_invented.py', "\n            or path in GENERATED)", ")",
+     ['test_g4.G4.test_generated_words_pass']),
 ]
 
 

@@ -21,6 +21,10 @@ class Hook(unittest.TestCase):
         self.git('init', '-q')
         shutil.copytree(CHECKS, os.path.join(self.tmp, 'tool', 'checks'),
                         ignore=shutil.ignore_patterns('__pycache__'))
+        # This tree has no import: it holds the marker whether or not the
+        # repository still does (branch 3 deletes it there; D32).
+        with open(os.path.join(self.tmp, 'tool', 'checks', 'awaiting-import'), 'w') as f:
+            f.write('x\n')
         os.makedirs(os.path.join(self.tmp, '.githooks'))
         shutil.copy(HOOK, os.path.join(self.tmp, '.githooks', 'pre-commit'))
         self.git('add', '.')

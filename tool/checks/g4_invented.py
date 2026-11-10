@@ -1,6 +1,7 @@
 # G4 invented only: no string literal of twelve words or more outside
-# fixtures/invented-nights.json and app/lib/words/.
-from guardlib import Finding, config_strings, words
+# fixtures/invented-nights.json, app/lib/words/ and the generated words,
+# which G1 proves are the generator's output (D32 Q18).
+from guardlib import GENERATED, Finding, config_strings, words
 
 CODE = 'G4'
 NAME = 'invented only'
@@ -8,7 +9,8 @@ LIMIT = 12
 
 
 def exempt(path):
-    return path == 'fixtures/invented-nights.json' or path.startswith('app/lib/words/')
+    return (path == 'fixtures/invented-nights.json' or path.startswith('app/lib/words/')
+            or path in GENERATED)
 
 
 def check(src):

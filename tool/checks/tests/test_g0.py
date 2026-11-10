@@ -18,6 +18,15 @@ class G0(GuardTest):
                      'tool/checks/awaiting-import': '', 'server/package-lock.json': '',
                      'app/pubspec.lock': '', 'app/icon.png': b'\x89PNG\r\n\x1a\n\0\0'})
 
+    def test_generated_strings_pass(self):
+        # D32: the two InfoPlist.strings the generator writes, by path.
+        self.passed({'app/ios/Runner/en.lproj/InfoPlist.strings': '"k" = "v";\n',
+                     'app/ios/Runner/sv.lproj/InfoPlist.strings': '"k" = "v";\n'})
+
+    def test_other_strings_refused(self):
+        for path in ('app/ios/Runner/de.lproj/InfoPlist.strings', 'app/ios/Runner/a.strings'):
+            self.assertEqual(self.refused({path: '"k" = "v";\n'}), [(path, 0, 'unknown-kind')])
+
     def test_unknown_kinds_refused(self):
         for path in ('a.tsx', 'a.jsx', 'a.mts', 'a.m', 'a.c', 'a.kt', 'a.txt', 'Makefile',
                      'docs/SOURCES', 'app/awaiting-import'):

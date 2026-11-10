@@ -2,7 +2,9 @@
 # in $TMPDIR (never the real tree): a failing guard must end it with
 # exit 1 and "check_all: FAILED". The copy leaves out this file (or it
 # would run itself again) and app/ and server/ (their analyzers and
-# tests are not what this checks).
+# tests are not what this checks). It is a tree before any import: no
+# docs/source/, and the awaiting-import marker (branch 3 deletes the
+# repository's own; D32).
 import os
 import shutil
 import subprocess
@@ -13,7 +15,8 @@ from helpers import CHECKS
 
 ROOT = os.path.dirname(os.path.dirname(CHECKS))
 SELF = 'tool/checks/tests/test_check_all.py'
-LEFT_OUT = ('app/', 'server/')
+LEFT_OUT = ('app/', 'server/', 'docs/source/')
+MARKER = 'tool/checks/awaiting-import'
 
 
 def clean_env():
@@ -36,6 +39,8 @@ def failing_copy(env):
         os.makedirs(os.path.dirname(full), exist_ok=True)
         shutil.copy2(os.path.join(ROOT, path), full)
     with open(os.path.join(tmp, 'notes.txt'), 'w') as f:
+        f.write('x\n')
+    with open(os.path.join(tmp, MARKER), 'w') as f:
         f.write('x\n')
     for args in (['init', '-q'], ['add', '-A']):
         subprocess.run(['git'] + args, cwd=tmp, env=env, check=True, capture_output=True)

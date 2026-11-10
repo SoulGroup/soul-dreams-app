@@ -20,6 +20,7 @@ sys.path.insert(0, HERE)
 
 from guardlib import CSV, LISTS, SOURCES, report, sha256  # noqa: E402
 import import_rows  # noqa: E402
+import wordsgen  # noqa: E402
 
 # Each kind says where its files may land. Later kinds (the model's
 # instructions in server/instructions/, the lens sections with their
@@ -188,6 +189,13 @@ def run(docs, path, digest, ordinal):
     write_atomic(SOURCES, sources_text(entries))
     report('import: hash ok, copied ' + dest)
     report('import: recorded in ' + SOURCES)
+    if kind in ('words', 'lists'):
+        # The words follow their inputs at once (D32): the generator
+        # writes, and stops on anything it does not expect.
+        if os.path.isfile(os.path.join(TOP, CSV)) and os.path.isfile(os.path.join(TOP, LISTS)):
+            wordsgen.write_all(TOP, TOP)
+        else:
+            report('import: the generator waits for the register and the lists')
     return kind
 
 
@@ -199,6 +207,9 @@ def main(argv):
         run(argv[1], argv[2], argv[3], argv[4])
     except Refused as e:
         report('import: refused ' + e.code)
+        return 1
+    except wordsgen.WordsError as e:
+        report('import: generator refused %s %s row %d' % (e.source, e.code, e.row))
         return 1
     report('import: review git status, then commit')
     return 0

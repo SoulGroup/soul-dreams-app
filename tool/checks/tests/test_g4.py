@@ -29,6 +29,14 @@ class G4(GuardTest):
         self.refused({'app/ios/Runner/Info.plist': '<string>%s</string>\n' % sentence(12)}, 'long-literal')
         self.refused({'app/pubspec.yaml': 'description: %s\n' % sentence(12)}, 'long-literal')
 
+    def test_generated_words_pass(self):
+        # D32 Q18: G1 proves these are the generator's output.
+        self.passed({'app/ios/Flutter/words.g.xcconfig': 'WORDS_MIC_USAGE = %s\n' % sentence(15)})
+
+    def test_hand_written_xcconfig_refused(self):
+        self.refused({'app/ios/Flutter/founder.xcconfig': 'X = %s\n' % sentence(12)},
+                     'long-literal')
+
     def test_exempt_places_pass(self):
         self.passed({'fixtures/invented-nights.json': '["%s"]\n' % sentence(30),
                      'app/lib/words/lines.g.dart': "const s = '%s';\n" % sentence(30),
