@@ -146,6 +146,8 @@ and waits for the output. Everything else is Claude Code's.
 
 **Commits.** Each task ends green with its own commit, through the hook (never `--no-verify`). Every commit message
 ends with the line `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`, shown below as `<trailer>`.
+*Corrected after the branch (D15):* the implementation's commits end with `Co-Authored-By: Claude Sonnet 5.5
+<noreply@anthropic.com>`, the model that wrote them, as the owner instructed. A commit's trailer names its model.
 
 **Red, then green.** Each task first writes its test and runs it, and the run must fail as stated. Then it writes the
 code and runs again, and the run must pass with the stated count. Any other result stops the task (R14).
@@ -259,6 +261,10 @@ Write nothing tracked; commit nothing.
        G3 app/lib/main.dart:13 dreamer-literal
 
    Then `git status --short` shows only `?? app/`.
+
+   *Corrected after the branch (D24):* run as `git add app && python3 -I -B tool/checks/guards.py --staged; git rm -r
+   -q --cached app`. Task 1's `fvm use` already ignores `.fvm/`, and git refuses the `':!app/.fvm'` exclusion of an
+   ignored path; git skips the ignored path anyway, so the findings are the same ten.
 
 If step 2, 3 or 4 fails, stop and report the exact output (D20 Q12).
 
@@ -646,7 +652,9 @@ with:
 
 In `app/`: `fvm flutter test --no-pub`, expected `All tests passed!` (1 test). `fvm flutter analyze --no-pub`,
 expected `No issues found!`. Then `git check-ignore -q app/.fvm/flutter_sdk app/ios/Flutter/Signing.xcconfig && echo
-ignored`, expected `ignored`.
+ignored`, expected `ignored`. *Corrected after the branch (D25):* git refuses `-q` with two paths (`fatal: --quiet
+is only valid with a single pathname`); run `git check-ignore app/.fvm/flutter_sdk app/ios/Flutter/Signing.xcconfig`,
+expected both paths printed and exit 0.
 
 **Mutation M-a.** In `app/lib/app.dart`, change `home: Scaffold()` to `home: Scaffold(body: Text('x'))`. Run
 `fvm flutter test --no-pub test/app_test.dart`: it must fail on `findsNothing`. Restore the line, and run again:
@@ -1166,6 +1174,12 @@ Expected:
 
 **Send back** the output. If a row differs, nothing goes further.
 
+*Corrected after the branch (D28):* `xcodebuild -list -workspace` prints only schemes, never configurations. The
+script's line is `xcodebuild -list -project Runner.xcodeproj 2>/dev/null || exit 1`. Its schemes may include Flutter's
+generated package schemes (`FlutterFramework`, `FlutterGeneratedPluginSwiftPackage`) beside `dev`, `founder` and
+`tester`; there is still no `Runner`. The owner's compile check of each flavour (D21 Q4) builds with
+`-t lib/main_dev.dart`, `-t lib/main_founder.dart` and `-t lib/main.dart`.
+
 ### Task 10 · `check_all.sh`: the pinned Flutter, offline locked packages (D20 Q15)
 
 **Edit `tool/check_all.sh`.** Replace:
@@ -1216,6 +1230,9 @@ Expected:
 - `flutter: pinned 3.47.9, running 3.47.9`;
 - `Got dependencies!` (offline), `No issues found!`, `All tests passed!` (6 tests);
 - `check_all: all passed`, and `exit=0`.
+
+*Corrected after the branch (D27):* `All tests passed!` with **9** tests, not 6. Task 7a, added by D27 and D27a after
+this plan, brings `app/test/entry_points_test.dart` (3 tests): 1 + 3 + 2 + 3.
 
 **Send back** the output. Claude Code then compares the analyzer's lines with Task 2's baseline, less the `(ran in
 …)` timing: `sed 's/ (ran in [0-9.]*s)//'` on both. They must match.

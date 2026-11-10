@@ -77,6 +77,19 @@ ruling D20 of 2026-11-09 for branch 2 is listed in `docs/plans/scaffold-2-app.md
 19. G3 cannot see a dreamer-facing `text=` or `title=` attribute in a storyboard; the two template storyboards have
     none (D20 Q13).
 20. Flutter in Claude Code's sandbox: `~/.config/flutter` is writable and local-port binding is allowed (D21 Q1, D23), so `fvm flutter analyze --no-pub` and `fvm flutter test --no-pub` run through the pinned 3.47.9; the unpinned `stable` SDK still tries a download there, so it is not used (D22), and `pub get` stays the owner's.
+21. B1 (D17, D26): no test checks the debug banner is off; fix if wanted: `expect(find.byType(CheckedModeBanner), findsNothing);` in `app/test/app_test.dart`.
+22. B2 (D17): `app/test/app_test.dart`'s `find.byType(RichText)` cannot see text drawn by `EditableText` or `CustomPaint`; add a check if such a widget arrives.
+23. B3 (D17): `if (kReleaseMode) return;` in `app/lib/core/safe_log.dart` cannot be tested under `flutter test`; release `developer.log` is a no-op anyway.
+24. B4 (D17): profile builds log, to the VM service only; the founder app is installed as release, never profile.
+25. B5 (D17): G8 checks direct imports only; a shared file importing `main_dev.dart` or `main_founder.dart` could reach `lib/founder/` transitively (with banked item 5).
+26. B6 (D17): `app/test/entry_points_test.dart` reads text by regex: a `*main` function holding the check, or a string or block comment, can fake "first statement"; parse with the Dart analyzer.
+27. B7 (D17): the same test: a `//` inside a string hides the rest of its line, a check in a never-called function passes, and `requireFlavour (` with a space is missed.
+28. B8 (D17): the same test's line 30 is 86 columns, so `dart format` would rewrap it; nothing checks formatting.
+29. B9 (D17, D28): `CFBundleName` in `app/ios/Runner/Info.plist` is still the template's `souldreams`; branch 3 sets it to `$(APP_DISPLAY_NAME)` when the generator writes MP·55.
+30. B10 (D17): `Runner`'s plain `Debug`, `Release` and `Profile` configurations have no bundle identifier or display name; no scheme uses them.
+31. B11 (D17): no test runs `check_all.sh`'s Flutter version and offline `pub get` step; only the owner's run (Task 11) proved it.
+32. D30: /simplify skipped for the scaffolding branches.
+33. `requireFlavour`'s `flavor:` parameter (for tests) is public, so app code could pass any name; only `app/test/entry_points_test.dart` pins the three calls; mark it `@visibleForTesting` if wanted.
 
 ## Documents as last imported
 
