@@ -51,11 +51,15 @@
       "Bash(fvm flutter --enable-analytics*)",
       "Bash(flutter --enable-analytics*)",
       "Bash(fvm dart --enable-analytics*)",
-      "Bash(dart --enable-analytics*)"
+      "Bash(dart --enable-analytics*)",
+      "Edit(/app/ios/Flutter/words.g.xcconfig)",
+      "Edit(/app/ios/Runner/en.lproj/**)",
+      "Edit(/app/ios/Runner/sv.lproj/**)"
     ],
     "ask": [
       "Edit(/CLAUDE.md)",
-      "Edit(/docs/workflow.md)"
+      "Edit(/docs/workflow.md)",
+      "Edit(/tool/import.sh)"
     ],
     "allow": [
       "Edit(/.githooks/**)",
@@ -87,7 +91,11 @@
         "./docs/source",
         "./fixtures",
         "./.git/config",
-        "./.git/hooks"
+        "./.git/hooks",
+        "./app/ios/Flutter/words.g.xcconfig",
+        "./app/ios/Runner/en.lproj",
+        "./app/ios/Runner/sv.lproj",
+        "./tool/import.sh"
       ],
       "allowWrite": [
         "~/.pub-cache",
