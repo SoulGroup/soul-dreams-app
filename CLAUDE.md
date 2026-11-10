@@ -95,7 +95,7 @@ merge command runs all of it. The guards (built in the first task, each with a m
   `app/lib/words/`.
 - **G5 logging** — no `print(`, `debugPrint(`, `log(` (`Math.log(` allowed), `console.`, `stdout.write`, `stderr.write`
   or `FlutterError.dumpErrorToConsole` outside the two safe loggers (`app/lib/core/safe_log.dart`,
-  `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`).
+  `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`); in Swift and headers also `NSLog(`, `os_log(` and `Logger(`.
 - **G6 identifiers** — none of `client_reference_id`, `identifierForVendor`, `advertisingIdentifier`, `device_info`.
 - **G7 secrets** — no key-shaped string, no `.env`, `.p8`, `.pem`, `.p12` or `.mobileprovision` file.
 - **G8 export** — nothing but `main_founder.dart` and `main_dev.dart` imports `lib/founder/`, besides files inside it
