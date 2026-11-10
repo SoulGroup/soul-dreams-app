@@ -13,6 +13,16 @@ MARKER = 'tool/checks/awaiting-import'
 SOURCES = 'docs/source/SOURCES'
 CSV = 'app/assets/words/places-register.csv'
 LISTS = 'app/assets/words/founder-lists-for-technology.md'
+# The words the generator makes (R1; D32). G1 proves each one is exactly
+# the generator's output; G0 and G4 read this list too.
+WORDS_ASSETS = 'app/assets/words/'
+WORDS_LIB = 'app/lib/words/'
+LINES = 'app/lib/words/lines.g.dart'
+LIST_WORDS = 'app/lib/words/lists.g.dart'
+WORDS_XCCONFIG = 'app/ios/Flutter/words.g.xcconfig'
+STRINGS_EN = 'app/ios/Runner/en.lproj/InfoPlist.strings'
+STRINGS_SV = 'app/ios/Runner/sv.lproj/InfoPlist.strings'
+GENERATED = (LINES, LIST_WORDS, WORDS_XCCONFIG, STRINGS_EN, STRINGS_SV)
 
 CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
             '.swift': 'swift', '.py': 'py', '.sh': 'sh'}

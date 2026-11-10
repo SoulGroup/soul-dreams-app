@@ -114,6 +114,26 @@ MUTATIONS = [
      ['test_import.Import.test_not_text_refused']),
     ('importer.py', "data.decode('utf-8')", "data.decode('latin-1')",
      ['test_import.Import.test_not_text_refused']),
+    # Branch 3, Task 4 (D32, D36): the words generator.
+    ('wordsgen.py', "    return None\n\n\ndef label", "    return 'line'\n\n\ndef label",
+     ['test_wordsgen.Generator.test_unknown_status_stops']),
+    ('wordsgen.py', "text.strip().split(' / ')", "[text.strip()]",
+     ['test_wordsgen.Generator.test_parts_and_paragraphs']),
+    ('wordsgen.py', "out.append('\\\\$')", "out.append('$')",
+     ['test_wordsgen.Generator.test_dart_escaping']),
+    ('wordsgen.py', "NO_LINE = ('retired', ", "NO_LINE = (",
+     ['test_wordsgen.Generator.test_statuses_without_constant']),
+    ('wordsgen.py', "    if name_en != name_sv:", "    if False:",
+     ['test_wordsgen.Generator.test_ios_lines_checked']),
+    ('wordsgen.py', "        if name in names:", "        if False:",
+     ['test_wordsgen.Generator.test_dart_name_clash_stops']),
+    ('wordsgen.py', "if status == IN_PARTS and not", "if False and not",
+     ['test_wordsgen.Generator.test_in_its_parts_may_be_empty_and_has_no_constant']),
+    ('wordsgen.py', "if section is None or section[key] is not None:", "if section is None:",
+     ['test_wordsgen.Generator.test_lists_shape_stops']),
+    ('wordsgen.py', "            items = None\n        elif line.startswith('# ')",
+     "            items = []\n        elif line.startswith('# ')",
+     ['test_wordsgen.Generator.test_lists_shape_stops']),
 ]
 
 
