@@ -134,6 +134,9 @@ MUTATIONS = [
     ('wordsgen.py', "            items = None\n        elif line.startswith('# ')",
      "            items = []\n        elif line.startswith('# ')",
      ['test_wordsgen.Generator.test_lists_shape_stops']),
+    # Branch 3, Task 4a (D37): prose closes a list.
+    ('wordsgen.py', "        elif line.strip():", "        elif False:",
+     ['test_wordsgen.Generator.test_prose_closes_a_list_and_a_later_item_stops']),
 ]
 
 

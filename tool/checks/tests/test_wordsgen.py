@@ -243,6 +243,21 @@ class Generator(unittest.TestCase):
             self.assertNotIn(hidden, out)
         self.assertEqual(out.count('static const'), 10)
 
+    def test_prose_closes_a_list_and_a_later_item_stops(self):
+        # D37: after a marker, a non-blank line that is not an item closes
+        # that list; a later "- " item in the section is then unexpected.
+        def shape(body):
+            return self.refused('lists-shape', lists_bytes=lists(body))
+        shape(five({5: sect(5) + '**Note.** see below\n- noteword\n'}))
+        shape(five({3: '## TECH' + DOT + '3 — T\n**English**\n- a\nprose\n- b\n'
+                       '**Swedish**\n- c\n'}))
+        shape(five({3: sect(3) + '---\n- late\n'}))
+        # Blank lines between items do not close a list.
+        spaced = '## TECH' + DOT + '3 — T\n**English**\n- a\n\n  \n- b\n**Swedish**\n- c\n'
+        out = wordsgen.generate(register(), lists(five({3: spaced})))[LIST_WORDS].decode('utf-8')
+        self.assertIn("static const tech3En = <String>['a', 'b'];", out)
+        self.assertIn("static const tech3Sv = <String>['c'];", out)
+
     def test_lists_shape_stops(self):
         def shape(body):
             return self.refused('lists-shape', lists_bytes=lists(body))

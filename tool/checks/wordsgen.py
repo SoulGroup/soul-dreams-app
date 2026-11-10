@@ -201,7 +201,8 @@ def read_lists(data):
     # D36 Q3: a level-1 title, then the five "## TECH·n — <title>"
     # sections in order. In each, the "**English**" and "**Swedish**"
     # marker lines, and the "- " items under each as that language's
-    # list. Every other line is ignored; anything unexpected stops.
+    # list. Every other line is ignored, except that a non-blank line
+    # that is not an item closes the list (D37); anything unexpected stops.
     text = decode(data, LIST_FILE)
     found = {}
     order = []
@@ -231,6 +232,8 @@ def read_lists(data):
             if items is None or not word or has_control(word):
                 raise WordsError(LIST_FILE, 'lists-shape', n)
             items.append(word)
+        elif line.strip():
+            items = None  # D37: prose closes the list; a later item stops
     if tuple(order) != TECH:
         raise WordsError(LIST_FILE, 'lists-shape', 0)
     for name in TECH:
