@@ -1,0 +1,13 @@
+// SoulDreams Dev (D20): the owner's test app, invented nights only.
+// Debug.xcconfig and Release.xcconfig only include Generated.xcconfig,
+// so every mode of this flavour starts from it. The lines after it win:
+// an Xcode build uses this flavour's entry point, whatever the last
+// flutter command wrote there (D20 Q8).
+#include "Generated.xcconfig"
+PRODUCT_BUNDLE_IDENTIFIER = app.souldreams.dev
+APP_DISPLAY_NAME = SoulDreams Dev
+FLUTTER_TARGET = lib/main_dev.dart
+FLAVOR = dev
+// The owner's Team ID, in an untracked file (D20 Q9a). Only this flavour
+// is ever signed under the Personal Team (D20 Q10).
+#include? "Signing.xcconfig"

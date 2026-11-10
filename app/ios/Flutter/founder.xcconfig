@@ -1,0 +1,9 @@
+// SoulDreams, the owner's Cohort 0 app (D20). Release builds only, built
+// by the CLI command (D20 Q8). It includes no signing: it waits for the
+// paid membership (D20 Q9b). See dev.xcconfig for the include order.
+#include "Generated.xcconfig"
+PRODUCT_BUNDLE_IDENTIFIER = app.souldreams.founder
+// Register place MP·55, until branch 3's generator writes it (D20 Q2).
+APP_DISPLAY_NAME = [MP·55]
+FLUTTER_TARGET = lib/main_founder.dart
+FLAVOR = founder
