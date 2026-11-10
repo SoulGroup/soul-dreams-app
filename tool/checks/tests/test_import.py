@@ -71,10 +71,10 @@ class Import(unittest.TestCase):
         with open(full, 'wb') as f:
             f.write(data)
 
-    def run_import(self, *args):
+    def run_import(self, *args, env=None):
         script = os.path.join(self.app, 'tool', 'checks', 'importer.py')
         r = subprocess.run([sys.executable, '-I', '-B', script, '--docs', self.docs] + list(args),
-                           capture_output=True, env=ENV)
+                           capture_output=True, env=env or ENV)
         return r.returncode, r.stdout.decode()
 
     def app_files(self):
@@ -136,8 +136,11 @@ class Import(unittest.TestCase):
         self.assertTrue(os.path.exists(WRAPPER))
         script = os.path.join(self.app, 'tool', 'import.sh')
         env = {k: v for k, v in ENV.items() if k != 'SOUL_DREAMS_DOCS'}
-        r = subprocess.run(['sh', script, 'a', 'b', 'c'], capture_output=True, env=env)
+        r = subprocess.run(['sh', script, 'product/handover.md', digest(BODY), ORDINAL],
+                           capture_output=True, env=env)
         self.assertNotEqual(r.returncode, 0)
+        self.assertNotIn(b'import:', r.stdout)  # the importer never ran
+        self.assertEqual(self.app_files(), [])
         r = subprocess.run(['sh', script, 'product/handover.md', digest(BODY), ORDINAL],
                            capture_output=True, env=dict(ENV, SOUL_DREAMS_DOCS=self.docs))
         self.assertEqual(r.returncode, 0, r.stdout)
@@ -212,6 +215,62 @@ class Import(unittest.TestCase):
     def test_on_main_refused(self):
         git(self.app, 'checkout', '-q', '-b', 'main')
         self.refused('on-main')
+
+    def commit_empty(self, where):
+        git(where, 'commit', '-q', '--allow-empty', '-m', 'x')
+
+    def test_on_main_refused_though_a_tag_is_named_main(self):
+        # With a tag of the same name, `symbolic-ref --short` prints heads/main.
+        git(self.app, 'checkout', '-q', '-b', 'main')
+        self.commit_empty(self.app)
+        git(self.app, 'tag', 'main')
+        self.refused('on-main')
+
+    def test_detached_head_at_main_refused_elsewhere_allowed(self):
+        git(self.app, 'checkout', '-q', '-b', 'main')
+        self.commit_empty(self.app)
+        git(self.app, 'checkout', '-q', '--detach')
+        self.refused('on-main')
+        self.commit_empty(self.app)  # detached, and no longer main's commit
+        rc, out = self.run_import('product/handover.md', digest(BODY), ORDINAL)
+        self.assertEqual(rc, 0, out)
+
+    def test_git_environment_does_not_steer_the_checks(self):
+        gitdir = os.path.join(self.docs, '.git')
+        env = dict(ENV, GIT_DIR=gitdir, GIT_WORK_TREE=self.docs,
+                   GIT_INDEX_FILE=os.path.join(gitdir, 'index'))
+        rc, out = self.run_import('product/handover.md', digest(BODY), ORDINAL, env=env)
+        self.assertEqual(rc, 0, out)
+        with open(os.path.join(self.app, 'docs', 'source', 'handover.md'), 'rb') as f:
+            self.assertEqual(f.read(), BODY)
+
+    def test_control_characters_in_the_ordinal_refused(self):
+        for bad in ('C1\x85x', 'C1 x', 'C1 x', 'C1\x7fx', 'C1\nx'):
+            self.refused('bad-ordinal', 'product/handover.md', digest(BODY), bad)
+        rc, out = self.run_import('product/handover.md', digest(BODY), 'C1–T item 2')
+        self.assertEqual(rc, 0, out)
+
+    def test_app_not_a_repository_refused(self):
+        shutil.rmtree(os.path.join(self.app, '.git'))
+        self.refused('app-not-a-repository')
+
+    def test_fetch_failure_refused(self):
+        git(self.docs, 'remote', 'set-url', 'origin', os.path.join(self.tmp, 'gone.git'))
+        self.refused('docs-fetch-failed')
+
+    def test_not_text_refused(self):
+        nul, latin = b'a\0b\n', b'\xff\xfe\n'
+        self.put('product/nul.md', nul)
+        self.put('product/latin.md', latin)
+        git(self.docs, 'add', '-A')
+        git(self.docs, 'commit', '-q', '-m', 'binary')
+        git(self.docs, 'push', '-q')
+        with open(os.path.join(self.app, 'tool', 'checks', 'import_rows.py'), 'a',
+                  encoding='utf-8') as f:
+            f.write("ROWS += (('product/nul.md', 'docs/source/nul.md', 'copy'),\n"
+                    "         ('product/latin.md', 'docs/source/latin.md', 'copy'))\n")
+        self.refused('not-text', 'product/nul.md', digest(nul), ORDINAL)
+        self.refused('not-text', 'product/latin.md', digest(latin), ORDINAL)
 
     def test_malformed_sources_refused(self):
         os.makedirs(os.path.join(self.app, 'docs', 'source'))

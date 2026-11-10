@@ -97,6 +97,23 @@ MUTATIONS = [
      ['test_import.Import.test_reads_the_committed_bytes']),
     ('importer.py', "    raise Refused('not-allowed')", "    return 'docs/source/x.md', 'copy'",
      ['test_import.Import.test_paths_refused']),
+    # Branch 3, Task 1a (D35): the review's fixes and test gaps.
+    ('importer.py', "if ref == b'refs/heads/main\\n':", "if False:",
+     ['test_import.Import.test_on_main_refused_though_a_tag_is_named_main']),
+    ('importer.py', "    if ref is None:", "    if False:",
+     ['test_import.Import.test_detached_head_at_main_refused_elsewhere_allowed']),
+    ('importer.py', "if not k.startswith('GIT_')}", "if True}",
+     ['test_import.Import.test_git_environment_does_not_steer_the_checks']),
+    ('importer.py', "unicodedata.category(c) in ('Cc', 'Zl', 'Zp')", "ord(c) < 32",
+     ['test_import.Import.test_control_characters_in_the_ordinal_refused']),
+    ('importer.py', "if git(TOP, 'rev-parse', '--git-dir') is None:", "if False:",
+     ['test_import.Import.test_app_not_a_repository_refused']),
+    ('importer.py', "if git(docs, 'fetch', '--quiet') is None:", "if False:",
+     ['test_import.Import.test_fetch_failure_refused']),
+    ('importer.py', "    if b'\\0' in data:", "    if False:",
+     ['test_import.Import.test_not_text_refused']),
+    ('importer.py', "data.decode('utf-8')", "data.decode('latin-1')",
+     ['test_import.Import.test_not_text_refused']),
 ]
 
 

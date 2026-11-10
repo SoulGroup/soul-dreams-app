@@ -12,6 +12,7 @@ import re
 import subprocess
 import sys
 import tempfile
+import unicodedata
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(os.path.dirname(HERE))
@@ -43,17 +44,34 @@ class Refused(Exception):
 
 
 def git(where, *args):
-    r = subprocess.run(('git', '-C', where) + args, capture_output=True)
+    # No GIT_* variable: GIT_DIR and its kin would point the checks at
+    # another repository than the one named (Task 1a, review note 2).
+    env = {k: v for k, v in os.environ.items() if not k.startswith('GIT_')}
+    r = subprocess.run(('git', '-C', where) + args, capture_output=True, env=env)
     if r.returncode != 0:
         return None
     return r.stdout
 
 
+def on_main():
+    # Compared as the full ref, so a tag named main cannot hide it; a
+    # detached HEAD at main's own commit counts as main (Task 1a, note 1).
+    ref = git(TOP, 'symbolic-ref', '-q', 'HEAD')
+    if ref == b'refs/heads/main\n':
+        return True
+    if ref is None:
+        head = git(TOP, 'rev-parse', '--verify', '-q', 'HEAD')
+        return head is not None and head == git(TOP, 'rev-parse', '--verify', '-q',
+                                                'refs/heads/main')
+    return False
+
+
 def check_args(path, digest, ordinal):
     if not HEX.match(digest):
         raise Refused('bad-hash')
+    # Controls (C0, DEL, C1) and the Unicode line and paragraph separators.
     if (not ordinal or ordinal != ordinal.strip()
-            or any(ord(c) < 32 or ord(c) == 127 for c in ordinal)):
+            or any(unicodedata.category(c) in ('Cc', 'Zl', 'Zp') for c in ordinal)):
         raise Refused('bad-ordinal')
     parts = path.split('/')
     if path.startswith('/') or '\\' in path or any(p in ('', '.', '..') for p in parts):
@@ -146,7 +164,7 @@ def run(docs, path, digest, ordinal):
     dest, kind = row_for(path)
     if git(TOP, 'rev-parse', '--git-dir') is None:
         raise Refused('app-not-a-repository')
-    if git(TOP, 'symbolic-ref', '--short', '-q', 'HEAD') == b'main\n':
+    if on_main():
         raise Refused('on-main')
     check_docs(docs)
     data = read_committed(docs, path)
