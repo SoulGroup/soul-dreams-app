@@ -24,6 +24,11 @@ void main() {
       expect(runs, hasLength(1));
       expect(code, contains('requireFlavour(Flavour.$flavour);'));
       expect(checks.single.start, lessThan(runs.single.start));
+      // The check is the first statement of main (D27a): not in a helper,
+      // not under a condition, not after other work.
+      final first = RegExp(
+          r'main\(\)\s*(async\s*)?\{\s*requireFlavour\(Flavour\.' + flavour + r'\);');
+      expect(first.hasMatch(code), isTrue, reason: 'first statement of main');
     });
   });
 }
