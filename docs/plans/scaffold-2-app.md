@@ -872,6 +872,8 @@ expected `No issues found!`. G8 is proven by the hook: `main.dart` imports nothi
     git add app/lib/core/flavour.dart app/test/core/flavour_test.dart app/lib/main.dart app/lib/main_dev.dart app/lib/main_founder.dart
     git commit -m "App: three entry points, each refusing another flavour (D20 Q8)" -m "<trailer>"
 
+Task 7a was added during implementation by D27 and D27a (the entry-point test).
+
 ### Task 8 · iOS: three flavours, iPhone only (D20 Q2–Q10)
 
 The script below changes `project.pbxproj`, `Info.plist` and the schemes. It lives in `.scratch/` (ignored, not

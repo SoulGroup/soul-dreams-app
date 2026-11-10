@@ -9,7 +9,8 @@ file points to them and never restates them. The rulings for branch 1 (D1 to D14
 chat and are listed in `docs/plans/scaffold-1-guards.md`, Part 1, and the answers to its questions in Part 4. The
 owner's rulings of 2026-11-07 on the third amendment's questions are listed in its Part 5, fourth amendment, the
 ruling on the review of Task 2b in its sixth, and the ruling on the review of Task 2c in its seventh. The owner's
-ruling D20 of 2026-11-09 for branch 2 is listed in `docs/plans/scaffold-2-app.md`, Part 1.
+ruling D20 of 2026-11-09 for branch 2 is listed in `docs/plans/scaffold-2-app.md`, Part 1. From branch 2 on, the
+rulings given during each branch are listed in this file, one line each, under "Rulings during branch N".
 
 ## Current branch
 
@@ -90,6 +91,20 @@ ruling D20 of 2026-11-09 for branch 2 is listed in `docs/plans/scaffold-2-app.md
 31. B11 (D17): no test runs `check_all.sh`'s Flutter version and offline `pub get` step; only the owner's run (Task 11) proved it.
 32. D30: /simplify skipped for the scaffolding branches.
 33. `requireFlavour`'s `flavor:` parameter (for tests) is public, so app code could pass any name; only `app/test/entry_points_test.dart` pins the three calls; mark it `@visibleForTesting` if wanted.
+
+## Rulings during branch 2
+
+- D21: answers Q1 to Q7 before Task 0: Flutter may write `~/.config/flutter` (`flutter config` and analytics denied); only the owner runs `check_all.sh` in this branch; CLAUDE.md's G5 line names Apple's loggers; a debug `--no-codesign` build per flavour; RunnerTests kept; founder scheme Run is `Release-founder`; the template's orientations kept.
+- D22: Task 0's P5 skipped on the unpinned `stable` SDK; run on the pinned 3.47.9 in Task 2 instead.
+- D23: the sandbox allows local port binding, so `flutter test` runs; the outbound allowlist is unchanged.
+- D24: Task 2 step 5 runs without the `':!app/.fvm'` exclusion; the duplicate `.fvm/` and missing final newline in `app/.gitignore` come from `fvm use`, not the plan.
+- D25: Task 5's ignore check runs without `-q`; a plan command that fails only on a tool's syntax may be replaced by the smallest equivalent command, recorded, and the build stops if any file's text or expected result would change.
+- D26: Task 5 reviewer's finding 1 (the debug banner is untested) is banked (item 21).
+- D27: the founder app is built and installed only by the CLI command (`docs/workflow.md` §i); Task 7a adds the entry-point test.
+- D27a: the entry-point test also requires the check to be the first statement of `main`.
+- D28: Task 9's `xcodebuild -list` runs on `-project Runner.xcodeproj`, generated package schemes allowed; the compile checks use `-t` per flavour; `CFBundleName` banked for branch 3 (item 29).
+- D29: banked item 20's sentence approved; the implementation report's D17 items reach Status.md as one-line banked items in the final review's docs pass.
+- D30: /simplify skipped for the scaffolding branches; the CLAUDE.md Commands line stays as it is.
 
 ## Documents as last imported
 
