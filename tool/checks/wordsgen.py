@@ -197,12 +197,23 @@ def places_of(rows):
     return out
 
 
+def item_like(line):
+    # D38: a line that looks like a list item. A dash-led line is one
+    # unless it is a rule of three dashes or more; "*" and "+" count only
+    # as bullets, so bold and italic lines are prose.
+    s = line.lstrip()
+    if s[:1] == '-':
+        return not (s.count('-') >= 3 and set(s) <= {'-', ' '})
+    return s[:2] in ('* ', '+ ')
+
+
 def read_lists(data):
     # D36 Q3: a level-1 title, then the five "## TECH·n — <title>"
     # sections in order. In each, the "**English**" and "**Swedish**"
     # marker lines, and the "- " items under each as that language's
     # list. Every other line is ignored, except that a non-blank line
-    # that is not an item closes the list (D37); anything unexpected stops.
+    # that is not an item closes the list (D37); a line that looks like an
+    # item but is not one stops (D38); anything unexpected stops.
     text = decode(data, LIST_FILE)
     found = {}
     order = []
@@ -232,6 +243,8 @@ def read_lists(data):
             if items is None or not word or has_control(word):
                 raise WordsError(LIST_FILE, 'lists-shape', n)
             items.append(word)
+        elif item_like(line):
+            raise WordsError(LIST_FILE, 'lists-shape', n)  # D38: never dropped
         elif line.strip():
             items = None  # D37: prose closes the list; a later item stops
     if tuple(order) != TECH:

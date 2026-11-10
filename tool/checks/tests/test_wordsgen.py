@@ -258,6 +258,24 @@ class Generator(unittest.TestCase):
         self.assertIn("static const tech3En = <String>['a', 'b'];", out)
         self.assertIn("static const tech3Sv = <String>['c'];", out)
 
+    def test_item_like_lines_stop_never_dropped(self):
+        # D38: a line that looks like an item but is not a valid "- word"
+        # item stops the generator, in a section or under a marker.
+        def shape(body):
+            return self.refused('lists-shape', lists_bytes=lists(body))
+        for bad in ('  - b', '\t- b', '-x', '-', '--x', '* b', '  * b', '+ b', '  + b'):
+            shape(five({3: sect(3) + bad + '\n'}))                         # after the lists
+            shape(five({3: sect(3).replace('**English** here\n',
+                                           '**English** here\n' + bad + '\n')}))  # under a marker
+            shape(five({3: '## TECH' + DOT + '3 — T\n' + bad + '\n**English**\n- a\n'
+                           '**Swedish**\n- c\n'}))                          # before a marker
+        shape(bad + '\n' + five())                                          # in the introduction
+        # Prose that only resembles a bullet is still prose: rules, bold
+        # and italic lines, a dash that is a long dash.
+        prose = '---\n-----\n**Bold.** x\n*italic note*\n***\n— long dash\n'
+        out = wordsgen.generate(register(), lists(five({3: sect(3) + prose})))[LIST_WORDS]
+        self.assertIn("static const tech3En = <String>['word3', 'other'];", out.decode('utf-8'))
+
     def test_lists_shape_stops(self):
         def shape(body):
             return self.refused('lists-shape', lists_bytes=lists(body))

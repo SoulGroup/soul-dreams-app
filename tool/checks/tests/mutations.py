@@ -151,6 +151,9 @@ MUTATIONS = [
      ['test_g0.G0.test_generated_strings_pass']),
     ('g4_invented.py', "\n            or path in GENERATED)", ")",
      ['test_g4.G4.test_generated_words_pass']),
+    # Branch 3, Task 5a (D38): an item-like line stops, never dropped.
+    ('wordsgen.py', "        elif item_like(line):", "        elif False:",
+     ['test_wordsgen.Generator.test_item_like_lines_stop_never_dropped']),
 ]
 
 
