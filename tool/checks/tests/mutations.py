@@ -84,6 +84,19 @@ MUTATIONS = [
      ['test_g0.G0.test_flutter_kinds_pass']),
     ('g5_logging.py', "    ('NSLog', re.compile(B + r'NSLog\\s*\\(')),\n", "",
      ['test_g5.G5.test_apple_writers_refused_in_swift_and_headers']),
+    # Branch 3, Task 1 (D32): the import.
+    ('importer.py', "if sha256(data) != digest:", "if False:",
+     ['test_import.Import.test_hash_mismatch_refused']),
+    ('importer.py', "if git(docs, 'status', '--porcelain', '--untracked-files=all') != b'':",
+     "if False:",
+     ['test_import.Import.test_dirty_docs_refused']),
+    ('importer.py', "if head != upstream:", "if False:",
+     ['test_import.Import.test_unsynced_docs_refused']),
+    ('importer.py', "data = git(docs, 'cat-file', 'blob', 'HEAD:' + path)",
+     "data = open(os.path.join(docs, path), 'rb').read()",
+     ['test_import.Import.test_reads_the_committed_bytes']),
+    ('importer.py', "    raise Refused('not-allowed')", "    return 'docs/source/x.md', 'copy'",
+     ['test_import.Import.test_paths_refused']),
 ]
 
 
