@@ -154,6 +154,9 @@ MUTATIONS = [
     # Branch 3, Task 5a (D38): an item-like line stops, never dropped.
     ('wordsgen.py', "        elif item_like(line):", "        elif False:",
      ['test_wordsgen.Generator.test_item_like_lines_stop_never_dropped']),
+    # Branch 3, Task 5b (D39): no high-entropy rule under docs/source/.
+    ('g7_secrets.py', "if not copy and any(", "if any(",
+     ['test_g7.G7.test_high_entropy_not_applied_under_docs_source']),
 ]
 
 

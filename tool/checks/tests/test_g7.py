@@ -33,6 +33,22 @@ class G7(GuardTest):
         self.passed({'docs/source/SOURCES': RANDOM + '\n',
                      'server/package-lock.json': '"integrity": "sha512-' + RANDOM + '"\n'})
 
+    def test_high_entropy_not_applied_under_docs_source(self):
+        # D39: the copies are byte-identical to filings (G2) and
+        # write-protected, and carry archive names that look like keys.
+        self.passed({'docs/source/a.md': 'file ' + RANDOM + '\n'})
+        self.refused({'docs/a.md': 'file ' + RANDOM + '\n'}, 'high-entropy')
+
+    def test_key_shapes_still_refused_under_docs_source(self):
+        for text, reason in ((AWS, 'aws-key'), (PEM, 'pem-block'), (SK, 'sk-token'),
+                             (GH, 'github-token'),
+                             ('api' + 'Key = "a1B2c3D4e5F6g7H8"', 'assigned-secret')):
+            self.refused({'docs/source/a.md': 'see ' + text + '\n'}, reason)
+
+    def test_docs_source_lookalike_paths_still_scanned(self):
+        for path in ('app/docs/source/a.md', 'docs/sources/a.md', 'docs/source.md'):
+            self.refused({path: 'file ' + RANDOM + '\n'}, 'high-entropy')
+
     def test_lockfile_other_lines_still_scanned(self):
         self.refused({'server/package-lock.json': '"x": "' + RANDOM + '"\n'}, 'high-entropy')
 

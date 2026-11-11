@@ -1,6 +1,9 @@
 # G7 secrets: no secret-named file anywhere, and no key-shaped string
 # in any tracked text file, Markdown included. Exempt: docs/source/SOURCES,
-# and lines naming an integrity field in a lockfile.
+# lines naming an integrity field in a lockfile, and the high-entropy rule
+# (only that rule) under docs/source/ (D39): those copies are byte-identical
+# to filings, which G2 proves, and are write-protected; archive file names
+# in them look like keys. Every key-shape rule still applies there.
 import math
 import posixpath
 import re
@@ -22,6 +25,7 @@ SHAPES = [
         r'(?i)(?:api[_-]?key|secret|token|passw(?:or)?d)[A-Za-z0-9_-]*["\']?\s*[:=]\s*'
         r'["\']?(?=[A-Za-z0-9+/_=-]*[0-9])(?=[A-Za-z0-9+/_=-]*[A-Za-z])[A-Za-z0-9+/_=-]{16,}')),
 ]
+COPIES = 'docs/source/'
 RUN = re.compile(r'[A-Za-z0-9+_=-]{32,}')
 HEX = re.compile(r'[0-9a-fA-F]+')
 
@@ -51,12 +55,13 @@ def check(src):
         if text is None:
             continue
         lock = posixpath.basename(path) in LOCKFILES
+        copy = path.startswith(COPIES)
         for n, line in enumerate(text.split('\n'), 1):
             if lock and 'integrity' in line:
                 continue
             for name, rx in SHAPES:
                 if rx.search(line):
                     findings.append(Finding(path, n, name))
-            if any(high_entropy(m.group(0)) for m in RUN.finditer(line)):
+            if not copy and any(high_entropy(m.group(0)) for m in RUN.finditer(line)):
                 findings.append(Finding(path, n, 'high-entropy'))
     return findings, []
