@@ -47,14 +47,16 @@ fi
 if [ -d server ]; then
   # The pinned Node first (package.json "engines"), then the locked
   # packages (offline: nothing is fetched), the type check and the tests
-  # (D42 Q2).
+  # (D42 Q2), each with npm's update check off, so npm itself contacts
+  # no registry (D46).
   want=$(sed -n 's/.*"node": *">=\([0-9]*\) .*/\1/p' server/package.json)
   have=$(node --version 2>/dev/null | sed -n 's/^v\([0-9]*\)\..*/\1/p')
   echo "node: pinned ${want:-none}, running ${have:-none}"
   if [ -z "$want" ] || [ "$want" != "$have" ]; then
     fail node-version
   else
-    (cd server && npm ci --offline --no-audit --no-fund \
+    (cd server && export NPM_CONFIG_UPDATE_NOTIFIER=false \
+      && npm ci --offline --no-audit --no-fund \
       && npm run check && npm test) || fail server
   fi
 else
