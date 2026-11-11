@@ -168,6 +168,13 @@ MUTATIONS = [
      ['test_wordsgen.Generator.test_bad_csv_and_missing_inputs_stop']),
     ('wordsgen.py', "or os.path.islink(full):", "or False:",
      ['test_wordsgen.Command.test_symlinked_input_is_treated_as_missing']),
+    # journal-core (D49 a): the design values and the fonts.
+    ('designgen.py', "        elif part in NOTES:", "        elif True:",
+     ['test_designgen.Generate.test_refusals']),
+    ('designgen.py', "return text.replace(MINUS, '-')", "return text",
+     ['test_designgen.Generate.test_type_roles']),
+    ('designgen.py', "        if value.endswith(UNSET):", "        if False:",
+     ['test_designgen.Generate.test_an_unset_value_has_no_constant']),
 ]
 
 

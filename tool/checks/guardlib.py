@@ -23,6 +23,14 @@ WORDS_XCCONFIG = 'app/ios/Flutter/words.g.xcconfig'
 STRINGS_EN = 'app/ios/Runner/en.lproj/InfoPlist.strings'
 STRINGS_SV = 'app/ios/Runner/sv.lproj/InfoPlist.strings'
 GENERATED = (LINES, LIST_WORDS, WORDS_XCCONFIG, STRINGS_EN, STRINGS_SV)
+# The design values (D49 a): designgen makes TOKENS from DESIGN, and G1
+# proves it.
+DESIGN = 'docs/source/design-system.md'
+TOKENS = 'app/lib/design/tokens.g.dart'
+# The fonts (D49 a): every file here is listed in FINGERPRINTS with its
+# sha256, which G2 proves; G0 knows .txt files here only.
+FONTS = 'app/assets/fonts/'
+FINGERPRINTS = 'app/assets/fonts/fingerprints.txt'
 
 CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
             '.swift': 'swift', '.py': 'py', '.sh': 'sh'}
