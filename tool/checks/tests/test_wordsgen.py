@@ -190,6 +190,15 @@ class Generator(unittest.TestCase):
         self.refused('control-character', register(row('A' + DOT + '1', 'written', 'a\nb', 'c')))
         self.refused('not-utf8', b'\xff\xfe')
 
+    def test_bad_csv_and_missing_inputs_stop(self):
+        e = self.refused('bad-csv', register() + b'"a"b,c\n')
+        self.assertGreater(e.row, 0)
+        for args, source in (((None, lists()), 'register'), ((register(), None), 'lists')):
+            with self.assertRaises(wordsgen.WordsError) as cm:
+                wordsgen.generate(*args)
+            self.assertEqual((cm.exception.source, cm.exception.code, cm.exception.row),
+                             (source, 'missing', 0))
+
     def test_bom_accepted(self):
         self.assertEqual(wordsgen.generate(b'\xef\xbb\xbf' + register(), lists())[LINES],
                          gen()[LINES].replace(
@@ -344,6 +353,13 @@ class Command(unittest.TestCase):
         rc, out = self.run_gen('--write')
         self.assertEqual((rc, out), (1, 'wordsgen: refused register unknown-status row 4\n'))
         self.assertFalse(os.path.exists(os.path.join(self.root, LINES)))
+
+    def test_symlinked_input_is_treated_as_missing(self):
+        path = os.path.join(self.root, CSV)
+        real = path + '.real'
+        os.replace(path, real)
+        os.symlink(real, path)
+        self.assertEqual(self.run_gen('--check'), (1, 'wordsgen: refused register missing row 0\n'))
 
     def test_usage(self):
         self.assertEqual(self.run_gen()[0], 1)

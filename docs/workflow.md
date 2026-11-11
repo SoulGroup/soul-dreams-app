@@ -105,8 +105,11 @@ It refuses on any doubt: a mismatch, a dirty or unsynced documents repository, a
 `tool/checks/import_rows.py`, or `main`. On a match it copies the file into `docs/source/` (or
 `app/assets/words/` for the register and the lists), records its hash and the filing's ordinal in
 `docs/source/SOURCES`, regenerates the words when the register or the lists change (`lines.g.dart`,
-`lists.g.dart`, `words.g.xcconfig` and the two `InfoPlist.strings`), and stops for the owner to commit. A copy is
-never edited; a difference found in it goes upward as a question.
+`lists.g.dart`, `words.g.xcconfig` and the two `InfoPlist.strings`), and stops for the owner to commit. If the
+generator refuses at the end of a words or lists import, the copy and `SOURCES` stay in place (nothing is rolled
+back) and G1 refuses any commit until the words are regenerated: find the cause in the refusal's code and row (a
+question upward if the register or the lists are at fault), then run `python3 -I -B tool/checks/wordsgen.py
+--write`. A copy is never edited; a difference found in it goes upward as a question.
 
 ## Installing on the owner's phone (i)
 

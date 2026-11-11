@@ -15,7 +15,7 @@ rulings given during each branch are listed in this file, one line each, under "
 ## Current branch
 
 `scaffold-3-import`: Scaffolding, branch 3 of 4. Plan: `docs/plans/scaffold-3-import.md`. Its Part 6 says where the
-build differs from Parts 1 to 5 (the owner's rulings D33 to D39, below) and governs.
+build differs from Parts 1 to 5 (the owner's rulings D33 to D40, below) and governs.
 
 ## Road ahead
 
@@ -51,7 +51,7 @@ build differs from Parts 1 to 5 (the owner's rulings D33 to D39, below) and gove
   if it is not.
 - `check_all.sh` also checks that the Flutter running is the one pinned, then runs `pub get` offline against the
   lockfile, the analyzer and the app's tests.
-- Totals: 188 guard tests and 63 mutation checks.
+- Totals: 192 guard tests and 68 mutation checks.
 
 ## Banked
 
@@ -118,24 +118,22 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
     that touches `docs/source/` outside an import.
 41. The microphone usage string is now in all three flavours' `Info.plist`. It does nothing until code asks for the
     microphone and opens no connection; App Review may question it until recording lands.
-42. Branch 3 ran with the owner's rulings D33 to D39 (below). The plan's Task 4 and Task 5 text, its Part 5 and its
+42. Branch 3 ran with the owner's rulings D33 to D40 (below). The plan's Task 4 and Task 5 text, its Part 5 and its
     totals are superseded by them; the plan's Part 6 lists each correction.
-43. The final whole-branch review's notes (verdict: approve with notes; no defect, no rule broken), open for the
-    owner's rulings:
-    a. A generator refusal at the end of an import leaves the copy and `SOURCES` written and the generated words
-       stale (G1 then reports `generator-refused:<code>`); `importer.py`'s header and `docs/workflow.md` say the
-       import "refuses on any doubt" and "writes nothing", and no test pins this state. Either the importer rolls the
-       copy and `SOURCES` back, or the two texts say they are left in place.
-    b. `CLAUDE.md`'s G7 line does not mention D39's exemption under `docs/source/`.
-    c. `.claude/settings.json` asks before an edit of `tool/import.sh` but allows edits of `tool/checks/**`, where
-       `importer.py` and `import_rows.py` (which decide what may be copied) live; the sandbox's `denyWrite` covers
-       them for shell writes only.
-    d. No test pins the importer's copy-kind depth rule (`docs/source/sub/x.md`), the generator's `bad-csv` and
-       `missing` codes, its refusal of a symlinked input, or the importer's exit 2 on an internal error.
-    e. `importer.py` imports `posixpath` and never uses it.
-    f. The importer's refused-document check also refuses a file named `restricted`; G2's checks folders only (the
-       importer's is the stricter).
-    g. Between the register's import and the lists' import, G1 reports the lists as `unlisted`, next to the
+43. The final whole-branch review's notes (verdict: approve with notes; no defect, no rule broken); ruled by D40:
+    a. RULED (D40): a generator refusal at the end of an import leaves the copy and `SOURCES` written and the
+       generated words stale (G1 then refuses; the fix is `wordsgen.py --write`); no rollback; the importer's header
+       and `docs/workflow.md` say so, and a test pins the state.
+    b. DONE (D40): `CLAUDE.md`'s G7 line names D39's exemption under `docs/source/`.
+    c. OWNER'S (D40): the owner adds "ask" for `tool/checks/importer.py`, `import_rows.py` and `wordsgen.py` in
+       `.claude/settings.json`. Until then those files can be edited without a prompt; the sandbox's `denyWrite`
+       covers shell writes only.
+    d. DONE (D40): tests for the importer's copy-kind rule and exit 2, and the generator's `bad-csv`, `missing` and
+       symlinked-input refusals (mutation rows 64 to 68).
+    e. DONE (D40): the unused `posixpath` import is removed.
+    f. Banked: the importer's refused-document check also refuses a file named `restricted`; G2's checks folders
+       only (the importer's is the stricter).
+    g. Banked: between the register's import and the lists' import, G1 reports the lists as `unlisted`, next to the
        importer's "the generator waits"; both are expected.
 
 ## Rulings during branch 2
@@ -156,13 +154,14 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
 
 - D31: the brief that opened the branch: the owner runs the import with each file's expected sha256; refusals on a dirty or unsynced documents repository; lines only for "written", "written, in its parts" and "composed (stand-in written)"; an unknown status stops the generator; both languages; MP·55 and EM·3 to iOS.
 - D32: answers Q1 to Q21 before Task 0 (the plan's Part 1 table): import first; the wrapper `tool/import.sh`; the status table; the compile-time Dart API; the lists' shape settled at Task 3; the home-screen name not localized; `words.g.xcconfig`; the guards' changes; the settings after a canary proof; the import refuses on `main`.
-- D33: points 1 to 6, given with the continuation of the plan: Task 3's counts are reported, not a stop; Claude Code may run `check_all.sh`; the fixture changes are approved; `SOUL_DREAMS_DOCS` is set in the owner's paste; an Opus review of Tasks 1, 4, 5 and 6, each verdict awaited.
+- D33: D31's text as given; `SOUL_DREAMS_DOCS` set in the owner's paste; Markdown and CSV only; the two test-fixture changes approved; Claude Code may run `check_all.sh` from branch 3 on; Task 3's counts are reported, not a stop (only a new status kind, slot, separator or column stops).
 - D34: Task 0's canary is waived (the auto-mode classifier blocks the probe; the write-block mechanism was proven in branches 1 and 2); the owner read `.claude/settings.json` instead: all 8 Part 2 entries present.
 - D35: Task 1's review: notes 1, 2, 3, 8 and 9 fixed as Task 1a; 4 to 7 banked (item 36). The gate runs on the staged state. The Task 2a rows.
 - D36: Task 3's three structural findings: the register's real handle forms with `dart-name-clash`; `written, in its parts` may be empty and gets no constant; the lists read per language under the five `TECH·n` sections, stopping with `lists-shape`. Task 4 written test-first from the ruling, not replayed from the plan; Task 5 amended to match.
 - D37: Task 4's review: note 2 fixed as Task 4a (prose closes a list; a later item stops); the rest banked (item 37).
 - D38: Task 4a's note 4: an item-like line that is not a valid item stops with `lists-shape`; fixed as Task 5a.
 - D39: Task 6's first run failed only on G7's high-entropy rule in `docs/source/product-change-record.md` (archive file names); fixed as Task 5b: the rule does not apply under `docs/source/`, every key-shape rule still does (banked item 40).
+- D40: the final review's notes (item 43): when the generator refuses at the end of an import nothing is rolled back (the importer's header and `docs/workflow.md` say so; G1 refuses any commit until the words are regenerated); the G7 line in `CLAUDE.md` names D39's exemption; the owner adds "ask" for `importer.py`, `import_rows.py` and `wordsgen.py` in `.claude/settings.json` himself; the missing tests added (rows 64 to 68) and the unused `posixpath` import removed. Task 5a's edge cases stay banked (item 38).
 
 ## Documents as last imported
 

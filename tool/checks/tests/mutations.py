@@ -157,6 +157,17 @@ MUTATIONS = [
     # Branch 3, Task 5b (D39): no high-entropy rule under docs/source/.
     ('g7_secrets.py', "if not copy and any(", "if any(",
      ['test_g7.G7.test_high_entropy_not_applied_under_docs_source']),
+    # Branch 3, D40: the final review's test gaps.
+    ('importer.py', "and dest.count('/') == 2", "and True",
+     ['test_import.Import.test_copy_destinations_must_fit_their_kind']),
+    ('importer.py', "sys.exit(2)", "sys.exit(1)",
+     ['test_import.Import.test_internal_error_exits_two_and_prints_no_content']),
+    ('wordsgen.py', "    except csv.Error:", "    except KeyError:",
+     ['test_wordsgen.Generator.test_bad_csv_and_missing_inputs_stop']),
+    ('wordsgen.py', "    if data is None:", "    if False:",
+     ['test_wordsgen.Generator.test_bad_csv_and_missing_inputs_stop']),
+    ('wordsgen.py', "or os.path.islink(full):", "or False:",
+     ['test_wordsgen.Command.test_symlinked_input_is_treated_as_missing']),
 ]
 
 

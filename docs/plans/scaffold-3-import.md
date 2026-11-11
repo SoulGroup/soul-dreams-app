@@ -5,7 +5,7 @@
 Written by Claude Code (Opus) on 2026-11-10 from the investigation (`.scratch/for-build-chat/scaffold-3-investigation.md`)
 and the owner's rulings D32. **Proven before committing as far as the sandbox allows** (Part 5). Only this file is
 committed by the planning step; nothing here was implemented yet. **The branch is built. Where the build differs from
-this text (the owner's rulings D33 to D39), Part 6 says so and governs; Parts 1 to 5 are kept as planned.**
+this text (the owner's rulings D33 to D40), Part 6 says so and governs; Parts 1 to 5 are kept as planned.**
 
 ## Part 1 · Spec
 
@@ -2685,8 +2685,9 @@ the docs. Tasks 3 and 8 are not committed (`.scratch/`); Task 3's report is
 ### The totals
 
 Guard tests and mutation checks, by task: Task 0 baseline 117 and 32 · Task 1 134 and 37 · Task 1a 141 and 45 · Task 4
-170 and 54 · Task 4a 171 and 55 · Task 5 184 and 61 · Task 5a 185 and 62 · Task 5b 188 and 63. **Final: 188 tests, 63
-mutations** (Task 1 +17/+5, 1a +7/+8, 4 +29/+9, 4a +1/+1, 5 +13/+6, 5a +1/+1, 5b +3/+1). The app's tests: 14. The plan's
+170 and 54 · Task 4a 171 and 55 · Task 5 184 and 61 · Task 5a 185 and 62 · Task 5b 188 and 63 · D40's tests 192 and 68.
+**Final: 192 tests, 68 mutations** (Task 1 +17/+5, 1a +7/+8, 4 +29/+9, 4a +1/+1, 5 +13/+6, 5a +1/+1, 5b +3/+1, D40
++4/+5). The final review's docs pass (`b3c50ba`, `7e97a45`) saw 188 and 63. The app's tests: 14. The plan's
 172 and 48, its 159 and 42, and its 134 and 37 gates in Tasks 4 to 6 and 9 are superseded by these.
 
 ### Superseded text, in order
@@ -2695,7 +2696,8 @@ mutations** (Task 1 +17/+5, 1a +7/+8, 4 +29/+9, 4a +1/+1, 5 +13/+6, 5a +1/+1, 5b
    repository says: `docs/workflow.md` and Task 9's paste name it as the owner's command (and R6 and the settings do
    as refusals). What holds is that no *code* reads it; `tool/import.sh` takes it from `SOUL_DREAMS_DOCS`.
 2. **Lines 96 to 97 (after a words or lists import):** a generator refusal leaves the copy and `SOURCES` already
-   written, and the generated words stale; G1 then reports `generator-refused:<code>` (banked item 43).
+   written, and the generated words stale; G1 then refuses any commit (`generator-refused:<code>`). Nothing is rolled
+   back (D40); the importer's header and `docs/workflow.md` say so.
 3. **The status table (line 105):** `written, in its parts` with both fields empty gets no constant (D36 Q2).
 4. **The handle rule (line 116):** `^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*(·[0-9]+)?$`; the Dart name replaces both `·` and `-`
    with `_`; two handles with one Dart name stop the generator with `dart-name-clash` (D36 Q1).
@@ -2716,7 +2718,8 @@ mutations** (Task 1 +17/+5, 1a +7/+8, 4 +29/+9, 4a +1/+1, 5 +13/+6, 5a +1/+1, 5b
    named failing; the lists refusal expects `(LISTS, 5, 'generator-refused:lists-shape')`.
 9. **Tasks 5a and 5b were added** (D38: an item-like line stops, `79bca6d`; D39: G7's high-entropy rule is off under
    `docs/source/` and every key shape still applies, `448cef3`, with `test_g7.py` +3 and one mutation row).
-10. **Task 6 and Task 9 (lines 2280 and 2601):** the totals are 188 and 63. Task 6 ran with Task 5b's change in place.
+10. **Task 6 and Task 9 (lines 2280 and 2601):** the totals were 188 and 63 at those tasks (192 and 68 after D40).
+    Task 6 ran with Task 5b's change in place.
 11. **Part 5:** the proof of the plan as first written; its counts (159/42, 172/48) and `ListWords.TECH_3` are
     superseded as above.
 12. **Task 1a (D35)** is not in the plan: the review's fixes: `on-main` compares the full ref (a tag named `main`, a

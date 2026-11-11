@@ -3,11 +3,13 @@
 # repository into this one, and records it in docs/source/SOURCES.
 # Only the owner runs it, through tool/import.sh: Claude Code cannot
 # read the documents repository (R6). On any doubt it refuses and
-# writes nothing. It prints codes and paths, never a file's content.
+# writes nothing. The one exception (D40): when the generator refuses
+# at the end of a words or lists import, the copy and SOURCES stay in
+# place, and G1 refuses any commit until the words are regenerated. It
+# prints codes and paths, never a file's content.
 # Usage: importer.py --docs DIR <documents path> <sha256> <ordinal>
 # Exit 0 done (or unchanged), 1 refused, 2 internal error.
 import os
-import posixpath
 import re
 import subprocess
 import sys

@@ -156,6 +156,31 @@ class Import(unittest.TestCase):
         self.assertEqual(rc, 1)
         self.assertIn('import: generator refused register unknown-status row 4', out)
         self.assertNotIn('app/lib/words/lines.g.dart', self.app_files())
+        # D40: nothing is rolled back; the copy and SOURCES stay in place.
+        self.assertIn('app/assets/words/places-register.csv', self.app_files())
+        self.assertIn('%s  app/assets/words/places-register.csv  %s\n' % (digest(register), ORDINAL),
+                      self.sources())
+
+    def test_copy_destinations_must_fit_their_kind(self):
+        # Task 6 review, D40: the copy kind is flat under docs/source/, .md only.
+        rows = [('a1', 'docs/source/sub/x.md', 'copy'), ('a2', 'docs/source/x.txt', 'copy'),
+                ('a3', 'docs/x.md', 'copy'), ('a4', 'app/assets/words/x.md', 'copy'),
+                ('a5', 'app/assets/words/other.csv', 'words'), ('a6', 'docs/source/x.md', 'bogus')]
+        with open(os.path.join(self.app, 'tool', 'checks', 'import_rows.py'), 'a',
+                  encoding='utf-8') as f:
+            f.write('ROWS += (%s)\n' % ''.join("('product/%s.md', '%s', '%s'),\n" % (n, d, k)
+                                               for n, d, k in rows))
+        for n, _, _ in rows:
+            self.refused('bad-row', 'product/%s.md' % n, digest(BODY), ORDINAL)
+
+    def test_internal_error_exits_two_and_prints_no_content(self):
+        os.makedirs(os.path.join(self.app, 'docs', 'source'))
+        with open(os.path.join(self.app, 'docs', 'source', 'SOURCES'), 'wb') as f:
+            f.write(b'\xff\xfe hidden words\n')
+        rc, out = self.run_import('product/handover.md', digest(BODY), ORDINAL)
+        self.assertEqual(rc, 2)
+        self.assertEqual(out, 'import: internal error UnicodeDecodeError\n')
+        self.assertFalse(os.path.exists(os.path.join(self.app, 'docs', 'source', 'handover.md')))
 
     def test_wrapper_needs_the_documents_location(self):
         self.assertTrue(os.path.exists(WRAPPER))
