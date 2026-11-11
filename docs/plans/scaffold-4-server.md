@@ -3,8 +3,9 @@
 *No matter where you are on your journey, the steps you take are equally important.*
 
 Written by Claude Code (Opus) on 2026-11-11 from the investigation (`.scratch/for-build-chat/scaffold-4-investigation.md`)
-and the owner's rulings D41 and D42. **Proven before committing as far as the sandbox allows** (Part 5). Only this
-file is committed by the planning step. Nothing here is implemented yet.
+and the owner's rulings D41 and D42; **amended for D43** (the answers to Part 4), which commits the server's mutation
+checks as a script run by hand and marks Tasks 6 and 7 for an Opus review. **Proven before committing as far as the
+sandbox allows** (Part 5). Only this file is committed by the planning step. Nothing here is implemented yet.
 
 ## Part 1 · Spec
 
@@ -22,7 +23,9 @@ installs the five packages; Claude Code never installs anything.
 - `server/package.json`, its lockfile (the owner's install), `.gitignore`, two tsconfigs and `cdk.json`.
 - `server/src/`: `handler.ts`, `safe-log.ts`, `hosts.ts` (banked item 2).
 - `server/infra/`: `dist.ts` (the build's two steps), `account.ts` (the deploy refusal), `stack.ts`, `app.ts`.
-- `server/test/`: 28 tests on Node's built-in runner, in 7 files. 13 mutation checks, run from a scratch script.
+- `server/test/`: 28 tests on Node's built-in runner, in 7 files.
+- `tool/server_mutations.py`: the server's 13 mutation checks, committed and run by hand; `check_all.sh` does not
+  call it (D43 Q3).
 - `tool/check_all.sh`: the pinned Node, then `npm ci --offline`, `npm run check` and `npm test`.
 - `.claude/settings.json`: the install denials (the owner's, Task 0).
 - `docs/Status.md`: the server, the first-deploy checklist, the banked items, D41 and D42.
@@ -55,7 +58,14 @@ installs the five packages; Claude Code never installs anything.
 | D42 Q13 | `npm install`, `npm i`, `npm ci` without `--offline`, `npm update` and `npx npm` denied to Claude Code in the settings, as the owner's Task 0 | Task 0; Part 4, questions 1 and 2 |
 | D42 Q14 | TypeScript 6.0.3 | Task 1 |
 | D42 Q15 | Every request 404 with no body, and one logged code | Task 5; mutation S4 |
-| D42 Q16 | Synth proven in-process only; the owner's `npx cdk synth` an optional checklist line | Task 6; Task 8 (optional); Task 9 |
+| D42 Q16 | Synth proven in-process only; the owner's `npx cdk synth` an optional checklist line | Task 6; Task 8; Task 9 |
+| D43 Q1 | Every direct `npm ci` denied; `check_all.sh` runs the offline install | Task 0; Task 7 |
+| D43 Q2 | The nine deny rules beyond D42 Q13's list | Task 0 |
+| D43 Q3 | The server's mutation checks committed as a script run by hand, not called by `check_all.sh` | Task 6, step 5 |
+| D43 Q4 | A different lockfile hash at Task 2 is not a stop by itself | Task 2 |
+| D43 Q5 | `registry.npmjs.org` stays on the sandbox's network allowlist | Nothing changes |
+| D43 Q6 | Task 8, the CLI's synth, is run once | Task 8 |
+| D43 | Tasks 6 and 7 are reviewed by an Opus reviewer before the next task | Tasks 6, 7 |
 
 ### The files after this branch
 
@@ -75,6 +85,8 @@ server/
   infra/stack.ts        the stack
   infra/app.ts          the CDK app: one stack, SoulDreamsServer
   test/*.test.ts        package, safe-log, hosts, handler, dist, account, stack
+tool/
+  server_mutations.py   S1 to S13, run by hand (D43 Q3)
 ~~~~
 
 The scripts: `npm run check` is `tsc -p tsconfig.json` (type check, no output). `npm run build` empties `dist/`,
@@ -94,7 +106,9 @@ compiles `src/` into `dist/src`, and writes the marker. `npm test` builds, then 
 | `account.test.ts` | 5 | `pickAccount` in every case; the app itself, run as a child process with invented accounts, refuses as the CLI would see it |
 | `stack.test.ts` | 9 | Exactly 9 resource types; eu-north-1 and termination protection; Node 24 on arm64; logs 7 days, JSON, INFO, WARN; no environment or tracing; no access logs, CORS or authorizer; the role writes only to its log group; no version-reporting metadata, with the CLI's own context on; `cdk.json`'s three opt-outs |
 
-**28 tests.** The mutation checks (Task 6, step 5), each in a copy of `server/`:
+**28 tests.** The mutation checks, in `tool/server_mutations.py` (D43 Q3), each in a copy of `server/` in the
+temporary folder. Run by hand from the repository root, `python3 -I -B tool/server_mutations.py`; expected, thirteen
+lines `S1 caught: …` to `S13 caught: …`, then `server mutations: 13 run, 13 caught`, exit 0:
 
 | | Break | Must fail |
 |---|---|---|
@@ -110,7 +124,7 @@ compiles `src/` into `dist/src`, and writes the marker. `npm test` builds, then 
 | S10 | the app ignores the resolved account | the app refuses a resolved account not passed |
 | S11 | `"notices": true` | cdk.json switches off the three reports |
 | S12 | `aws-cdk-lib` as a range | the five packages, exact, for development only |
-| S13 | a second Lambda in the stack | these resources and no others |
+| S13 | a second log group in the stack | these resources and no others |
 
 And in Task 7, `check_all.sh` with `engines` set to Node 22 must end `FAILED: node-version`.
 
@@ -142,9 +156,9 @@ text". No night, line or key appears in this plan (R1, R2, R5).
 
 Permission patterns match the start of a command, so "`npm ci` without `--offline`" cannot be written as a pattern:
 the script denies every direct `npm ci`, and Claude Code runs `npm ci --offline` only inside `tool/check_all.sh`,
-which writes the flag itself (Part 4, question 1). The rules beyond D42 Q13's list close the other spellings of an
+which writes the flag itself (D43 Q1). The rules beyond D42 Q13's list close the other spellings of an
 install (`npm add`, `npm up`, `npm upgrade`), the investigation's Q13 lean (`npm audit fix`, `npm publish`), and the
-two ways to start the CDK CLI that `Bash(npx cdk *)` misses (`npm exec`, the CLI's own path) (Part 4, question 2).
+two ways to start the CDK CLI that `Bash(npx cdk *)` misses (`npm exec`, the CLI's own path) (D43 Q2).
 
 ---
 
@@ -153,7 +167,8 @@ two ways to start the CDK CLI that `Bash(npx cdk *)` misses (`npm exec`, the CLI
 **Who runs what.** Tasks marked **[OWNER]** are the owner's pastes. Claude Code stops before each, gives the paste,
 and waits for the output. Everything else is Claude Code's.
 
-**How files are written.** Files under `server/` go in through the Write tool, whole, exactly as given. `tool/check_all.sh`
+**How files are written.** Files under `server/`, and `tool/server_mutations.py`, go in through the Write tool,
+whole, exactly as given. `tool/check_all.sh`
 and `docs/Status.md` change through the Edit tool: an **Edit** block replaces its first fence with its second, and the
 first must occur exactly once.
 
@@ -336,8 +351,7 @@ Paste 2 — Terminal:
 Expected:
 - `added 9 packages` (the five, and four that `aws-cdk-lib` and `@types/node` bring).
 - The lockfile's sha256. The proof's was `9b74f3c0367e8d392846303251712f6b27a9903832127cf17a1aeb69077abc01`. A different hash is not a stop by itself: npm may
-  resolve a newer version within a range one of the five declares. Task 3's test and `npm ls` decide (Part 4,
-  question 4).
+  resolve a newer version within a range one of the five declares. Task 3's test and `npm ls` decide (D43 Q4).
 - `npm ls`: exactly `@types/node@24.19.2`, `aws-cdk-lib@2.275.0`, `aws-cdk@2.1147.0`, `constructs@10.8.1`,
   `typescript@6.0.3`.
 - `npm audit`: `2 moderate severity vulnerabilities`, both through `minimatch` inside `aws-cdk-lib`
@@ -653,7 +667,7 @@ export async function handler(): Promise<Reply> {
 }
 ~~~~
 
-### Task 6 · The stack, the account refusal and the template tests (D42 Q3, Q4, Q7 to Q9, Q16)
+### Task 6 · The stack, the account refusal and the template tests (D42 Q3, Q4, Q7 to Q9, Q16; D43 Q3) · **Opus review**
 
 1. Write `test/account.test.ts` and `test/stack.test.ts`. From `server/`, `npm test`. Expected (red): `ℹ tests 16`,
    `ℹ pass 14`, `ℹ fail 2`: the files `test/account.test.ts` and `test/stack.test.ts` (they cannot import `infra/`).
@@ -664,13 +678,18 @@ export async function handler(): Promise<Reply> {
    The in-process synth writes its staging to the temporary folder, never into the repository.
 4. Stage the six files by path; commit: "Server: the CDK stack, its account refusal and its template tests (D42 Q3,
    Q4, Q7 to Q9, Q16)".
-5. **Mutation checks.** Write the script below (not committed) and run, from the repository root:
+5. **Mutation checks (D43 Q3).** Write `tool/server_mutations.py` (below) and run, from the repository root:
 
-       python3 -I .scratch/scaffold-4/mutate.py "$PWD/server"
+       python3 -I -B tool/server_mutations.py; echo "exit=$?"
 
-   Expected: thirteen lines `S1 CAUGHT` to `S13 CAUGHT`, then `server mutations: 13 run, 13 caught`. Each row works
-   on a copy of `server/` in the temporary folder, with `node_modules` linked, never on the repository. A `MISSED` or
-   `NOT APPLIED` stops the task.
+   Expected: thirteen lines `S1 caught: an unknown code is refused` to `S13 caught: these resources and no others`,
+   then `server mutations: 13 run, 13 caught` and `exit=0`. Each row works on a copy of `server/` in the temporary
+   folder, with `node_modules` linked, never on the repository; `git status --short` then lists only
+   `?? tool/server_mutations.py`. A `missed` or `not-applied` line stops the task. The gate's guards line, then stage
+   that one file and commit: "Server: the mutation checks, run by hand (D43 Q3)".
+6. **Opus review (D43).** An Opus reviewer reads this task's two commits against this plan and `CLAUDE.md` (the
+   stack, its template tests, the account refusal and the mutation runner) and gives a verdict. Claude Code waits for
+   it before Task 7. Findings go to the Build chat; nothing is changed on a finding without a ruling (D17).
 
 **New file `server/test/account.test.ts`**
 
@@ -951,52 +970,114 @@ new ServerStack(app, 'SoulDreamsServer', {
 });
 ~~~~
 
-**File `.scratch/scaffold-4/mutate.py`** (not committed)
+**New file `tool/server_mutations.py`**
 
 ~~~~python
-# Server mutation checks for the plan's proof: each row breaks one thing in
-# a copy of server/ and the named test (or the type check) must fail.
-import os, shutil, subprocess, sys, tempfile
-SERVER = sys.argv[1]
+# The server's mutation checks (D43 Q3), run by hand from the repository
+# root: python3 -I -B tool/server_mutations.py
+# Each row breaks one thing in a copy of server/ in the temporary folder
+# (node_modules linked, never the repository), runs the type check or the
+# tests there, and the named test must fail. check_all.sh does not call
+# it. It reports row codes and test names only, through the checks' own
+# writer. Exit 0 when every row is caught, 1 otherwise.
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+
+TOOL = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(TOOL, 'checks'))
+
+from guardlib import report  # noqa: E402
+
+SERVER = os.path.join(os.path.dirname(TOOL), 'server')
+
+# (code, file, old, new, 'check' or 'test', the test that must fail)
 ROWS = [
- ('S1', 'src/safe-log.ts', "  if (!(LOG_EVENTS as readonly string[]).includes(code)) {\n    throw new TypeError('safe-log-code');\n  }\n", '', 'test', 'an unknown code is refused'),
- ('S2', 'src/safe-log.ts', "!Number.isFinite(n)", "Number.isNaN(Number.NaN) === false", 'test', 'a number that is not finite is refused'),
- ('S3', 'src/safe-log.ts', "numbers: readonly number[] = []", "numbers: readonly unknown[] = []", 'check', 'test/safe-log.test.ts'),
- ('S4', 'src/handler.ts', "    safeLog('handlerFailed');\n    return { statusCode: 500 };", "    return { statusCode: 404 };", 'test', 'a failure: 500 and a code, never its message'),
- ('S5', 'package.json', " && node infra/dist.ts mark", "", 'test', 'the marker makes the code a module'),
- ('S6', 'infra/stack.ts', "      analyticsReporting: false,\n", "", 'test', 'no version reporting'),
- ('S7', 'infra/stack.ts', "RetentionDays.ONE_WEEK", "RetentionDays.ONE_MONTH", 'test', 'logs: 7 days, JSON, application INFO, system WARN'),
- ('S8', 'infra/stack.ts', "      role,\n", "", 'test', 'the role writes to its own log group only'),
- ('S9', 'infra/account.ts', "  if (wanted !== resolved) {", "  if (wanted !== resolved && wanted !== undefined) {", 'test', 'none passed, or another: refused'),
- ('S10', 'infra/app.ts', "process.env['CDK_DEFAULT_ACCOUNT']", "undefined", 'test', 'the app refuses a resolved account not passed'),
- ('S11', 'cdk.json', '"notices": false', '"notices": true', 'test', 'cdk.json switches off the three reports'),
- ('S12', 'package.json', '"aws-cdk-lib": "2.275.0"', '"aws-cdk-lib": "^2.275.0"', 'test', 'the five packages, exact, for development only'),
- ('S13', 'infra/stack.ts', "    new HttpApi(this, 'Api', {", "    new lambda.Function(this, 'Extra', { runtime: lambda.Runtime.NODEJS_24_X, code: lambda.Code.fromAsset(props.codeDir), handler: 'x.y' });\n    new HttpApi(this, 'Api', {", 'test', 'these resources and no others'),
+    ('S1', 'src/safe-log.ts',
+     "    throw new TypeError('safe-log-code');\n", '',
+     'test', 'an unknown code is refused'),
+    ('S2', 'src/safe-log.ts', '!Number.isFinite(n)', 'Number.isNaN(n)',
+     'test', 'a number that is not finite is refused'),
+    ('S3', 'src/safe-log.ts', 'numbers: readonly number[] = []',
+     'numbers: readonly unknown[] = []', 'check', 'test/safe-log.test.ts'),
+    ('S4', 'src/handler.ts', "    safeLog('handlerFailed');\n    return { statusCode: 500 };",
+     '    return { statusCode: 404 };',
+     'test', 'a failure: 500 and a code, never its message'),
+    ('S5', 'package.json', ' && node infra/dist.ts mark', '',
+     'test', 'the marker makes the code a module'),
+    ('S6', 'infra/stack.ts', '      analyticsReporting: false,\n', '',
+     'test', 'no version reporting'),
+    ('S7', 'infra/stack.ts', 'RetentionDays.ONE_WEEK', 'RetentionDays.ONE_MONTH',
+     'test', 'logs: 7 days, JSON, application INFO, system WARN'),
+    ('S8', 'infra/stack.ts', '      role,\n', '',
+     'test', 'the role writes to its own log group only'),
+    ('S9', 'infra/account.ts', '  if (wanted !== resolved) {',
+     '  if (wanted !== resolved && wanted !== undefined) {',
+     'test', 'none passed, or another: refused'),
+    ('S10', 'infra/app.ts', "process.env['CDK_DEFAULT_ACCOUNT']", 'undefined',
+     'test', 'the app refuses a resolved account not passed'),
+    ('S11', 'cdk.json', '"notices": false', '"notices": true',
+     'test', 'cdk.json switches off the three reports'),
+    ('S12', 'package.json', '"aws-cdk-lib": "2.275.0"', '"aws-cdk-lib": "^2.275.0"',
+     'test', 'the five packages, exact, for development only'),
+    ('S13', 'infra/stack.ts', "    new HttpApi(this, 'Api', {",
+     "    new logs.LogGroup(this, 'Extra');\n    new HttpApi(this, 'Api', {",
+     'test', 'these resources and no others'),
 ]
-def run(d, what):
-    cmd = ['npm', 'run', 'check'] if what == 'check' else ['npm', 'test']
-    r = subprocess.run(cmd, cwd=d, capture_output=True, text=True)
-    return r.returncode, r.stdout + r.stderr
-caught = 0
-for code, path, old, new, what, name in ROWS:
-    d = tempfile.mkdtemp(prefix='mut-')
-    shutil.copytree(SERVER, d, dirs_exist_ok=True, ignore=shutil.ignore_patterns('node_modules', 'dist', 'cdk.out'))
-    os.symlink(os.path.join(SERVER, 'node_modules'), os.path.join(d, 'node_modules'))
-    p = os.path.join(d, path)
-    t = open(p, encoding='utf-8').read()
-    if t.count(old) != 1:
-        sys.stdout.write(code + ' NOT APPLIED\n'); continue
-    open(p, 'w', encoding='utf-8').write(t.replace(old, new))
-    rc, out = run(d, what)
-    failed = [l for l in out.splitlines() if l.startswith('✖ ') or 'error TS' in l]
-    hit = rc != 0 and any(name in l for l in failed)
-    caught += hit
-    sys.stdout.write('%s %s rc=%d %s | %s\n' % (code, 'CAUGHT' if hit else 'MISSED', rc, name, '; '.join(sorted(set(l[:90] for l in failed)))[:400]))
-    shutil.rmtree(d)
-sys.stdout.write('server mutations: %d run, %d caught\n' % (len(ROWS), caught))
+
+
+def failed_names(output):
+    # The names node:test marks as failed, and the files tsc names.
+    names = set()
+    for line in output.splitlines():
+        if line.startswith('✖ '):
+            names.add(line[2:].rsplit(' (', 1)[0])
+        elif ': error TS' in line:
+            names.add(line.split('(', 1)[0])
+    return names
+
+
+def run_row(code, path, old, new, what, name):
+    copy = tempfile.mkdtemp(prefix='server-mutation-')
+    try:
+        shutil.copytree(SERVER, copy, dirs_exist_ok=True,
+                        ignore=shutil.ignore_patterns('node_modules', 'dist', 'cdk.out'))
+        os.symlink(os.path.join(SERVER, 'node_modules'), os.path.join(copy, 'node_modules'))
+        target = os.path.join(copy, path)
+        with open(target, encoding='utf-8') as f:
+            text = f.read()
+        if text.count(old) != 1:
+            return 'not-applied'
+        with open(target, 'w', encoding='utf-8') as f:
+            f.write(text.replace(old, new))
+        cmd = ['npm', 'run', 'check'] if what == 'check' else ['npm', 'test']
+        r = subprocess.run(cmd, cwd=copy, capture_output=True, text=True)
+        caught = r.returncode != 0 and name in failed_names(r.stdout + r.stderr)
+        return 'caught' if caught else 'missed'
+    finally:
+        shutil.rmtree(copy, ignore_errors=True)
+
+
+def main():
+    if not os.path.isdir(os.path.join(SERVER, 'node_modules')):
+        report('server mutations: no server/node_modules (the owner installs them)')
+        return 2
+    caught = 0
+    for row in ROWS:
+        result = run_row(*row)
+        caught += result == 'caught'
+        report('%s %s: %s' % (row[0], result, row[5]))
+    report('server mutations: %d run, %d caught' % (len(ROWS), caught))
+    return 0 if caught == len(ROWS) else 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
 ~~~~
 
-### Task 7 · `check_all.sh`: the pinned Node, then the locked packages offline (D42 Q2)
+### Task 7 · `check_all.sh`: the pinned Node, then the locked packages offline (D42 Q2; D43 Q1) · **Opus review**
 
 1. **Edit `tool/check_all.sh`**
 
@@ -1034,12 +1115,12 @@ else
    Expected: `node: pinned 22, running 24`, `FAILED: node-version`, `check_all: FAILED: node-version`; then
    `git status --short` lists only ` M tool/check_all.sh`.
 4. Stage `tool/check_all.sh`; commit: "check_all: the pinned Node, then the server's locked packages offline (D42 Q2)".
+5. **Opus review (D43).** As in Task 6, step 6, on this commit. Claude Code waits for the verdict before Task 8.
 
-### Task 8 · [OWNER, optional] The CLI's own synth (D42 Q16)
+### Task 8 · [OWNER] The CLI's own synth, once (D42 Q16; D43 Q6)
 
-Not needed for the branch: the template is proven in Task 6. The CLI cannot run in Claude Code's sandbox (the settings
-deny it, and its hosts are not on the network allowlist). If the owner wants to see it once, with no AWS credentials
-at all:
+The template is proven in Task 6; this is a single look at the CLI itself, with no AWS credentials at all. The CLI
+cannot run in Claude Code's sandbox (the settings deny it, and its hosts are not on the network allowlist).
 
 Paste 3 — Terminal:
 
@@ -1112,7 +1193,9 @@ build differs from Parts 1 to 5 (the owner's rulings D33 to D40, below) and gove
 - `npm test` proves the template in-process, with no AWS credentials, CLI or network (D42 Q16). The account is never
   in the repository: with credentials, the app refuses unless the resolved account equals `-c account=<id>` (D42 Q9).
 - The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 28 tests, and
-  13 mutation checks (S1 to S13, in the plan's Part 5).
+  13 mutation checks (S1 to S13) in `tool/server_mutations.py`, run by hand from the repository root with
+  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 13 run, 13 caught`); `check_all.sh` does not
+  call it (D43 Q3).
 
 ## Before the first deploy
 
@@ -1179,8 +1262,8 @@ Banked in branch 4:
 45. D42 Q11: `npm audit` reports 2 moderate findings, in the `minimatch` that `aws-cdk-lib` bundles
     (GHSA-g3hv-75wg-m249). It runs at build time on the Mac and is not in the Lambda's code. No downgrade (the fix
     offered is `aws-cdk-lib` 2.239.0); recheck at each dependency change, never `npm audit fix --force`.
-46. The server's mutation checks (S1 to S13) are a script in the plan, run at planning and at Task 6, not a committed
-    runner like the guards' `mutations.py`.
+46. `tool/server_mutations.py` is run by hand, not by `check_all.sh` (D43 Q3): a server change that weakens a test
+    is caught only when someone runs it. It takes about 20 seconds.
 47. The account refusal assumes the CDK CLI sets `CDK_DEFAULT_ACCOUNT` whenever credentials resolve; shown at the
     first deploy (step 5 above).
 48. System logs at WARN leave out Lambda's START, END and REPORT lines; if their counts are wanted, the level is INFO
@@ -1200,6 +1283,7 @@ Banked in branch 4:
 
 - D41: the brainstorm that opened the branch: infrastructure as code, tested, nothing deployed; minimal packages; the owner installs them; the model's instructions and the lens files in a later branch.
 - D42: answers Q1 to Q16 of the investigation, every lean accepted: the five packages at exact versions; `check_all.sh` pins Node and installs offline; the CDK CLI's three reports off, with a test; the HTTP API kept, its 30-second limit banked (item 44); the module marker; no `exactOptionalPropertyTypes`; arm64, JSON logs, application INFO, system WARN; the scoped log policy; region literal, no account in the repository, the deploy refusal; no beta key or spending stop before the first deploy's branch; the audit findings banked (item 45); the first-deploy checklist; installs denied to Claude Code in the settings; TypeScript 6.0.3; 404 with no body; synth proven in-process only.
+- D43: answers the plan's Part 4: every direct `npm ci` denied, `check_all.sh` installs offline; the nine extra deny rules; the server's mutation checks committed as `tool/server_mutations.py`, run by hand; a different lockfile hash is not a stop by itself; `registry.npmjs.org` stays on the allowlist; Task 8 run once. Tasks 6 and 7 reviewed by Opus.
 
 ## Documents as last imported
 ~~~~
@@ -1207,6 +1291,10 @@ Banked in branch 4:
 ---
 
 ## Part 4 · Open questions (numbered; a blank is not a yes)
+
+**All six answered by D43** (2026-11-11): 1 yes; 2 yes; 3 the mutation checks committed as a script run by hand, not
+called by `check_all.sh` (amended: `tool/server_mutations.py`, Task 6 step 5); 4 yes; 5 yes; 6 yes, Task 8 is run
+once. The questions as asked:
 
 1. **Every direct `npm ci` is denied, not only those without `--offline`** (Part 2). Permission patterns match a
    command's start, so the ruling's wording cannot be written as one. *Lean:* deny all; Claude Code reaches
@@ -1248,7 +1336,8 @@ On 2026-11-11, before this file was committed:
    - Task 5: red `ℹ tests 13`, `ℹ pass 10`, `ℹ fail 3`, the three named; `ℹ tests 14`, `ℹ pass 14`; commit
      `f37d99b`.
    - Task 6: red `ℹ tests 16`, `ℹ pass 14`, `ℹ fail 2`; `npm run check` clean; `ℹ tests 28`, `ℹ pass 28`; commit
-     `5ab11ff`; `server mutations: 13 run, 13 caught`; only `server/dist/` and `server/node_modules/` ignored.
+     `5ab11ff`; the scratch mutation script (since replaced, step 8 below) `13 run, 13 caught`; only `server/dist/`
+     and `server/node_modules/` ignored.
    - Task 7: `check_all.sh` ended `check_all: all passed`, with `Ran 192 tests` `OK`, `mutations: 68 run, all
      caught`, `flutter: pinned 3.47.9, running 3.47.9`, `No issues found!`, the app's 14 tests, `node: pinned 24,
      running 24`, `added 9 packages`, `ℹ tests 28`, `ℹ fail 0`. With `engines` at 22: `FAILED: node-version`.
@@ -1267,3 +1356,11 @@ On 2026-11-11, before this file was committed:
    checklist in Task 9).
 7. The scratch worktree is removed after the proof (`git worktree remove --force .scratch/build4`); its commits
    were on a detached HEAD and reach no branch.
+8. **The D43 amendment, proven the same way** in a fresh worktree, `./.scratch/build4b`, detached at `89f946e`:
+   Tasks 3 to 6 replayed through the hook (`ℹ tests 3`, `9`, `14`, `28`, each `ℹ fail 0`); `tool/server_mutations.py`
+   committed through the hook and run **from its committed location**: `S1 caught` to `S13 caught`,
+   `server mutations: 13 run, 13 caught`. A row that changes nothing the tests see was reported
+   `missed`, `server mutations: 1 run, 0 caught`, exit 1, so the runner can fail. S13 adds a second log group (the
+   first draft's second Lambda was a literal of twelve words or more, which G4 refuses). Task 7's `check_all.sh`
+   ended `check_all: all passed` (`node: pinned 24, running 24`); Task 9's nine `Status.md` blocks (now with D43)
+   applied, each found once; guards all passed. The worktree was then removed.
