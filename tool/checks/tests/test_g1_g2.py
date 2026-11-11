@@ -4,9 +4,11 @@ import unittest
 from helpers import GuardTest
 import g1_words
 import g2_copies
+import designgen
+import test_designgen as invented_design
 import test_wordsgen as invented
 import wordsgen
-from guardlib import GENERATED, LINES, WORDS_XCCONFIG
+from guardlib import DESIGN, GENERATED, LINES, TOKENS, WORDS_XCCONFIG
 
 MARKER = 'tool/checks/awaiting-import'
 SOURCES = 'docs/source/SOURCES'
@@ -21,14 +23,18 @@ def line(path, body, ordinal='C0-T item 1'):
     return hashlib.sha256(body).hexdigest() + '  ' + path + '  ' + ordinal + '\n'
 
 
-def armed(csv_bytes=None, lists_bytes=None, generated=True):
+def armed(csv_bytes=None, lists_bytes=None, generated=True, design=None):
     # An armed tree from an invented register and lists, with SOURCES
-    # matching them and, when it can be made, the generated words.
+    # matching them and, when it can be made, the generated words; and an
+    # invented Design System with its tokens (D49 a).
     c = csv_bytes if csv_bytes is not None else invented.register()
     l = lists_bytes if lists_bytes is not None else invented.lists()
-    files = {CSV: c, LISTS: l, SOURCES: line(CSV, c) + line(LISTS, l)}
+    d = design if design is not None else invented_design.doc()
+    files = {CSV: c, LISTS: l, DESIGN: d, SOURCES: line(CSV, c) + line(LISTS, l) + line(DESIGN, d)}
     if generated:
         files.update(wordsgen.generate(c, l))
+    if design is None:
+        files.update(designgen.generate(d))
     return files
 
 
@@ -89,6 +95,36 @@ class G1(GuardTest):
         four = invented.lists('## TECH' + invented.DOT + '1\n- w\n')
         self.assertEqual(self.refused(armed(lists_bytes=four, generated=False)),
                          [(LISTS, 5, 'generator-refused:lists-shape')])
+
+    # D49 a: the design values.
+    def test_design_missing_refuses(self):
+        files = armed()
+        del files[DESIGN]
+        self.assertEqual(self.refused(files), [(DESIGN, 0, 'missing')])
+
+    def test_tokens_missing_refuses(self):
+        files = armed()
+        del files[TOKENS]
+        self.assertEqual(self.refused(files), [(TOKENS, 0, 'generated-missing')])
+
+    def test_tokens_hand_edited_refuses(self):
+        files = armed()
+        files[TOKENS] = files[TOKENS].replace(b'0xFFF5F5EC', b'0xFFF5F5ED')
+        self.assertEqual(self.refused(files), [(TOKENS, 0, 'generated-differs')])
+
+    def test_design_refused_by_its_generator_refuses(self):
+        bad = invented_design.doc(light=['| color.page | #F5F5EC, almost always |'])
+        files = armed(design=bad)
+        row = bad.decode('utf-8').split('\n').index('| color.page | #F5F5EC, almost always |') + 1
+        self.assertEqual(self.refused(files), [(DESIGN, row, 'generator-refused:colour-form')])
+
+    def test_design_checked_beside_a_words_refusal(self):
+        files = armed()
+        del files[TOKENS]
+        files[CSV] = b'changed\n'
+        found = self.refused(files)
+        self.assertIn((CSV, 0, 'hash-mismatch'), found)
+        self.assertIn((TOKENS, 0, 'generated-missing'), found)
 
 
 class G2(GuardTest):

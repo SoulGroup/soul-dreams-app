@@ -142,7 +142,7 @@ MUTATIONS = [
      ['test_g1_g2.G1.test_generated_differs_refuses']),
     ('g1_words.py', "and p not in KNOWN]", "and False]",
      ['test_g1_g2.G1.test_unknown_words_file_refuses']),
-    ('g1_words.py', "return [Finding(where, e.row, 'generator-refused:' + e.code)] + unknown, []",
+    ('g1_words.py', "return [Finding(where, e.row, 'generator-refused:' + e.code)] + unknown + design, []",
      "outputs = {}",
      ['test_g1_g2.G1.test_generator_refusal_refuses']),
     ('g2_copies.py', "REFUSED_NAMES = ('privacy-ethics-safety.md',)", "REFUSED_NAMES = ()",
@@ -187,6 +187,8 @@ MUTATIONS = [
      ['test_designgen.Generate.test_no_prose_reaches_the_tokens']),
     ('designgen.py', "after [^\\d,]+, before [^\\d,]+$')", "after \\S.*$')",
      ['test_designgen.Generate.test_an_after_value_with_other_text_stops']),
+    ('g1_words.py', "    design = design_findings(src)\n", "    design = []\n",
+     ['test_g1_g2.G1.test_tokens_hand_edited_refuses']),
 ]
 
 
