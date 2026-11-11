@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-11, at the end of branch `scaffold-3-import`, by Claude Code.
+Last updated: 2026-11-11, at the end of branch `scaffold-4-server`, by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,12 +14,12 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`scaffold-3-import`: Scaffolding, branch 3 of 4. Plan: `docs/plans/scaffold-3-import.md`. Its Part 6 says where the
-build differs from Parts 1 to 5 (the owner's rulings D33 to D40, below) and governs.
+`scaffold-4-server`: Scaffolding, branch 4 of 4. Plan: `docs/plans/scaffold-4-server.md`.
 
 ## Road ahead
 
-- Branch 4, `scaffold-4-server`: the empty TypeScript server for Lambda, with its tests; nothing deployed.
+- The first server feature, and before it the front door (banked item 44); then the first deploy, after "Before
+  the first deploy" below.
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
   6 and 11 only, with a guard G10 refusing any other `## ` heading in them, and a kind for
   `lens-register-waking-material-pass.md`, imported whole into `server/instructions/`. The importer's `KINDS` table
@@ -42,6 +42,47 @@ build differs from Parts 1 to 5 (the owner's rulings D33 to D40, below) and gove
   two `InfoPlist.strings`. A place waiting for a line shows its handle in square brackets (R1).
 - The app's analyzer baseline: `No issues found!`. The app has 14 tests.
 
+## The server
+
+- Node 24, pinned by `engines` in `server/package.json`; `check_all.sh` checks the running major. TypeScript, strict
+  (`server/tsconfig.json`; no `exactOptionalPropertyTypes`, D42 Q6). Five packages, for development only, at exact
+  versions: `typescript` 6.0.3, `@types/node` 24.19.2, `aws-cdk-lib` 2.275.0, `constructs` 10.8.1, `aws-cdk`
+  2.1147.0 (D42 Q1, Q14). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
+  --offline` only through `check_all.sh` (D42 Q13).
+- `server/src/`: the handler (every request 404 with no body, one logged code; D42 Q15), `safe-log.ts` (codes and
+  numbers only) and `hosts.ts` (no host yet). `server/infra/`: the CDK app, its account refusal and the stack.
+  `npm run build` writes `dist/src` with the module marker beside the compiled files (D42 Q5).
+- The stack: one Lambda (`nodejs24.x`, arm64, CDK's default memory and timeout) behind an HTTP API in eu-north-1;
+  logs kept 7 days, JSON, application INFO, system WARN; a role that writes only to its own log group; no access
+  logs, tracing, environment, CORS or authorizer; termination protection on (D42 Q4, Q7 to Q9). The CDK CLI's
+  telemetry, notices and version reporting are off (D42 Q3). **Nothing is deployed.**
+- `npm test` proves the template in-process, with no AWS credentials, CLI or network (D42 Q16). The account is never
+  in the repository: with credentials, the app refuses unless the resolved account equals `-c account=<id>` (D42 Q9).
+  The template tests also pin that the role has no inline policy, that the Lambda logs to the stack's own log group,
+  and that the log group is deleted with the stack (D44 a, b, c).
+- The CDK CLI's own synth was run once, with no credentials (Task 8, D45): the `Resources` section holds the nine
+  types of `test/stack.test.ts` and no `AWS::CDK::Metadata`; `Parameters` holds only `BootstrapVersion`.
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 28 tests, and
+  16 mutation checks (S1 to S16) in `tool/server_mutations.py`, run by hand from the repository root with
+  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 16 run, 16 caught`); `check_all.sh` does not
+  call it (D43 Q3).
+
+## Before the first deploy
+
+The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45):
+
+1. The front door is settled (banked item 44).
+2. The beta key (48 characters, D18) and the spending stop are built, in a branch of their own.
+3. The workload account is bootstrapped for the CDK in eu-north-1 (never the management account; C4-T item 15).
+4. In the workload account: Bedrock model invocation logging is off, and the retention mode is `none` under the
+   service control policy (technical-answers b).
+5. The deploy runs from the workload account's profile with `-c account=<workload id>`; the app refuses any other.
+   Always deploy through the app, never `cdk deploy --app cdk.out` (banked item 49).
+6. After one request: CloudWatch holds codes and numbers only; no `/aws/lambda/...` log group exists; the stage has
+   no access logs (technical-answers e and p, "[ASSUMED until built and shown]").
+7. The head has ruled on the CLI's two notices (banked item 53).
+8. Optional: `npx cdk synth`, its `Resources` compared with `server/test/stack.test.ts` (run once in Task 8, D45).
+
 ## The guards
 
 - G0 and G1 to G9: armed, on every commit (`.githooks/pre-commit`) and in `tool/check_all.sh`. G1 and G2 were armed
@@ -50,16 +91,16 @@ build differs from Parts 1 to 5 (the owner's rulings D33 to D40, below) and gove
 - The hook runs once `core.hooksPath` is `.githooks`, which the owner sets on each clone. `check_all.sh` fails loudly
   if it is not.
 - `check_all.sh` also checks that the Flutter running is the one pinned, then runs `pub get` offline against the
-  lockfile, the analyzer and the app's tests.
+  lockfile, the analyzer and the app's tests; and that the Node running is the major pinned, then runs `npm ci`
+  offline against the server's lockfile, `npm run check` and `npm test` (D42 Q2).
 - Totals: 192 guard tests and 68 mutation checks.
 
 ## Banked
 
 1. CLOSED in branch 3: the microphone text, place EM·3, is written by the generator into `words.g.xcconfig` and the
    two `InfoPlist.strings`, and G1 checks them as it checks `lines.g.dart`.
-2. The server's safe logger (`server/src/safe-log.ts`) and hosts file (`server/src/hosts.ts`) arrive with branch 4.
-   The app's exist since branch 2.
-3. The server's analyzer baseline is saved by branch 4. The app's is above.
+2. CLOSED in branch 4: the server's safe logger (`server/src/safe-log.ts`) and hosts file (`server/src/hosts.ts`).
+3. CLOSED in branch 4: the server's analyzer baseline is in "The server", above.
 4. In tracked mode (`check_all.sh`), a tracked symlink, or a tracked file deleted from the working tree, is refused
    by G0 as `unknown-kind` whatever its kind (fails closed; the reason code is misleading for a missing file), and no
    other guard reads it. The hook reads the index, but skips staged symlinks and gitlinks with no finding; tracked
@@ -138,6 +179,38 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
     g. Banked: between the register's import and the lists' import, G1 reports the lists as `unlisted`, next to the
        importer's "the generator waits"; both are expected.
 
+Banked in branch 4:
+
+44. D42 Q4: the 30-second limit goes to the head and the Architecture worker before the first server feature (front
+    door for the reading call).
+45. D42 Q11: `npm audit` reports 2 moderate findings, in the `minimatch` that `aws-cdk-lib` bundles
+    (GHSA-g3hv-75wg-m249). It runs at build time on the Mac and is not in the Lambda's code. No downgrade (the fix
+    offered is `aws-cdk-lib` 2.239.0); recheck at each dependency change, never `npm audit fix --force`.
+46. `tool/server_mutations.py` is run by hand, not by `check_all.sh` (D43 Q3): a server change that weakens a test
+    is caught only when someone runs it. It takes about 40 seconds.
+47. The account refusal assumes the CDK CLI sets `CDK_DEFAULT_ACCOUNT` whenever credentials resolve; shown at the
+    first deploy (step 5 above).
+48. System logs at WARN leave out Lambda's START, END and REPORT lines; if their counts are wanted, the level is INFO
+    (D42 Q7).
+
+Banked by D17 (D44, from the review of Task 6; its notes a, b and c were fixed as Task 6a, rows S14 to S16):
+
+49. D44 d: the account refusal runs only when the app is synthesized, and a synth with no credentials writes an
+    account-agnostic assembly. Always deploy through the app; never `cdk deploy --app cdk.out` (step 5 above).
+50. D44 e: in `server/test/account.test.ts`, `app.ts` never calls `synth()`, so the child process's `'ok'` means
+    the constructors ran without throwing, not that the app synthesized. Enough here: `pickAccount` runs first.
+51. D44 f: `tool/server_mutations.py` counts a `check` row (S3) as caught on any TypeScript error in the named
+    file, whatever its code; a later row of that kind could be caught by an unrelated error.
+
+Banked by D45 (Task 8, the CLI's own synth):
+
+52. The template's `Parameters` holds `BootstrapVersion` (type `AWS::SSM::Parameter::Value<String>`) and a
+    `CheckBootstrapVersion` rule, so a deploy needs a bootstrapped account. `test/stack.test.ts` reads `Resources`
+    only. Optional later task: a test pinning `Parameters` to `BootstrapVersion` alone.
+53. The CLI printed two notices with `cdk.json`'s three opt-outs on: advice about 85 unset feature flags, and a
+    newer-version banner (2.1148.0). For the head before the first deploy; `cdk.json` is unchanged. Whether the
+    version check contacts the network is not known (the CLI was not run in the sandbox).
+
 ## Rulings during branch 2
 
 - D21: answers Q1 to Q7 before Task 0: Flutter may write `~/.config/flutter` (`flutter config` and analytics denied); only the owner runs `check_all.sh` in this branch; CLAUDE.md's G5 line names Apple's loggers; a debug `--no-codesign` build per flavour; RunnerTests kept; founder scheme Run is `Release-founder`; the template's orientations kept.
@@ -164,6 +237,14 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
 - D38: Task 4a's note 4: an item-like line that is not a valid item stops with `lists-shape`; fixed as Task 5a.
 - D39: Task 6's first run failed only on G7's high-entropy rule in `docs/source/product-change-record.md` (archive file names); fixed as Task 5b: the rule does not apply under `docs/source/`, every key-shape rule still does (banked item 40).
 - D40: the final review's notes (item 43): when the generator refuses at the end of an import nothing is rolled back (the importer's header and `docs/workflow.md` say so; G1 refuses any commit that includes the copy until the words are regenerated); the G7 line in `CLAUDE.md` names D39's exemption; the owner adds "ask" for `importer.py`, `import_rows.py` and `wordsgen.py` in `.claude/settings.json` himself; the missing tests added (rows 64 to 68) and the unused `posixpath` import removed. Task 5a's edge cases stay banked (item 38).
+
+## Rulings during branch 4
+
+- D41: the brainstorm that opened the branch: infrastructure as code, tested, nothing deployed; minimal packages; the owner installs them; the model's instructions and the lens files in a later branch.
+- D42: answers Q1 to Q16 of the investigation, every lean accepted: the five packages at exact versions; `check_all.sh` pins Node and installs offline; the CDK CLI's three reports off, with a test; the HTTP API kept, its 30-second limit banked (item 44); the module marker; no `exactOptionalPropertyTypes`; arm64, JSON logs, application INFO, system WARN; the scoped log policy; region literal, no account in the repository, the deploy refusal; no beta key or spending stop before the first deploy's branch; the audit findings banked (item 45); the first-deploy checklist; installs denied to Claude Code in the settings; TypeScript 6.0.3; 404 with no body; synth proven in-process only.
+- D43: answers the plan's Part 4: every direct `npm ci` denied, `check_all.sh` installs offline; the nine extra deny rules; the server's mutation checks committed as `tool/server_mutations.py`, run by hand; a different lockfile hash is not a stop by itself; `registry.npmjs.org` stays on the allowlist; Task 8 run once. Tasks 6 and 7 reviewed by Opus.
+- D44: Task 6's review (approve with notes): notes a, b and c fixed as Task 6a, test-first, rows S14 to S16 (the role's inline policies, the Lambda's own log group, the group's deletion policy); d, e and f banked (items 49 to 51); Task 7's review notes await a ruling.
+- D45: Task 8: the CLI's synth shows nine resource types and a `BootstrapVersion` parameter, accepted and banked with an optional test (item 52); the CLI's two notices banked for the head before the first deploy (item 53), `cdk.json` unchanged; Task 8 done.
 
 ## Documents as last imported
 
