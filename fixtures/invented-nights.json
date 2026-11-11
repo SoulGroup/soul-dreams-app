@@ -1,0 +1,37 @@
+{
+  "about": "Invented nights for tests and examples only (R2). None is anyone's. Every night a test or a plan uses lives here.",
+  "nights": [
+    {
+      "key": "two-dreams-en",
+      "lang": "en",
+      "dreams": [
+        "A lighthouse stood in the middle of a wheat field, and its lamp turned slowly even though it was noon. I walked toward it but the field kept getting wider.",
+        "Then I was in a kitchen with green tiles, sorting buttons into jars by colour. One jar would not close."
+      ]
+    },
+    {
+      "key": "framed-opening-en",
+      "lang": "en",
+      "dreams": [
+        "I had a dream that a paper boat carried me down a staircase of water inside an old library."
+      ]
+    },
+    {
+      "key": "one-dream-sv",
+      "lang": "sv",
+      "dreams": [
+        "Jag stod på en perrong där tågen var gjorda av glas, och varje vagn var full av små citronträd."
+      ]
+    },
+    {
+      "key": "named-three-dreams-sv",
+      "lang": "sv",
+      "name": "Glastrappan",
+      "dreams": [
+        "En trappa av glas gick upp genom molnen.",
+        "Sedan cyklade jag över en frusen sjö med en kopp te i handen.",
+        "Till sist hittade jag en nyckel i fickan som passade i alla dörrar."
+      ]
+    }
+  ]
+}

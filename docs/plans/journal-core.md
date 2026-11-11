@@ -3,8 +3,9 @@
 *No matter where you are on your journey, the steps you take are equally important.*
 
 Written by Claude Code (Opus) on 2026-11-11 from the investigation (`.scratch/for-build-chat/journal-core-investigation.md`)
-and the owner's rulings D48 and D49. **Proven before committing as far as the sandbox allows** (Part 5). Only this file
-is committed by the planning step. Nothing here is implemented yet.
+and the owner's rulings D48 and D49; **amended the same day** with the owner's answers to Part 4 and ruling D50 (two
+app-wide protections). **Proven before committing as far as the sandbox allows** (Part 5). The planning steps commit
+only this file and, with the amendment, `fixtures/invented-nights.json` (Part 4, Q2). Nothing else is implemented yet.
 
 ## Part 1 · Spec
 
@@ -24,28 +25,37 @@ The journal gets its foundations, and no screen yet. Three things:
    temporary file, and that a file that does not read as a night is skipped with a code and never touched. On the
    phone, a check built into SoulDreams Dev reads back the backup flag and both protection classes, and the owner
    looks in the downloaded app container for any trace of its probe.
+4. **Two protections, app-wide (D50).** Third-party keyboards are refused in all three apps: a few lines of Swift
+   answer iOS's question with no. And when the app leaves the foreground, the plain page colour covers the screen
+   before iOS takes its app-switcher snapshot: no logo, no words. Both are proven on the Mac as far as it can, and on
+   the phone by the owner.
 
 ### What this branch builds
 
 - `tool/checks/designgen.py` and its tests; G1 extended to prove `app/lib/design/tokens.g.dart`.
 - G0 knowing `.txt` in `app/assets/fonts/` only; G2 proving every font file against `app/assets/fonts/fingerprints.txt`.
 - `app/assets/fonts/`: twelve files and the fingerprints, the owner's download (Task 5); `pubspec.yaml` declaring them.
-- `fixtures/invented-nights.json` (R2), four invented nights, and the tests' reader.
+- `fixtures/invented-nights.json` (R2), four invented nights, committed with the plan's amendment; the tests' reader.
 - `app/lib/journal/`: the night and its file format (version 1), the folder's interface, the store, the channel, and
   the phone check; `AppDelegate.swift`'s folder code; `main_dev.dart` running the check when asked.
+- `app/lib/core/privacy_cover.dart`, in `app.dart`'s builder: the cover (D50 2).
+- `AppDelegate.swift`: third-party keyboards refused (D50 1); `app/lib/core/keyboard_check.dart`: SoulDreams Dev's
+  one empty field for the owner's keyboard check, built only when asked.
 - `docs/Status.md`: this branch's state, the rulings and the banked items.
 
 ### What it does not build (D49)
 
 No screen, no night rules (the 21:00 boundary), no typing, no Settings, no Delete-journal control: they wait for
 Product's answers to P1 to P14 (the investigation, §7), sent through the head, and come in a later branch. Nothing in
-the founder or tester entry points changes (O1). No package is added (D47; O8).
+the founder or tester entry points changes (O1): D50's two protections reach all three apps through the files they
+share, `app.dart` and `AppDelegate.swift`. No package is added (D47; O8). Product's other answers are for
+journal-screens (D50).
 
 ### The decisions, by number
 
 | | Ruling | Where it lands |
 |---|---|---|
-| D48 | As this plan reads it (Part 4, Q1): the brief that opened the branch: the journal on the phone, nothing leaves it, invented nights only, installs the owner's | All tasks |
+| D48 | The journal brainstorm's five leans (the owner's words in Task 14's last block): (1) the core loop is the slice; (2) the journal on the phone only, out of backups, under the phone's file protection, with as little package code as possible; (3) design values from Product's design system through the checked import and a generator, never typed; (4) screens exactly to `main-path.md` at C16-P, anything unclear a question to Product; (5) English shown, Swedish built. D49 split the slice: journal-core the foundations, journal-screens the pages | All tasks; (4) and (5) wait for journal-screens |
 | D49 split | This branch builds only what needs no Product answer: (a) the design values, the fonts; (b) the store; (c) the deletion tests | Tasks 2 to 10 |
 | D49 a | `designgen.py` with G1 extended; the owner downloads static TTFs and OFL licences into `app/assets/fonts/`, fingerprinted; G0 learns `.txt` there only | Tasks 2 to 6 |
 | D49 b | One JSON file per night in `Library/Application Support/<journal dir>` (`Journal`); the folder excluded from backup; complete file protection; a version field from day one; a small Swift channel; no package | Tasks 8 to 10 |
@@ -60,7 +70,10 @@ the founder or tester entry points changes (O1). No package is added (D47; O8).
 | D49 O8 | Per-night JSON and a Swift channel, no package | Tasks 8 to 10 |
 | D49 O9 | The 21:00 tests use a fake zone table, no `check_all.sh` change | Waits with the night rules |
 | D49 O10 | Read by the Build chat: the backup exclusion may be set on a directory, covers its contents, and is guidance to the system, not a guarantee; iOS snapshots the UI after backgrounding, and Apple advises hiding sensitive information first. The rest stays ASSUMED, proven by the owner's phone checks | Tasks 10, 11 |
-| D49 Status | Status.md records D46 (already there, branch 4), D47 (`1b3e93b`), D48, D49, and banks the lists becoming English only (head, C156-I/C157-I): `lists-shape` will need a ruling at the next lists filing | Task 12 |
+| D49 Status | Status.md records D46 (already there, branch 4), D47 (`1b3e93b`), D48, D49, and banks the lists becoming English only (head, C156-I/C157-I): `lists-shape` will need a ruling at the next lists filing | Task 14 |
+| Part 4 | Answered by the owner: Q1, D48's words; Q2, the fixture committed with this amendment, Task 7 checks it; Q3 to Q11, the leans | Tasks 7, 14 |
+| D50 1 | Third-party keyboards refused app-wide (founder-ruled): `application(_:shouldAllowExtensionPointIdentifier:)` answers `false` for `.keyboard`, `true` otherwise, Apple's documented way [Build chat READ, developer.apple.com, `UIApplication.ExtensionPointIdentifier.keyboard`]. Tested as far as the Mac can; the phone check proves it | Tasks 12, 13 |
+| D50 2 | P11: when the app leaves the foreground, the plain page colour (from the generated design values) covers the screen, no logo, no words; on at `inactive`, off at `resumed`; a widget test proves it appears and holds no text | Tasks 11, 13 |
 
 ### The files after this branch
 
@@ -79,19 +92,23 @@ app/
   pubspec.yaml              the fonts block
   assets/fonts/             12 font and licence files, fingerprints.txt (the owner's)
   lib/design/tokens.g.dart  generated: TypeRoles, LightColours, DarkColours, Spacing
+  lib/app.dart              the cover over every page; Dev's optional first page
   lib/core/safe_log.dart    four journal events
+  lib/core/privacy_cover.dart   the cover (D50 2)
+  lib/core/keyboard_check.dart  Dev's keyboard check: one empty field
   lib/journal/night.dart                  a night; format version 1
   lib/journal/journal_files.dart          the folder's interface; validName; Protection
   lib/journal/journal_store.dart          the store
   lib/journal/channel_journal_files.dart  the folder on the phone, through the channel
   lib/journal/self_check.dart             the phone check
-  lib/main_dev.dart         runs the check when built with JOURNAL_SELF_CHECK=true
-  ios/Runner/AppDelegate.swift   the channel and the folder's file work
+  lib/main_dev.dart         the checks when built with JOURNAL_SELF_CHECK or KEYBOARD_CHECK
+  ios/Runner/AppDelegate.swift   the channel, the folder's file work, keyboards refused
   test/fixtures.dart, test/fixtures_test.dart
   test/design/tokens_test.dart, test/design/fonts_test.dart
   test/journal/night_test.dart, io_journal_files.dart, journal_store_test.dart,
                channel_journal_files_test.dart, self_check_test.dart
-.scratch/journal-core/      (not committed) fonts.sh, app_mutations.py, invented-nights.json
+  test/core/privacy_cover_test.dart, test/core/keyboards_test.dart; test/app_test.dart +1
+.scratch/journal-core/      (not committed) fonts.sh, app_mutations.py
 ~~~~
 
 ### The format, version 1
@@ -118,9 +135,12 @@ founder app it may change freely (O5).
 | `app/test/journal/journal_store_test.dart` | 9 | Save and read back; delete leaves no trace (text, JSON-escaped text, name, id) in any file and every other file byte-identical; an edit leaves one version; Delete journal empties the folder; a cut save; unreadable files skipped with a code and untouched; other files left alone; the first-use flag; bad ids refused |
 | `app/test/journal/channel_journal_files_test.dart` | 5 | Each call's name and arguments; answers; missing answers never read as protected; failures as codes, bad names never sent; the Swift side answers every method |
 | `app/test/journal/self_check_test.dart` | 4 | Passes and leaves nothing; fails at step 3 for each missing protection, probe removed; fails at step 2; keeps other nights |
+| `app/test/core/privacy_cover_test.dart` | 4 | `inactive` covers the whole screen with the page colour and the cover holds nothing (no text, image or icon); it is on top and what is under it is kept but out of the semantics; `hidden` and `paused` keep it, `resumed` removes it; the dark theme's page colour |
+| `app/test/app_test.dart` | +1 | Every page of the app is under the cover |
+| `app/test/core/keyboards_test.dart` | 2 | `AppDelegate.swift` refuses the keyboard extension point and only it (read as text: no test runs the Swift); Dev's keyboard check is one empty field, no words |
 
-**Totals after the branch:** guard tests 195 → **221**; guard mutations 68 → **75**; app tests 14 → **47**; app
-mutation checks **8** (A1 to A8), by hand with the scratch runner (Part 4, Q4). The new guard mutation rows:
+**Totals after the branch:** guard tests 195 → **221**; guard mutations 68 → **75**; app tests 14 → **54**; app
+mutation checks **13** (A1 to A13), by hand with the scratch runner (Part 4, Q4). The new guard mutation rows:
 
 | | Break | Must fail |
 |---|---|---|
@@ -132,7 +152,7 @@ mutation checks **8** (A1 to A8), by hand with the scratch runner (Part 4, Q4). 
 | 74 | `g2_copies.py`: a font's hash not compared | `test_g1_g2.G2.test_font_hash_mismatch_refuses` |
 | 75 | `g2_copies.py`: the fonts never checked | `test_g1_g2.G2.test_font_unlisted_refuses` |
 
-The app's mutation checks, in `.scratch/journal-core/app_mutations.py` (Task 10):
+The app's mutation checks, in `.scratch/journal-core/app_mutations.py` (run in Task 12):
 
 | | Break | Must fail |
 |---|---|---|
@@ -144,12 +164,17 @@ The app's mutation checks, in `.scratch/journal-core/app_mutations.py` (Task 10)
 | A6 | a file whose id differs from its name is read | an unreadable file is skipped with a code, never touched |
 | A7 | extra keys accepted | anything not a version-1 night decodes to null |
 | A8 | the protections not checked | each missing protection fails at step 3, probe removed |
+| A9 | the cover only when `paused` | inactive covers the screen with the page colour, no text |
+| A10 | what is under the cover stays in the semantics | the cover is on top and hides what is under it |
+| A11 | the light page colour in either theme | the dark theme gets the dark page colour |
+| A12 | the app not under the cover | every page of the app is under the cover |
+| A13 | the Swift allows every keyboard | AppDelegate refuses the keyboard extension point, and only it |
 
 ---
 
 ## Part 2 · Settings
 
-None change. D49 approves G0's new kind (`.txt` in `app/assets/fonts/`, CLAUDE.md G0). `tool/checks/` is writable by
+None change, for D50 either. D49 approves G0's new kind (`.txt` in `app/assets/fonts/`, CLAUDE.md G0). `tool/checks/` is writable by
 Claude Code (`Edit(/tool/checks/**)` allowed); nothing here edits `check_all.sh`, `.githooks`, `CLAUDE.md`,
 `docs/workflow.md`, the importer or `wordsgen.py`.
 
@@ -191,19 +216,14 @@ From the repository root, on `journal-core` with a clean tree:
     cd app && fvm flutter analyze --no-pub && fvm flutter test --no-pub
 
 Expected: `Ran 195 tests`, `OK`; `mutations: 68 run, all caught`; `guards (tracked): all passed`; `No issues found!`;
-`+14: All tests passed!`. Any other result stops the branch.
+`+14: All tests passed!`. Any other result stops the branch. The fixture is already committed (Part 4, Q2).
 
 ### Task 1 · The scratch files
 
-Write the three files the later tasks use, none committed (`.scratch/` is ignored):
+Write the two files the later tasks use, neither committed (`.scratch/` is ignored):
 
 - `.scratch/journal-core/fonts.sh` (Task 5's block);
-- `.scratch/journal-core/app_mutations.py` (Task 10's block);
-- `.scratch/journal-core/invented-nights.json`: already there, kept by this plan's proof (Part 4, Q2). Check it:
-
-      shasum -a 256 .scratch/journal-core/invented-nights.json
-
-  Expected: `feb1baaea50d2d313dc5aefd3f3b21af0d47690a6564614894af13eec6985932`. If it is missing or differs, stop: the owner decides (Part 4, Q2).
+- `.scratch/journal-core/app_mutations.py` (Task 12's block).
 
 ### Task 2 · The design values generator (D49 a, O3)
 
@@ -1553,41 +1573,13 @@ void main() {
 
 ### Task 7 · The invented nights (R2)
 
-The fixture's text is not in this plan: invented nights live in one file (R2; Part 4, Q2).
+The fixture was committed with this plan's amendment (Part 4, Q2); its text is not in the plan, because invented
+nights live in one file (R2). This task checks it and writes the tests' reader.
 
-1. The reader and its test:
+1. From the repository root: `shasum -a 256 fixtures/invented-nights.json` prints `feb1baaea50d2d313dc5aefd3f3b21af0d47690a6564614894af13eec6985932`. A different
+   hash, or no file, stops the task.
 
-**File `app/test/fixtures.dart`**
-
-~~~~dart
-// The invented nights (R2): every test night comes from
-// fixtures/invented-nights.json, read here. `flutter test` runs in app/.
-import 'dart:convert';
-import 'dart:io';
-
-/// One invented night, as the fixture file holds it.
-final class InventedNight {
-  const InventedNight(this.key, this.lang, this.name, this.dreams);
-
-  final String key;
-  final String lang;
-  final String? name;
-  final List<String> dreams;
-}
-
-/// Every invented night, in the file's order.
-List<InventedNight> inventedNights() {
-  final json = jsonDecode(File('../fixtures/invented-nights.json').readAsStringSync());
-  return [
-    for (final n in (json as Map<String, Object?>)['nights'] as List<Object?>)
-      if (n case {'key': String key, 'lang': String lang, 'dreams': List<Object?> dreams})
-        InventedNight(key, lang, (n as Map)['name'] as String?, dreams.cast<String>()),
-  ];
-}
-
-/// The invented night named [key].
-InventedNight invented(String key) => inventedNights().singleWhere((n) => n.key == key);
-~~~~
+2. The test:
 
 **File `app/test/fixtures_test.dart`**
 
@@ -1624,13 +1616,44 @@ void main() {
 }
 ~~~~
 
-2. Red: `cd app && fvm flutter test --no-pub test/fixtures_test.dart` ends `+0 -3: Some tests failed.`
+3. Red: `cd app && fvm flutter test --no-pub test/fixtures_test.dart` fails to load (`fixtures.dart` not found).
 
-3. From the repository root: `mkdir -p fixtures && cp .scratch/journal-core/invented-nights.json fixtures/`, then
-   `shasum -a 256 fixtures/invented-nights.json` prints `feb1baaea50d2d313dc5aefd3f3b21af0d47690a6564614894af13eec6985932`.
+4. The reader:
 
-4. Green: the gate, 23 app tests. Commit `fixtures/invented-nights.json`, `app/test/fixtures.dart`,
-   `app/test/fixtures_test.dart`: "Fixtures: the invented nights file, and the tests' reader (R2; D49)".
+**File `app/test/fixtures.dart`**
+
+~~~~dart
+// The invented nights (R2): every test night comes from
+// fixtures/invented-nights.json, read here. `flutter test` runs in app/.
+import 'dart:convert';
+import 'dart:io';
+
+/// One invented night, as the fixture file holds it.
+final class InventedNight {
+  const InventedNight(this.key, this.lang, this.name, this.dreams);
+
+  final String key;
+  final String lang;
+  final String? name;
+  final List<String> dreams;
+}
+
+/// Every invented night, in the file's order.
+List<InventedNight> inventedNights() {
+  final json = jsonDecode(File('../fixtures/invented-nights.json').readAsStringSync());
+  return [
+    for (final n in (json as Map<String, Object?>)['nights'] as List<Object?>)
+      if (n case {'key': String key, 'lang': String lang, 'dreams': List<Object?> dreams})
+        InventedNight(key, lang, (n as Map)['name'] as String?, dreams.cast<String>()),
+  ];
+}
+
+/// The invented night named [key].
+InventedNight invented(String key) => inventedNights().singleWhere((n) => n.key == key);
+~~~~
+
+5. Green: the gate, 23 app tests. Commit `app/test/fixtures.dart` and `app/test/fixtures_test.dart`: "Fixtures: the
+   tests' reader of the invented nights (R2; D49)".
 
 ### Task 8 · A night and its format (D49 b, O5)
 
@@ -2577,7 +2600,7 @@ final class ChannelJournalFiles implements JournalFiles, JournalProtection {
 **File `app/lib/journal/self_check.dart`**
 
 ~~~~dart
-// The phone check (D49 c; the plan's Task 11): SoulDreams Dev runs it
+// The phone check (D49 c; the plan's Task 13): SoulDreams Dev runs it
 // once when built with --dart-define=JOURNAL_SELF_CHECK=true. It saves a
 // probe night, reads back the folder's backup flag and both protection
 // classes, reads the probe, deletes it, and checks no file names it. It
@@ -2821,6 +2844,398 @@ import 'journal/self_check.dart';
 6. Commit the six files: "Journal: the Swift folder (backup-excluded, complete protection), its channel, and the
    phone check (D49 b, c)".
 
+### Task 11 · The cover (D50 2; P11)
+
+1. The tests:
+
+**File `app/test/core/privacy_cover_test.dart`**
+
+~~~~dart
+// The cover (D50 2; P11): when the app leaves the foreground, the plain
+// page colour covers the screen before iOS takes its snapshot. No logo,
+// no words. Covered from inactive on, removed on resumed.
+import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/core/privacy_cover.dart';
+import 'package:souldreams/design/tokens.g.dart';
+
+Widget _app({Brightness brightness = Brightness.light}) {
+  return MaterialApp(
+    theme: ThemeData(brightness: brightness),
+    builder: (context, child) => PrivacyCover(child: child!),
+    home: const Scaffold(body: Center(child: Text('invented'))),
+  );
+}
+
+// Whether the semantics tree, as VoiceOver gets it, holds the label.
+bool _spoken(WidgetTester tester, String label) {
+  var found = false;
+  bool visit(SemanticsNode node) {
+    if (node.label.contains(label)) found = true;
+    node.visitChildren(visit);
+    return true;
+  }
+
+  visit(tester.binding.renderViews.first.owner!.semanticsOwner!.rootSemanticsNode!);
+  return found;
+}
+
+Future<void> _to(WidgetTester tester, AppLifecycleState state) async {
+  tester.binding.handleAppLifecycleStateChanged(state);
+  await tester.pump();
+}
+
+void main() {
+  testWidgets('inactive covers the screen with the page colour, no text', (tester) async {
+    await tester.pumpWidget(_app());
+    expect(find.byKey(PrivacyCover.coverKey), findsNothing);
+    await _to(tester, AppLifecycleState.inactive);
+    final cover = find.byKey(PrivacyCover.coverKey);
+    expect(cover, findsOneWidget);
+    expect(tester.widget<ColoredBox>(cover).color, LightColours.page.colour);
+    expect(tester.getSize(cover), tester.view.physicalSize / tester.view.devicePixelRatio);
+    expect(find.descendant(of: cover, matching: find.byType(RichText)), findsNothing);
+    expect(find.descendant(of: cover, matching: find.byType(Image)), findsNothing);
+    expect(find.descendant(of: cover, matching: find.byType(Icon)), findsNothing);
+    expect(find.descendant(of: cover, matching: find.byType(Widget)), findsNothing);
+  });
+
+  testWidgets('the cover is on top and hides what is under it', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_app());
+    expect(_spoken(tester, 'invented'), isTrue);
+    await _to(tester, AppLifecycleState.inactive);
+    final stack = tester.widget<Stack>(find.byKey(PrivacyCover.stackKey));
+    expect((stack.children.last as Positioned).child.key, PrivacyCover.coverKey);
+    expect(find.text('invented'), findsOneWidget, reason: 'kept, not rebuilt');
+    expect(_spoken(tester, 'invented'), isFalse);
+    semantics.dispose();
+  });
+
+  testWidgets('hidden and paused keep it; resumed removes it', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await tester.pumpWidget(_app());
+    await _to(tester, AppLifecycleState.inactive);
+    await _to(tester, AppLifecycleState.hidden);
+    expect(find.byKey(PrivacyCover.coverKey), findsOneWidget);
+    await _to(tester, AppLifecycleState.paused);
+    expect(find.byKey(PrivacyCover.coverKey), findsOneWidget);
+    await _to(tester, AppLifecycleState.hidden);
+    await _to(tester, AppLifecycleState.inactive);
+    expect(find.byKey(PrivacyCover.coverKey), findsOneWidget);
+    await _to(tester, AppLifecycleState.resumed);
+    expect(find.byKey(PrivacyCover.coverKey), findsNothing);
+    expect(_spoken(tester, 'invented'), isTrue);
+    semantics.dispose();
+  });
+
+  testWidgets('the dark theme gets the dark page colour', (tester) async {
+    await tester.pumpWidget(_app(brightness: Brightness.dark));
+    await _to(tester, AppLifecycleState.inactive);
+    final cover = find.byKey(PrivacyCover.coverKey);
+    expect(tester.widget<ColoredBox>(cover).color, DarkColours.page.colour);
+  });
+}
+~~~~
+
+**Edit `app/test/app_test.dart`** (1 of 2)
+
+~~~~dart
+import 'package:souldreams/app.dart';
+
+~~~~
+
+~~~~dart
+import 'package:souldreams/app.dart';
+import 'package:souldreams/core/privacy_cover.dart';
+
+~~~~
+
+**Edit `app/test/app_test.dart`** (2 of 2)
+
+~~~~dart
+  });
+}
+~~~~
+
+~~~~dart
+  });
+
+  testWidgets('every page of the app is under the cover (D50 2)', (tester) async {
+    await tester.pumpWidget(const SoulDreamsApp());
+    expect(find.ancestor(of: find.byType(Scaffold), matching: find.byType(PrivacyCover)),
+        findsOneWidget);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump();
+    expect(find.byKey(PrivacyCover.coverKey), findsOneWidget);
+  });
+}
+~~~~
+
+2. Red: `cd app && fvm flutter test --no-pub test/core/privacy_cover_test.dart test/app_test.dart`: both fail to load
+   (`privacy_cover.dart` not found).
+
+3. The cover, and the app under it:
+
+**File `app/lib/core/privacy_cover.dart`**
+
+~~~~dart
+import 'package:flutter/material.dart';
+
+import '../design/tokens.g.dart';
+
+/// The cover (D50 2; P11). iOS snapshots the screen for the app switcher
+/// after the app leaves the foreground, and Apple advises hiding what is
+/// private first (D49 O10). From `inactive` on, the plain page colour of
+/// the current theme covers everything: no logo, no words. `resumed`
+/// removes it. What is under it stays built, and out of the semantics.
+class PrivacyCover extends StatefulWidget {
+  const PrivacyCover({super.key, required this.child});
+
+  final Widget child;
+
+  static const coverKey = Key('privacy-cover');
+  static const stackKey = Key('privacy-cover-stack');
+
+  @override
+  State<PrivacyCover> createState() => _PrivacyCoverState();
+}
+
+class _PrivacyCoverState extends State<PrivacyCover> with WidgetsBindingObserver {
+  bool _covered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = WidgetsBinding.instance.lifecycleState;
+    _covered = state != null && state != AppLifecycleState.resumed;
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final covered = state != AppLifecycleState.resumed;
+    if (covered != _covered) setState(() => _covered = covered);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final page = (dark ? DarkColours.page : LightColours.page).colour!;
+    return Stack(
+      key: PrivacyCover.stackKey,
+      textDirection: TextDirection.ltr,
+      children: [
+        ExcludeSemantics(excluding: _covered, child: widget.child),
+        if (_covered) Positioned.fill(child: ColoredBox(key: PrivacyCover.coverKey, color: page)),
+      ],
+    );
+  }
+}
+~~~~
+
+**Edit `app/lib/app.dart`** (1 of 2)
+
+~~~~dart
+
+/// The app. For now a blank screen with no text (scaffold-2-app).
+class SoulDreamsApp extends StatelessWidget {
+~~~~
+
+~~~~dart
+
+import 'core/privacy_cover.dart';
+
+/// The app. For now a blank screen with no text (scaffold-2-app), under
+/// the cover (D50 2) on every page.
+class SoulDreamsApp extends StatelessWidget {
+~~~~
+
+**Edit `app/lib/app.dart`** (2 of 2)
+
+~~~~dart
+  Widget build(BuildContext context) {
+    return const MaterialApp(debugShowCheckedModeBanner: false, home: Scaffold());
+  }
+~~~~
+
+~~~~dart
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      builder: (context, child) => PrivacyCover(child: child!),
+      home: const Scaffold(),
+    );
+  }
+~~~~
+
+4. Green: the gate, 52 app tests. Commit the four files: "The cover: the page colour over the app when it leaves the
+   foreground (D50 2)".
+
+### Task 12 · Third-party keyboards refused (D50 1)
+
+1. The test:
+
+**File `app/test/core/keyboards_test.dart`**
+
+~~~~dart
+// Third-party keyboards refused, app-wide (D50 1). No test runs the
+// Swift, so this one reads it, comments removed; the phone check proves
+// it (the plan's Task 13). `flutter test` runs in app/.
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/app.dart';
+import 'package:souldreams/core/keyboard_check.dart';
+
+void main() {
+  test('AppDelegate refuses the keyboard extension point, and only it', () {
+    final swift = File('ios/Runner/AppDelegate.swift')
+        .readAsLinesSync()
+        .map((line) => line.split('//').first)
+        .join('\n')
+        .replaceAll(RegExp(r'\s+'), ' ');
+    const method = 'override func application( _ application: UIApplication, '
+        'shouldAllowExtensionPointIdentifier extensionPointIdentifier: '
+        'UIApplication.ExtensionPointIdentifier ) -> Bool { '
+        'return extensionPointIdentifier != .keyboard }';
+    expect(swift, contains(method));
+    expect('shouldAllowExtensionPointIdentifier'.allMatches(swift), hasLength(1));
+  });
+
+  testWidgets('the Dev keyboard check is one empty field, no words', (tester) async {
+    await tester.pumpWidget(const SoulDreamsApp(home: KeyboardCheck()));
+    expect(find.byType(TextField), findsOneWidget);
+    expect(tester.widget<TextField>(find.byType(TextField)).autofocus, isTrue);
+    expect(find.byType(RichText), findsNothing);
+    expect(find.byType(EditableText), findsOneWidget);
+    expect(tester.widget<EditableText>(find.byType(EditableText)).controller.text, isEmpty);
+  });
+}
+~~~~
+
+2. Red: `cd app && fvm flutter test --no-pub test/core/keyboards_test.dart` fails to load (`keyboard_check.dart` not
+   found).
+
+3. Dev's keyboard check, the app's optional first page, the Swift and the Dev entry point:
+
+**File `app/lib/core/keyboard_check.dart`**
+
+~~~~dart
+import 'package:flutter/material.dart';
+
+/// SoulDreams Dev only (D50 1; the plan's Task 13): one empty field, no
+/// words, so the owner can see that the phone offers no third-party
+/// keyboard here. Nothing typed is kept.
+class KeyboardCheck extends StatelessWidget {
+  const KeyboardCheck({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: SafeArea(child: TextField(autofocus: true)));
+  }
+}
+~~~~
+
+**Edit `app/lib/app.dart`** (1 of 2)
+
+~~~~dart
+class SoulDreamsApp extends StatelessWidget {
+  const SoulDreamsApp({super.key});
+
+~~~~
+
+~~~~dart
+class SoulDreamsApp extends StatelessWidget {
+  const SoulDreamsApp({super.key, this.home});
+
+  /// The first page; a blank one when null. Only SoulDreams Dev sets it
+  /// (the keyboard check, D50 1).
+  final Widget? home;
+
+~~~~
+
+**Edit `app/lib/app.dart`** (2 of 2)
+
+~~~~dart
+      builder: (context, child) => PrivacyCover(child: child!),
+      home: const Scaffold(),
+    );
+~~~~
+
+~~~~dart
+      builder: (context, child) => PrivacyCover(child: child!),
+      home: home ?? const Scaffold(),
+    );
+~~~~
+
+**Edit `app/ios/Runner/AppDelegate.swift`**
+
+~~~~swift
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+~~~~
+
+~~~~swift
+    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  // Third-party keyboards refused, app-wide (D50 1): Apple's documented way
+  // to reject custom keyboards. Every other extension point is allowed.
+  // FlutterAppDelegate's own answer (it asks the plugins) is not consulted.
+  override func application(
+    _ application: UIApplication,
+    shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier
+  ) -> Bool {
+    return extensionPointIdentifier != .keyboard
+  }
+~~~~
+
+**Edit `app/lib/main_dev.dart`** (1 of 2)
+
+~~~~dart
+import 'core/flavour.dart';
+import 'core/safe_log.dart';
+~~~~
+
+~~~~dart
+import 'core/flavour.dart';
+import 'core/keyboard_check.dart';
+import 'core/safe_log.dart';
+~~~~
+
+**Edit `app/lib/main_dev.dart`** (2 of 2)
+
+~~~~dart
+  SafeLog.event(LogEvent.appStarted);
+  runApp(const SoulDreamsApp());
+  // The phone check (D49 c): only in a build made with
+~~~~
+
+~~~~dart
+  SafeLog.event(LogEvent.appStarted);
+  // The keyboard check (D50 1): only in a build made with
+  // --dart-define=KEYBOARD_CHECK=true.
+  runApp(SoulDreamsApp(
+      home: const bool.fromEnvironment('KEYBOARD_CHECK') ? const KeyboardCheck() : null));
+  // The phone check (D49 c): only in a build made with
+~~~~
+
+4. Green: the gate, 54 app tests (`entry_points_test.dart` still passes).
+
+5. The Swift type-check, the command of Task 10, step 5. Expected: `swift exit 0`. (`FlutterAppDelegate` already
+   declares the method, so it needs `override`; without it the type-check fails.)
+
+6. Commit the five files: "Third-party keyboards refused app-wide, and the Dev keyboard check (D50 1)".
+
 7. The app's mutation checks. The runner (written in Task 1, not committed; Part 4, Q4):
 
 **File `.scratch/journal-core/app_mutations.py`**
@@ -2828,7 +3243,7 @@ import 'journal/self_check.dart';
 ~~~~python
 # journal-core: the app's mutation checks (D49 c), run by hand from the
 # repository root:  python3 -I -B .scratch/journal-core/app_mutations.py
-# Each row breaks one thing in app/lib/, runs the named test, which must
+# Each row breaks one thing in app/, runs the named test, which must
 # fail, and puts the file back byte for byte, whatever happens. Prints
 # row codes only. Exit 0 when every row is caught.
 import os
@@ -2869,6 +3284,26 @@ ROWS = [
      '    if (!p.excluded || !p.folderComplete || !p.fileComplete) return _failed(step);\n',
      '',
      'test/journal/self_check_test.dart', 'each missing protection fails at step 3, probe removed'),
+    ('A9', 'lib/core/privacy_cover.dart',
+     'final covered = state != AppLifecycleState.resumed;',
+     'final covered = state == AppLifecycleState.paused;',
+     'test/core/privacy_cover_test.dart', 'inactive covers the screen with the page colour, no text'),
+    ('A10', 'lib/core/privacy_cover.dart',
+     'ExcludeSemantics(excluding: _covered, ',
+     'ExcludeSemantics(excluding: false, ',
+     'test/core/privacy_cover_test.dart', 'the cover is on top and hides what is under it'),
+    ('A11', 'lib/core/privacy_cover.dart',
+     '(dark ? DarkColours.page : LightColours.page)',
+     'LightColours.page',
+     'test/core/privacy_cover_test.dart', 'the dark theme gets the dark page colour'),
+    ('A12', 'lib/app.dart',
+     'builder: (context, child) => PrivacyCover(child: child!),',
+     'builder: (context, child) => child!,',
+     'test/app_test.dart', 'every page of the app is under the cover'),
+    ('A13', 'ios/Runner/AppDelegate.swift',
+     'return extensionPointIdentifier != .keyboard',
+     'return true',
+     'test/core/keyboards_test.dart', 'AppDelegate refuses the keyboard extension point, and only it'),
 ]
 
 
@@ -2916,10 +3351,10 @@ if __name__ == '__main__':
 ~~~~
 
    From the repository root: `python3 -I -B .scratch/journal-core/app_mutations.py`. Expected: `A1: caught` to
-   `A8: caught`, then `app mutations: 8 run, all caught`; `git status --short` prints nothing afterwards (every file
-   put back).
+   `A13: caught`, then `app mutations: 13 run, all caught`; `git status --short` prints nothing afterwards (every
+   file put back).
 
-### Task 11 · [OWNER] The phone checks (D49 c; O10)
+### Task 13 · [OWNER] The phone checks (D49 c; O10; D50)
 
 SoulDreams Dev only, invented nights only (R12). Nothing here touches the founder app.
 
@@ -2944,19 +3379,34 @@ SoulDreams Dev only, invented nights only (R12). Nothing here touches the founde
    deleted); then `0` (no trace of the probe anywhere in the container, caches included). Delete
    `~/Desktop/jc-container` afterwards.
 
-3. **[OWNER]** Optional: Settings → your name → iCloud → Manage Account Storage → Backups → this iPhone. SoulDreams
+3. **[OWNER]** Keyboards and the cover (D50). Before it: a third-party keyboard installed and added on the phone
+   (Settings → General → Keyboard → Keyboards → Add New Keyboard; any one, your choice; Part 4, Q14). Then Paste 3 —
+   Terminal
+
+       cd ~/Developer/soul-dreams-app/app && fvm flutter run --flavor dev -t lib/main_dev.dart --dart-define=KEYBOARD_CHECK=true -d <the phone's id>
+
+   SoulDreams Dev opens on one empty field, and the keyboard rises. Type nothing.
+   - **Keyboards.** Hold the globe (or emoji) key: the list offers Apple's keyboards only, never the third-party one.
+     As a control, the same list in Notes does offer it. Expected: refused here, offered in Notes.
+   - **The cover.** Back in SoulDreams Dev, with the field and keyboard showing, swipe up and hold to open the app
+     switcher. Expected: SoulDreams Dev's card is one plain colour (Light `color.page`, a pale cream), with no field,
+     no keyboard, no logo and no words. Tap the card: the field is back.
+
+   Quit with `q`. Afterwards you may remove the keyboard from the list again.
+
+4. **[OWNER]** Optional: Settings → your name → iCloud → Manage Account Storage → Backups → this iPhone. SoulDreams
    Dev's backup size is about zero [ASSUMED; Apple calls the exclusion guidance to the system, not a guarantee].
 
-4. Report the three results to Claude Code. A failure stops the branch before Task 12.
+5. Report the results to Claude Code. A failure stops the branch before Task 14.
 
-### Task 12 · `check_all.sh` and the docs (D49 Status)
+### Task 14 · `check_all.sh` and the docs (D49 Status; D50)
 
 1. From the repository root: `tool/check_all.sh`. Expected: `Ran 221 tests`, `OK`; `mutations: 75 run, all caught`;
-   `flutter: pinned 3.47.9, running 3.47.9`; `No issues found!`; `+47: All tests passed!`; `node: pinned 24, running
+   `flutter: pinned 3.47.9, running 3.47.9`; `No issues found!`; `+54: All tests passed!`; `node: pinned 24, running
    24`; `ℹ tests 28`, `ℹ fail 0`; `check_all: all passed`. It takes about ten minutes.
 
-2. **Edit** `docs/Status.md`, the seven blocks below. In the first, `YYYY-MM-DD` is the day of the run; in the last,
-   D48's line is the owner's answer to Part 4, Q1, word for word (the task waits for it).
+2. **Edit** `docs/Status.md`, the seven blocks below. In the first, `YYYY-MM-DD` is the day of the run. D48's line is
+   the owner's words (Part 4, Q1).
 
 **Edit `docs/Status.md`** (1 of 7)
 
@@ -2976,9 +3426,9 @@ build differs from Parts 1 to 5 (the owner's rulings D44 to D46, below) and gove
 ~~~~
 
 ~~~~markdown
-`journal-core`: the journal's foundations, with no screen (D49). Plan: `docs/plans/journal-core.md`. The screens,
-the night rules (the 21:00 boundary) and typing wait for Product's answers to P1 to P14, sent through the head, and
-come in a later branch.
+`journal-core`: the journal's foundations, with no screen (D49), and two app-wide protections (D50). Plan:
+`docs/plans/journal-core.md`. The screens, the night rules (the 21:00 boundary) and typing come in
+`journal-screens`, built to Product's answers to P1 to P14.
 ~~~~
 
 **Edit `docs/Status.md`** (3 of 7)
@@ -2991,7 +3441,7 @@ come in a later branch.
 ~~~~markdown
 ## Road ahead
 
-- The journal's screens, the night rules and typing, once Product answers P1 to P14 (D49; the plan's Part 1).
+- `journal-screens`: the journal's pages, the night rules and typing, to Product's answers to P1 to P14 (D48, D49).
 ~~~~
 
 **Edit `docs/Status.md`** (4 of 7)
@@ -3012,9 +3462,15 @@ come in a later branch.
   file protection, through the Swift channel in `AppDelegate.swift`. A save writes a temporary file and renames it; a
   file that does not read as a night is skipped (`journalFileSkipped`) and never touched; Delete journal empties the
   folder, the first-use flag included. The format may change freely until it first reaches the founder app (D49 O5).
-- SoulDreams Dev runs the phone check when built with `--dart-define=JOURNAL_SELF_CHECK=true` (the plan's Task 11).
-  Journal code reaches `main_dev.dart` only (D49 O1).
-- The app's analyzer baseline: `No issues found!`. The app has 47 tests, and 8 mutation checks (A1 to A8), run by
+- The cover (D50 2; P11): from `inactive` on, every page of the app is covered by the current theme's plain page
+  colour (`color.page`), no logo, no words; `resumed` removes it (`app/lib/core/privacy_cover.dart`, in
+  `app.dart`'s builder, so in all three apps).
+- Third-party keyboards are refused in all three apps (D50 1): `AppDelegate.swift` answers `false` for the keyboard
+  extension point, `true` for every other.
+- SoulDreams Dev runs the phone check when built with `--dart-define=JOURNAL_SELF_CHECK=true`, and shows one empty
+  field, no words, when built with `--dart-define=KEYBOARD_CHECK=true` (the plan's Task 13). Journal code reaches
+  `main_dev.dart` only (D49 O1).
+- The app's analyzer baseline: `No issues found!`. The app has 54 tests, and 13 mutation checks (A1 to A13), run by
   hand with `python3 -I -B .scratch/journal-core/app_mutations.py` (not committed; banked item 60).
 ~~~~
 
@@ -3053,8 +3509,12 @@ Banked in journal-core:
 63. The fonts' fingerprints prove the files have not changed since the owner's download, not where they came from.
     The zip names and Inter's 18pt statics are `fonts.sh`'s assumptions.
 64. The phone check logs through `SafeLog` only, so its result shows in DevTools' Logging view, not the terminal.
-65. Apple calls the backup exclusion guidance to the system, not a guarantee (D49 O10). The app-switcher snapshot of
-    a night on screen waits for Product's answer to P11.
+65. Apple calls the backup exclusion guidance to the system, not a guarantee (D49 O10).
+66. The cover is drawn by Flutter on `inactive`; that its frame reaches the screen before iOS takes the app-switcher
+    snapshot is proven only by the owner's look at the app switcher (the plan's Task 13). A native cover in
+    `SceneDelegate.swift` is the fallback if it ever does not.
+67. The cover follows the theme the app shows (`color.page`, light or dark). The app has no theme rules yet; they
+    come with Night/Day mode (Design System §6) in a later branch, and the cover follows them unchanged.
 ~~~~
 
 **Edit `docs/Status.md`** (7 of 7)
@@ -3070,25 +3530,46 @@ Banked in journal-core:
 
 - D47: the sandbox reaches no package registry, only `storage.googleapis.com`; `pub get` and `pub add` are the
   owner's (the owner's commit `1b3e93b`).
-- D48: <the owner's words, the plan's Part 4, Q1>
+- D48 (owner, 2026-11-11): the journal brainstorm's five leans accepted: (1) the slice is the core loop (open the app,
+  tonight's night, type a dream, kept on the phone, past nights, delete); (2) the journal on the phone only, excluded
+  from backup, protected by the phone's file protection, with as little package code as possible; (3) design values
+  from Product's design system through the checked import and a generator, never typed; (4) screens exactly to
+  main-path.md at C16-P, anything unclear a question to Product, never a guess; (5) English shown, Swedish built. D49
+  later split the slice: journal-core builds the foundations, journal-screens the pages.
 - D49: the investigation's rulings. This branch builds only what needs no Product answer: the design values
   generator with G1, and the fonts (G0, G2); the store (one JSON file per night, the folder out of backups, complete
   file protection, a version field, a Swift channel, no package); the deletion tests, and the unreadable file
   skipped and never touched. The screens, the night rules and typing wait for P1 to P14, sent through the head. O1
   to O10 accepted; O10's two Apple facts read by the Build chat. The lists becoming English only banked (item 59).
+  The plan's Part 4 answered (owner, 2026-11-11): the fixture committed with the plan's amendment; the other leans
+  accepted.
+- D50 (the head's messages 16 and 17; owner, 2026-11-11), app-wide and independent of any screen: (1) third-party
+  keyboards refused (founder-ruled), through `application(_:shouldAllowExtensionPointIdentifier:)`, Apple's
+  documented way [Build chat READ, developer.apple.com, `UIApplication.ExtensionPointIdentifier.keyboard`]; (2) P11:
+  when the app leaves the foreground, the plain page colour covers the screen, no logo, no words; on at `inactive`,
+  off at `resumed`. Product's other answers are for journal-screens.
 
 ## Documents as last imported
 ~~~~
 
-3. The gate. Commit `docs/Status.md`: "Docs: journal-core in Status.md; D47 to D49 and the banked items".
+3. The gate. Commit `docs/Status.md`: "Docs: journal-core in Status.md; D47 to D50 and the banked items".
 
 ---
 
-## Part 4 · Open questions (numbered; a blank is not a yes)
+## Part 4 · Questions (numbered; a blank is not a yes)
+
+**Q1 to Q11 were answered by the owner on 2026-11-11**, and the plan now builds to the answers:
+
+- **Q1:** D48 is the journal brainstorm's five leans, in the owner's words (Part 1's table; Task 14's last block).
+- **Q2:** the fixture is committed with this amendment, at `fixtures/invented-nights.json`; Task 7 checks it rather
+  than copying it.
+- **Q3 to Q11:** the leans, accepted.
+
+As first asked, for the record:
 
 1. **D48.** The ruling's text did not reach this session. *Lean:* it is the brief that opened the branch (the journal
    on the phone, nothing leaves it, invented nights only, installs the owner's, the head's four rulings relayed), and
-   Part 1 cites it so. *If otherwise:* Part 1's row and Task 12's line change; no code does.
+   Part 1 cites it so. *If otherwise:* Part 1's row and Task 14's line change; no code does.
 2. **The fixture's text is not in the plan.** R2 keeps every invented night in one file, so the plan names
    `.scratch/journal-core/invented-nights.json` (kept by the proof, sha256 given) and Task 7 copies it. *Lean:* yes.
    *If not:* the fixture is committed now with the plan, and Task 7 only checks its hash.
@@ -3111,46 +3592,70 @@ Banked in journal-core:
    *Lean:* yes.
 9. **The phone check's probe** is a night with one marker word, `journal-probe-d49`, never a dream, saved and deleted
    in SoulDreams Dev only. *Lean:* yes.
-10. **D46** is already recorded under branch 4 in Status.md; Task 12 adds D47 to D49 and does not repeat it. *Lean:*
+10. **D46** is already recorded under branch 4 in Status.md; Task 14 adds D47 to D50 and does not repeat it. *Lean:*
     yes. *If wanted twice:* one line more.
 11. **After an import of `design-system.md`**, the importer does not regenerate the tokens; G1 refuses until
     `python3 -I -B tool/checks/designgen.py --write` (banked item 61). *Lean:* bank it; the importer's change asks
     (it is under "ask") and waits for a later branch.
 
+**New with D50, open:**
+
+12. **The cover's colour follows the theme the app shows.** `color.page` of the light theme today (the app has no
+    theme rules yet), of the dark theme once Night/Day mode (Design System §6) sets it; the cover needs no change
+    then. *Lean:* yes. *If always one theme:* one line in `privacy_cover.dart` and one test.
+13. **The cover is Flutter's, drawn at `inactive`.** That covers more than the app switcher: Control Centre, a pulled
+    notification, the Face ID sheet and an incoming call also turn the screen to the plain colour until the app is
+    active again, as D50 rules ("cover on inactive, remove on active"). That Flutter's frame lands before iOS's
+    snapshot is ASSUMED and proven by Task 13's look at the app switcher; a native cover in `SceneDelegate.swift` is
+    the fallback (banked item 66). *Lean:* yes.
+14. **A field for the keyboard check.** The app has no text field until journal-screens, and a refused keyboard can
+    only be seen where a keyboard rises. SoulDreams Dev, built with `--dart-define=KEYBOARD_CHECK=true`, opens on one
+    empty field, no words; nothing typed is kept. The tester and founder apps never build it. Task 13 needs a
+    third-party keyboard on the phone, which you install and choose. *Lean:* yes.
+15. **FlutterAppDelegate's own answer is not consulted.** Flutter's delegate already answers this question (it asks
+    the plugins); ours overrides it and answers alone, so no plugin can allow a keyboard. *Lean:* yes, as D50 rules.
+
 ---
 
 ## Part 5 · How this plan was proven
 
-On 2026-11-11, before this file was committed:
+First on 2026-11-11, before `d556f99` committed the plan; again the same day for this amendment, before it was
+committed with the fixture:
 
-1. **Built in a scratch worktree**, `./.scratch/build-jc`, detached at `1b3e93b`, with the app's Flutter link and
-   package configuration copied in. Every block in Part 3 is generated from the files built and committed there,
-   and compared back. Its commits, in task order: `e868b26`; `c317230`; `5945fbc`; `0578402`; `8503f70`; `ab1f763`; `9eb8750`; `a04c33d`.
+1. **Built in a scratch worktree**, `./.scratch/build-jc`, detached at `d556f99` with the fixture committed on top (as
+   the amendment commits it), the app's Flutter link and package configuration copied in. Tasks 1 to 10 were
+   replayed there from the plan as first committed (each Edit's old text found once, each task committed through the
+   hook); Tasks 11 and 12 were built red then green. Every block in Part 3 is generated from the files committed
+   there, and compared back. Its commits, in task order: `d03b7c3`; `d905ebf`; `f685855`; `27d742a`; `f815bb1`; `64e39e6`; `ed89e94`; `5ac37ad`; `fea6e37`; `5a08e0e`; `7cb1a1f`; `d7ff67a`.
 2. **Each task, red then green, through the pre-commit hook** (`guards (staged): all passed` each time), with the
-   counts Part 3 states: generator tests red `errors=1`, then 12; G1 red `failures=5`; fonts' guards red
-   `failures=7`; fonts test red `-3`; fixtures red `-3`; the app 17, 20, 23, 29, 38, 47. Guard mutations: `3 run`,
-   `6 run`, `10 run`, each `all caught`; the whole runner `75 run, all caught`. App mutations: `8 run, all caught`,
-   and `git status` clean after.
+   counts Part 3 states. First proof: generator tests red `errors=1`, then 12; G1 red `failures=5`; fonts' guards red
+   `failures=7`; fonts test red `-3`; the app 17, 20, 23, 29, 38, 47. Guard mutations: `3 run`, `6 run`, `10 run`,
+   each `all caught`; the whole runner `75 run, all caught`. This amendment: Task 7 red with the fixture present
+   (`fixtures_test.dart` fails to load), then 23; the cover red (both files fail to load), then 52; the keyboards red
+   (fails to load), then 54. App mutations: `13 run, all caught`, and `git status` clean after.
 3. **The owner's download (Task 5) was simulated** with five fake zips holding the expected names (Inter's and
    Nunito's under `static/`), each "font" a few bytes with a NUL. `fonts.sh` stopped with `fonts: missing download
    Habibi.zip`, `STOPPED (nothing copied)`, when one was missing; wrote 13 files when all were there; and refused a
    second run (`already exists`). The real files are the owner's; only their names and the script's logic were
    proven.
-4. **The Swift type-checked** (`swiftc -typecheck`, iOS 15 simulator SDK, Flutter's framework): exit 0. It was not
-   built or run: the phone is the owner's (Task 11).
-5. **`tool/check_all.sh` on the worktree** ended `check_all: all passed`: `Ran 221 tests`, `OK`; `mutations: 75 run,
-   all caught`; `flutter: pinned 3.47.9, running 3.47.9`; `No issues found!`; `+47: All tests passed!`; `node:
-   pinned 24, running 24`; the server's 28. Its offline `pub get` passed with the fonts block in `pubspec.yaml`.
-6. **The plan replayed on a clean worktree**, `./.scratch/replay-jc`, detached at `1b3e93b`: every File and Edit
-   block applied in task order (each Edit's old text found exactly once), Task 5 from the fake zips, Task 12's
-   blocks with a stand-in D48 line, each task committed through the hook, and the final tree compared with the build
-   worktree's: no difference at Task 10 (`git diff --stat` printed nothing), and Task 12's seven Status.md blocks applied, each found once. On the replayed tree: `guards (tracked): all passed`; `Ran 221 tests`, `OK`; `No issues found!`; `+47: All tests passed!`.
+4. **The Swift type-checked** (`swiftc -typecheck`, iOS 15 simulator SDK, Flutter's framework): exit 0 at Task 10 and
+   at Task 12. It was not built or run: the phone is the owner's (Task 13).
+5. **`tool/check_all.sh` on the build worktree** ended `check_all: all passed`: `Ran 221 tests`, `OK`; `mutations: 75 run, all caught`; `flutter: pinned 3.47.9, running 3.47.9`; `No issues found!`; `+54: All tests passed!`; `node: pinned 24, running 24`; the server's 28, `ℹ fail 0`. Its offline `pub get` passed with the fonts block in `pubspec.yaml`.
+6. **The plan replayed on a clean worktree**, `./.scratch/replay-jc`, detached at the same fixture commit: every File
+   and Edit block applied in task order (each Edit's old text found exactly once), Task 5 from the fake zips, Task 7's
+   hash checked, Task 14's blocks with the day's date, each task committed through the hook, and the final tree
+   compared with the build worktree's: no difference at Task 14 (`git diff --stat` between the two final commits printed nothing), Task 14's seven Status.md blocks each found once. On the replayed tree: `guards (tracked): all passed`; `Ran 221 tests`, `OK`; `No issues found!`; `+54: All tests passed!`. Task 7's red was rechecked there at the Task 6 commit, the fixture present: `fixtures_test.dart` fails to load (`Error when reading 'test/fixtures.dart'`).
 7. **Found by the proof and fixed in the plan:** G4 counts test names and Python strings, so long ones were
    shortened or built from parts; G7's high-entropy rule refused a Swift alphabet literal, now three ranges; two old
    mutation rows' patterns followed the code they break (row 23's pattern stays unique, row 58's follows G1);
-   `mktemp -d` needs a template under the sandbox; `fonts.sh` copies nothing unless every file is found.
-8. **Not provable in the sandbox, and so the owner's:** the real fonts (Task 5), the iOS build and the phone (Task
-   11), whether the log shows in DevTools, and iCloud's backup size.
+   `mktemp -d` needs a template under the sandbox; `fonts.sh` copies nothing unless every file is found. In the
+   amendment: `FlutterAppDelegate` already declares the keyboard method, so ours needs `override` (the type-check
+   refused it without); `find.bySemanticsLabel` still finds a label under `ExcludeSemantics`, so the cover's test reads
+   the semantics tree itself; the app's mutation runner moved from Task 10 to Task 12, since A9 to A13 need Tasks 11
+   and 12.
+8. **Not provable in the sandbox, and so the owner's:** the real fonts (Task 5); the iOS build and the phone (Task
+   13): the backup flag and protection classes, the container, the refused keyboard, and the cover in the app
+   switcher; whether the log shows in DevTools; iCloud's backup size.
 9. The scratch worktrees are removed after the proof (`git worktree remove --force`); their commits were on
    detached HEADs and reach no branch.
 
