@@ -78,12 +78,12 @@
       "Edit(/tool/import.sh)",
       "Edit(/tool/checks/importer.py)",
       "Edit(/tool/checks/import_rows.py)",
-      "Edit(/tool/checks/wordsgen.py)"
+      "Edit(/tool/checks/wordsgen.py)",
+      "Edit(/tool/check_all.sh)",
+      "Edit(/.githooks/**)"
     ],
     "allow": [
-      "Edit(/.githooks/**)",
       "Edit(/tool/checks/**)",
-      "Edit(/tool/check_all.sh)",
       "Edit(/fixtures/**)"
     ]
   },
