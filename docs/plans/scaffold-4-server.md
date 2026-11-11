@@ -1212,8 +1212,8 @@ Banked in branch 4:
    command's start, so the ruling's wording cannot be written as one. *Lean:* deny all; Claude Code reaches
    `npm ci --offline` only through `check_all.sh`, which fixes the flag. *If not:* deny only the bare `npm ci`, and an
    online `npm ci --no-audit` stays open to Claude Code.
-2. **Eleven more denials than D42 Q13 names** (Part 2): `npm add`, `npm up`, `npm upgrade`, `npm audit fix`,
-   `npm publish`, `npm exec`, and the CDK CLI's paths under `node_modules`. *Lean:* yes; they are other spellings of
+2. **Nine more rules than D42 Q13 names** (Part 2): `npm add`, `npm up` (two rules), `npm upgrade`, `npm audit fix`,
+   `npm publish`, `npm exec`, and the CDK CLI's two paths under `node_modules`. *Lean:* yes; they are other spellings of
    an install, the investigation's Q13 lean, and routes past `Bash(npx cdk *)`. *If not:* the script's `NEW` list
    loses them, and Task 0's count changes from 16.
 3. **The server's mutation checks are a scratch script, not committed** (banked item 46). *Lean:* yes for this branch;
