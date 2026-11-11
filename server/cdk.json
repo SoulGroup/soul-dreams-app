@@ -1,0 +1,8 @@
+{
+  "app": "node infra/app.ts",
+  "versionReporting": false,
+  "notices": false,
+  "context": {
+    "cli-telemetry": false
+  }
+}
