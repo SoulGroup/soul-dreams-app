@@ -2,8 +2,9 @@
 // by the CLI command (D20 Q8). It includes no signing: it waits for the
 // paid membership (D20 Q9b). See dev.xcconfig for the include order.
 #include "Generated.xcconfig"
+#include "words.g.xcconfig"
 PRODUCT_BUNDLE_IDENTIFIER = app.souldreams.founder
-// Register place MP·55, until branch 3's generator writes it (D20 Q2).
-APP_DISPLAY_NAME = [MP·55]
+// Register place MP·55, from the words generator (D32 Q16, Q17).
+APP_DISPLAY_NAME = $(WORDS_APP_NAME)
 FLUTTER_TARGET = lib/main_founder.dart
 FLAVOR = founder

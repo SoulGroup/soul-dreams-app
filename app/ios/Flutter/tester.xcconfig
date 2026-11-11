@@ -1,8 +1,9 @@
 // SoulDreams for testers (D20). It includes no signing: it waits for the
 // paid membership (D20 Q10). See dev.xcconfig for the include order.
 #include "Generated.xcconfig"
+#include "words.g.xcconfig"
 PRODUCT_BUNDLE_IDENTIFIER = app.souldreams
-// Register place MP·55, until branch 3's generator writes it (D20 Q2).
-APP_DISPLAY_NAME = [MP·55]
+// Register place MP·55, from the words generator (D32 Q16, Q17).
+APP_DISPLAY_NAME = $(WORDS_APP_NAME)
 FLUTTER_TARGET = lib/main.dart
 FLAVOR = tester

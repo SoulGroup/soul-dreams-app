@@ -4,6 +4,8 @@
 // an Xcode build uses this flavour's entry point, whatever the last
 // flutter command wrote there (D20 Q8).
 #include "Generated.xcconfig"
+// The microphone text, EM·3 (D32 Q17). The name below stays.
+#include "words.g.xcconfig"
 PRODUCT_BUNDLE_IDENTIFIER = app.souldreams.dev
 APP_DISPLAY_NAME = SoulDreams Dev
 FLUTTER_TARGET = lib/main_dev.dart
