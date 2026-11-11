@@ -1,0 +1,16 @@
+# Every imported file: its sha256, path here and filing.
+# Written by tool/import.sh only. Never edited by hand.
+4326cfcc5cb804344eb456a65ab56cbc4d8ccd2aa175214aff9253ee25d92500  app/assets/words/founder-lists-for-technology.md  C13-P
+b2bd53188762db71e58078c2634d6e455dcff3561010d78cb8f4d46ad85e59df  app/assets/words/places-register.csv  C16-P
+fcf8e8140d2b743ae58ad0431d15e43e099fbc60db8dcb2109f76040143748fe  docs/source/design-system.md  C16-P
+3c8878f6f03b6f75d460c13d7b85293f8da6edff8af94cb07799294e847e6a41  docs/source/experience-map.md  C16-P
+a7279784886b17364d84fd7f99b7dc5e15a4ee11f9a8e732a2a746fe84c324db  docs/source/how-the-ai-appears.md  C16-P
+486d480f1b2f4a39fa61be0b8c915f950cee807a3fb2e09b19fa6e5109718b70  docs/source/interpretation-change-record.md  C154-I
+6d503665ef9e86228672c1b8e0fea578bd8109d51e18259d6fc5f754e218ab19  docs/source/main-path.md  C16-P
+b9cb48191346c8f5cf8935f2ecc848b0f601c4de44f3452e80a120209b1bb170  docs/source/product-change-record.md  C16-P
+1f8992a7ec513553f5c08742244a304bc9d8d8dd9531c167d138230ba6a82a00  docs/source/product-principles.md  C16-P
+22f742c740ab640352883a45af4ecf9708c16d7c07df57d329bedde6c51e64c5  docs/source/requirements-list.md  C11-P
+c6b1d05a56a08deb90e2709f96fc4038a99f108b2cb6e2e0021df93aac7bdca5  docs/source/technical-answers.md  C5-T
+6499825fde54ec163bb3b4397cd45fb0cb536d6b6946b9487ea3c862823d3a46  docs/source/technology-change-record.md  C5-T
+0f40be6b5c8061d7afa1fc7cf1d29b5f080ebe5f6b61f713c7feff4cd90a1576  docs/source/technology-handover.md  C16-P
+f28b64e16cc8b4df3598d6dd86447645eceba2a48b2594682fc4f0bfb6981ff3  docs/source/tester-disclosure-specification.md  C11-P
