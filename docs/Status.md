@@ -14,7 +14,8 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`scaffold-4-server`: Scaffolding, branch 4 of 4. Plan: `docs/plans/scaffold-4-server.md`.
+`scaffold-4-server`: Scaffolding, branch 4 of 4. Plan: `docs/plans/scaffold-4-server.md`. Its Part 6 says where the
+build differs from Parts 1 to 5 (the owner's rulings D44 to D46, below) and governs.
 
 ## Road ahead
 
@@ -65,7 +66,8 @@ rulings given during each branch are listed in this file, one line each, under "
 - The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 28 tests, and
   16 mutation checks (S1 to S16) in `tool/server_mutations.py`, run by hand from the repository root with
   `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 16 run, 16 caught`); `check_all.sh` does not
-  call it (D43 Q3).
+  call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
+  `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
 ## Before the first deploy
 
@@ -92,8 +94,9 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45):
   if it is not.
 - `check_all.sh` also checks that the Flutter running is the one pinned, then runs `pub get` offline against the
   lockfile, the analyzer and the app's tests; and that the Node running is the major pinned, then runs `npm ci`
-  offline against the server's lockfile, `npm run check` and `npm test` (D42 Q2).
-- Totals: 192 guard tests and 68 mutation checks.
+  offline against the server's lockfile, `npm run check` and `npm test` (D42 Q2), each with npm's update check off
+  (`NPM_CONFIG_UPDATE_NOTIFIER=false`; D46, proved by `test_check_all.py`).
+- Totals: 195 guard tests and 68 mutation checks.
 
 ## Banked
 
@@ -211,6 +214,23 @@ Banked by D45 (Task 8, the CLI's own synth):
     newer-version banner (2.1148.0). For the head before the first deploy; `cdk.json` is unchanged. Whether the
     version check contacts the network is not known (the CLI was not run in the sandbox).
 
+Banked by D46 (the reviews of Task 7 and Task 6a):
+
+54. Task 7, note 1: `check_all.sh` reads the pinned Node from `engines` only in the shape `">=N "`, and only the
+    lower bound; any other shape fails safe (`FAILED: node-version`), and a range such as `">=24 <26"` would refuse
+    Node 25.
+55. Task 7, note 2: a failed `npm ci --offline` (a cache miss, a lockfile out of step) has already deleted
+    `server/node_modules`; the owner reinstalls before the checks can run again. Loud, not a pass.
+56. Task 7, note 4: the offline install rests on `check_all.sh`'s text and the lockfile, both writable by Claude Code
+    in the sandbox; an edited script could run an online `npm ci` past the deny rules. Edits to `tool/check_all.sh`
+    and `.githooks/**` ask again (D46, the owner's `62221ed`); the lockfile rests on the owner's reading of each
+    commit (D43 Q1).
+57. Task 6a, note a: the test named "logs: 7 days, JSON, application INFO, system WARN" also pins the group's
+    deletion and the Lambda's own group; its name undersells it.
+58. Task 6a, note b: S7, S15 and S16 name the same test, and the runner checks the test, not the assertion, so a
+    row whose change trips another assertion in it still reads as `caught` (each row's own assertion was seen to
+    fire by hand). A test that fails unbroken now stops the runner (`2fbaad6`).
+
 ## Rulings during branch 2
 
 - D21: answers Q1 to Q7 before Task 0: Flutter may write `~/.config/flutter` (`flutter config` and analytics denied); only the owner runs `check_all.sh` in this branch; CLAUDE.md's G5 line names Apple's loggers; a debug `--no-codesign` build per flavour; RunnerTests kept; founder scheme Run is `Release-founder`; the template's orientations kept.
@@ -245,6 +265,9 @@ Banked by D45 (Task 8, the CLI's own synth):
 - D43: answers the plan's Part 4: every direct `npm ci` denied, `check_all.sh` installs offline; the nine extra deny rules; the server's mutation checks committed as `tool/server_mutations.py`, run by hand; a different lockfile hash is not a stop by itself; `registry.npmjs.org` stays on the allowlist; Task 8 run once. Tasks 6 and 7 reviewed by Opus.
 - D44: Task 6's review (approve with notes): notes a, b and c fixed as Task 6a, test-first, rows S14 to S16 (the role's inline policies, the Lambda's own log group, the group's deletion policy); d, e and f banked (items 49 to 51); Task 7's review notes await a ruling.
 - D45: Task 8: the CLI's synth shows nine resource types and a `BootstrapVersion` parameter, accepted and banked with an optional test (item 52); the CLI's two notices banked for the head before the first deploy (item 53), `cdk.json` unchanged; Task 8 done.
+- D46: Task 7's review notes 1, 2 and 4 and Task 6a's notes a and b banked (items 54 to 58); edits to
+  `tool/check_all.sh` and `.githooks/**` ask again (the owner's `62221ed`); note 3: npm's update check off for
+  `check_all.sh`'s npm calls, with a test; `/simplify` skipped (D30).
 
 ## Documents as last imported
 

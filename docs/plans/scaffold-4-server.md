@@ -1364,3 +1364,61 @@ On 2026-11-11, before this file was committed:
    first draft's second Lambda was a literal of twelve words or more, which G4 refuses). Task 7's `check_all.sh`
    ended `check_all: all passed` (`node: pinned 24, running 24`); Task 9's nine `Status.md` blocks (now with D43)
    applied, each found once; guards all passed. The worktree was then removed.
+
+---
+
+## Part 6 · What the build changed (the final review's docs pass, 2026-11-11)
+
+Written after the branch was built and reviewed. The rulings are listed in `docs/Status.md`, "Rulings during branch 4"
+(D44 to D46 were given during the build). **Where this part and Parts 1 to 5 differ, this part governs.**
+
+### The commits, in order
+
+`6b6a8e8` Task 0, the settings (the owner's) · `4381632` Task 3, the packages · `6172db8` Task 4 · `3333c86` Task 5 ·
+`1fa900e` Task 6 · `6d76243` Task 6, the mutation checks · `1ca0d61` Task 7 · `3af209a` Task 6a (D44) · `cefed92`
+Task 9, the docs · `62221ed` D46, the settings (the owner's) · `c3143f1` D46, npm's update check off · `2fbaad6` the
+final review's fix to the server's mutation runner · then the final review's docs pass (this part). Tasks 2 and 8 were
+the owner's runs and are not commits.
+
+### The totals
+
+The server: **28 tests** (unchanged: Task 6a extended two existing tests) and **16 mutation checks**, S1 to S16
+(`server mutations: 16 run, 16 caught`, about 40 seconds), not 13. The guards: **195 tests** (192, then 1 for D46 in
+`test_check_all.py` and 2 in the new `test_server_mutations.py`) and **68 mutation checks**, not 192 and 68. The app:
+14 tests.
+
+### Superseded text, in order
+
+1. **Part 1, "What branch 4 builds" and "The files after this branch", and the test plan (lines 27, 89, 110 to 111 and
+   the table to line 127):** the runner holds S1 to S16, and its expected last line is `16 run, 16 caught`. Rows S14
+   to S16 (Task 6a, below): S14 an inline `logs:*` policy on `*` in the role must fail "the role writes to its own log
+   group only"; S15 an outside log group by name and S16 `RemovalPolicy.RETAIN` must fail "logs: 7 days, JSON,
+   application INFO, system WARN".
+2. **Part 1, "What branch 4 does not build" (lines 38 to 39):** the guards changed after all, by D46 and the final
+   review (`test_check_all.py` and `test_server_mutations.py`; no guard's code); the totals are above.
+3. **Task 6a was added** (D44 a, b, c; `3af209a`), test-first through the mutation rows: the role test also pins that
+   the role has no inline `Policies`; the logs test pins the Lambda's `LogGroup` to the stack's own group by `Ref`,
+   and the group's `DeletionPolicy` and `UpdateReplacePolicy` as `Delete`; `stack.ts` sets
+   `removalPolicy: RemovalPolicy.DESTROY` on the group. Red: `16 run, 13 caught`; then `16 run, 16 caught`.
+4. **Task 6's runner (lines 975 to 1078), by the final review (`2fbaad6`):** before any row, the runner copies the
+   unbroken server and runs `npm run check` and `npm test` there; if either fails it reports
+   `server mutations: FAILED (the unbroken server fails)` and exits 1. Before, a named test that already failed
+   unbroken counted as `caught`. The copy is made by `copy_server()`, shared with `run_row`.
+5. **Task 7 (lines 1105 to 1115):** steps 2 and 3 were the owner's runs (Claude Code's own `check_all.sh` was refused
+   by the auto-mode classifier); both ended as expected. By D46 (`c3143f1`), the server step also runs
+   `export NPM_CONFIG_UPDATE_NOTIFIER=false` before `npm ci --offline`, so `npm run check` and `npm test` make no
+   update check of their own; `test_check_all.py` proves it with a stand-in `npm` that records each call.
+6. **Task 8 (lines 1129 to 1131), by D45:** the CLI's synth printed a tenth `"Type"`,
+   `AWS::SSM::Parameter::Value<String>`, the template's `BootstrapVersion` parameter, not a resource; `Resources` held
+   the nine expected types and no `AWS::CDK::Metadata`. It also printed two notices (85 unset feature flags; a newer
+   CDK, 2.1148.0). Accepted, both banked (Status, items 52 and 53); `cdk.json` unchanged. Not a stop.
+7. **Task 9 (lines 1133 to 1290), by D44 and D45:** the commit says "D41 to D45"; "13 mutation checks (S1 to S13)"
+   became 16 (S1 to S16) and "about 20 seconds" about 40; the first-deploy checklist gained D44 d in step 5 and a new
+   step 7 (the head rules on the CLI's two notices), so the optional synth is step 8; "The server" gained a bullet
+   for Task 6a and one for Task 8; banked items 49 to 53 and the D44 and D45 lines were added.
+8. **Part 4, Q3 (line 1309):** the runner is committed as `tool/server_mutations.py` (D43), not under `tool/checks/`,
+   and `check_all.sh` does not call it; it runs sixteen rows (fifteen `npm test`, one `npm run check`) after one
+   unbroken run of both, in about 40 seconds.
+9. **D46 (2026-11-11):** Task 7's review notes 1, 2 and 4 and Task 6a's notes a and b are banked (Status, items 54 to
+   58); edits to `tool/check_all.sh` and `.githooks/**` ask again (`62221ed`, the owner's); note 3 is done (item 5
+   above); `/simplify` is skipped (D30 covers the four scaffolding branches).
