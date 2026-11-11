@@ -4,7 +4,8 @@
 
 Written by Claude Code (Opus) on 2026-11-10 from the investigation (`.scratch/for-build-chat/scaffold-3-investigation.md`)
 and the owner's rulings D32. **Proven before committing as far as the sandbox allows** (Part 5). Only this file is
-committed by the planning step; nothing here is implemented yet.
+committed by the planning step; nothing here was implemented yet. **The branch is built. Where the build differs from
+this text (the owner's rulings D33 to D39), Part 6 says so and governs; Parts 1 to 5 are kept as planned.**
 
 ## Part 1 · Spec
 
@@ -2665,5 +2666,61 @@ On 2026-11-10, before this file was committed:
    path (Task 8).
 8. The scratch worktrees were removed after the proof. The replay's invented documents repository, in `$TMPDIR`,
    committed under a throwaway identity set for that repository's command only.
+
+---
+
+## Part 6 · What the build changed (the final review's docs pass, 2026-11-11)
+
+Written after the branch was built and reviewed. The rulings are listed in `docs/Status.md`, "Rulings during branch 3".
+**Where this part and Parts 1 to 5 differ, this part governs.**
+
+### The commits, in order
+
+`1e928eb` settings (D32 Q19) · `a69319c` Task 1, the import · `fe30009` Task 1a (D35) · `6c6f4a3` Task 2b, the rows ·
+`0093fe2` Task 4, the generator (D36) · `51c5906` Task 4a (D37) · `e5999c2` Task 5, the guards · `79bca6d` Task 5a (D38)
+· `448cef3` Task 5b (D39) · `ca29414` Task 6, the owner's import · `8ac1cfb` Task 7, the iOS wiring · `b3c50ba` Task 9,
+the docs. Tasks 3 and 8 are not committed (`.scratch/`); Task 3's report is
+`.scratch/for-build-chat/scaffold-3-shape.md`. Task 0's canary was waived (D34).
+
+### The totals
+
+Guard tests and mutation checks, by task: Task 0 baseline 117 and 32 · Task 1 134 and 37 · Task 1a 141 and 45 · Task 4
+170 and 54 · Task 4a 171 and 55 · Task 5 184 and 61 · Task 5a 185 and 62 · Task 5b 188 and 63. **Final: 188 tests, 63
+mutations** (Task 1 +17/+5, 1a +7/+8, 4 +29/+9, 4a +1/+1, 5 +13/+6, 5a +1/+1, 5b +3/+1). The app's tests: 14. The plan's
+172 and 48, its 159 and 42, and its 134 and 37 gates in Tasks 4 to 6 and 9 are superseded by these.
+
+### Superseded text, in order
+
+1. **Lines 75 to 77 and Part 4, Q2:** "no file in this repository names the documents repository's path" is not what the
+   repository says: `docs/workflow.md` and Task 9's paste name it as the owner's command (and R6 and the settings do
+   as refusals). What holds is that no *code* reads it; `tool/import.sh` takes it from `SOUL_DREAMS_DOCS`.
+2. **Lines 96 to 97 (after a words or lists import):** a generator refusal leaves the copy and `SOURCES` already
+   written, and the generated words stale; G1 then reports `generator-refused:<code>` (banked item 43).
+3. **The status table (line 105):** `written, in its parts` with both fields empty gets no constant (D36 Q2).
+4. **The handle rule (line 116):** `^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*(·[0-9]+)?$`; the Dart name replaces both `·` and `-`
+   with `_`; two handles with one Dart name stop the generator with `dart-name-clash` (D36 Q1).
+5. **The lists (lines 124 to 126, Task 4's `read_lists`, Task 3's expectations):** five `## TECH·n — <title>` sections;
+   in each, the items under the `**English**` and `**Swedish**` marker lines; a non-blank line that is not an item
+   closes the list (D37); a line that looks like an item but is not one stops (D38); every shape error is
+   `lists-shape`. `lists.g.dart` holds ten constants, `tech1En` to `tech5Sv` (class `ListWords`). The codes
+   `sections`, `unexpected-line`, `empty-section`, `unexpected-heading` and `bad-word` no longer exist; `TECH_1` and
+   `TECH_5` in Task 4's test, and `ListWords.TECH_3` in Part 5, are `tech1En`, `tech5Sv` and `tech3En`.
+6. **Task 3 (lines 803 to 838 and 895 to 905):** the real counts are `written` 99, `composed (stand-in written)` 9,
+   `retired` 36, `to rewrite` 7, `composed, no stand-in` 3 (the others as expected); 41 handles are outside the first
+   pattern; one `written, in its parts` row is empty; the lists are per language. "Any difference stops the branch"
+   was relaxed to the structural ones by D33 (point 1), and Part 4, Q6 with it.
+7. **Task 4 (lines 907 to 912 and the code and test blocks to line 1693):** the generator and its tests as committed in
+   `0093fe2`, `51c5906` and `79bca6d`: 29 tests and 9 mutation rows, then 4a (+1/+1) and 5a (+1/+1); the gate was
+   170 and 54, not 159 and 42. The BOM test in `decode()` holds the literal character, as the plan has it.
+8. **Task 5 (lines 1729 to 1738 and 1987 to 1993):** the gate is 184 and 61; the red run had 72 tests with the eleven
+   named failing; the lists refusal expects `(LISTS, 5, 'generator-refused:lists-shape')`.
+9. **Tasks 5a and 5b were added** (D38: an item-like line stops, `79bca6d`; D39: G7's high-entropy rule is off under
+   `docs/source/` and every key shape still applies, `448cef3`, with `test_g7.py` +3 and one mutation row).
+10. **Task 6 and Task 9 (lines 2280 and 2601):** the totals are 188 and 63. Task 6 ran with Task 5b's change in place.
+11. **Part 5:** the proof of the plan as first written; its counts (159/42, 172/48) and `ListWords.TECH_3` are
+    superseded as above.
+12. **Task 1a (D35)** is not in the plan: the review's fixes: `on-main` compares the full ref (a tag named `main`, a
+    detached HEAD at `main`), `git()` drops every `GIT_*` variable, the ordinal refuses C1 controls and the Unicode
+    line and paragraph separators, three refusal codes tested, the wrapper test no longer passes through `bad-hash`.
 
 *No matter where you are on your journey, the steps you take are equally important.*

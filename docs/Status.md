@@ -14,8 +14,8 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`scaffold-3-import`: Scaffolding, branch 3 of 4. Plan: `docs/plans/scaffold-3-import.md`. Its Task 4, Task 5 and
-totals are superseded by D36 to D39 (below); the final review's docs pass corrects the plan text.
+`scaffold-3-import`: Scaffolding, branch 3 of 4. Plan: `docs/plans/scaffold-3-import.md`. Its Part 6 says where the
+build differs from Parts 1 to 5 (the owner's rulings D33 to D39, below) and governs.
 
 ## Road ahead
 
@@ -119,7 +119,24 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
 41. The microphone usage string is now in all three flavours' `Info.plist`. It does nothing until code asks for the
     microphone and opens no connection; App Review may question it until recording lands.
 42. Branch 3 ran with the owner's rulings D33 to D39 (below). The plan's Task 4 and Task 5 text, its Part 5 and its
-    totals are superseded by them; the final review's docs pass corrects the plan.
+    totals are superseded by them; the plan's Part 6 lists each correction.
+43. The final whole-branch review's notes (verdict: approve with notes; no defect, no rule broken), open for the
+    owner's rulings:
+    a. A generator refusal at the end of an import leaves the copy and `SOURCES` written and the generated words
+       stale (G1 then reports `generator-refused:<code>`); `importer.py`'s header and `docs/workflow.md` say the
+       import "refuses on any doubt" and "writes nothing", and no test pins this state. Either the importer rolls the
+       copy and `SOURCES` back, or the two texts say they are left in place.
+    b. `CLAUDE.md`'s G7 line does not mention D39's exemption under `docs/source/`.
+    c. `.claude/settings.json` asks before an edit of `tool/import.sh` but allows edits of `tool/checks/**`, where
+       `importer.py` and `import_rows.py` (which decide what may be copied) live; the sandbox's `denyWrite` covers
+       them for shell writes only.
+    d. No test pins the importer's copy-kind depth rule (`docs/source/sub/x.md`), the generator's `bad-csv` and
+       `missing` codes, its refusal of a symlinked input, or the importer's exit 2 on an internal error.
+    e. `importer.py` imports `posixpath` and never uses it.
+    f. The importer's refused-document check also refuses a file named `restricted`; G2's checks folders only (the
+       importer's is the stricter).
+    g. Between the register's import and the lists' import, G1 reports the lists as `unlisted`, next to the
+       importer's "the generator waits"; both are expected.
 
 ## Rulings during branch 2
 
