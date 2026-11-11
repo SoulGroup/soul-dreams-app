@@ -1,10 +1,11 @@
 # The server's mutation checks (D43 Q3), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
-# Each row breaks one thing in a copy of server/ in the temporary folder
-# (node_modules linked, never the repository), runs the type check or the
-# tests there, and the named test must fail. check_all.sh does not call
-# it. It reports row codes and test names only, through the checks' own
-# writer. Exit 0 when every row is caught, 1 otherwise.
+# First the unbroken server, copied, must pass its type check and tests.
+# Then each row breaks one thing in a copy of server/ in the temporary
+# folder (node_modules linked, never the repository), runs the type
+# check or the tests there, and the named test must fail. check_all.sh
+# does not call it. It reports row codes and test names only, through
+# the checks' own writer. Exit 0 when every row is caught, 1 otherwise.
 import os
 import shutil
 import subprocess
@@ -75,12 +76,32 @@ def failed_names(output):
     return names
 
 
-def run_row(code, path, old, new, what, name):
+def copy_server():
     copy = tempfile.mkdtemp(prefix='server-mutation-')
     try:
         shutil.copytree(SERVER, copy, dirs_exist_ok=True,
                         ignore=shutil.ignore_patterns('node_modules', 'dist', 'cdk.out'))
         os.symlink(os.path.join(SERVER, 'node_modules'), os.path.join(copy, 'node_modules'))
+    except BaseException:
+        shutil.rmtree(copy, ignore_errors=True)
+        raise
+    return copy
+
+
+def unbroken_passes():
+    copy = copy_server()
+    try:
+        for cmd in (['npm', 'run', 'check'], ['npm', 'test']):
+            if subprocess.run(cmd, cwd=copy, capture_output=True).returncode != 0:
+                return False
+        return True
+    finally:
+        shutil.rmtree(copy, ignore_errors=True)
+
+
+def run_row(code, path, old, new, what, name):
+    copy = copy_server()
+    try:
         target = os.path.join(copy, path)
         with open(target, encoding='utf-8') as f:
             text = f.read()
@@ -100,6 +121,9 @@ def main():
     if not os.path.isdir(os.path.join(SERVER, 'node_modules')):
         report('server mutations: no server/node_modules (the owner installs them)')
         return 2
+    if not unbroken_passes():
+        report('server mutations: FAILED (the unbroken server fails)')
+        return 1
     caught = 0
     for row in ROWS:
         result = run_row(*row)
