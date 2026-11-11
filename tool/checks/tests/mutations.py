@@ -175,6 +175,18 @@ MUTATIONS = [
      ['test_designgen.Generate.test_type_roles']),
     ('designgen.py', "        if value.endswith(UNSET):", "        if False:",
      ['test_designgen.Generate.test_an_unset_value_has_no_constant']),
+    # journal-core, Task 2a (D52): no prose in the output; an "after" value
+    # is fully parsed.
+    ('designgen.py', "[comment('`%s`' % role),", "[comment('`%s`: %s' % (role, used)),",
+     ['test_designgen.Generate.test_no_prose_reaches_the_tokens']),
+    ('designgen.py', "    doc = [comment('`%s`' % role)]",
+     "    doc = [comment('`%s` (%s)' % (role, note))]",
+     ['test_designgen.Generate.test_no_prose_reaches_the_tokens']),
+    ('designgen.py', "body.append(comment('`%s`' % role) + '\\n' + code)",
+     "body.append(comment('`%s`: %s' % (role, value)) + '\\n' + code)",
+     ['test_designgen.Generate.test_no_prose_reaches_the_tokens']),
+    ('designgen.py', "after [^\\d,]+, before [^\\d,]+$')", "after \\S.*$')",
+     ['test_designgen.Generate.test_an_after_value_with_other_text_stops']),
 ]
 
 

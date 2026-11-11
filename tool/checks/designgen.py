@@ -3,7 +3,9 @@
 # to app/lib/design/tokens.g.dart, every value named by its role. A pure
 # function of the file's bytes, so G1 can run it again and compare. It
 # knows each value form the tables use and stops on any other, with a
-# reason code and a line number, never a file's content.
+# reason code and a line number, never a file's content. No prose of the
+# Design System reaches the output: a comment carries the role name only
+# (D52).
 # Usage: designgen.py --write           write tokens.g.dart
 #        designgen.py --check           exit 1 if it differs
 #        add --root DIR to read the input, --out DIR to write or compare
@@ -55,7 +57,9 @@ BOX = re.compile(r'^(\d+)px above and below, (\d+)px left and right$')
 SIDES = re.compile(r'^(\d+)px from the left edge, (\d+)px from the right$')
 HEADER_GAP = re.compile(r'^(\d+)px above the header, (\d+)px below(?:, in both themes)?$')
 TALL = re.compile(r'^(\d+)px tall$')
-AFTER = re.compile(r'^(\d+)px (?:more space )?after \S.*$')
+# D52: "N px after A, before B": A and B are prose the generator does not
+# use, and hold no digit or comma, so no second value or part is dropped.
+AFTER = re.compile(r'^(\d+)px (?:more space )?after [^\d,]+, before [^\d,]+$')
 
 
 class DesignError(Exception):
@@ -231,7 +235,7 @@ def colour_const(role, note, v, notes, line):
             args.append('%s: %s' % (name, colour(v[key])))
     if v.get('width'):
         args.append('borderWidth: %s' % v['width'])
-    doc = [comment('`%s`%s' % (role, ' (%s)' % note if note else ''))]
+    doc = [comment('`%s`' % role)]
     if notes:
         doc.append(comment('Noted: ' + '; '.join(notes) + '.'))
     return doc + ['  static const %s = ColourRole(%s);' % (ident(role, line), ', '.join(args))]
@@ -295,7 +299,7 @@ def tokens_dart(type_rows, light, dark, spacing, unset, digest):
     out.append('/// Design System §1.\nabstract final class TypeRoles {\n')
     body = []
     for line, role, used, (family, weight, size, height, letter) in type_rows:
-        body.append('\n'.join([comment('`%s`: %s' % (role, used)),
+        body.append('\n'.join([comment('`%s`' % role),
                                "  static const %s = TypeRole('%s', %s, %s, %s, %s);"
                                % (ident(role, line), family, weight, size, height, letter)]))
     out.append('\n\n'.join(body) + '\n}\n\n')
@@ -319,7 +323,7 @@ def tokens_dart(type_rows, light, dark, spacing, unset, digest):
         else:
             code = ('  static const %s = EdgeInsets.only(top: %s, bottom: %s);'
                     % (ident(role, line), g[0], g[1]))
-        body.append(comment('`%s`: %s' % (role, value)) + '\n' + code)
+        body.append(comment('`%s`' % role) + '\n' + code)
     out.append('\n\n'.join(body) + '\n')
     if unset:
         out.append('\n  // Not set in the source yet ([to set in Framer]),\n')

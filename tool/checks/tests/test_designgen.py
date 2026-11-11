@@ -45,7 +45,8 @@ SPACING_ROWS = [
     r('space.box', '50px above and below, 30px left and right'),
     r('size.field.search', '50px tall'),
     r('space.bubble', '30px from the left edge, 10px from the right'),
-    r('space.turn', '20px more space after the last reply'),
+    r('space.turn', '20px more space after the last reply, before each new turn'),
+    r('space.label', '20px after "A" label, before the next line'),
     r('space.night.header', '20px above the header, 10px below, in both themes'),
     r('space.end', 'Space below the list: [to set in Framer]'),
     r('Everything else', '[to set in Framer]'),
@@ -151,6 +152,30 @@ class Generate(unittest.TestCase):
         self.refused(doc(spacing=[r('space.x', 'about 20px')]), 'spacing-form')
         self.refused(doc(spacing=[r('Everything else', '10px')]), 'spacing-form')
         self.refused(doc(light=[r('Page colour', '#F5F5EC')]), 'role-form')
+
+    def test_no_prose_reaches_the_tokens(self):
+        # D52: comments carry the role name only. Marker words are put in
+        # every descriptive place: a type row's "Used for", a role's
+        # parenthetical, and a spacing value's text.
+        t = text(doc(
+            type_rows=[r('type.h6', 'Inter', 'Regular', '9px', '1', '0', 'zebra marker')],
+            light=[r('color.page (quagga marker)', '#F5F5EC')],
+            dark=[r('color.page', '#0F0D29')],
+            spacing=[r('space.turn', '20px after the okapi marker, before the gnu marker')]))
+        for word in ('zebra', 'quagga', 'okapi', 'gnu'):
+            self.assertNotIn(word, t)
+        self.assertIn('/// `type.h6`\n', t)
+        self.assertIn('/// `color.page`\n', t)
+        self.assertIn('/// `space.turn`\n', t)
+
+    def test_an_after_value_with_other_text_stops(self):
+        # D52: trailing text the generator does not fully parse is never
+        # dropped silently.
+        for value in ('20px after the label, 30px before the image line',
+                      '20px after the label',
+                      '20px after the label, before the line, and more',
+                      '20px more space after the label, before the line, 30px'):
+            self.refused(doc(spacing=[r('space.x', value)]), 'spacing-form')
 
     def test_refusal_names_the_line(self):
         data = doc(light=[r('color.page', '#F5F5EC'), r('color.odd', '#12')])
