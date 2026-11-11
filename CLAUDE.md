@@ -86,13 +86,15 @@ merge command runs all of it. The guards (built in the first task, each with a m
 - **G0 file kinds** — every tracked file is a kind the guards know: code, config, or an unscanned type, name or path
   listed in `tool/checks/g0_kinds.py`. Anything else, an unknown `#!` interpreter included, is refused. A branch that
   brings a new kind of file extends the list, and the owner approves it.
-- **G1 words** — `lines.g.dart` is exactly what the generator makes from the CSV, and the CSV's and lists' hashes match
-  `docs/source/SOURCES`.
-- **G2 copies** — every file in `docs/source/` matches its listed hash.
+- **G1 words** — the generated words (`lines.g.dart`, `lists.g.dart`, `words.g.xcconfig` and the two
+  `InfoPlist.strings`) are exactly what the generator makes from the CSV and the lists, nothing else sits in
+  `app/lib/words/` or `app/assets/words/`, and the CSV's and lists' hashes match `docs/source/SOURCES`.
+- **G2 copies** — every file in `docs/source/` matches its listed hash; no tracked `privacy-ethics-safety.md`, and
+  nothing in a folder named `restricted`.
 - **G3 no literal words** — no string literal shown to a dreamer outside `app/lib/words/`; any other literal of more
   than two words needs `// not-dreamer-facing: <reason>` on its line.
-- **G4 invented only** — no string literal of twelve words or more outside `fixtures/invented-nights.json` and
-  `app/lib/words/`.
+- **G4 invented only** — no string literal of twelve words or more outside `fixtures/invented-nights.json`,
+  `app/lib/words/` and the generated iOS words.
 - **G5 logging** — no `print(`, `debugPrint(`, `log(` (`Math.log(` allowed), `console.`, `stdout.write`, `stderr.write`
   or `FlutterError.dumpErrorToConsole` outside the two safe loggers (`app/lib/core/safe_log.dart`,
   `server/src/safe-log.ts`) and the checks' own writer (`tool/checks/guardlib.py`); in Swift and headers also `NSLog(`, `os_log(` and `Logger(`.

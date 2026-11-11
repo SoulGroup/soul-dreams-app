@@ -99,11 +99,14 @@ the hook is caught here.
 Claude Code never reads the documents repository. When Product or Interpretation files a document the build reads,
 the owner runs the import script with the hash that filing recorded:
 
-    cd ~/Developer/soul-dreams-app && tool/import.sh <file> <expected-sha256>
+    cd ~/Developer/soul-dreams-app && SOUL_DREAMS_DOCS=~/Developer/soul-dreams-docs tool/import.sh <documents path> <expected-sha256> "<filing ordinal>"
 
-It refuses on a mismatch. On a match it copies the file into `docs/source/` (or `app/assets/words/` for the register and
-the lists), records its hash and the filing's ordinal in `docs/source/SOURCES`, regenerates `lines.g.dart`, and stops
-for the owner to commit. A copy is never edited; a difference found in it goes upward as a question.
+It refuses on any doubt: a mismatch, a dirty or unsynced documents repository, a path not in
+`tool/checks/import_rows.py`, or `main`. On a match it copies the file into `docs/source/` (or
+`app/assets/words/` for the register and the lists), records its hash and the filing's ordinal in
+`docs/source/SOURCES`, regenerates the words when the register or the lists change (`lines.g.dart`,
+`lists.g.dart`, `words.g.xcconfig` and the two `InfoPlist.strings`), and stops for the owner to commit. A copy is
+never edited; a difference found in it goes upward as a question.
 
 ## Installing on the owner's phone (i)
 
