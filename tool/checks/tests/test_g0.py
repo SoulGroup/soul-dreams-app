@@ -7,6 +7,16 @@ import g0_kinds
 
 
 class G0(GuardTest):
+    # D49 a: .txt is known in the fonts folder only, as UTF-8 text.
+    def test_txt_in_the_fonts_folder_only(self):
+        self.passed({'app/assets/fonts/OFL-Inter.txt': 'licence\n'})
+        self.refused({'app/notes.txt': 'x\n'}, 'unknown-kind')
+        self.refused({'app/assets/fonts/sub/OFL.txt': 'x\n'}, 'unknown-kind')
+        self.refused({'app/assets/fonts/OFL.txt': b'\xff\xfe'}, 'unknown-kind')
+
+    def test_a_font_is_binary(self):
+        self.passed({'app/assets/fonts/A-Regular.ttf': b'\x00\x01font'})
+
     guard = g0_kinds
 
     def test_known_kinds_pass(self):

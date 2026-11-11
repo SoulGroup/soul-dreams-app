@@ -189,6 +189,12 @@ MUTATIONS = [
      ['test_designgen.Generate.test_an_after_value_with_other_text_stops']),
     ('g1_words.py', "    design = design_findings(src)\n", "    design = []\n",
      ['test_g1_g2.G1.test_tokens_hand_edited_refuses']),
+    ('g0_kinds.py', "fonts_txt = ext == '.txt' and posixpath.dirname(path) + '/' == FONTS",
+     "fonts_txt = ext == '.txt'", ['test_g0.G0.test_txt_in_the_fonts_folder_only']),
+    ('g2_copies.py', "        elif sha256(src.read(path) or b'') != listed[path]:", "        elif False:",
+     ['test_g1_g2.G2.test_font_hash_mismatch_refuses']),
+    ('g2_copies.py', "    refused += font_findings(src)\n", "",
+     ['test_g1_g2.G2.test_font_unlisted_refuses']),
 ]
 
 

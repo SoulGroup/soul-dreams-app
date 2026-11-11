@@ -15,6 +15,7 @@ SOURCES = 'docs/source/SOURCES'
 CSV = 'app/assets/words/places-register.csv'
 LISTS = 'app/assets/words/founder-lists-for-technology.md'
 COPY = 'docs/source/handover.md'
+FONTS_LIST = 'app/assets/fonts/fingerprints.txt'
 
 
 def line(path, body, ordinal='C0-T item 1'):
@@ -169,6 +170,51 @@ class G2(GuardTest):
 
     def test_lookalike_names_pass(self):
         self.passed({MARKER: 'x\n', 'docs/restricted.md': 'h\n', 'docs/restricted-x/a.md': 'h\n'})
+
+    # D49 a: the fonts and their fingerprints.
+    def fonts(self, listed=None, files=None):
+        files = {'A-Regular.ttf': b'\x00a', 'OFL-A.txt': b'licence\n'} if files is None else files
+        listed = files if listed is None else listed
+        tree = {'app/assets/fonts/' + name: body for name, body in files.items()}
+        tree[FONTS_LIST] = ''.join(hashlib.sha256(body).hexdigest() + '  ' + name + '\n'
+                                   for name, body in listed.items())
+        tree.update({COPY: 'h\n', SOURCES: line(COPY, 'h\n')})
+        return tree
+
+    def test_fonts_listed_pass(self):
+        self.passed(self.fonts())
+
+    def test_font_unlisted_refuses(self):
+        tree = self.fonts(listed={'A-Regular.ttf': b'\x00a'})
+        self.assertEqual(self.refused(tree), [('app/assets/fonts/OFL-A.txt', 0, 'font-unlisted')])
+
+    def test_font_hash_mismatch_refuses(self):
+        tree = self.fonts()
+        tree['app/assets/fonts/A-Regular.ttf'] = b'\x00b'
+        self.assertEqual(self.refused(tree),
+                         [('app/assets/fonts/A-Regular.ttf', 0, 'font-hash-mismatch')])
+
+    def test_font_listed_but_missing_refuses(self):
+        tree = self.fonts(listed={'A-Regular.ttf': b'\x00a', 'B.ttf': b'\x00b'},
+                          files={'A-Regular.ttf': b'\x00a'})
+        self.assertEqual(self.refused(tree), [('app/assets/fonts/B.ttf', 0, 'font-missing')])
+
+    def test_fingerprints_malformed_refuses(self):
+        tree = self.fonts()
+        tree[FONTS_LIST] += 'abc  A-Regular.ttf\n'
+        self.assertIn((FONTS_LIST, 3, 'fingerprints-malformed'), self.refused(tree))
+
+    def test_fonts_without_fingerprints_refuse(self):
+        tree = self.fonts()
+        del tree[FONTS_LIST]
+        self.assertEqual(self.refused(tree), [(FONTS_LIST, 0, 'no-fingerprints')])
+
+    def test_fonts_checked_when_not_armed(self):
+        tree = self.fonts()
+        tree['app/assets/fonts/A-Regular.ttf'] = b'\x00b'
+        del tree[COPY], tree[SOURCES]
+        tree[MARKER] = 'x\n'
+        self.refused(tree, 'font-hash-mismatch')
 
     def test_unknown_path_outside_docs_source_refuses(self):
         self.refused({'app/x.txt': 'h\n', SOURCES: line('app/x.txt', 'h\n')}, 'unknown-path')
