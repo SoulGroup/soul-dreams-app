@@ -2696,8 +2696,8 @@ Guard tests and mutation checks, by task: Task 0 baseline 117 and 32 · Task 1 1
    repository says: `docs/workflow.md` and Task 9's paste name it as the owner's command (and R6 and the settings do
    as refusals). What holds is that no *code* reads it; `tool/import.sh` takes it from `SOUL_DREAMS_DOCS`.
 2. **Lines 96 to 97 (after a words or lists import):** a generator refusal leaves the copy and `SOURCES` already
-   written, and the generated words stale; G1 then refuses any commit (`generator-refused:<code>`). Nothing is rolled
-   back (D40); the importer's header and `docs/workflow.md` say so.
+   written, and the generated words stale; G1 then refuses any commit that includes the copy
+   (`generator-refused:<code>`). Nothing is rolled back (D40); the importer's header and `docs/workflow.md` say so.
 3. **The status table (line 105):** `written, in its parts` with both fields empty gets no constant (D36 Q2).
 4. **The handle rule (line 116):** `^[A-Z][A-Z0-9]*(-[A-Z0-9]+)*(·[0-9]+)?$`; the Dart name replaces both `·` and `-`
    with `_`; two handles with one Dart name stop the generator with `dart-name-clash` (D36 Q1).

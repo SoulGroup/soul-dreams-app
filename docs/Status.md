@@ -122,8 +122,10 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
     totals are superseded by them; the plan's Part 6 lists each correction.
 43. The final whole-branch review's notes (verdict: approve with notes; no defect, no rule broken); ruled by D40:
     a. RULED (D40): a generator refusal at the end of an import leaves the copy and `SOURCES` written and the
-       generated words stale (G1 then refuses; the fix is `wordsgen.py --write`); no rollback; the importer's header
-       and `docs/workflow.md` say so, and a test pins the state.
+       generated words stale (G1 then refuses any commit that includes the copy; the fix is `wordsgen.py --write`
+       if the generator's code changed, or, if the register or lists are at fault, a corrected filing imported
+       again, or the uncommitted copy and `SOURCES` discarded); no rollback; the importer's header and
+       `docs/workflow.md` say so, and a test pins the state.
     b. DONE (D40): `CLAUDE.md`'s G7 line names D39's exemption under `docs/source/`.
     c. OWNER'S (D40): the owner adds "ask" for `tool/checks/importer.py`, `import_rows.py` and `wordsgen.py` in
        `.claude/settings.json`. Until then those files can be edited without a prompt; the sandbox's `denyWrite`
@@ -161,7 +163,7 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
 - D37: Task 4's review: note 2 fixed as Task 4a (prose closes a list; a later item stops); the rest banked (item 37).
 - D38: Task 4a's note 4: an item-like line that is not a valid item stops with `lists-shape`; fixed as Task 5a.
 - D39: Task 6's first run failed only on G7's high-entropy rule in `docs/source/product-change-record.md` (archive file names); fixed as Task 5b: the rule does not apply under `docs/source/`, every key-shape rule still does (banked item 40).
-- D40: the final review's notes (item 43): when the generator refuses at the end of an import nothing is rolled back (the importer's header and `docs/workflow.md` say so; G1 refuses any commit until the words are regenerated); the G7 line in `CLAUDE.md` names D39's exemption; the owner adds "ask" for `importer.py`, `import_rows.py` and `wordsgen.py` in `.claude/settings.json` himself; the missing tests added (rows 64 to 68) and the unused `posixpath` import removed. Task 5a's edge cases stay banked (item 38).
+- D40: the final review's notes (item 43): when the generator refuses at the end of an import nothing is rolled back (the importer's header and `docs/workflow.md` say so; G1 refuses any commit that includes the copy until the words are regenerated); the G7 line in `CLAUDE.md` names D39's exemption; the owner adds "ask" for `importer.py`, `import_rows.py` and `wordsgen.py` in `.claude/settings.json` himself; the missing tests added (rows 64 to 68) and the unused `posixpath` import removed. Task 5a's edge cases stay banked (item 38).
 
 ## Documents as last imported
 

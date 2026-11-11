@@ -107,9 +107,11 @@ It refuses on any doubt: a mismatch, a dirty or unsynced documents repository, a
 `docs/source/SOURCES`, regenerates the words when the register or the lists change (`lines.g.dart`,
 `lists.g.dart`, `words.g.xcconfig` and the two `InfoPlist.strings`), and stops for the owner to commit. If the
 generator refuses at the end of a words or lists import, the copy and `SOURCES` stay in place (nothing is rolled
-back) and G1 refuses any commit until the words are regenerated: find the cause in the refusal's code and row (a
-question upward if the register or the lists are at fault), then run `python3 -I -B tool/checks/wordsgen.py
---write`. A copy is never edited; a difference found in it goes upward as a question.
+back) and G1 refuses any commit that includes the copy until the words are regenerated. Find the cause in the
+refusal's code and row. If the generator's code changed, run `python3 -I -B tool/checks/wordsgen.py --write`. If
+the register or the lists are at fault, the question goes upward, and either a corrected filing is imported again
+(which regenerates the words) or the uncommitted copy and `SOURCES` are discarded. A copy is never edited; a
+difference found in it goes upward as a question.
 
 ## Installing on the owner's phone (i)
 
