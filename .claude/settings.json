@@ -59,7 +59,10 @@
     "ask": [
       "Edit(/CLAUDE.md)",
       "Edit(/docs/workflow.md)",
-      "Edit(/tool/import.sh)"
+      "Edit(/tool/import.sh)",
+      "Edit(/tool/checks/importer.py)",
+      "Edit(/tool/checks/import_rows.py)",
+      "Edit(/tool/checks/wordsgen.py)"
     ],
     "allow": [
       "Edit(/.githooks/**)",
