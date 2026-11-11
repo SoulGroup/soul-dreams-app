@@ -126,10 +126,7 @@
     },
     "network": {
       "allowedDomains": [
-        "pub.dev",
-        "*.pub.dev",
-        "storage.googleapis.com",
-        "registry.npmjs.org"
+        "storage.googleapis.com"
       ],
       "allowLocalBinding": true
     }
