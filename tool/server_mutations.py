@@ -50,6 +50,17 @@ ROWS = [
     ('S13', 'infra/stack.ts', "    new HttpApi(this, 'Api', {",
      "    new logs.LogGroup(this, 'Extra');\n    new HttpApi(this, 'Api', {",
      'test', 'these resources and no others'),
+    ('S14', 'infra/stack.ts',
+     "      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),\n",
+     "      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),\n"
+     "      inlinePolicies: { x: new iam.PolicyDocument({ statements: ["
+     "new iam.PolicyStatement({ actions: ['logs:*'], resources: ['*'] })] }) },\n",
+     'test', 'the role writes to its own log group only'),
+    ('S15', 'infra/stack.ts', '      logGroup,\n',
+     "      logGroup: logs.LogGroup.fromLogGroupName(this, 'Old', 'kept'),\n",
+     'test', 'logs: 7 days, JSON, application INFO, system WARN'),
+    ('S16', 'infra/stack.ts', 'RemovalPolicy.DESTROY', 'RemovalPolicy.RETAIN',
+     'test', 'logs: 7 days, JSON, application INFO, system WARN'),
 ]
 
 

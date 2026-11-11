@@ -53,13 +53,21 @@ test('Node 24 on arm64, its own handler', () => {
 });
 
 test('logs: 7 days, JSON, application INFO, system WARN', () => {
-  template.hasResourceProperties('AWS::Logs::LogGroup', { RetentionInDays: 7 });
+  // The group is kept 7 days and goes with the stack (D44 c).
+  template.hasResource('AWS::Logs::LogGroup', {
+    Properties: { RetentionInDays: 7 },
+    DeletionPolicy: 'Delete',
+    UpdateReplacePolicy: 'Delete',
+  });
+  // The Lambda writes to the stack's own group, never one outside (D44 b).
+  const groups = Object.keys(template.findResources('AWS::Logs::LogGroup'));
+  assert.equal(groups.length, 1);
   template.hasResourceProperties('AWS::Lambda::Function', {
     LoggingConfig: {
       LogFormat: 'JSON',
       ApplicationLogLevel: 'INFO',
       SystemLogLevel: 'WARN',
-      LogGroup: Match.anyValue(),
+      LogGroup: { Ref: groups[0] },
     },
   });
 });
@@ -78,6 +86,8 @@ test('no access logs, no CORS, no authorizer', () => {
 
 test('the role writes to its own log group only', () => {
   assert.equal(only('AWS::IAM::Role').Properties?.['ManagedPolicyArns'], undefined);
+  // No inline policy on the role either (D44 a).
+  assert.equal(only('AWS::IAM::Role').Properties?.['Policies'], undefined);
   template.hasResourceProperties('AWS::IAM::Policy', {
     PolicyDocument: {
       Statement: [
