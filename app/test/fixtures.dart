@@ -2,6 +2,10 @@
 // fixtures/invented-nights.json, read here. `flutter test` runs in app/.
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+
+import 'package:souldreams/journal/night.dart';
+import 'package:souldreams/words/lines.g.dart' show Lang;
 
 /// One invented night, as the fixture file holds it.
 final class InventedNight {
@@ -25,3 +29,21 @@ List<InventedNight> inventedNights() {
 
 /// The invented night named [key].
 InventedNight invented(String key) => inventedNights().singleWhere((n) => n.key == key);
+
+/// Each invented night as a Night, with ids from a seeded source and
+/// first recordings an hour apart.
+List<Night> nightsFromFixtures([int seed = 1]) {
+  final random = Random(seed);
+  var at = DateTime.utc(2026, 10, 12, 5, 40);
+  return [
+    for (final n in inventedNights())
+      Night(
+        id: newNightId(random),
+        firstRecorded: at = at.add(const Duration(hours: 1)),
+        date: (year: at.year, month: at.month, day: at.day),
+        lang: Lang.values.byName(n.lang),
+        name: n.name,
+        dreams: n.dreams,
+      ),
+  ];
+}
