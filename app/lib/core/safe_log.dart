@@ -17,6 +17,9 @@ enum LogEvent {
   journalCheckPassed,
   journalCheckFailed,
 
+  /// SoulDreams Dev's journal could not open its folder (journal-screens).
+  journalOpenFailed,
+
   /// The typing screen's save failed; the words stay on the screen (D62).
   journalSaveFailed,
 
