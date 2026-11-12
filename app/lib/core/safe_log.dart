@@ -6,7 +6,17 @@ import 'dart:developer' as developer;
 import 'package:flutter/foundation.dart';
 
 /// Every event the app may log. A new event is a new value here.
-enum LogEvent { appStarted, wrongFlavour }
+enum LogEvent {
+  appStarted,
+  wrongFlavour,
+
+  /// The journal (D49): a temporary file from an interrupted save removed;
+  /// a file that does not read as a night skipped; the phone check's result.
+  journalTempSwept,
+  journalFileSkipped,
+  journalCheckPassed,
+  journalCheckFailed,
+}
 
 abstract final class SafeLog {
   /// Where lines go. Tests replace it; the app writes to the debugger.
