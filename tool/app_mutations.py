@@ -1,6 +1,6 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: A1 to A23 each "caught", then "app mutations: 23 run, 23
+# Expected: A1 to A24 each "caught", then "app mutations: 24 run, 24
 # caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
@@ -124,6 +124,11 @@ ROWS = [
      '_covered = state != null && state != AppLifecycleState.resumed;',
      '_covered = false;',
      'test/core/privacy_cover_test.dart', 'a cold start while not resumed starts covered'),
+    # The final review: a night that is made always reads back
+    ('A24', 'lib/journal/night.dart',
+     "    if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');\n",
+     '',
+     'test/journal/night_test.dart', 'a date its file could not hold is refused'),
 ]
 
 

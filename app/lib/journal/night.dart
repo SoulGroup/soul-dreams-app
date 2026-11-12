@@ -27,6 +27,15 @@ String newNightId([Random? random]) {
 /// A calendar date, as the phone showed it at the first recording.
 typedef NightDate = ({int year, int month, int day});
 
+// A real day its file can hold: four digits of year, a month and a day
+// that exist. The constructor and decodeNight share it, so every night
+// that can be made reads back after a save.
+bool _isDay(int y, int m, int d) {
+  if (y < 0 || y > 9999) return false;
+  final check = DateTime.utc(y, m, d);
+  return check.year == y && check.month == m && check.day == d;
+}
+
 final class Night {
   Night({
     required this.id,
@@ -38,6 +47,7 @@ final class Night {
   }) : dreams = List.unmodifiable(dreams) {
     if (!_id.hasMatch(id)) throw ArgumentError('id');
     if (!firstRecorded.isUtc) throw ArgumentError('firstRecorded');
+    if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');
   }
 
   final String id;
@@ -109,8 +119,7 @@ Night? decodeNight(Uint8List bytes) {
     final language = Lang.values.where((l) => l.name == lang).firstOrNull;
     if (!_id.hasMatch(id) || at == null || !at.isUtc || d == null || language == null) return null;
     final (y, m, day) = (int.parse(d[1]!), int.parse(d[2]!), int.parse(d[3]!));
-    final check = DateTime.utc(y, m, day);
-    if (check.year != y || check.month != m || check.day != day) return null;
+    if (!_isDay(y, m, day)) return null;
     if (dreams.any((x) => x is! String)) return null;
     return Night(
       id: id,

@@ -77,6 +77,25 @@ void main() {
         throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'firstRecorded')));
   });
 
+  test('a date its file could not hold is refused', () {
+    final n = nightsFromFixtures().first;
+    Night on(NightDate date) =>
+        Night(id: n.id, firstRecorded: n.firstRecorded, date: date, lang: n.lang, dreams: n.dreams);
+    for (final date in [
+      (year: 2026, month: 2, day: 30),
+      (year: 2026, month: 13, day: 1),
+      (year: 2026, month: 0, day: 1),
+      (year: 2026, month: 1, day: 0),
+      (year: 10000, month: 1, day: 1),
+      (year: -1, month: 1, day: 1),
+    ]) {
+      expect(() => on(date), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'date')),
+          reason: '$date');
+    }
+    final leap = on((year: 2028, month: 2, day: 29));
+    expect(decodeNight(encodeNight(leap)), leap);
+  });
+
   test("a night's dreams cannot be changed in place", () {
     final n = nightsFromFixtures().first;
     expect(() => n.dreams.add('x'), throwsUnsupportedError);
