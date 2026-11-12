@@ -1,6 +1,7 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: A1 to A24 each "caught", then "app mutations: 24 run, 24
+# Expected: every row "caught" (A1 to A39, with the rows A24a to A24aq of
+# the later rulings among them), then "app mutations: 82 run, 82
 # caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
@@ -337,6 +338,70 @@ ROWS = [
      "    if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');\n",
      '',
      'test/journal/night_test.dart', 'a date its file could not hold is refused'),
+    # journal-screens: the night rules and the journal's operations
+    ('A25', 'lib/journal/night_rules.dart',
+     'return same.isAfter(first) ? same',
+     'return !same.isBefore(first) ? same',
+     'test/journal/night_rules_test.dart', '20:59 closes a minute later; 21:00 itself starts a new night'),
+    ('A26', 'lib/journal/night_rules.dart',
+     'if (c > 0 || (c == 0',
+     'if (c < 0 || (c == 0',
+     'test/journal/night_rules_test.dart', "tonight's night is the latest one not yet closed"),
+    ('A27', 'lib/journal/journal.dart',
+     '    if (isEmptyText(text)) return false;\n',
+     '',
+     'test/journal/journal_test.dart', 'an empty Save keeps nothing'),
+    ('A28', 'lib/journal/journal.dart',
+     '      dreams.removeAt(index);',
+     '      dreams[index] = text;',
+     'test/journal/journal_test.dart', 'an edit replaces the dream; an emptied dream disappears'),
+    ('A29', 'lib/journal/journal.dart',
+     'return dreams.isEmpty ? null : n.withDreams(dreams);',
+     'return n.withDreams(dreams);',
+     'test/journal/journal_test.dart', 'a night whose every dream is emptied is deleted, nothing left'),
+    ('A30', 'lib/journal/pages/typing_page.dart',
+     'await widget.journal.addDream(widget.target, ',
+     'await widget.journal.addDream(await widget.journal.targetNow(), ',
+     'test/journal/pages/typing_page_test.dart', 'a screen open across 21:00 saves into its own night'),
+    # the rows
+    ('A31', 'lib/journal/row_text.dart',
+     '    if (dream.length > f.length && _wordChar.hasMatch(dream[f.length])) continue;\n',
+     '',
+     'test/journal/row_text_test.dart', 'a framing is trimmed only whole, at the start'),
+    ('A32', 'lib/journal/row_text.dart',
+     '.toLowerCase() != f.toLowerCase()',
+     ' != f',
+     'test/journal/row_text_test.dart', 'each framing is trimmed from the very start, ignoring case'),
+    ('A33', 'lib/journal/row_text.dart',
+     'final words = year == currentYear',
+     'final words = false',
+     'test/journal/row_text_test.dart', 'a divider: the month alone this year, month and year before'),
+    # motion
+    ('A34', 'lib/core/night_day.dart',
+     'return f.reduceMotion || f.disableAnimations;',
+     'return f.disableAnimations;',
+     'test/core/night_day_test.dart', 'with Reduce Motion the change is instant'),
+    ('A35', 'lib/core/night_day.dart',
+     '? NightDay.fade : Duration.zero',
+     '? Duration.zero : Duration.zero',
+     'test/core/night_day_test.dart', 'at 21:00 the open app fades to dark over five seconds'),
+    ('A36', 'lib/core/app_line.dart',
+     'if (f.reduceMotion || f.disableAnimations) {',
+     'if (f.disableAnimations) {',
+     'test/core/app_line_test.dart', 'with Reduce Motion the line stands whole'),
+    ('A37', 'lib/core/app_line.dart',
+     '    _shown = 1;\n',
+     '    _shown = _words.length;\n',
+     'test/core/app_line_test.dart', 'one word, then one more every 60 ms'),
+    # deleting, and Dev only
+    ('A38', 'lib/journal/pages/night_page.dart',
+     '    if (yes != true || !mounted) return;\n',
+     '    if (!mounted) return;\n',
+     'test/journal/pages/night_page_test.dart', 'one confirmation: Cancel first keeps the night'),
+    ('A39', 'lib/main.dart',
+     "import 'core/safe_log.dart';\n",
+     "import 'core/safe_log.dart';\nimport 'journal/journal.dart';\n",
+     'test/dev_only_test.dart', 'lib/main.dart reaches no journal code and no pending line'),
 ]
 
 
