@@ -1,6 +1,9 @@
 // The journal store (D49 b, c): deleting removes everything, an edit
 // leaves one version, an interrupted save leaves nothing behind, and a
-// file that does not read as a night is skipped and never touched.
+// file that does not read as a night is skipped and never touched. D54:
+// a delete takes a cut save's temporary file too, a failed save removes its
+// own, and every operation waits for the one before it.
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -39,6 +42,31 @@ final class BrokenRename extends IoJournalFiles {
 
   @override
   Future<void> rename(String from, String to) async => throw const FileSystemException('rename');
+}
+
+/// A folder that records the order of its calls and can hold a rename
+/// open, to put an operation in the middle of a save (D54).
+final class Gated extends IoJournalFiles {
+  Gated(super.dir);
+
+  final log = <String>[];
+  Completer<void> hold = Completer<void>()..complete();
+  Completer<void> reached = Completer<void>();
+
+  @override
+  Future<void> rename(String from, String to) async {
+    log.add('rename:start');
+    if (!reached.isCompleted) reached.complete();
+    await hold.future;
+    await super.rename(from, to);
+    log.add('rename:end');
+  }
+
+  @override
+  Future<void> delete(String name) {
+    log.add('delete:start');
+    return super.delete(name);
+  }
 }
 
 void main() {
@@ -136,11 +164,62 @@ void main() {
         dreams: nightsFromFixtures()[2].dreams);
     final broken = await JournalStore.open(BrokenRename(files.dir));
     await expectLater(broken.save(changed), throwsA(isA<FileSystemException>()));
-    expect(files.everything().keys.where((k) => k.startsWith(JournalStore.tempPrefix)), hasLength(1));
+    expect(files.everything().keys, [JournalStore.fileOf(night.id)],
+        reason: 'a failed save removes its own temporary file');
+    // A crash leaves what a failed save cleans up itself: the next open
+    // removes it.
+    await files.write(JournalStore.tempPrefix + JournalStore.fileOf(night.id), encodeNight(changed));
     final reopened = await JournalStore.open(files);
     expect(files.everything().keys, [JournalStore.fileOf(night.id)]);
     expect(await reopened.nights(), [night]);
     expect(lines, ['journalTempSwept']);
+  });
+
+  test('deleting a night takes a cut save temp file', () async {
+    final store = await JournalStore.open(files);
+    final [first, second, ...] = nightsFromFixtures();
+    await store.save(first);
+    final edited = Night(
+        id: first.id,
+        firstRecorded: first.firstRecorded,
+        date: first.date,
+        lang: first.lang,
+        dreams: second.dreams);
+    await files.write(JournalStore.tempPrefix + JournalStore.fileOf(first.id), encodeNight(edited));
+    await store.delete(first.id);
+    expect(files.everything(), isEmpty);
+  });
+
+  test('deleting the journal waits for a save in flight', () async {
+    final gated = Gated(files.dir);
+    final store = await JournalStore.open(gated);
+    gated.hold = Completer<void>();
+    addTearDown(() => gated.hold.isCompleted ? null : gated.hold.complete());
+    final saving = store.save(nightsFromFixtures().first);
+    await gated.reached.future;
+    final deleting = store.deleteAll();
+    await pumpEventQueue();
+    gated.hold.complete();
+    await Future.wait([saving, deleting]);
+    expect(gated.log, ['rename:start', 'rename:end', 'delete:start']);
+    expect(files.everything(), isEmpty);
+  });
+
+  test('a delete between a save write and rename waits', () async {
+    final gated = Gated(files.dir);
+    final store = await JournalStore.open(gated);
+    final night = nightsFromFixtures().first;
+    gated.hold = Completer<void>();
+    addTearDown(() => gated.hold.isCompleted ? null : gated.hold.complete());
+    final saving = store.save(night);
+    await gated.reached.future;
+    final deleting = store.delete(night.id);
+    await pumpEventQueue();
+    gated.hold.complete();
+    await Future.wait([saving, deleting]);
+    expect(gated.log, ['rename:start', 'rename:end', 'delete:start', 'delete:start']);
+    expect(files.everything(), isEmpty);
+    expect(await store.nights(), isEmpty);
   });
 
   test('an unreadable file is skipped with a code, never touched', () async {

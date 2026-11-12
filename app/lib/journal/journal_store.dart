@@ -1,10 +1,15 @@
 // The journal on the phone (D49 b; R11): one JSON file per night. A save
 // writes the whole night to a temporary file and renames it into place,
 // so the folder always holds one whole version of each night and no
-// earlier one. Deleting a night deletes its file; deleting the journal
-// deletes every file in the folder. A file that does not read as a night
-// is skipped with a code and left exactly as it is (D49 c), until the
-// journal is deleted.
+// earlier one. Deleting a night deletes its file and any temporary file
+// of its save; deleting the journal deletes every file in the folder. A
+// file that does not read as a night is skipped with a code and left
+// exactly as it is (D49 c), until the journal is deleted.
+//
+// D54: every operation waits for the one before it (one queue), so a
+// delete can never fall between a save's write and its rename, and a
+// save in flight can never bring a night back after the journal is
+// deleted. A save that fails removes its own temporary file.
 import 'dart:typed_data';
 
 import '../core/safe_log.dart';
@@ -26,6 +31,17 @@ final class JournalStore {
   /// (MP·10, then MP·32); removed with the journal (D49 c, O6).
   static const firstUseFlag = 'first-use-seen';
 
+  // The one queue (D54): each operation starts when the one before it,
+  // whether it succeeded or failed, has finished. No operation calls
+  // another queued one.
+  static Future<void> _tail = Future<void>.value();
+
+  static Future<T> _run<T>(Future<T> Function() operation) {
+    final result = _tail.then((_) => operation());
+    _tail = result.then<void>((_) {}, onError: (_) {});
+    return result;
+  }
+
   /// The name of a night's file.
   static String fileOf(String id) {
     if (!_id.hasMatch(id)) throw ArgumentError('id');
@@ -33,7 +49,7 @@ final class JournalStore {
   }
 
   /// Opens the folder, and removes what an interrupted save left.
-  static Future<JournalStore> open(JournalFiles files) async {
+  static Future<JournalStore> open(JournalFiles files) => _run(() async {
     await files.open();
     for (final name in await files.list()) {
       if (name.startsWith(tempPrefix)) {
@@ -42,10 +58,10 @@ final class JournalStore {
       }
     }
     return JournalStore._(files);
-  }
+  });
 
   /// Every night that reads, earliest first recording first.
-  Future<List<Night>> nights() async {
+  Future<List<Night>> nights() => _run(() async {
     final out = <Night>[];
     for (final name in await _files.list()) {
       final match = _nightFile.firstMatch(name);
@@ -63,26 +79,40 @@ final class JournalStore {
       return c != 0 ? c : a.id.compareTo(b.id);
     });
     return out;
-  }
+  });
 
-  /// Saves the night whole, replacing any earlier version.
-  Future<void> save(Night night) async {
+  /// Saves the night whole, replacing any earlier version. If the save
+  /// fails, its temporary file is removed before the failure is passed on.
+  Future<void> save(Night night) => _run(() async {
     final name = fileOf(night.id);
-    await _files.write(tempPrefix + name, encodeNight(night));
-    await _files.rename(tempPrefix + name, name);
-  }
+    try {
+      await _files.write(tempPrefix + name, encodeNight(night));
+      await _files.rename(tempPrefix + name, name);
+    } on Object {
+      try {
+        await _files.delete(tempPrefix + name);
+      } on Object {
+        // The next open removes it.
+      }
+      rethrow;
+    }
+  });
 
-  /// Deletes the night's file.
-  Future<void> delete(String id) => _files.delete(fileOf(id));
+  /// Deletes the night's file, and the temporary file of a save of it.
+  Future<void> delete(String id) => _run(() async {
+    final name = fileOf(id);
+    await _files.delete(name);
+    await _files.delete(tempPrefix + name);
+  });
 
   /// Deletes every file in the journal's folder.
-  Future<void> deleteAll() async {
+  Future<void> deleteAll() => _run(() async {
     for (final name in await _files.list()) {
       await _files.delete(name);
     }
-  }
+  });
 
-  Future<bool> firstUseSeen() async => (await _files.list()).contains(firstUseFlag);
+  Future<bool> firstUseSeen() => _run(() async => (await _files.list()).contains(firstUseFlag));
 
-  Future<void> markFirstUseSeen() => _files.write(firstUseFlag, Uint8List(0));
+  Future<void> markFirstUseSeen() => _run(() => _files.write(firstUseFlag, Uint8List(0)));
 }

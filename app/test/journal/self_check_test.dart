@@ -66,8 +66,10 @@ void main() {
   });
 
   test('a save that cannot finish fails at step 2', () async {
-    expect(await journalSelfCheck(NoRename(dir), all), isFalse);
+    final files = NoRename(dir);
+    expect(await journalSelfCheck(files, all), isFalse);
     expect(lines, ['journalCheckFailed 2']);
+    expect(files.everything(), isEmpty);
   });
 
   test('the probe is one marker word, and other nights stay', () async {
