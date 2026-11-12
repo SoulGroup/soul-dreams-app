@@ -26,5 +26,7 @@ void main() {
   test('the cases the journal tests need are there', () {
     expect(inventedNights().any((n) => n.dreams.length > 1), isTrue);
     expect(inventedNights().any((n) => n.name != null), isTrue);
+    // journal-screens: a dream long enough to be cut at three lines.
+    expect(invented('long-dream-en').dreams.single.split(' ').length, greaterThan(60));
   });
 }
