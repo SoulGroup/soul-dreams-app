@@ -3,8 +3,10 @@
 *No matter where you are on your journey, the steps you take are equally important.*
 
 Written by Claude Code (Opus) on 2026-11-12 from the investigation
-(`.scratch/for-build-chat/journal-screens-investigation.md`) and the owner's rulings D56, D57 and D58. **Proven
-before committing as far as the sandbox allows** (Part 5). The planning step commits only this file.
+(`.scratch/for-build-chat/journal-screens-investigation.md`) and the owner's rulings D56, D57 and D58; **amended the
+same day** with D59, the owner's answers to Part 4. **Proven before committing as far as the sandbox allows**
+(Part 5). The amendment commits this file and `fixtures/invented-nights.json` (D59 Q9); nothing else is implemented
+yet.
 
 ## Part 1 · Spec
 
@@ -103,6 +105,7 @@ the journal; a test proves they cannot reach its code.
 | D58 Q11 | MP·60 "Delete", MP·61 "Cancel" (and Swedish) as pending lines under those handles; W27·5 keeps its handle | Tasks 4, 10 |
 | D58 Q17 | Word by word at about one word every 60 ms | Task 8 |
 | D58 screens | Not filed: the owner's reference folder `docs/reference/screens/` with a fingerprints file; G0, G2 learn it | Tasks 3, 4, 14 |
+| D59 | Part 4 answered: Q1 the suggested `CLAUDE.md` wording, edited in the docs task; Q2 Opus changes numbers only; Q3 `newQueueForTests()` `@visibleForTesting`; Q4 to Q8, Q10 the leans; Q9 the new invented night committed with this amendment | Tasks 9, 11, 14, 16 |
 
 ### The places these pages use
 
@@ -263,7 +266,7 @@ Commit:
 
 > Guards: the pending lines, generated as PendingLine and proven by G1 with their fingerprint (D57 Q11)
 
-**The block** (from the proof's `bba96c2`):
+**The block** (from the proof's `30e6870`):
 
 ~~~~diff
 diff --git a/tool/checks/g0_kinds.py b/tool/checks/g0_kinds.py
@@ -895,7 +898,7 @@ Commit:
 
 > Guards: the screenshots' folder, docs/reference/screens/, fingerprinted as the fonts are (D58)
 
-**The block** (from the proof's `29ce68a`):
+**The block** (from the proof's `18b7aa0`):
 
 ~~~~diff
 diff --git a/tool/checks/g0_kinds.py b/tool/checks/g0_kinds.py
@@ -1165,7 +1168,7 @@ Expected: 76 tests. Commit:
 
 > Journal: a night's closing instant, the 21:00 rules and the journal's operations (D57 Q13, Q14; D58 Q2, Q3; P9, P10)
 
-**The block** (from the proof's `a00b239`):
+**The block** (from the proof's `0d41147`):
 
 ~~~~diff
 diff --git a/app/lib/journal/journal.dart b/app/lib/journal/journal.dart
@@ -1896,7 +1899,7 @@ Expected: 83 tests. Commit:
 
 > Journal: a row's opening trimmed of TECH·1, the date's digits and the month dividers (D58 Q7; P5)
 
-**The block** (from the proof's `0dd6c1c`):
+**The block** (from the proof's `e03996e`):
 
 ~~~~diff
 diff --git a/app/lib/journal/row_text.dart b/app/lib/journal/row_text.dart
@@ -2118,7 +2121,7 @@ Expected: 89 tests. Commit:
 
 > App: Night/Day automatic, faded over five seconds, instant with Reduce Motion; the palette; Flutter's localizations (D56; D57 Q9, Q12, Q15, Q16; P14)
 
-**The block** (from the proof's `b9a4f90`):
+**The block** (from the proof's `8b39b71`):
 
 ~~~~diff
 diff --git a/app/lib/app.dart b/app/lib/app.dart
@@ -2531,7 +2534,7 @@ Expected: 92 tests. Commit:
 
 > App: the app's words word by word at 60 ms, whole with Reduce Motion; the named stand-ins; the pages' parts (D58 Q17; P13)
 
-**The block** (from the proof's `149a098`):
+**The block** (from the proof's `a1cce70`):
 
 ~~~~diff
 diff --git a/app/lib/core/app_line.dart b/app/lib/core/app_line.dart
@@ -2914,7 +2917,7 @@ Expected: 100 tests. Commit:
 
 > Journal: the typing screen; the store's queue renewed per widget test (P2 to P4, P10, P12; D58 Q4)
 
-**The block** (from the proof's `7e7266e`):
+**The block** (from the proof's `21e9f98`):
 
 ~~~~diff
 diff --git a/app/lib/journal/journal_store.dart b/app/lib/journal/journal_store.dart
@@ -3363,7 +3366,7 @@ Expected: 111 tests. Commit:
 
 > Journal: a night's page: header, Dreams, editing, Add dreams, the menu and its one confirmation (P1, P6, P7; D58 Q1, Q3, Q4, Q8, Q11)
 
-**The block** (from the proof's `7f5bfb9`):
+**The block** (from the proof's `ba7dd34`):
 
 ~~~~diff
 diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night_page.dart
@@ -3696,15 +3699,15 @@ index 0000000..ab6e756
 - the record button fixes the typing screen's target when it opens.
 
 `fixtures/invented-nights.json` gains `long-dream-en`, one invented dream of more than 60 words, and
-`fixtures_test.dart` asks for it. R2 keeps every dream in the fixture file, so the block leaves it out. The proof
-kept the new fixture at `.scratch/journal-screens/invented-nights.json` (ignored by git), and this task copies it:
+`fixtures_test.dart` asks for it. The fixture was committed with this plan's amendment (D59 Q9), so the block does
+not touch it; this task checks it first:
 
 ```
-cp .scratch/journal-screens/invented-nights.json fixtures/invented-nights.json && shasum -a 256 fixtures/invented-nights.json
+shasum -a 256 fixtures/invented-nights.json
 ```
 
-Expected: `7341767362b5ea064ed9f89d6b0f617eabba9b75d2197a52c788a4791919aafb`. A different hash, or a missing file:
-stop. Then apply the block.
+Expected: `7341767362b5ea064ed9f89d6b0f617eabba9b75d2197a52c788a4791919aafb`. A different hash: stop. Then apply the
+block.
 
 Tests: `journal_page_test.dart` (8).
 
@@ -3712,7 +3715,7 @@ Expected: 119 tests. Commit:
 
 > Journal: the journal list: rows, month dividers, the record button, the empty journal; a long invented dream (P5, P8; D58 Q7)
 
-**The block** (from the proof's `663b45e`):
+**The block** (from the proof's `568198b`):
 
 ~~~~diff
 diff --git a/app/lib/journal/pages/journal_page.dart b/app/lib/journal/pages/journal_page.dart
@@ -4031,7 +4034,7 @@ Expected: 126 tests. Commit:
 
 > Dev: SoulDreams Dev opens on the journal; the tester and founder apps reach no journal code and no pending line (D49 O1; D57 Q11)
 
-**The block** (from the proof's `c6acd80`):
+**The block** (from the proof's `0a7e543`):
 
 ~~~~diff
 diff --git a/app/lib/core/safe_log.dart b/app/lib/core/safe_log.dart
@@ -4258,7 +4261,7 @@ Commit:
 
 > Journal: the app mutations A25 to A39, and the typing test across 21:00
 
-**The block** (from the proof's `270c868`):
+**The block** (from the proof's `0afbdf1`):
 
 ~~~~diff
 diff --git a/app/test/journal/pages/typing_page_test.dart b/app/test/journal/pages/typing_page_test.dart
@@ -4457,19 +4460,63 @@ Status.md:
 - banked items 75 to 80;
 - the rulings D56 to D58.
 
+And `CLAUDE.md`, in the owner's words ruled by D59 Q1:
+- R1 gains the pending lines;
+- G0 gains the two fingerprint files;
+- G1 gains the pending lines and `pending.g.dart`;
+- G2 gains `docs/reference/screens/`.
+
+`CLAUDE.md` is under "ask": the owner approves the edit at the prompt.
+
 Replace the date in "Last updated" with the day's date. Then check with:
 - `python3 -I -B tool/checks/guards.py`;
 - the owner's `tool/check_all.sh`, expected `check_all: all passed`.
 
 Commit:
 
-> Docs: Status.md at the end of journal-screens (D56 to D58)
+> Docs: Status.md at the end of journal-screens; CLAUDE.md's R1, G0, G1 and G2 lines (D56 to D59)
 
-**The block** (from the proof's `d893b20`):
+**The block** (from the proof's `a74a9b3`):
 
 ~~~~diff
+diff --git a/CLAUDE.md b/CLAUDE.md
+index 7803ddd..b57bd5c 100644
+--- a/CLAUDE.md
++++ b/CLAUDE.md
+@@ -15,7 +15,10 @@ numbered question. Never settle it in code.** Never edit a copy: copies change o
+ ## The rules. Each one is checked; breaking one stops the task.
+ 
+ **R1 · Words.** You never write, translate, reword or invent a dreamer-facing line, nor a word on any check list. Every
+-dreamer-facing line comes from `app/lib/words/lines.g.dart`, generated from `app/assets/words/places-register.csv`. Every
++dreamer-facing line comes from `app/lib/words/lines.g.dart`, generated from `app/assets/words/places-register.csv`.
++Lines given and approved but not yet filed are pending lines: the owner writes them in
++`app/assets/words/pending-lines.csv`, fingerprinted, the generator makes `app/lib/words/pending.g.dart`, and their words
++show in SoulDreams Dev only (D57 Q11). Every
+ list word comes from `app/assets/words/founder-lists-for-technology.md`. Both are copied by the owner's import after a
+ hash check. A place whose status is not "written", "written, in its parts" or "composed (stand-in written)" has no line;
+ an unknown status stops the generator. Where a line is missing, use the place's handle as a visible placeholder (e.g.
+@@ -85,13 +88,16 @@ merge command runs all of it. The guards (built in the first task, each with a m
+ 
+ - **G0 file kinds** — every tracked file is a kind the guards know: code, config, or an unscanned type, name or path
+   listed in `tool/checks/g0_kinds.py`. Anything else, an unknown `#!` interpreter included, is refused. A branch that
+-  brings a new kind of file extends the list, and the owner approves it; and `.txt` in `app/assets/fonts/` only.
++  brings a new kind of file extends the list, and the owner approves it; and `.txt` in `app/assets/fonts/` only; and the
++  pending lines' and the screenshots' fingerprints by exact path.
+ - **G1 words** — the generated words (`lines.g.dart`, `lists.g.dart`, `words.g.xcconfig` and the two
+   `InfoPlist.strings`) are exactly what the generator makes from the CSV and the lists, nothing else sits in
+   `app/lib/words/` or `app/assets/words/`, and the CSV's and lists' hashes match `docs/source/SOURCES`; and
+-  `app/lib/design/tokens.g.dart` is exactly what `designgen.py` makes from `design-system.md`.
++  `app/lib/design/tokens.g.dart` is exactly what `designgen.py` makes from `design-system.md`; and the pending lines
++  match `pending-fingerprint.txt`, and `pending.g.dart` is what the generator makes from them.
+ - **G2 copies** — every file in `docs/source/` matches its listed hash; no tracked `privacy-ethics-safety.md`, and
+-  nothing in a folder named `restricted`; and every file in `app/assets/fonts/` matches `fingerprints.txt`.
++  nothing in a folder named `restricted`; and every file in `app/assets/fonts/` matches `fingerprints.txt`; and every
++  file in `docs/reference/screens/` matches its `fingerprints.txt`.
+ - **G3 no literal words** — no string literal shown to a dreamer outside `app/lib/words/`; any other literal of more
+   than two words needs `// not-dreamer-facing: <reason>` on its line.
+ - **G4 invented only** — no string literal of twelve words or more outside `fixtures/invented-nights.json`,
 diff --git a/docs/Status.md b/docs/Status.md
-index e836d4e..492cb3f 100644
+index e836d4e..03a26b9 100644
 --- a/docs/Status.md
 +++ b/docs/Status.md
 @@ -1,6 +1,6 @@
@@ -4575,7 +4622,7 @@ index e836d4e..492cb3f 100644
  ## Rulings during branch 2
  
  - D21: answers Q1 to Q7 before Task 0: Flutter may write `~/.config/flutter` (`flutter config` and analytics denied); only the owner runs `check_all.sh` in this branch; CLAUDE.md's G5 line names Apple's loggers; a debug `--no-codesign` build per flavour; RunnerTests kept; founder scheme Run is `Release-founder`; the template's orientations kept.
-@@ -404,6 +451,21 @@ Banked by D17 (the reviews in journal-core; D52, D54):
+@@ -404,6 +451,24 @@ Banked by D17 (the reviews in journal-core; D52, D54):
    `tool/server_mutations.py` (D43; banked item 60 closed); `CLAUDE.md`'s G0, G1 and G2 lines name the branch's
    additions; the plan gains a Part 6, where the build differs from it.
  
@@ -4593,6 +4640,9 @@ index e836d4e..492cb3f 100644
 +  typing screen (founder); Q7 the first dream cut to three lines, TECH·1 whole word or phrase, ignoring case; Q8 the
 +  phone's standard confirmation, Cancel first, Delete destructive (founder); Q11 MP·60 and MP·61 pending; Q17 a word
 +  every 60 ms. The screenshots: not filed; the owner's reference folder, fingerprinted.
++- D59 (owner, 2026-11-12): the plan's Part 4: `CLAUDE.md`'s R1, G0, G1 and G2 lines in the plan's words, approved at
++  the prompt; Opus changes the stand-ins' numbers only; `newQueueForTests()` test-only; the other leans; the new
++  invented night committed with the plan's amendment.
 +
  ## Documents as last imported
  
@@ -4600,6 +4650,19 @@ index e836d4e..492cb3f 100644
 ~~~~
 
 ## Part 4 · Questions (numbered; a blank is not a yes)
+
+**Q1 to Q10 were answered by the owner on 2026-11-12 (D59)**, and the plan now builds to the answers:
+
+- **Q1:** the suggested wording for R1 and the G0, G1 and G2 lines. The edit is made in Task 16, and the owner
+  approves it at the prompt (`CLAUDE.md` is under "ask").
+- **Q2:** Opus changes numbers only, and reports each value against its screenshot (Task 14).
+- **Q3:** yes. `newQueueForTests()` is `@visibleForTesting`, so app code can never call it; the analyzer flags any
+  call outside a test (Task 9's block, as proven).
+- **Q4 to Q8, Q10:** the leans.
+- **Q9:** the new invented night is committed to `fixtures/invented-nights.json` with this amendment, as
+  journal-core did. Task 11 checks the fixture's hash instead of copying it, and the scratch copy is deleted.
+
+As first asked, for the record:
 
 1. **`CLAUDE.md` is the owner's, and this branch changes what its R1, G0, G1 and G2 lines describe.** *Lean:* after the
    merge, the owner adds:
@@ -4639,55 +4702,55 @@ index e836d4e..492cb3f 100644
 
 ## Part 5 · How this plan was proven
 
-On 2026-11-12, before this plan was committed:
+**First proof, 2026-11-12, before `b043d42` committed the plan:**
 
-1. **Built in a scratch worktree**, `./.scratch/build-js`, detached at `fc6f960`, the app's Flutter link and package
-   configuration copied in. Each task was built and committed through the pre-commit hook. Every block in Part 3 is
-   generated from those commits (`git diff <commit>^ <commit>`).
-   - The commits, in task order: `4bf2d7f`, `bba96c2`, `29ce68a`, `3dc9df9` (Task 4, simulated), `a00b239`,
-     `0dd6c1c`, `b9a4f90`, `149a098`, `7e7266e`, `7f5bfb9`, `663b45e`, `c6acd80`, `270c868`, `d893b20`.
-2. **The owner's steps were simulated, never with the real words or images.**
-   - Task 1: `pub add` with `--offline`, from the pub cache. It gave the same two lines in `pubspec.yaml` and
-     `intl` 0.20.3 in the lockfile.
-   - Task 2: `wordsgen.py --write` made the empty `pending.g.dart` (sha256 `d1954a98…c463`).
-   - Task 4: a pending file of two rows, `MP·60` and `MP·61`, with stand-in words that are not the approved ones, its
-     fingerprint, and two fake PNG files (a few bytes, with a NUL) and their fingerprints. The real words and the
-     real screenshots are the owner's.
-3. **Found by the proof and fixed in the plan:**
-   - G4 refused test names of twelve words or more, and the generated `PendingLine` comments; both were shortened.
-   - G3 refused the app line's `' $w'` inside a `TextSpan`; the words are now split after each space, with no
-     literal.
-   - Four guard mutation rows' patterns followed the code they break (58, 60, 66, 67), and row 83 after Task 3.
-   - A widget test waited forever on the store's static queue, stranded in an earlier test's zone (Part 4, Q3).
-   - `setUp` cannot renew the queue: it runs outside the test's zone, so the renewal sits inside each test.
-   - `TextField.enableSuggestions` reads null unset: the keyboard test reads the resolved `EditableText`.
-   - The new invented night stays out of the plan (Part 4, Q9).
-4. **Checks on the build worktree at its last commit:**
-   - `tool/check_all.sh` ended `check_all: all passed`: `Ran 241 tests`, `OK`; `mutations: 87 run, all caught`;
-     `flutter: pinned 3.47.9, running 3.47.9`; `No issues found!`; `+126: All tests passed!`; `node: pinned 24,
-     running 24`; the server's `fail 0`.
-   - `python3 -I -B tool/app_mutations.py`: `app mutations: 39 run, 39 caught`, with `git status` clean after.
-5. **The plan replayed on a clean worktree**, `./.scratch/replay-js`, detached at `fc6f960`.
-   - Every block was extracted from this file and applied with `git apply`; each applied. The owner's steps were
-     simulated as in point 2, and Task 11 copied the fixture (its hash as given). Each task was committed through
-     the hook with its message from this file: `guards (staged): all passed` every time.
-   - The counts at each task: Task 1, 60 app tests; Task 2, `Ran 238 tests`, `OK`, `mutations: 85 run, all
-     caught`, the empty `pending.g.dart` at `d1954a98…c463`; Task 3, `Ran 241`, `OK`, `87 run, all caught`; Task 4,
-     60; then 76, 83, 89, 92, 100, 111, 119, 125 and 126. `No issues found!` at each.
-   - The replayed tree's last commit against the build's: `git diff` printed 0 lines.
-6. **Not provable in the sandbox, so the owner's:**
-   - the real pending words and their check against message 16;
+1. Built task by task in a scratch worktree at `fc6f960`. Every block was generated from those commits.
+   `tool/check_all.sh` ended `check_all: all passed`, and the app mutations `39 run, 39 caught`.
+2. Replayed on a clean worktree from the plan's own blocks: every block applied, every commit passed the hook, and
+   the final tree matched the build's (0 lines of difference).
+3. **Found by that proof and fixed in the plan:**
+   - G4 refused long test names and long generated comments; both were shortened.
+   - G3 refused a literal inside a `TextSpan`; the words are now split with no literal.
+   - Five guard mutation patterns followed the code they break.
+   - The store's static queue stranded widget tests (`newQueueForTests()`, Q3), and the renewal sits inside each
+     test, not in `setUp`.
+   - The keyboard test reads the resolved `EditableText`.
+
+**The amendment (D59), the same day, before it was committed with the fixture:**
+
+4. **Rebuilt on the amendment's base.** A scratch worktree, `./.scratch/build-js`, at `b043d42` with the new
+   fixture committed on top, as the amendment commits it.
+   - Its baseline: 60 app tests, so the fifth invented night breaks no earlier test.
+   - Tasks 1 to 13 were applied there from the first plan's blocks, through the hook, with the same counts as
+     before.
+   - Task 16 was built again with D59's line in Status.md and the four `CLAUDE.md` lines.
+   - The blocks in Part 3 are generated from these commits.
+5. **The owner's steps were simulated, never with the real words or images.**
+   - Task 1: `pub add --offline` from the pub cache: the same two lines, `intl` 0.20.3.
+   - Task 2: the empty `pending.g.dart`, sha256 `d1954a98…c463`.
+   - Task 4: two pending rows, `MP·60` and `MP·61`, with stand-in words that are not the approved ones, and two fake
+     PNG files, each with its fingerprint.
+6. **Checks on the rebuilt tree:**
+   - `tool/check_all.sh`: `check_all: all passed`: `Ran 241 tests`, `OK`; `mutations: 87 run, all caught`; `flutter: pinned 3.47.9, running 3.47.9`; `No issues found!`; `+126: All tests passed!`; `node: pinned 24, running 24`; the server's `fail 0`. The app mutations were run on the first build (`39 run, 39 caught`), and the app code is unchanged by the amendment.
+7. **This amended plan replayed on a clean worktree**, `./.scratch/replay-js`, at `b043d42` with the fixture
+   committed on top.
+   - Every block was extracted from this file and applied with `git apply`, and each applied.
+   - Task 11 checked the fixture's hash. Each task was committed through the hook with its message from this file:
+     `guards (staged): all passed` every time.
+   - The counts: Task 1, 60 app tests; Task 2, `Ran 238 tests`, `OK`, `mutations: 85 run, all caught`, `pending.g.dart` at `d1954a98…c463`; Task 3, `Ran 241`, `OK`, `87 run, all caught`; Task 4, 60; then 76, 83, 89, 92, 100, 111, 119 (the fixture at `73417673…aafb`), 125 and 126, with `No issues found!` at each; Task 16, `guards (tracked): all passed`.
+   - The replayed tree's last commit against the rebuilt one: `git diff` printed 0 lines.
+8. **Not provable in the sandbox, so the owner's:**
+   - the real pending words, and their check against message 16;
    - the real screenshots, and Task 14's values;
-   - the iOS build and every phone check (Task 15): Reduce Motion's flag on a real phone, the fade, VoiceOver, the
-     keyboard's own settings, a zone change before 21:00, and the cover in the dark theme.
-7. **Read in the pinned SDK:**
-   - On iOS, Reduce Motion is `AccessibilityFeatures.reduceMotion` and does not set `disableAnimations`
-     (`widgets/media_query.dart`, the investigation's §6).
-   - `FakeAccessibilityFeatures` takes `reduceMotion` for tests.
+   - the `CLAUDE.md` prompt;
+   - the iOS build and every phone check (Task 15).
+9. **Read in the pinned SDK:**
+   - On iOS, Reduce Motion is `AccessibilityFeatures.reduceMotion` and does not set `disableAnimations`.
+   - `FakeAccessibilityFeatures` takes `reduceMotion`.
    - `MaterialApp.themeAnimationDuration` exists.
-   - `flutter_localizations` loads `intl`'s date data when its delegates load.
-8. The scratch worktrees are removed after the proof; their commits are on detached HEADs and reach no branch. The
-   fixture copy in `.scratch/journal-screens/` stays for Task 11.
+   - `flutter_localizations` loads `intl`'s date data with its delegates.
+10. The scratch worktrees are removed after the proof; their commits are on detached HEADs and reach no branch.
+    `.scratch/journal-screens/` is deleted (D59 Q9).
 
 ## Part 6 · Where the build differs from this plan
 
