@@ -81,4 +81,45 @@ void main() {
     }
     expect(isEmptyText(nightsFromFixtures().first.dreams.first), isFalse);
   });
+
+  test('invisible characters alone are empty too', () {
+    for (final c in [0x200B, 0x200C, 0x200D, 0x2060, 0xFEFF]) {
+      final s = String.fromCharCode(c);
+      expect(isEmptyText(s), isTrue, reason: '$c');
+      expect(isEmptyText(' $s\n$s '), isTrue, reason: '$c');
+      expect(isEmptyText('x$s'), isFalse, reason: '$c');
+    }
+  });
+
+  test('nights recorded at one instant: the later id is tonight', () {
+    final first = stockholm(2026, 6, 10, 23);
+    final a = nightAt(first, id: 'a');
+    final b = nightAt(first, id: 'b');
+    final now = stockholm(2026, 6, 11, 7);
+    expect(tonight([a, b], now), b);
+    expect(tonight([b, a], now), b);
+  });
+
+  test("the phone's zone reads 21:00 at 21:00, not at the recording", () {
+    const phone = PhoneZone();
+    for (final (y, m, d) in [(2026, 3, 28), (2026, 3, 29), (2026, 10, 24), (2026, 10, 25), (2028, 2, 29)]) {
+      expect(phone.instantAt(y, m, d, 21), DateTime(y, m, d, 21).toUtc(), reason: '$y-$m-$d');
+    }
+    expect(phone.instantAt(2026, 1, 32, 21), DateTime(2026, 2, 1, 21).toUtc());
+    expect(phone.instantAt(2026, 12, 32, 21), DateTime(2027, 1, 1, 21).toUtc());
+    // Whatever zone the Mac is in: every hour of a year closes at a local 21:00,
+    // after it and within a day (25 hours across a clock change).
+    final wrong = <DateTime>[];
+    for (var t = DateTime.utc(2026, 1, 1); t.isBefore(DateTime.utc(2027, 1, 2)); t = t.add(const Duration(minutes: 59))) {
+      final w = phone.wall(t);
+      final l = t.toLocal();
+      final c = closesAfter(t, phone);
+      final ok = (w.year, w.month, w.day, w.hour) == (l.year, l.month, l.day, l.hour) &&
+          c.isAfter(t) &&
+          c.difference(t) <= const Duration(hours: 25) &&
+          phone.wall(c).hour == closingHour;
+      if (!ok) wrong.add(t);
+    }
+    expect(wrong, isEmpty);
+  });
 }

@@ -113,4 +113,56 @@ void main() {
     expect(await journal.addDream(t, a[1], Lang.en), isFalse);
     expect(files.everything(), isEmpty);
   });
+
+  // D61 (the review of Task 5): a read and the write that follows it are
+  // one turn of the store's queue, so nothing falls between them.
+  test('a delete queued behind a Save keeps the night deleted', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final t = await journal.targetNow() as IntoNight;
+    final add = journal.addDream(t, a[1], Lang.en);
+    final gone = journal.delete(t.id);
+    await Future.wait([add, gone]);
+    expect(files.everything(), isEmpty);
+  });
+
+  test('a delete queued right behind an edit keeps the night deleted', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final id = (await journal.newestFirst()).single.id;
+    final edit = journal.editDream(id, 0, b[0]);
+    final gone = journal.delete(id);
+    await Future.wait([edit, gone]);
+    expect(files.everything(), isEmpty);
+  });
+
+  test('two Saves at once into one night keep both dreams', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final t = await journal.targetNow();
+    await Future.wait([journal.addDream(t, b[0], Lang.sv), journal.addDream(t, a[1], Lang.en)]);
+    expect((await journal.newestFirst()).single.dreams, [a[0], b[0], a[1]]);
+  });
+
+  test('an edit and a Save at once keep both', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final t = await journal.targetNow() as IntoNight;
+    await Future.wait([journal.editDream(t.id, 0, b[0]), journal.addDream(t, a[1], Lang.en)]);
+    expect((await journal.night(t.id))!.dreams, [b[0], a[1]]);
+  });
+
+  test('an edit of a dream that is not there changes nothing', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    await journal.addDream(await journal.targetNow(), a[1], Lang.en);
+    final id = (await journal.newestFirst()).single.id;
+    final before = files.everything();
+    for (final index in [-1, 2, 99]) {
+      await journal.editDream(id, index, b[0]);
+      await journal.editDream(id, index, '');
+    }
+    await journal.editDream('0' * 32, 0, b[0]);
+    expect((await journal.night(id))!.dreams, a);
+    final after = files.everything();
+    expect(after.keys, before.keys);
+    for (final name in before.keys) {
+      expect(after[name], before[name]);
+    }
+  });
 }

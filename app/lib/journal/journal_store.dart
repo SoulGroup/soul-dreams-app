@@ -83,7 +83,9 @@ final class JournalStore {
 
   /// Saves the night whole, replacing any earlier version. If the save
   /// fails, its temporary file is removed before the failure is passed on.
-  Future<void> save(Night night) => _run(() async {
+  Future<void> save(Night night) => _run(() => _save(night));
+
+  Future<void> _save(Night night) async {
     final name = fileOf(night.id);
     try {
       await _files.write(tempPrefix + name, encodeNight(night));
@@ -96,14 +98,36 @@ final class JournalStore {
       }
       rethrow;
     }
+  }
+
+  /// Reads night [id], and writes back what [change] makes of it, all in
+  /// one turn of the queue (D61), so no delete or save can fall between
+  /// the read and the write. [change] returns the night to keep, the same
+  /// night for no change, or null to delete it; it must not wait. Returns
+  /// whether the night was there to change: a file that does not read as
+  /// that night is left exactly as it is.
+  Future<bool> update(String id, Night? Function(Night night) change) => _run(() async {
+    final bytes = await _files.read(fileOf(id));
+    final night = bytes == null ? null : decodeNight(bytes);
+    if (night == null || night.id != id) return false;
+    final next = change(night);
+    if (next == null) {
+      await _delete(id);
+    } else if (next != night) {
+      if (next.id != id) throw ArgumentError('id');
+      await _save(next);
+    }
+    return true;
   });
 
   /// Deletes the night's file, and the temporary file of a save of it.
-  Future<void> delete(String id) => _run(() async {
+  Future<void> delete(String id) => _run(() => _delete(id));
+
+  Future<void> _delete(String id) async {
     final name = fileOf(id);
     await _files.delete(name);
     await _files.delete(tempPrefix + name);
-  });
+  }
 
   /// Deletes every entry in the journal's folder, whatever its name.
   Future<void> deleteAll() => _run(() => _files.deleteAll());

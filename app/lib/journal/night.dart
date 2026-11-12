@@ -24,6 +24,11 @@ String newNightId([Random? random]) {
   return [for (var i = 0; i < 16; i++) r.nextInt(256).toRadixString(16).padLeft(2, '0')].join();
 }
 
+/// The longest a night stays open after its first recording: the next 21:00
+/// is at most 25 hours on, across a clock change (D61). A file that says
+/// more is damaged.
+const maxOpen = Duration(hours: 26);
+
 /// A calendar date, as the phone showed it at the first recording.
 typedef NightDate = ({int year, int month, int day});
 
@@ -49,7 +54,9 @@ final class Night {
     if (!_id.hasMatch(id)) throw ArgumentError('id');
     if (!firstRecorded.isUtc) throw ArgumentError('firstRecorded');
     if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');
-    if (!closes.isUtc || !closes.isAfter(firstRecorded)) throw ArgumentError('closes');
+    if (!closes.isUtc || !closes.isAfter(firstRecorded) || closes.isAfter(firstRecorded.add(maxOpen))) {
+      throw ArgumentError('closes');
+    }
   }
 
   final String id;
@@ -133,7 +140,7 @@ Night? decodeNight(Uint8List bytes) {
     final d = _date.firstMatch(date);
     final language = Lang.values.where((l) => l.name == lang).firstOrNull;
     if (!_id.hasMatch(id) || at == null || !at.isUtc || d == null || language == null) return null;
-    if (shut == null || !shut.isUtc || !shut.isAfter(at)) return null;
+    if (shut == null || !shut.isUtc || !shut.isAfter(at) || shut.isAfter(at.add(maxOpen))) return null;
     final (y, m, day) = (int.parse(d[1]!), int.parse(d[2]!), int.parse(d[3]!));
     if (!_isDay(y, m, day)) return null;
     if (dreams.any((x) => x is! String)) return null;

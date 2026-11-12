@@ -119,4 +119,15 @@ void main() {
     final n = nightsFromFixtures().first;
     expect(() => n.dreams.add('x'), throwsUnsupportedError);
   });
+
+  test('a closing instant over 26 hours on is refused as damaged', () {
+    final n = nightsFromFixtures().first;
+    Night closing(DateTime closes) =>
+        Night(id: n.id, firstRecorded: n.firstRecorded, date: n.date, closes: closes, lang: n.lang, dreams: n.dreams);
+    final limit = n.firstRecorded.add(const Duration(hours: 26));
+    expect(decodeNight(encodeNight(closing(limit))), closing(limit));
+    final late = limit.add(const Duration(minutes: 1));
+    expect(() => closing(late), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'closes')));
+    expect(decodeNight(bytesOf({...fields(n), 'closes': late.toIso8601String()})), isNull);
+  });
 }

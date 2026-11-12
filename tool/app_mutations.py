@@ -124,6 +124,51 @@ ROWS = [
      '_covered = state != null && state != AppLifecycleState.resumed;',
      '_covered = false;',
      'test/core/privacy_cover_test.dart', 'a cold start while not resumed starts covered'),
+    # Task 5a (D61): a read and its write are one turn; invisible text is empty;
+    # a night open too long is damaged
+    ('A24a', 'lib/journal/journal.dart',
+     '        return _store.update(id, (n) => n.withDreams([...n.dreams, text]));\n',
+     '        final n = await night(id);\n'
+     '        if (n == null) return false;\n'
+     '        await _store.save(n.withDreams([...n.dreams, text]));\n'
+     '        return true;\n',
+     'test/journal/journal_test.dart', 'a delete queued behind a Save keeps the night deleted'),
+    ('A24b', 'lib/journal/journal.dart',
+     '    await _store.update(id, (n) {\n'
+     '      if (index < 0 || index >= n.dreams.length) return n;\n'
+     '      final dreams = [...n.dreams];\n'
+     '      if (isEmptyText(text)) {\n'
+     '        dreams.removeAt(index);\n'
+     '      } else {\n'
+     '        dreams[index] = text;\n'
+     '      }\n'
+     '      return dreams.isEmpty ? null : n.withDreams(dreams);\n'
+     '    });\n',
+     ''.join(line + '\n' for line in [
+         '    final n = await night(id);',
+         '    if (n == null) return;',
+         '    if (index < 0 || index >= n.dreams.length) return;',
+         '    final dreams = [...n.dreams];',
+         '    if (isEmptyText(text)) {',
+         '      dreams.removeAt(index);',
+         '    } else {',
+         '      dreams[index] = text;',
+         '    }',
+         '    if (dreams.isEmpty) {',
+         '      await _store.delete(id);',
+         '    } else {',
+         '      await _store.save(n.withDreams(dreams));',
+         '    }',
+     ]),
+     'test/journal/journal_test.dart', 'a delete queued right behind an edit keeps the night deleted'),
+    ('A24c', 'lib/journal/night_rules.dart',
+     "text.replaceAll(_invisible, '').trim().isEmpty",
+     'text.trim().isEmpty',
+     'test/journal/night_rules_test.dart', 'invisible characters alone are empty too'),
+    ('A24d', 'lib/journal/night.dart',
+     ' || shut.isAfter(at.add(maxOpen))) return null;',
+     ') return null;',
+     'test/journal/night_test.dart', 'a closing instant over 26 hours on is refused as damaged'),
     # The final review: a night that is made always reads back
     ('A24', 'lib/journal/night.dart',
      "    if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');\n",

@@ -94,5 +94,9 @@ Target targetAt(Iterable<Night> nights, DateTime now) {
   return open == null ? NewNight(now) : IntoNight(open.id);
 }
 
-/// Nothing but whitespace counts as empty (P10; D58 Q3).
-bool isEmptyText(String text) => text.trim().isEmpty;
+// The zero-width characters a paste can carry: they show nothing, so a
+// text of nothing else is empty (D61).
+final _invisible = RegExp(r'[\u200B\u200C\u200D\u2060\uFEFF]');
+
+/// Nothing but whitespace counts as empty (P10; D58 Q3; D61).
+bool isEmptyText(String text) => text.replaceAll(_invisible, '').trim().isEmpty;

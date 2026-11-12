@@ -281,4 +281,53 @@ void main() {
     expect(() => JournalStore.fileOf('../x'), throwsArgumentError);
     expect(() => IoJournalFiles(dir).read('../x'), throwsArgumentError);
   });
+
+  // D61: one turn of the queue reads a night, changes it and writes it.
+  test('an update changes a night; a delete behind it still wins', () async {
+    final store = await JournalStore.open(files);
+    final n = nightsFromFixtures().first;
+    await store.save(n);
+    final changed = store.update(n.id, (x) => x.withDreams(const ['x']));
+    final gone = store.delete(n.id);
+    expect(await changed, isTrue);
+    await gone;
+    expect(files.everything(), isEmpty);
+  });
+
+  test('an update changes the dreams, and null deletes the night', () async {
+    final store = await JournalStore.open(files);
+    final n = nightsFromFixtures().first;
+    await store.save(n);
+    expect(await store.update(n.id, (x) => x.withDreams([...x.dreams, 'x'])), isTrue);
+    expect((await store.nights()).single.dreams, [...n.dreams, 'x']);
+    expect(await store.update(n.id, (x) => null), isTrue);
+    expect(files.everything(), isEmpty);
+  });
+
+  test('an update of a missing or unreadable night changes nothing', () async {
+    final store = await JournalStore.open(files);
+    final n = nightsFromFixtures().first;
+    var called = false;
+    Night? touch(Night x) {
+      called = true;
+      return null;
+    }
+
+    expect(await store.update(n.id, touch), isFalse);
+    await files.write(JournalStore.fileOf(n.id), utf8.encode('not a night'));
+    expect(await store.update(n.id, touch), isFalse);
+    expect(called, isFalse);
+    expect(utf8.decode(files.everything()[JournalStore.fileOf(n.id)]!), 'not a night');
+  });
+
+  test('an update that throws writes nothing, and the queue goes on', () async {
+    final store = await JournalStore.open(files);
+    final n = nightsFromFixtures().first;
+    await store.save(n);
+    final before = files.everything();
+    await expectLater(store.update(n.id, (x) => throw StateError('x')), throwsStateError);
+    await expectLater(store.update(n.id, (x) => x.withDreams(const ['y'])), completion(isTrue));
+    expect(before.keys.single, files.everything().keys.single);
+    expect((await store.nights()).single.dreams, const ['y']);
+  });
 }

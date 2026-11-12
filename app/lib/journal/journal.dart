@@ -55,29 +55,26 @@ final class Journal {
           lang: lang,
           dreams: [text],
         ));
+        return true;
       case IntoNight(:final id):
-        final n = await night(id);
-        if (n == null) return false;
-        await _store.save(n.withDreams([...n.dreams, text]));
+        // One turn of the store's queue: a delete cannot fall between
+        // the read and the write, nor another Save lose this one (D61).
+        return _store.update(id, (n) => n.withDreams([...n.dreams, text]));
     }
-    return true;
   }
 
   /// Replaces dream [index] of night [id] with [text].
   Future<void> editDream(String id, int index, String text) async {
-    final n = await night(id);
-    if (n == null || index < 0 || index >= n.dreams.length) return;
-    final dreams = [...n.dreams];
-    if (isEmptyText(text)) {
-      dreams.removeAt(index);
-    } else {
-      dreams[index] = text;
-    }
-    if (dreams.isEmpty) {
-      await _store.delete(id);
-    } else {
-      await _store.save(n.withDreams(dreams));
-    }
+    await _store.update(id, (n) {
+      if (index < 0 || index >= n.dreams.length) return n;
+      final dreams = [...n.dreams];
+      if (isEmptyText(text)) {
+        dreams.removeAt(index);
+      } else {
+        dreams[index] = text;
+      }
+      return dreams.isEmpty ? null : n.withDreams(dreams);
+    });
   }
 
   /// Deletes the night, and everything of it (X11).
