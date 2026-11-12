@@ -3659,4 +3659,43 @@ committed with the fixture:
 9. The scratch worktrees are removed after the proof (`git worktree remove --force`); their commits were on
    detached HEADs and reach no branch.
 
+## Part 6 · Where the build differs from this plan
+
+Added by the final whole-branch review on 2026-11-12. Part 3's blocks are left as proven; where they differ from the
+committed code, the committed code and this part govern. The implementation report
+(`.scratch/for-build-chat/journal-core-implementation.md`) has the detail.
+
+- **D52 (Tasks 2a and 3a, `a13b796`, `36f26b0`).** `designgen.py` writes a role's name and never the Design System's
+  prose (the type table's "Used for" cell, a role's parenthetical, a spacing value's text); an "after" spacing value
+  is `N px [more space ]after A, before B` or stops with `spacing-form`. The colour notes are read (a new one stops
+  the generator) and never written out; Task 3's `/// Noted: only ever on white.` assertion is gone, and a test pins
+  that every role comment is a role name. Mutation rows 72 to 75 (2a) and 80 (3a).
+- **The tokens' sha256.** Not the plan's `0fe490a9…`: `0e7259ee…` as committed in Task 3, and
+  `986aec4abc071501b881252bae81ad9d269200d56a88169a4cc04aa74e500248` after Task 3a (the committed file). The counts
+  are the plan's: type 11, light 16, dark 14, spacing 9, unset 1.
+- **D53, unused.** A standing rule for an analyzer `unnecessary_import` in the plan's code; asked on a wrong premise
+  (a mistyped line, not the plan) and never applied.
+- **D54, Task 9a (`38ff073`).** Every `JournalStore` operation goes through one queue; `delete(id)` also removes
+  `.tmp-night-<id>.json`; a failed save removes its temporary file, then rethrows. Task 9's "a save cut short" and "a
+  save that cannot finish" tests changed to match; three tests added (a delete takes a cut save's temporary file, and
+  two event-order tests on a gated folder); three test names shortened for G4. App mutation rows A14 to A17.
+- **D54, Task 10a (`a8ffeff`).** `JournalFiles.deleteAll()` is native: the Swift removes every entry, carries on past
+  one it cannot remove and answers with a code; `write` flushes (`F_FULLFSYNC`, else `fsync`) before it returns, so
+  before the rename. The channel and Swift-as-text tests follow; one test added (deleting the journal does not depend
+  on file names). Rows A18 to A20.
+- **D54, Task 11a (`2eb2f15`).** The cover's tests: `ColoredBox.child == null` replaces Task 11's
+  `find.byType(Widget)` line, which never matched; the cover's rect equals the screen; a cold start while not resumed
+  starts covered. The code is unchanged. Rows A21 to A23.
+- **D55.** Flutter may write its session file in `~/.dart-tool` (the owner's `3c8af83`), so Claude Code runs the
+  app's analyzer and tests again (Status banked item 74 closed). `/simplify` is skipped for this branch. The app's
+  mutation runner is committed as `tool/app_mutations.py`, run by hand like `tool/server_mutations.py` (D43), with
+  three tests in `tool/checks/tests/test_app_mutations.py`; this replaces Part 4 Q4's lean (the screens branch).
+  Its rows are the scratch runner's; A4's and A18's code strings are split by line for G4. Expected:
+  `app mutations: 23 run, 23 caught`.
+- **Smaller.** Task 2 step 4's whole-suite run needed the new files staged first (`test_check_all` copies tracked
+  files only). Task 3's second `mutations.py` Edit is anchored on Task 2a's last row. The guard mutation rows are
+  numbered 69 to 71 (Task 2), 72 to 75 (2a), 76 (G1), 77 to 79 (fonts) and 80 (3a).
+- **The counts.** At the end of the build: **224** guard tests, **80** guard mutation rows, **59** app tests and
+  **23** app mutation rows (the plan's 221, 75, 54 and 13). With the runner's three tests (D55): **227** guard tests.
+
 *No matter where you are on your journey, the steps you take are equally important.*

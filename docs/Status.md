@@ -70,8 +70,9 @@ rulings given during each branch are listed in this file, one line each, under "
   third-party keyboard was not offered in SoulDreams Dev and was in Notes; the app-switcher card was plain, with no
   field, keyboard, logo, words or suggestion bar, including with an invented word typed. The backup size (optional)
   was not looked at.
-- The app's analyzer baseline: `No issues found!`. The app has 59 tests, and 23 mutation checks (A1 to A23), run by
-  hand with `python3 -I -B .scratch/journal-core/app_mutations.py` (not committed; banked item 60).
+- The app's analyzer baseline: `No issues found!`. The app has 59 tests, and 23 mutation checks (A1 to A23) in
+  `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
+  (expected: `app mutations: 23 run, 23 caught`); `check_all.sh` does not call it (D55).
 
 ## The server
 
@@ -128,7 +129,7 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45):
   (`NPM_CONFIG_UPDATE_NOTIFIER=false`; D46, proved by `test_check_all.py`).
 - G1 also proves the design values; G2 also proves every file in `app/assets/fonts/` against `fingerprints.txt`,
   armed or not; G0 knows `.txt` in `app/assets/fonts/` only (D49 a).
-- Totals: 224 guard tests and 80 mutation checks.
+- Totals: 227 guard tests and 80 mutation checks.
 
 ## Banked
 
@@ -267,8 +268,8 @@ Banked in journal-core:
 
 59. The check lists will become English only (head, C156-I and C157-I), so the lists' per-language shape
     (`lists-shape`, D36 Q3) needs a ruling at the next lists filing (D49).
-60. The app's mutation checks are a scratch runner, run by hand (the plan's Part 4, Q4); committed, with tests, in the
-    screens branch.
+60. CLOSED in journal-core (D55): the app's mutation checks are committed as `tool/app_mutations.py`, with three
+    tests, run by hand.
 61. The importer does not regenerate the tokens after an import of `design-system.md`; G1 refuses until
     `python3 -I -B tool/checks/designgen.py --write` (the plan's Part 4, Q11).
 62. `designgen.py` knows the Design System's value forms and notes exactly; a new form or note stops it
@@ -316,10 +317,11 @@ Banked by D17 (the reviews in journal-core; D52, D54):
     file and assert the method sits inside `class AppDelegate`); a dreamer who relies on a third-party accessibility
     keyboard cannot use it in the app (founder-ruled); `dart format` would reformat `main_dev.dart` and
     `keyboards_test.dart`.
-74. `tool/check_all.sh`'s `fvm flutter --version --machine` cannot run in Claude Code's sandbox (Flutter writes its
+74. CLOSED in journal-core (D55, the owner's `3c8af83`): `tool/check_all.sh`'s `fvm flutter --version --machine` cannot run in Claude Code's sandbox (Flutter writes its
     telemetry session file in `~/.dart-tool`, outside the writable paths), so the script reports `running none` and
     `FAILED: flutter-version`; Claude Code runs the guards, mutations, analyzer, tests and server checks one by one,
-    and the owner runs `tool/check_all.sh` whole.
+    and the owner runs `tool/check_all.sh` whole. Flutter may now write `~/.dart-tool`, and the app's analyzer and
+    tests run in the sandbox again.
 
 ## Rulings during branch 2
 
@@ -395,6 +397,11 @@ Banked by D17 (the reviews in journal-core; D52, D54):
   removes its own; every store operation through one queue; a native delete-all; a flush before the rename (Tasks
   9a, 10a); the cover's tests strengthened (Task 11a); the other notes banked (items 71 to 73). A Task 13 check for
   the keyboard's suggestion bar was added.
+- D55 (owner, 2026-11-12): Flutter may write its session file in `~/.dart-tool` (the owner's `3c8af83`; banked item
+  74 closed); `/simplify` skipped for journal-core (the store, cover and keyboard code are pinned by the app
+  mutations and the phone checks); the app's mutation runner committed as `tool/app_mutations.py`, run by hand like
+  `tool/server_mutations.py` (D43; banked item 60 closed); `CLAUDE.md`'s G0, G1 and G2 lines name the branch's
+  additions; the plan gains a Part 6, where the build differs from it.
 
 ## Documents as last imported
 
