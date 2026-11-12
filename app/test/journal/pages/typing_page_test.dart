@@ -369,6 +369,8 @@ void main() {
       final h = await open(tester);
       expect(tester.takeException(), isNull);
       expect(tester.getSize(find.byKey(TypingPage.fieldKey)).height, greaterThanOrEqualTo(100 * scale));
+      // The window the field shows in stays usable, not only the field's own height.
+      expect(tester.getSize(find.byType(SingleChildScrollView)).height, greaterThanOrEqualTo(100));
       expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
       await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
       await tester.tap(find.byKey(TypingPage.saveKey));
@@ -480,5 +482,61 @@ void main() {
     expect(lines, ['journalSaveFailed']);
     expect(find.byType(TypingPage), findsOneWidget);
     expect(await h.nights(), isEmpty);
+  });
+
+  // 9c (the review of 9b): MP·62 sits in the scroll area, so it can never
+  // squeeze the field's window away.
+  testWidgets('a failure at largest text keeps a window, shows MP·62', (tester) async {
+    await se(tester, scale: 3.1);
+    final files = FlakyFiles();
+    await open(tester, files: files);
+    files.failures = 1;
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    final area = tester.getRect(find.byType(SingleChildScrollView));
+    expect(area.height, greaterThanOrEqualTo(100));
+    final line = tester.getRect(find.byType(AppLine).last);
+    expect(line.top, greaterThanOrEqualTo(area.top));
+    expect(line.bottom, lessThanOrEqualTo(area.bottom));
+    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
+  });
+
+  testWidgets('MP·62 goes during a retry and stays if it fails', (tester) async {
+    final files = FlakyFiles();
+    final h = await open(tester, files: files);
+    final shown = find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en));
+    files.failures = 2;
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(shown, findsOneWidget);
+    files.hold = Completer<void>();
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    expect(shown, findsNothing);
+    files.hold!.complete();
+    await tester.pumpAndSettle();
+    expect(shown, findsOneWidget);
+    files.hold = null;
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [dreams[0]]);
+  });
+
+  testWidgets('the field fills the page when there is room', (tester) async {
+    tester.view.devicePixelRatio = 2;
+    tester.view.physicalSize = const Size(786, 1704);
+    addTearDown(tester.view.reset);
+    final h = await Harness.make();
+    await h.journal.markFirstUseSeen();
+    await h.pump(tester, Opener(() async => TypingPage(journal: h.journal, target: await h.journal.targetNow())));
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    final area = tester.getRect(find.byType(SingleChildScrollView));
+    expect(tester.getRect(find.byKey(TypingPage.fieldKey)).bottom, closeTo(area.bottom, 1));
   });
 }

@@ -51,6 +51,9 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   bool? _firstUse;
   bool _saving = false;
   bool _failed = false;
+  // MP·62 sits in the scroll area, below the field, so it can never squeeze
+  // the field's window away; a failure scrolls it into view (9c).
+  final _failure = GlobalKey();
 
   // Flutter's own edge swipe is off while this screen's PopScope refuses
   // a pop, so the screen answers the swipe itself (D62): from the left
@@ -108,6 +111,10 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       SafeLog.event(LogEvent.journalSaveFailed);
       _saving = false;
       if (mounted) setState(() => _failed = true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final line = _failure.currentContext;
+        if (mounted && line != null) Scrollable.ensureVisible(line);
+      });
       return;
     }
     if (mounted) Navigator.of(context).pop();
@@ -187,6 +194,18 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                                       ),
                                     ),
                                   ),
+                                  if (_failed)
+                                    Padding(
+                                      key: _failure,
+                                      padding: const EdgeInsets.only(top: StandIns.gap),
+                                      child: Semantics(
+                                        liveRegion: true,
+                                        child: AppLine(
+                                          PendingLines.MP_62.text(appLanguage),
+                                          style: TypeRoles.voiceApp.style(p.text),
+                                        ),
+                                      ),
+                                    ),
                                 ],
                               ),
                             ),
@@ -194,14 +213,6 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                         ),
                       ),
                     ),
-                    if (_failed)
-                      Padding(
-                        padding: const EdgeInsets.only(top: StandIns.gap),
-                        child: Semantics(
-                          liveRegion: true,
-                          child: AppLine(PendingLines.MP_62.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
-                        ),
-                      ),
                     const SizedBox(height: StandIns.gap),
                     Align(
                       alignment: Alignment.centerRight,
