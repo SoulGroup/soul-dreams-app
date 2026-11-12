@@ -137,12 +137,7 @@ void main() {
     final store = await JournalStore.open(files);
     final [first, second, ...] = nightsFromFixtures();
     await store.save(first);
-    final edited = Night(
-        id: first.id,
-        firstRecorded: first.firstRecorded,
-        date: first.date,
-        lang: first.lang,
-        dreams: second.dreams);
+    final edited = first.withDreams(second.dreams);
     await store.save(edited);
     final all = files.everything();
     expect(all.keys, [JournalStore.fileOf(first.id)]);
@@ -186,12 +181,7 @@ void main() {
     final night = nightsFromFixtures().first;
     final store = await JournalStore.open(files);
     await store.save(night);
-    final changed = Night(
-        id: night.id,
-        firstRecorded: night.firstRecorded,
-        date: night.date,
-        lang: night.lang,
-        dreams: nightsFromFixtures()[2].dreams);
+    final changed = night.withDreams(nightsFromFixtures()[2].dreams);
     final broken = await JournalStore.open(BrokenRename(files.dir));
     await expectLater(broken.save(changed), throwsA(isA<FileSystemException>()));
     expect(files.everything().keys, [JournalStore.fileOf(night.id)],
@@ -209,12 +199,7 @@ void main() {
     final store = await JournalStore.open(files);
     final [first, second, ...] = nightsFromFixtures();
     await store.save(first);
-    final edited = Night(
-        id: first.id,
-        firstRecorded: first.firstRecorded,
-        date: first.date,
-        lang: first.lang,
-        dreams: second.dreams);
+    final edited = first.withDreams(second.dreams);
     await files.write(JournalStore.tempPrefix + JournalStore.fileOf(first.id), encodeNight(edited));
     await store.delete(first.id);
     expect(files.everything(), isEmpty);

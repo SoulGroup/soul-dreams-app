@@ -41,6 +41,7 @@ List<Night> nightsFromFixtures([int seed = 1]) {
         id: newNightId(random),
         firstRecorded: at = at.add(const Duration(hours: 1)),
         date: (year: at.year, month: at.month, day: at.day),
+        closes: at.add(const Duration(hours: 14)),
         lang: Lang.values.byName(n.lang),
         name: n.name,
         dreams: n.dreams,

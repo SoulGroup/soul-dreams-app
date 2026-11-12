@@ -10,6 +10,7 @@ import '../words/lines.g.dart' show Lang;
 import 'journal_files.dart';
 import 'journal_store.dart';
 import 'night.dart';
+import 'night_rules.dart';
 
 const journalProbe = 'journal-probe-d49';
 
@@ -26,6 +27,7 @@ Future<bool> journalSelfCheck(JournalFiles files, JournalProtection protection,
       id: probeId = newNightId(),
       firstRecorded: local.toUtc(),
       date: (year: local.year, month: local.month, day: local.day),
+      closes: closesAfter(local.toUtc(), const PhoneZone()),
       lang: Lang.en,
       dreams: const [journalProbe],
     );

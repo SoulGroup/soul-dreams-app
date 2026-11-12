@@ -24,11 +24,12 @@ void main() {
     final n = nightsFromFixtures().first;
     final json = fields(n);
     expect(json.keys.toSet(),
-        {'version', 'id', 'firstRecorded', 'date', 'lang', 'name', 'dreams'});
+        {'version', 'id', 'firstRecorded', 'date', 'closes', 'lang', 'name', 'dreams'});
     expect(json['version'], 1);
     expect(json['id'], n.id);
     expect(json['firstRecorded'], '2026-10-12T06:40:00.000Z');
     expect(json['date'], '2026-10-12');
+    expect(json['closes'], '2026-10-12T20:40:00.000Z');
     expect(json['lang'], 'en');
     expect(json['dreams'], n.dreams);
   });
@@ -49,6 +50,10 @@ void main() {
       bytesOf(with_('firstRecorded', 'tomorrow')),
       bytesOf(with_('date', '2026-02-30')),
       bytesOf(with_('date', '12/10/2026')),
+      bytesOf(without('closes')),
+      bytesOf(with_('closes', '2026-10-12T20:40:00.000')),
+      bytesOf(with_('closes', good['firstRecorded'])),
+      bytesOf(with_('closes', '2026-10-12T06:39:00.000Z')),
       bytesOf(with_('lang', 'de')),
       bytesOf(with_('name', 7)),
       bytesOf(with_('dreams', [1])),
@@ -70,17 +75,31 @@ void main() {
   test('a bad id or a local time is refused', () {
     final n = nightsFromFixtures().first;
     expect(
-        () => Night(id: 'x', firstRecorded: n.firstRecorded, date: n.date, lang: n.lang, dreams: n.dreams),
+        () => Night(
+            id: 'x', firstRecorded: n.firstRecorded, date: n.date, closes: n.closes, lang: n.lang, dreams: n.dreams),
         throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'id')));
     expect(
-        () => Night(id: n.id, firstRecorded: DateTime(2026), date: n.date, lang: n.lang, dreams: n.dreams),
+        () => Night(
+            id: n.id, firstRecorded: DateTime(2026), date: n.date, closes: n.closes, lang: n.lang, dreams: n.dreams),
         throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'firstRecorded')));
+  });
+
+  test('a local or too early closing instant is refused', () {
+    final n = nightsFromFixtures().first;
+    for (final closes in [n.firstRecorded, n.firstRecorded.subtract(const Duration(minutes: 1)), DateTime(2027)]) {
+      expect(
+          () => Night(
+              id: n.id, firstRecorded: n.firstRecorded, date: n.date, closes: closes, lang: n.lang, dreams: n.dreams),
+          throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'closes')),
+          reason: '$closes');
+    }
+    expect(n.withDreams(const ['x']).closes, n.closes);
   });
 
   test('a date its file could not hold is refused', () {
     final n = nightsFromFixtures().first;
     Night on(NightDate date) =>
-        Night(id: n.id, firstRecorded: n.firstRecorded, date: date, lang: n.lang, dreams: n.dreams);
+        Night(id: n.id, firstRecorded: n.firstRecorded, date: date, closes: n.closes, lang: n.lang, dreams: n.dreams);
     for (final date in [
       (year: 2026, month: 2, day: 30),
       (year: 2026, month: 13, day: 1),
