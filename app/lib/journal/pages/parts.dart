@@ -9,10 +9,10 @@ import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
 
 BoxDecoration _pill(Color top, Color bottom, [Color? border]) => BoxDecoration(
-      gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, bottom]),
-      borderRadius: BorderRadius.circular(Spacing.radius),
-      border: border == null ? null : Border.all(color: border),
-    );
+  gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, bottom]),
+  borderRadius: BorderRadius.circular(Spacing.radius),
+  border: border == null ? null : Border.all(color: border),
+);
 
 /// A section label: a pill in the green gradient, white text, heard as a
 /// heading (How the AI Appears §2.6, §8).
@@ -57,13 +57,18 @@ class PlainButton extends StatelessWidget {
           decoration: _pill(p.buttonTop, p.buttonBottom, p.buttonBorder),
           child: Padding(
             padding: StandIns.buttonPadding,
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              if (icon != null) ...[
-                ExcludeSemantics(child: Icon(icon, size: style.fontSize! * 1.4, color: p.buttonText)),
-                const SizedBox(width: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  ExcludeSemantics(
+                    child: Icon(icon, size: style.fontSize! * 1.4, color: p.buttonText),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Text(label, style: style),
               ],
-              Text(label, style: style),
-            ]),
+            ),
           ),
         ),
       ),
@@ -102,11 +107,14 @@ class RecordButton extends StatelessWidget {
 
 /// A surface: a journal row or a dreamer's bubble (color.surface, radius).
 BoxDecoration surface(Palette p) => BoxDecoration(
-      gradient: LinearGradient(
-          begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [p.surfaceTop, p.surfaceBottom]),
-      borderRadius: BorderRadius.circular(Spacing.radius),
-      border: Border.all(color: p.surfaceBorder),
-    );
+  gradient: LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [p.surfaceTop, p.surfaceBottom],
+  ),
+  borderRadius: BorderRadius.circular(Spacing.radius),
+  border: Border.all(color: p.surfaceBorder),
+);
 
 /// A dream in the dreamer's bubble, from the right (Spacing.bubbleDreamer).
 class DreamBubble extends StatelessWidget {
@@ -122,13 +130,16 @@ class DreamBubble extends StatelessWidget {
       padding: Spacing.bubbleDreamer,
       child: Align(
         alignment: Alignment.centerRight,
-        child: GestureDetector(
-          onTap: onTap,
-          child: DecoratedBox(
-            decoration: surface(p),
-            child: Padding(
-              padding: StandIns.bubblePadding,
-              child: Text(text, style: TypeRoles.voiceDreamer.style(p.text)),
+        child: Semantics(
+          button: true,
+          child: GestureDetector(
+            onTap: onTap,
+            child: DecoratedBox(
+              decoration: surface(p),
+              child: Padding(
+                padding: StandIns.bubblePadding,
+                child: Text(text, style: TypeRoles.voiceDreamer.style(p.text)),
+              ),
             ),
           ),
         ),
@@ -147,9 +158,9 @@ class BackControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IconButton(
-        key: buttonKey,
-        onPressed: onPressed,
-        tooltip: Lines.MP_14.text(appLanguage),
-        icon: Icon(Icons.arrow_back_ios_new, color: Palette.of(context).text),
-      );
+    key: buttonKey,
+    onPressed: onPressed,
+    tooltip: Lines.MP_14.text(appLanguage),
+    icon: Icon(Icons.arrow_back_ios_new, color: Palette.of(context).text),
+  );
 }

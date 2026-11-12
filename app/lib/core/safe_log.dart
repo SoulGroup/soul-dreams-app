@@ -19,6 +19,11 @@ enum LogEvent {
 
   /// The typing screen's save failed; the words stay on the screen (D62).
   journalSaveFailed,
+
+  /// A night's page: its delete failed, or its read of the night did (D64).
+  /// The page stays as it was.
+  journalDeleteFailed,
+  journalReadFailed,
 }
 
 abstract final class SafeLog {

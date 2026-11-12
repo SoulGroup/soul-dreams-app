@@ -10,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/language.dart';
+import '../../core/safe_log.dart';
 import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
@@ -39,6 +40,9 @@ class NightPage extends StatefulWidget {
 class _NightPageState extends State<NightPage> {
   Night? _night;
 
+  // A delete is in flight: the menu, Add dreams and the dreams wait (D64).
+  bool _busy = false;
+
   @override
   void initState() {
     super.initState();
@@ -47,7 +51,13 @@ class _NightPageState extends State<NightPage> {
 
   // A night gone (every dream emptied) leaves its page (P10).
   Future<void> _load() async {
-    final n = await widget.journal.night(widget.id);
+    final Night? n;
+    try {
+      n = await widget.journal.night(widget.id);
+    } on Object {
+      SafeLog.event(LogEvent.journalReadFailed);
+      return;
+    }
     if (!mounted) return;
     if (n == null) {
       Navigator.of(context).pop();
@@ -57,12 +67,14 @@ class _NightPageState extends State<NightPage> {
   }
 
   Future<void> _type(DreamEdit? edit) async {
+    if (_busy) return;
     final page = TypingPage(journal: widget.journal, target: IntoNight(widget.id), edit: edit);
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     await _load();
   }
 
   Future<void> _delete() async {
+    if (_busy) return;
     final yes = await showCupertinoDialog<bool>(
       context: context,
       builder: (context) => CupertinoAlertDialog(
@@ -80,8 +92,15 @@ class _NightPageState extends State<NightPage> {
         ],
       ),
     );
-    if (yes != true) return;
-    await widget.journal.delete(widget.id);
+    if (yes != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await widget.journal.delete(widget.id);
+    } on Object {
+      SafeLog.event(LogEvent.journalDeleteFailed);
+      if (mounted) setState(() => _busy = false);
+      return;
+    }
     if (mounted) Navigator.of(context).pop();
   }
 
@@ -91,59 +110,68 @@ class _NightPageState extends State<NightPage> {
     final n = _night;
     return Scaffold(
       body: SafeArea(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Row(children: [
-            BackControl(onPressed: () => Navigator.of(context).pop()),
-            const Spacer(),
-            PopupMenuButton<int>(
-              key: NightPage.menuKey,
-              tooltip: Lines.MP_39.text(appLanguage),
-              icon: Icon(Icons.more_horiz, color: p.text),
-              onSelected: (_) => _delete(),
-              itemBuilder: (context) => [
-                PopupMenuItem<int>(
-                  key: NightPage.deleteKey,
-                  value: 0,
-                  child: Text(Lines.EM_11.parts(appLanguage)[1], style: TypeRoles.button.style(p.text)),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                BackControl(onPressed: () => Navigator.of(context).pop()),
+                const Spacer(),
+                PopupMenuButton<int>(
+                  key: NightPage.menuKey,
+                  enabled: !_busy,
+                  tooltip: Lines.MP_39.text(appLanguage),
+                  icon: Icon(Icons.more_horiz, color: p.text),
+                  onSelected: (_) => _delete(),
+                  itemBuilder: (context) => [
+                    PopupMenuItem<int>(
+                      key: NightPage.deleteKey,
+                      value: 0,
+                      child: Text(Lines.EM_11.parts(appLanguage)[1], style: TypeRoles.button.style(p.text)),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ]),
-          if (n != null)
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
-                children: [
-                  Padding(
-                    padding: Spacing.nightHeader,
-                    child: Semantics(
-                      header: true,
-                      child: n.name == null
-                          ? Text(dayDigits(n.date), style: TypeRoles.h2.style(p.text))
-                          : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Text(n.name!, style: TypeRoles.h2.style(p.text)),
-                              Text(dayDigits(n.date), style: TypeRoles.button.style(p.text)),
-                            ]),
+            if (n != null)
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
+                  children: [
+                    Padding(
+                      padding: Spacing.nightHeader,
+                      child: Semantics(
+                        header: true,
+                        child: n.name == null
+                            ? Text(dayDigits(n.date), style: TypeRoles.h2.style(p.text))
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(n.name!, style: TypeRoles.h2.style(p.text)),
+                                  Text(dayDigits(n.date), style: TypeRoles.button.style(p.text)),
+                                ],
+                              ),
+                      ),
                     ),
-                  ),
-                  Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
-                  const SizedBox(height: StandIns.gap),
-                  for (final (i, d) in n.dreams.indexed) ...[
-                    DreamBubble(d, onTap: () => _type((id: n.id, index: i, text: d))),
-                    const SizedBox(height: StandIns.bubbleGap),
+                    Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
+                    const SizedBox(height: StandIns.gap),
+                    for (final (i, d) in n.dreams.indexed) ...[
+                      DreamBubble(d, onTap: () => _type((id: n.id, index: i, text: d))),
+                      const SizedBox(height: StandIns.bubbleGap),
+                    ],
+                    const SizedBox(height: StandIns.gap),
+                    Center(
+                      child: KeyedSubtree(
+                        key: NightPage.addKey,
+                        child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
+                      ),
+                    ),
+                    const SizedBox(height: StandIns.gap),
                   ],
-                  const SizedBox(height: StandIns.gap),
-                  Center(
-                    child: KeyedSubtree(
-                      key: NightPage.addKey,
-                      child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
-                    ),
-                  ),
-                  const SizedBox(height: StandIns.gap),
-                ],
+                ),
               ),
-            ),
-        ]),
+          ],
+        ),
       ),
     );
   }
