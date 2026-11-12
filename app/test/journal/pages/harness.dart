@@ -27,10 +27,11 @@ final class Harness {
   /// The journal's clock, in UTC; tests move it.
   static DateTime clock = stockholm(2026, 6, 10, 12);
 
-  static Future<Harness> make() async {
+  /// A journal on [files], or on a fresh in-memory folder.
+  static Future<Harness> make({MemoryJournalFiles? files}) async {
     clock = stockholm(2026, 6, 10, 12);
     JournalStore.newQueueForTests();
-    final files = MemoryJournalFiles();
+    files ??= MemoryJournalFiles();
     final store = await JournalStore.open(files);
     final journal = Journal(store, zone: const FakeStockholm(), now: () => clock, random: Random(5));
     return Harness._(files, store, journal);

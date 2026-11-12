@@ -16,6 +16,9 @@ enum LogEvent {
   journalFileSkipped,
   journalCheckPassed,
   journalCheckFailed,
+
+  /// The typing screen's save failed; the words stay on the screen (D62).
+  journalSaveFailed,
 }
 
 abstract final class SafeLog {
