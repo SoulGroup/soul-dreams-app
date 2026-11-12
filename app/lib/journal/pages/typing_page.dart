@@ -8,7 +8,9 @@
 // the record button and Start Interpretation. D62: Save, Back, the
 // system's back and the iPhone's edge swipe all go through one _save;
 // when it fails the words and the screen stay, one code is logged, and
-// each of them tries again.
+// each of them tries again. D63: the field takes no focus by itself, the
+// page scrolls with the keyboard up, a failed save shows MP·62, and
+// leaving the app (hidden or paused, not inactive) saves what is typed.
 import 'package:flutter/material.dart';
 
 import '../../core/app_line.dart';
@@ -18,6 +20,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
+import '../../words/pending.g.dart';
 import '../journal.dart';
 import '../night_rules.dart';
 import 'parts.dart';
@@ -43,10 +46,11 @@ class TypingPage extends StatefulWidget {
   State<TypingPage> createState() => _TypingPageState();
 }
 
-class _TypingPageState extends State<TypingPage> {
+class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   late final _text = TextEditingController(text: widget.edit?.text);
   bool? _firstUse;
   bool _saving = false;
+  bool _failed = false;
 
   // Flutter's own edge swipe is off while this screen's PopScope refuses
   // a pop, so the screen answers the swipe itself (D62): from the left
@@ -59,6 +63,7 @@ class _TypingPageState extends State<TypingPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     widget.journal.firstUseSeen().then((seen) async {
       if (!seen) await widget.journal.markFirstUseSeen();
       if (mounted) setState(() => _firstUse = !seen);
@@ -67,13 +72,31 @@ class _TypingPageState extends State<TypingPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _text.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
+  // Leaving the app saves what is typed, as Save does (D63). `inactive`
+  // only covers the screen (D50 2) and saves nothing.
+  // It saves once, as the app goes away; the way back (paused, hidden,
+  // inactive, resumed) passes through hidden again and does not save.
+  bool _away = false;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final wasAway = _away;
+    _away = state == AppLifecycleState.hidden || state == AppLifecycleState.paused;
+    if (_away && !wasAway) _save(leaving: true);
+  }
+
+  Future<void> _save({bool leaving = false}) async {
     if (_saving) return;
+    // Leaving with nothing typed keeps nothing and stays, so an emptied
+    // edit never deletes a dream behind the dreamer's back.
+    if (leaving && isEmptyText(_text.text)) return;
     _saving = true;
+    if (_failed) setState(() => _failed = false);
     try {
       final e = widget.edit;
       if (e == null) {
@@ -84,6 +107,7 @@ class _TypingPageState extends State<TypingPage> {
     } on Object {
       SafeLog.event(LogEvent.journalSaveFailed);
       _saving = false;
+      if (mounted) setState(() => _failed = true);
       return;
     }
     if (mounted) Navigator.of(context).pop();
@@ -97,6 +121,10 @@ class _TypingPageState extends State<TypingPage> {
       borderSide: BorderSide(color: p.fieldBorder),
     );
     final first = _firstUse;
+    final dreamer = TypeRoles.voiceDreamer;
+    final minField =
+        MediaQuery.textScalerOf(context).scale(dreamer.size) * dreamer.height * StandIns.fieldMinLines +
+        StandIns.fieldPadding.vertical;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -115,36 +143,65 @@ class _TypingPageState extends State<TypingPage> {
                       alignment: Alignment.centerLeft,
                       child: BackControl(onPressed: _save),
                     ),
-                    if (first != null)
-                      AppLine(
-                        (first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),
-                        style: TypeRoles.voiceApp.style(p.text),
-                      ),
-                    const SizedBox(height: StandIns.gap),
                     Expanded(
-                      child: TextField(
-                        key: TypingPage.fieldKey,
-                        controller: _text,
-                        autofocus: true,
-                        expands: true,
-                        maxLines: null,
-                        keyboardType: TextInputType.multiline,
-                        textCapitalization: TextCapitalization.sentences,
-                        textAlignVertical: TextAlignVertical.top,
-                        style: TypeRoles.voiceDreamer.style(p.fieldText),
-                        cursorColor: p.fieldText,
-                        decoration: InputDecoration(
-                          hintText: Lines.MP_12.text(appLanguage),
-                          hintStyle: TypeRoles.button.style(p.placeholder),
-                          filled: true,
-                          fillColor: p.field,
-                          contentPadding: StandIns.fieldPadding,
-                          border: edge,
-                          enabledBorder: edge,
-                          focusedBorder: edge,
+                      // One column, so the field is always built and keeps its
+                      // focus; it fills the page, and no less than its least
+                      // height, and the page scrolls when that does not fit.
+                      child: LayoutBuilder(
+                        builder: (context, box) => SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(minHeight: box.maxHeight),
+                            child: IntrinsicHeight(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  if (first != null)
+                                    AppLine(
+                                      (first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),
+                                      style: TypeRoles.voiceApp.style(p.text),
+                                    ),
+                                  const SizedBox(height: StandIns.gap),
+                                  Expanded(
+                                    child: ConstrainedBox(
+                                      constraints: BoxConstraints(minHeight: minField),
+                                      child: TextField(
+                                        key: TypingPage.fieldKey,
+                                        controller: _text,
+                                        expands: true,
+                                        maxLines: null,
+                                        keyboardType: TextInputType.multiline,
+                                        textCapitalization: TextCapitalization.sentences,
+                                        textAlignVertical: TextAlignVertical.top,
+                                        style: TypeRoles.voiceDreamer.style(p.fieldText),
+                                        cursorColor: p.fieldText,
+                                        decoration: InputDecoration(
+                                          hintText: Lines.MP_12.text(appLanguage),
+                                          hintStyle: TypeRoles.button.style(p.placeholder),
+                                          filled: true,
+                                          fillColor: p.field,
+                                          contentPadding: StandIns.fieldPadding,
+                                          border: edge,
+                                          enabledBorder: edge,
+                                          focusedBorder: edge,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
+                    if (_failed)
+                      Padding(
+                        padding: const EdgeInsets.only(top: StandIns.gap),
+                        child: Semantics(
+                          liveRegion: true,
+                          child: AppLine(PendingLines.MP_62.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                        ),
+                      ),
                     const SizedBox(height: StandIns.gap),
                     Align(
                       alignment: Alignment.centerRight,

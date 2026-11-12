@@ -43,6 +43,10 @@ abstract final class StandIns {
   static const fieldPadding = EdgeInsets.all(20);
   static const double gap = 20;
 
+  /// The least height of the typing field, in lines of the dreamer's text
+  /// at the phone's text size, so it stays usable with the keyboard up (D63).
+  static const int fieldMinLines = 5;
+
   /// A row's summary: the dreamer's words (type role unset).
   static const summary = TypeRoles.voiceDreamer;
 }
