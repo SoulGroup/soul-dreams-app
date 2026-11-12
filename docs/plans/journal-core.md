@@ -3697,5 +3697,9 @@ committed code, the committed code and this part govern. The implementation repo
   numbered 69 to 71 (Task 2), 72 to 75 (2a), 76 (G1), 77 to 79 (fonts) and 80 (3a).
 - **The counts.** At the end of the build: **224** guard tests, **80** guard mutation rows, **59** app tests and
   **23** app mutation rows (the plan's 221, 75, 54 and 13). With the runner's three tests (D55): **227** guard tests.
+- **The final review's fix (`a559b66`).** `Night`'s constructor refuses a date its file could not hold (a day that
+  does not exist, a year outside four digits) with `ArgumentError('date')`; `decodeNight` already refused one, so
+  such a night was saved and then skipped as unreadable. One test, app mutation row A24: **60** app tests, **24**
+  app mutation rows (`app mutations: 24 run, 24 caught`).
 
 *No matter where you are on your journey, the steps you take are equally important.*

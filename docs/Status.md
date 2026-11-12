@@ -70,9 +70,10 @@ rulings given during each branch are listed in this file, one line each, under "
   third-party keyboard was not offered in SoulDreams Dev and was in Notes; the app-switcher card was plain, with no
   field, keyboard, logo, words or suggestion bar, including with an invented word typed. The backup size (optional)
   was not looked at.
-- The app's analyzer baseline: `No issues found!`. The app has 59 tests, and 23 mutation checks (A1 to A23) in
+- The app's analyzer baseline: `No issues found!`. The app has 60 tests, and 24 mutation checks (A1 to A24) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 23 run, 23 caught`); `check_all.sh` does not call it (D55).
+  (expected: `app mutations: 24 run, 24 caught`); `check_all.sh` does not call it (D55). A night's date is a day its
+  file can hold (the final review, `a559b66`; row A24).
 
 ## The server
 
