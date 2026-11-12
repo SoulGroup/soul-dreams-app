@@ -17,3 +17,26 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # The faces the Design System names (D49 a), bundled: never fetched at
+  # run time (R10). Each file is fingerprinted in assets/fonts/.
+  fonts:
+    - family: Tangerine
+      fonts:
+        - asset: assets/fonts/Tangerine-Regular.ttf
+    - family: SortsMillGoudy
+      fonts:
+        - asset: assets/fonts/SortsMillGoudy-Regular.ttf
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+        - asset: assets/fonts/Nunito-Italic.ttf
+          style: italic
+    - family: Habibi
+      fonts:
+        - asset: assets/fonts/Habibi-Regular.ttf
