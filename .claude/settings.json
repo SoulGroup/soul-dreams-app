@@ -121,7 +121,8 @@
         "~/fvm",
         "~/.dartServer",
         "~/.npm",
-        "~/.config/flutter"
+        "~/.config/flutter",
+        "~/.dart-tool"
       ]
     },
     "network": {
