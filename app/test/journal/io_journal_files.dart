@@ -43,6 +43,13 @@ class IoJournalFiles implements JournalFiles {
     if (f.existsSync()) f.deleteSync();
   }
 
+  @override
+  Future<void> deleteAll() async {
+    for (final e in dir.listSync()) {
+      e.deleteSync(recursive: true);
+    }
+  }
+
   /// Every file's bytes, by name: what a look at the whole folder finds.
   Map<String, Uint8List> everything() => {
         for (final e in dir.listSync(recursive: true))

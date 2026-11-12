@@ -67,6 +67,21 @@ final class Gated extends IoJournalFiles {
     log.add('delete:start');
     return super.delete(name);
   }
+
+  @override
+  Future<void> deleteAll() {
+    log.add('deleteAll:start');
+    return super.deleteAll();
+  }
+}
+
+/// Deleting by name always fails, as it would for a name the channel
+/// refuses: only the folder's own delete-all can still empty it (D54).
+final class NoNamedDelete extends IoJournalFiles {
+  NoNamedDelete(super.dir);
+
+  @override
+  Future<void> delete(String name) async => throw ArgumentError('name');
 }
 
 void main() {
@@ -152,6 +167,21 @@ void main() {
     expect(await store.nights(), isEmpty);
   });
 
+  test('deleting the journal does not depend on file names', () async {
+    final folder = NoNamedDelete(files.dir);
+    final store = await JournalStore.open(folder);
+    for (final n in nightsFromFixtures()) {
+      await store.save(n);
+    }
+    File('${files.dir.path}/odd name').writeAsBytesSync([1]);
+    File('${files.dir.path}/\u00e9').writeAsBytesSync([1]);
+    Directory('${files.dir.path}/sub').createSync();
+    File('${files.dir.path}/sub/inside').writeAsBytesSync([1]);
+    await store.deleteAll();
+    expect(files.dir.listSync(recursive: true), isEmpty);
+    expect(await store.nights(), isEmpty);
+  });
+
   test('a save cut short leaves the last whole version', () async {
     final night = nightsFromFixtures().first;
     final store = await JournalStore.open(files);
@@ -201,7 +231,7 @@ void main() {
     await pumpEventQueue();
     gated.hold.complete();
     await Future.wait([saving, deleting]);
-    expect(gated.log, ['rename:start', 'rename:end', 'delete:start']);
+    expect(gated.log, ['rename:start', 'rename:end', 'deleteAll:start']);
     expect(files.everything(), isEmpty);
   });
 

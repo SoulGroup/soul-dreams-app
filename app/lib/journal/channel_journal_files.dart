@@ -39,6 +39,9 @@ final class ChannelJournalFiles implements JournalFiles, JournalProtection {
   Future<void> delete(String name) => _channel.invokeMethod<void>('delete', _checked(name));
 
   @override
+  Future<void> deleteAll() => _channel.invokeMethod<void>('deleteAll');
+
+  @override
   Future<Protection> protection(String name) async {
     final m = await _channel.invokeMapMethod<String, bool>('protection', _checked(name)) ??
         const <String, bool>{};

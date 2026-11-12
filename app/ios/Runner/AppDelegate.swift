@@ -42,7 +42,7 @@ enum JournalFiles {
       || c == "." || c == "_" || c == "-"
   }
 
-  enum Failure: Error { case name, arguments, rename }
+  enum Failure: Error { case name, arguments, rename, flush, delete }
 
   static func channel(messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {
     let channel = FlutterMethodChannel(name: channelName, binaryMessenger: messenger)
@@ -75,6 +75,16 @@ enum JournalFiles {
     return a
   }
 
+  // Forces a written file's bytes to the disk (D54), so that the rename
+  // which publishes it can never leave an empty or partial night after a
+  // power loss. F_FULLFSYNC where the file system has it, else fsync.
+  static func flush(_ url: URL) throws {
+    let fd = Darwin.open(url.path, O_RDONLY)
+    guard fd >= 0 else { throw Failure.flush }
+    defer { Darwin.close(fd) }
+    if fcntl(fd, F_FULLFSYNC) == -1 && fsync(fd) == -1 { throw Failure.flush }
+  }
+
   static func handle(_ call: FlutterMethodCall) throws -> Any? {
     let fm = FileManager.default
     switch call.method {
@@ -96,7 +106,9 @@ enum JournalFiles {
     case "write":
       let a = try arguments(call)
       guard let bytes = a["bytes"] as? FlutterStandardTypedData else { throw Failure.arguments }
-      try bytes.data.write(to: try file(a["name"]), options: [.completeFileProtection])
+      let url = try file(a["name"])
+      try bytes.data.write(to: url, options: [.completeFileProtection])
+      try flush(url)
       return nil
     case "rename":
       let a = try arguments(call)
@@ -108,6 +120,16 @@ enum JournalFiles {
     case "delete":
       let url = try file(call.arguments)
       if fm.fileExists(atPath: url.path) { try fm.removeItem(at: url) }
+      return nil
+    case "deleteAll":
+      // Every entry, whatever its name (D54): one that cannot be removed
+      // does not stop the others, and the call then answers with a code.
+      let dir = try folder()
+      var failed = false
+      for name in try fm.contentsOfDirectory(atPath: dir.path) {
+        do { try fm.removeItem(at: dir.appendingPathComponent(name)) } catch { failed = true }
+      }
+      if failed { throw Failure.delete }
       return nil
     case "protection":
       let dir = try folder()

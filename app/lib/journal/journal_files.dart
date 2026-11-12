@@ -29,6 +29,10 @@ abstract interface class JournalFiles {
 
   /// Deletes the file; nothing happens when there is none.
   Future<void> delete(String name);
+
+  /// Deletes every entry in the folder, whatever its name (D54): files and
+  /// anything else, and it does not stop at one it cannot name.
+  Future<void> deleteAll();
 }
 
 /// What the phone check reads back (D49 c): whether the folder is

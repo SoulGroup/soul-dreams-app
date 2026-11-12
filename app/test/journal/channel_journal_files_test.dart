@@ -33,13 +33,15 @@ void main() {
     await files.read('b.json');
     await files.delete('b.json');
     await files.list();
+    await files.deleteAll();
     expect([for (final c in calls) c.method],
-        ['open', 'write', 'rename', 'read', 'delete', 'list']);
+        ['open', 'write', 'rename', 'read', 'delete', 'list', 'deleteAll']);
     expect(calls[0].arguments, isNull);
     expect(calls[1].arguments, {'name': 'a.json', 'bytes': bytes});
     expect(calls[2].arguments, {'from': 'a.json', 'to': 'b.json'});
     expect(calls[3].arguments, 'b.json');
     expect(calls[4].arguments, 'b.json');
+    expect(calls[6].arguments, isNull);
   });
 
   test('answers come back as the store expects', () async {
@@ -77,7 +79,7 @@ void main() {
   test('the Swift side answers every method this side calls', () {
     final swift = File('ios/Runner/AppDelegate.swift').readAsStringSync();
     expect(swift, contains('"$journalChannel"'));
-    for (final m in ['open', 'list', 'read', 'write', 'rename', 'delete', 'protection']) {
+    for (final m in ['open', 'list', 'read', 'write', 'rename', 'delete', 'deleteAll', 'protection']) {
       expect(swift, contains('case "$m":'), reason: m);
     }
     for (final k in ['name', 'bytes', 'from', 'to', 'excluded', 'folderComplete', 'fileComplete']) {
@@ -85,5 +87,10 @@ void main() {
     }
     expect(swift, contains('.completeFileProtection'));
     expect(swift, contains('isExcludedFromBackup = true'));
+    // D54: the bytes are flushed to the disk before the rename that
+    // publishes them, and delete-all goes through every entry.
+    expect(swift, contains('F_FULLFSYNC'));
+    expect(swift, contains('try flush(url)'));
+    expect(swift, contains('contentsOfDirectory(atPath: dir.path)'));
   });
 }

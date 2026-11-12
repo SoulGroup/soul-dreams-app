@@ -105,12 +105,8 @@ final class JournalStore {
     await _files.delete(tempPrefix + name);
   });
 
-  /// Deletes every file in the journal's folder.
-  Future<void> deleteAll() => _run(() async {
-    for (final name in await _files.list()) {
-      await _files.delete(name);
-    }
-  });
+  /// Deletes every entry in the journal's folder, whatever its name.
+  Future<void> deleteAll() => _run(() => _files.deleteAll());
 
   Future<bool> firstUseSeen() => _run(() async => (await _files.list()).contains(firstUseFlag));
 
