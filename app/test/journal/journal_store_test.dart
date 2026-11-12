@@ -330,4 +330,17 @@ void main() {
     expect(before.keys.single, files.everything().keys.single);
     expect((await store.nights()).single.dreams, const ['y']);
   });
+
+  test('an update leaves a file that holds another id alone', () async {
+    final store = await JournalStore.open(files);
+    final [a, b] = nightsFromFixtures().take(2).toList();
+    await files.write(JournalStore.fileOf(a.id), encodeNight(b));
+    var called = false;
+    expect(await store.update(a.id, (x) {
+      called = true;
+      return null;
+    }), isFalse);
+    expect(called, isFalse);
+    expect(files.everything()[JournalStore.fileOf(a.id)], encodeNight(b));
+  });
 }

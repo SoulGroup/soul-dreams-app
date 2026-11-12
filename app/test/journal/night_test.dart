@@ -130,4 +130,25 @@ void main() {
     expect(() => closing(late), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'closes')));
     expect(decodeNight(bytesOf({...fields(n), 'closes': late.toIso8601String()})), isNull);
   });
+
+  test('a night at the far end of time reads without throwing', () {
+    final n = nightsFromFixtures().first;
+    final json = {
+      ...fields(n),
+      'firstRecorded': '+275760-09-12T23:00:00.000Z',
+      'closes': '+275760-09-13T00:00:00.000Z',
+    };
+    // A whole night, however far off: read as one, and never thrown at.
+    expect(() => decodeNight(bytesOf(json)), returnsNormally);
+    final end = DateTime.utc(275760, 9, 12, 23);
+    expect(
+        () => Night(
+            id: n.id,
+            firstRecorded: end,
+            date: n.date,
+            closes: DateTime.utc(275760, 9, 13),
+            lang: n.lang,
+            dreams: n.dreams),
+        returnsNormally);
+  });
 }
