@@ -12,6 +12,16 @@ import UIKit
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
+  // Third-party keyboards refused, app-wide (D50 1): Apple's documented way
+  // to reject custom keyboards. Every other extension point is allowed.
+  // FlutterAppDelegate's own answer (it asks the plugins) is not consulted.
+  override func application(
+    _ application: UIApplication,
+    shouldAllowExtensionPointIdentifier extensionPointIdentifier: UIApplication.ExtensionPointIdentifier
+  ) -> Bool {
+    return extensionPointIdentifier != .keyboard
+  }
+
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "JournalFiles") {
