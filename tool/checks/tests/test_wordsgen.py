@@ -12,7 +12,7 @@ import unittest
 import helpers  # noqa: F401  (puts tool/checks on the path)
 import wordsgen
 from guardlib import CSV, GENERATED, LINES, LIST_WORDS, LISTS, STRINGS_EN, STRINGS_SV
-from guardlib import WORDS_XCCONFIG
+from guardlib import PENDING_CSV, PENDING_DART, WORDS_XCCONFIG
 
 DOT = '·'
 PILCROW = '¶'
@@ -65,8 +65,72 @@ def gen(*rows):
     return wordsgen.generate(register(*rows), lists())
 
 
+def pending_row(handle, en='pa', sv='pb', status='pending', given='a message'):
+    return [handle, 'a place', status, en, sv, given]
+
+
+def pending(*rows, header=None):
+    out = io.StringIO(newline='')
+    w = csv.writer(out, lineterminator='\n')
+    w.writerow(header or wordsgen.PENDING_HEADER)
+    for r in rows:
+        w.writerow(r)
+    return out.getvalue().encode('utf-8')
+
+
+def pending_dart(pending_bytes, *rows):
+    return wordsgen.generate(register(*rows), lists(), pending_bytes)[PENDING_DART].decode('utf-8')
+
+
 def lines(*rows):
     return gen(*rows)[LINES].decode('utf-8')
+
+
+class Pending(unittest.TestCase):
+    # D57 Q11, D58 Q11: lines given and approved, not yet filed.
+    def refused(self, code, pending_bytes, *rows):
+        with self.assertRaises(wordsgen.WordsError) as cm:
+            wordsgen.generate(register(*rows), lists(), pending_bytes)
+        self.assertEqual((cm.exception.source, cm.exception.code), ('pending', code))
+        return cm.exception
+
+    def test_no_pending_file_makes_an_empty_class(self):
+        dart = pending_dart(None)
+        self.assertIn('(sha256 none)', dart)
+        self.assertIn('final class PendingLine {', dart)
+        self.assertIn('  static const all = <PendingLine>[];\n}\n', dart)
+
+    def test_pending_lines_are_their_own_type(self):
+        body = pending(pending_row('MP' + DOT + '60', 'pa / pc', 'pb / pd'))
+        dart = pending_dart(body)
+        self.assertIn("  static const MP_60 = PendingLine('MP" + DOT + "60', ['pa', 'pc'], ['pb', 'pd']);",
+                      dart)
+        self.assertIn('  static const all = <PendingLine>[MP_60];', dart)
+        self.assertIn("    if (flavor != 'dev') return ['[$handle]'];", dart)
+        self.assertIn('(sha256 %s)' % wordsgen.sha256(body), dart)
+        self.assertNotIn('Line(', dart.replace('PendingLine(', ''))
+
+    def test_a_filed_handle_stops(self):
+        filed = row('MP' + DOT + '60', 'written', 'w', 'v')
+        e = self.refused('pending-filed', pending(pending_row('MP' + DOT + '60')), filed)
+        self.assertEqual(e.row, 2)
+        retired = row('MP' + DOT + '61', 'retired')
+        self.refused('pending-filed', pending(pending_row('MP' + DOT + '61')), retired)
+
+    def test_each_row_rule_stops(self):
+        h = 'MP' + DOT + '60'
+        self.refused('bad-header', pending(header=('handle', 'english')))
+        self.refused('bad-row', pending(pending_row(h)[:-1]))
+        self.refused('bad-handle', pending(pending_row('mp60')))
+        self.refused('repeated-handle', pending(pending_row(h), pending_row(h)))
+        self.refused('dart-name-clash', pending(pending_row('MP-60')), row('MP' + DOT + '60', 'retired'))
+        self.refused('pending-status', pending(pending_row(h, status='written')))
+        self.refused('pending-given', pending(pending_row(h, given=' ')))
+        self.refused('missing-language', pending(pending_row(h, sv='')))
+        self.refused('parts-differ', pending(pending_row(h, 'pa / pc', 'pb')))
+        self.refused('pending-slot', pending(pending_row(h, '{n} pa', '{n} pb')))
+        self.refused('control-character', pending(pending_row(h, 'p\ta')))
+        self.refused('bad-csv', b'handle,"place\n')
 
 
 class Generator(unittest.TestCase):
@@ -360,6 +424,18 @@ class Command(unittest.TestCase):
         os.replace(path, real)
         os.symlink(real, path)
         self.assertEqual(self.run_gen('--check'), (1, 'wordsgen: refused register missing row 0\n'))
+
+    def test_pending_file_is_read_from_root(self):
+        with open(os.path.join(self.root, PENDING_CSV), 'wb') as f:
+            f.write(pending(pending_row('MP' + DOT + '60')))
+        rc, out = self.run_gen('--write')
+        self.assertEqual(rc, 0, out)
+        self.assertIn('wordsgen: pending lines 1', out)
+        with open(os.path.join(self.root, PENDING_DART), 'rb') as f:
+            self.assertIn(b'static const MP_60 = PendingLine(', f.read())
+        with open(os.path.join(self.root, PENDING_CSV), 'wb') as f:
+            f.write(pending(pending_row('MP' + DOT + '60', status='filed')))
+        self.assertEqual(self.run_gen('--check'), (1, 'wordsgen: refused pending pending-status row 2\n'))
 
     def test_usage(self):
         self.assertEqual(self.run_gen()[0], 1)

@@ -8,7 +8,8 @@ import designgen
 import test_designgen as invented_design
 import test_wordsgen as invented
 import wordsgen
-from guardlib import DESIGN, GENERATED, LINES, TOKENS, WORDS_XCCONFIG
+from guardlib import (DESIGN, GENERATED, LINES, PENDING_CSV, PENDING_DART, PENDING_FINGERPRINT,
+                      TOKENS, WORDS_XCCONFIG)
 
 MARKER = 'tool/checks/awaiting-import'
 SOURCES = 'docs/source/SOURCES'
@@ -126,6 +127,47 @@ class G1(GuardTest):
         found = self.refused(files)
         self.assertIn((CSV, 0, 'hash-mismatch'), found)
         self.assertIn((TOKENS, 0, 'generated-missing'), found)
+
+
+    # D57 Q11: the pending lines and their fingerprint.
+    def pending_tree(self, body=None, fingerprint=None, made=True):
+        files = armed()
+        body = body if body is not None else invented.pending(invented.pending_row('MP' + invented.DOT + '60'))
+        files[PENDING_CSV] = body
+        files[PENDING_FINGERPRINT] = (fingerprint if fingerprint is not None else
+                                      hashlib.sha256(body).hexdigest() + '  pending-lines.csv\n')
+        if made:
+            files[PENDING_DART] = wordsgen.generate(files[CSV], files[LISTS], body)[PENDING_DART]
+        return files
+
+    def test_pending_lines_with_their_fingerprint_pass(self):
+        self.passed(self.pending_tree())
+
+    def test_pending_lines_need_their_fingerprint(self):
+        files = self.pending_tree()
+        del files[PENDING_FINGERPRINT]
+        self.assertEqual(self.refused(files), [(PENDING_CSV, 0, 'pending-unfingerprinted')])
+        files = self.pending_tree()
+        del files[PENDING_CSV]
+        self.assertEqual(self.refused(files), [(PENDING_FINGERPRINT, 0, 'pending-missing')])
+
+    def test_pending_fingerprint_must_match(self):
+        files = self.pending_tree()
+        files[PENDING_CSV] = files[PENDING_CSV] + b'MP' + invented.DOT.encode() + b'61,p,pending,a,b,c\n'
+        self.assertEqual(self.refused(files), [(PENDING_CSV, 0, 'hash-mismatch')])
+        for bad in ('', 'x\n', '0' * 64 + '  other.csv\n', '0' * 64 + '  pending-lines.csv'):
+            self.assertEqual(self.refused(self.pending_tree(fingerprint=bad)),
+                             [(PENDING_FINGERPRINT, 1, 'fingerprint-malformed')])
+
+    def test_pending_dart_must_be_generated(self):
+        files = self.pending_tree()
+        files[PENDING_DART] = wordsgen.generate(files[CSV], files[LISTS])[PENDING_DART]
+        self.assertEqual(self.refused(files), [(PENDING_DART, 0, 'generated-differs')])
+
+    def test_pending_refusal_names_the_pending_file(self):
+        body = invented.pending(invented.pending_row('MP' + invented.DOT + '55'))
+        files = self.pending_tree(body, made=False)
+        self.assertEqual(self.refused(files), [(PENDING_CSV, 2, 'generator-refused:pending-filed')])
 
 
 class G2(GuardTest):

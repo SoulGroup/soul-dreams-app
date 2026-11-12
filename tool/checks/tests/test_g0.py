@@ -14,6 +14,13 @@ class G0(GuardTest):
         self.refused({'app/assets/fonts/sub/OFL.txt': 'x\n'}, 'unknown-kind')
         self.refused({'app/assets/fonts/OFL.txt': b'\xff\xfe'}, 'unknown-kind')
 
+    # D57 Q11: the pending lines' fingerprint, by exact path only.
+    def test_pending_fingerprint_known_by_path_only(self):
+        self.passed({'app/assets/words/pending-fingerprint.txt': 'x\n',
+                     'app/assets/words/pending-lines.csv': 'x\n'})
+        self.refused({'app/assets/words/other.txt': 'x\n'}, 'unknown-kind')
+        self.refused({'app/assets/words/pending-fingerprint.txt': b'\xff\xfe'}, 'unknown-kind')
+
     def test_a_font_is_binary(self):
         self.passed({'app/assets/fonts/A-Regular.ttf': b'\x00\x01font'})
 

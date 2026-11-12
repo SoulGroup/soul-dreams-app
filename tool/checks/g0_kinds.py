@@ -5,17 +5,20 @@
 # unknown '#!' interpreter, or of any other kind, is refused as
 # unknown-kind. A branch that brings a new kind of file extends these
 # lists, and the owner approves the change at the prompt. D49 a: .txt is
-# known in the fonts folder only (the licences and the fingerprints).
+# known in the fonts folder only (the licences and the fingerprints);
+# D57 Q11: and the pending lines' fingerprint, by exact path.
 import posixpath
 
-from guardlib import FONTS, LOCKFILES, MARKER, SOURCES, STRINGS_EN, STRINGS_SV, Finding
+from guardlib import (FONTS, LOCKFILES, MARKER, PENDING_FINGERPRINT, SOURCES, STRINGS_EN,
+                      STRINGS_SV, Finding)
 
 CODE = 'G0'
 NAME = 'file kinds'
 UNSCANNED_EXT = ('.md', '.csv')
 UNSCANNED_NAMES = ('.gitignore',) + LOCKFILES
 # The two generated InfoPlist.strings, by exact path: G1 proves them (D32).
-UNSCANNED_PATHS = (SOURCES, MARKER, STRINGS_EN, STRINGS_SV)
+# The pending lines' fingerprint, by exact path: G1 proves it (D57 Q11).
+UNSCANNED_PATHS = (SOURCES, MARKER, STRINGS_EN, STRINGS_SV, PENDING_FINGERPRINT)
 
 
 def known(src, path):

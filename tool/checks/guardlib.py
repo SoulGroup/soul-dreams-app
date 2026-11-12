@@ -22,7 +22,14 @@ LIST_WORDS = 'app/lib/words/lists.g.dart'
 WORDS_XCCONFIG = 'app/ios/Flutter/words.g.xcconfig'
 STRINGS_EN = 'app/ios/Runner/en.lproj/InfoPlist.strings'
 STRINGS_SV = 'app/ios/Runner/sv.lproj/InfoPlist.strings'
-GENERATED = (LINES, LIST_WORDS, WORDS_XCCONFIG, STRINGS_EN, STRINGS_SV)
+# The pending lines (D57 Q11, D58 Q11): given and approved, not yet filed.
+# The owner writes the file and its fingerprint; never Claude Code.
+PENDING_CSV = 'app/assets/words/pending-lines.csv'
+PENDING_FINGERPRINT = 'app/assets/words/pending-fingerprint.txt'
+PENDING_DART = 'app/lib/words/pending.g.dart'
+GENERATED = (LINES, LIST_WORDS, WORDS_XCCONFIG, STRINGS_EN, STRINGS_SV, PENDING_DART)
+# shasum -a 256's own line: the digest, two spaces, a plain file name.
+FINGERPRINT = re.compile(r'^([0-9a-f]{64})  ([A-Za-z0-9._-]+)$')
 # The design values (D49 a): designgen makes TOKENS from DESIGN, and G1
 # proves it.
 DESIGN = 'docs/source/design-system.md'

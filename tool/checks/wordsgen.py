@@ -1,7 +1,8 @@
 # The words generator (R1; D32, D36). From the places register and the
 # founder's lists to the app's words: lines.g.dart, lists.g.dart, and
-# the iOS home-screen name and microphone text. A pure function of the
-# two files' bytes, so G1 can run it again and compare. It stops on
+# the iOS home-screen name and microphone text; and from the owner's
+# pending lines, if any, pending.g.dart (D57 Q11). A pure function of
+# the files' bytes, so G1 can run it again and compare. It stops on
 # anything it does not expect, with a reason code and a row number,
 # never a file's content.
 # Usage: wordsgen.py --write           write the five files (the owner)
@@ -20,8 +21,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 
-from guardlib import (CSV, GENERATED, LINES, LIST_WORDS, LISTS, STRINGS_EN,  # noqa: E402
-                      STRINGS_SV, WORDS_XCCONFIG, report, sha256)
+from guardlib import (CSV, GENERATED, LINES, LIST_WORDS, LISTS, PENDING_CSV,  # noqa: E402
+                      PENDING_DART, STRINGS_EN, STRINGS_SV, WORDS_XCCONFIG, report, sha256)
 
 HEADER = ('handle', 'place', 'source', 'screen', 'also_on', 'moment', 'must', 'never',
           'length', 'status', 'draft', 'english', 'swedish', 'flag')
@@ -48,6 +49,14 @@ TECH = tuple('TECH·%d' % n for n in range(1, 6))
 LIST_HEADING = re.compile(r'^## (TECH·[1-5]) — \S')
 REGISTER = 'register'
 LIST_FILE = 'lists'
+# The pending lines (D57 Q11; D58 Q11): lines given and approved but not
+# yet filed in the register. Shown in SoulDreams Dev only, never as a
+# filed line (pending.g.dart's PendingLine). A row whose handle the
+# register already holds stops the generator, so a filed place retires
+# its pending row.
+PENDING = 'pending'
+PENDING_HEADER = ('handle', 'place', 'status', 'english', 'swedish', 'given')
+PENDING_STATUS = 'pending'
 
 
 class WordsError(Exception):
@@ -140,15 +149,15 @@ def read_register(data):
     return out
 
 
-def parse_text(text, row):
+def parse_text(text, row, source=REGISTER):
     # " / " separates parts; a pilcrow separates paragraphs (D32 Q11, Q12).
     if has_control(text):
-        raise WordsError(REGISTER, 'control-character', row)
+        raise WordsError(source, 'control-character', row)
     parts = []
     for part in text.strip().split(' / '):
         paragraphs = [p.strip() for p in part.split('¶')]
         if not all(paragraphs):
-            raise WordsError(REGISTER, 'empty-part', row)
+            raise WordsError(source, 'empty-part', row)
         parts.append('\n\n'.join(paragraphs))
     return parts
 
@@ -195,6 +204,105 @@ def places_of(rows):
         slots = tuple(s for s in SLOTS if s[0] in en_slots)
         out.append(Place(row, handle, en_parts, sv_parts, LINE[status], slots))
     return out
+
+
+def read_pending(data, register_rows):
+    # None (no file) is no pending line. Each row: a handle of the
+    # register's shape that the register does not hold, the status
+    # "pending", where it was given, and one plain line in each language,
+    # with the same number of parts and no slot.
+    if data is None:
+        return []
+    text = decode(data, PENDING)
+    reader = csv.reader(io.StringIO(text, newline=''), strict=True)
+    try:
+        rows = list(reader)
+    except csv.Error:
+        raise WordsError(PENDING, 'bad-csv', reader.line_num)
+    if not rows or tuple(rows[0]) != PENDING_HEADER:
+        raise WordsError(PENDING, 'bad-header', 1)
+    filed = set(r[1] for r in register_rows)
+    names = set(ident(h) for h in filed)
+    seen = set()
+    out = []
+    for n, r in enumerate(rows[1:], 2):
+        if len(r) != len(PENDING_HEADER):
+            raise WordsError(PENDING, 'bad-row', n)
+        f = dict(zip(PENDING_HEADER, r))
+        handle = f['handle']
+        if not HANDLE.match(handle):
+            raise WordsError(PENDING, 'bad-handle', n)
+        if handle in seen:
+            raise WordsError(PENDING, 'repeated-handle', n)
+        if handle in filed:
+            raise WordsError(PENDING, 'pending-filed', n)
+        if ident(handle) in names:
+            raise WordsError(PENDING, 'dart-name-clash', n)
+        if f['status'] != PENDING_STATUS:
+            raise WordsError(PENDING, 'pending-status', n)
+        if not f['given'].strip() or has_control(f['given']):
+            raise WordsError(PENDING, 'pending-given', n)
+        if not f['english'].strip() or not f['swedish'].strip():
+            raise WordsError(PENDING, 'missing-language', n)
+        en, sv = parse_text(f['english'], n, PENDING), parse_text(f['swedish'], n, PENDING)
+        if len(en) != len(sv):
+            raise WordsError(PENDING, 'parts-differ', n)
+        if any('{' in p or '}' in p for p in en + sv):
+            raise WordsError(PENDING, 'pending-slot', n)
+        seen.add(handle)
+        names.add(ident(handle))
+        out.append((handle, en, sv))
+    return out
+
+
+PENDING_HEAD = ''.join(line + '\n' for line in (
+    '// GENERATED by tool/checks/wordsgen.py from the pending lines',
+    '// (sha256 @SHA@). Do not edit: the owner changes pending-lines.csv.',
+    '// ignore_for_file: constant_identifier_names',
+    "import 'package:flutter/services.dart' show appFlavor;",
+    '',
+    "import 'lines.g.dart' show Lang;",
+    '',
+    '/// A line given and approved, not yet filed',
+    '/// in the register (D57 Q11). Not a [Line]:',
+    '/// it cannot stand where a filed line is asked.',
+    '/// Its words show in SoulDreams Dev only;',
+    '/// other builds show its handle (R1).',
+    'final class PendingLine {',
+    '  const PendingLine(this.handle, this._en, this._sv);',
+    '',
+    '  final String handle;',
+    '  final List<String> _en;',
+    '  final List<String> _sv;',
+    '',
+    '  /// The parts, in SoulDreams Dev only.',
+    '  List<String> parts(Lang lang, {String? flavor = appFlavor}) {',
+    "    if (flavor != 'dev') return ['[$handle]'];",
+    '    return lang == Lang.en ? _en : _sv;',
+    '  }',
+    '',
+    '  /// A line of one part.',
+    '  String text(Lang lang, {String? flavor = appFlavor}) {',
+    '    final all = parts(lang, flavor: flavor);',
+    "    assert(all.length == 1, 'text() needs a line of one part');",
+    '    return all.single;',
+    '  }',
+    '}',
+    '',
+    '/// Every pending line, by handle.',
+    'abstract final class PendingLines {',
+))
+
+
+def pending_dart(pending, digest):
+    out = [PENDING_HEAD.replace('@SHA@', digest)]
+    for handle, en, sv in pending:
+        out.append('  static const %s = PendingLine(%s, %s, %s);\n'
+                   % (ident(handle), dart_string(handle), dart_list(en), dart_list(sv)))
+    out.append('\n  /// Every pending line above, in the file\'s order.\n')
+    out.append('  static const all = <PendingLine>[%s];\n}\n'
+               % ', '.join(ident(h) for h, _, _ in pending))
+    return ''.join(out)
 
 
 def item_like(line):
@@ -389,9 +497,11 @@ def strings_file(text, digest):
             '"NSMicrophoneUsageDescription" = "%s";\n' % (digest, value))
 
 
-def generate(csv_bytes, lists_bytes):
+def generate(csv_bytes, lists_bytes, pending_bytes=None):
     # {repository path: bytes} for every path in guardlib.GENERATED.
-    places = places_of(read_register(csv_bytes))
+    rows = read_register(csv_bytes)
+    places = places_of(rows)
+    pending = read_pending(pending_bytes, rows)
     sections = read_lists(lists_bytes)
     digest = sha256(csv_bytes)
     name_en, name_sv, row = one_line(places, APP_NAME)
@@ -410,20 +520,24 @@ def generate(csv_bytes, lists_bytes):
         WORDS_XCCONFIG: xcconfig,
         STRINGS_EN: strings_file(mic_en, digest),
         STRINGS_SV: strings_file(mic_sv, digest),
+        PENDING_DART: pending_dart(pending, 'none' if pending_bytes is None
+                                   else sha256(pending_bytes)),
     }
     assert tuple(sorted(out)) == tuple(sorted(GENERATED))
     return {path: text.encode('utf-8') for path, text in out.items()}
 
 
-def summary(csv_bytes, lists_bytes):
+def summary(csv_bytes, lists_bytes, pending_bytes=None):
     counts = {}
-    for _, _, status, _, _ in read_register(csv_bytes):
+    rows = read_register(csv_bytes)
+    for _, _, status, _, _ in rows:
         counts[label(status)] = counts.get(label(status), 0) + 1
     lines = ['wordsgen: rows %d' % sum(counts.values())]
     for name in sorted(counts):
         lines.append('wordsgen: status "%s" %d' % (name, counts[name]))
     words = sum(len(en) + len(sv) for _, en, sv in read_lists(lists_bytes))
     lines.append('wordsgen: list words %d' % words)
+    lines.append('wordsgen: pending lines %d' % len(read_pending(pending_bytes, rows)))
     return lines
 
 
@@ -453,12 +567,13 @@ def write_atomic(root, path, data):
 def write_all(root, out):
     # Generates from root's inputs and writes into out. Raises WordsError.
     csv_bytes, lists_bytes = read(root, CSV), read(root, LISTS)
-    outputs = generate(csv_bytes, lists_bytes)
+    pending_bytes = read(root, PENDING_CSV)
+    outputs = generate(csv_bytes, lists_bytes, pending_bytes)
     for path in GENERATED:
         if read(out, path) != outputs[path]:
             write_atomic(out, path, outputs[path])
             report('wordsgen: wrote ' + path)
-    for line in summary(csv_bytes, lists_bytes):
+    for line in summary(csv_bytes, lists_bytes, pending_bytes):
         report(line)
 
 
@@ -485,7 +600,7 @@ def main(argv):
         if mode == '--write':
             write_all(root, out)
             return 0
-        outputs = generate(read(root, CSV), read(root, LISTS))
+        outputs = generate(read(root, CSV), read(root, LISTS), read(root, PENDING_CSV))
     except WordsError as e:
         report('wordsgen: refused %s %s row %d' % (e.source, e.code, e.row))
         return 1

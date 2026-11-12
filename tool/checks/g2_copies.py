@@ -5,17 +5,13 @@
 # a folder named restricted (D32 Q18): those never leave the documents.
 # The fonts (D49 a), armed or not: every file in the fonts folder is
 # listed in its fingerprints file with its sha256, and matches it.
-import re
-
-from guardlib import (CSV, FINGERPRINTS, FONTS, LISTS, MARKER, SOURCES, Finding, parse_sources,
-                      sha256)
+from guardlib import (CSV, FINGERPRINT, FINGERPRINTS, FONTS, LISTS, MARKER, SOURCES, Finding,
+                      parse_sources, sha256)
 
 CODE = 'G2'
 NAME = 'copies'
 DIR = 'docs/source/'
 REFUSED_NAMES = ('privacy-ethics-safety.md',)
-# shasum -a 256's own line: the digest, two spaces, a plain file name.
-FINGERPRINT = re.compile(r'^([0-9a-f]{64})  ([A-Za-z0-9._-]+)$')
 
 
 def refused_document(path):
