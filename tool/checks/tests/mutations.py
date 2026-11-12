@@ -195,6 +195,10 @@ MUTATIONS = [
      ['test_g1_g2.G2.test_font_hash_mismatch_refuses']),
     ('g2_copies.py', "    refused += font_findings(src)\n", "",
      ['test_g1_g2.G2.test_font_unlisted_refuses']),
+    # journal-core, Task 3a (D52): a colour's notes are never written out.
+    ('designgen.py', "    return doc + [",
+     "    doc.append(comment('Noted: ' + '; '.join(notes) + '.'))\n    return doc + [",
+     ['test_designgen.Generate.test_every_role_comment_is_a_role_name_only']),
 ]
 
 

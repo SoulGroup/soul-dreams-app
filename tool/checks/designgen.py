@@ -235,9 +235,9 @@ def colour_const(role, note, v, notes, line):
             args.append('%s: %s' % (name, colour(v[key])))
     if v.get('width'):
         args.append('borderWidth: %s' % v['width'])
+    # The notes (NOTES, "as ...") are read so that a new one stops the
+    # generator, and never written out: a comment is the role name (D52).
     doc = [comment('`%s`' % role)]
-    if notes:
-        doc.append(comment('Noted: ' + '; '.join(notes) + '.'))
     return doc + ['  static const %s = ColourRole(%s);' % (ident(role, line), ', '.join(args))]
 
 

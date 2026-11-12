@@ -104,11 +104,9 @@ abstract final class LightColours {
   static const text = ColourRole(colour: Color(0xFF333333));
 
   /// `color.text.placeholder`
-  /// Noted: only ever on white.
   static const textPlaceholder = ColourRole(colour: Color(0xFF767676));
 
   /// `color.text.summary`
-  /// Noted: only ever on white.
   static const textSummary = ColourRole(colour: Color(0xFF767676));
 
   /// `color.button`
@@ -145,11 +143,9 @@ abstract final class DarkColours {
   static const surface = ColourRole(colour: Color(0xFF3D376E), colourEnd: Color(0xFF26214F), border: Color(0xFF26214F));
 
   /// `color.text`
-  /// Noted: and on the bubble gradient everywhere; a row's summary included.
   static const text = ColourRole(colour: Color(0xFFF5F5EC));
 
   /// `color.field`
-  /// Noted: no border.
   static const field = ColourRole(colour: Color(0xFFCFCDC1));
 
   /// `color.field.text`
@@ -162,26 +158,21 @@ abstract final class DarkColours {
   static const button = ColourRole(colour: Color(0xFFF5F5EC), colourEnd: Color(0xFFABAB93), border: Color(0xFFCCCCCC), text: Color(0xFF333333));
 
   /// `color.button.filled`
-  /// Noted: as color.button.
   static const buttonFilled = ColourRole(colour: Color(0xFFF5F5EC), colourEnd: Color(0xFFABAB93), text: Color(0xFF333333));
 
   /// `color.record`
-  /// Noted: as in the light theme.
   static const record = ColourRole(colour: Color(0xFF8F3D24), colourEnd: Color(0xFF6B2B18), text: Color(0xFFFFFFFF));
 
   /// `color.label.tradition`
-  /// Noted: as in the light theme.
   static const labelTradition = ColourRole(colour: Color(0xFF8F3D24), colourEnd: Color(0xFF6B2B18), text: Color(0xFFFFFFFF));
 
   /// `color.label.section`
-  /// Noted: as in the light theme.
   static const labelSection = ColourRole(colour: Color(0xFF33691C), colourEnd: Color(0xFF1B3B0E), text: Color(0xFFFFFFFF));
 
   /// `color.tag.dream`
   static const tagDream = ColourRole(colour: Color(0xFFF5F5EC), colourEnd: Color(0xFFABAB93), text: Color(0xFF333333));
 
   /// `color.destructive`
-  /// Noted: as in the light theme.
   static const destructive = ColourRole(colour: Color(0xFF8F3D24), colourEnd: Color(0xFF6B2B18), text: Color(0xFFFFFFFF));
 
   /// `color.line.state`

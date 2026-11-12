@@ -98,7 +98,6 @@ class Generate(unittest.TestCase):
                       'border: Color(0xFF26214F));', t)
         self.assertIn('static const buttonFilled = ColourRole(colour: Color(0xFFF5F5EC), '
                       'colourEnd: Color(0xFFABAB93), text: Color(0xFF333333));', t)
-        self.assertIn('/// Noted: only ever on white.', t)
 
     def test_as_in_the_light_theme_copies_the_light_value(self):
         t = text(doc())
@@ -167,6 +166,19 @@ class Generate(unittest.TestCase):
         self.assertIn('/// `type.h6`\n', t)
         self.assertIn('/// `color.page`\n', t)
         self.assertIn('/// `space.turn`\n', t)
+
+    def test_every_role_comment_is_a_role_name_only(self):
+        # D52: the invented tables carry every kind of note and "as"
+        # form; none reaches a comment. Each role's comment is its name.
+        t = text(doc())
+        body = t[t.index('abstract final class TypeRoles'):]
+        comments = [line for line in body.split('\n') if line.lstrip().startswith('///')]
+        self.assertGreaterEqual(len(comments), 20)
+        for line in comments:
+            if line.startswith('/// Design System'):
+                continue
+            self.assertRegex(line, r'^  /// `[a-z][a-z0-9.]*`$')
+        self.assertNotIn('Noted', t)
 
     def test_an_after_value_with_other_text_stops(self):
         # D52: trailing text the generator does not fully parse is never
