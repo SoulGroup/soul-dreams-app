@@ -1,7 +1,13 @@
 // The journal and the pending lines reach SoulDreams Dev only (D49 O1;
 // D57 Q11). G8 reads direct imports only (banked item 25), so this test
-// follows every import, from each entry point, through every file it
-// reaches in lib/. `flutter test` runs in app/.
+// follows the ordinary forms of import, export and part (any quote, a
+// conditional import's every alternative, comments, several lines or
+// several directives to a line), from each entry point, through every file
+// it reaches in lib/. It is a floor, not a proof: it does not read a
+// directive written with no space after the keyword, as a raw string, with
+// metadata or a script tag before it, with `//` inside its address, or
+// with an address whose case differs from the file's (D66; D17).
+// `flutter test` runs in app/.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -73,8 +79,8 @@ void main() {
     expect(files, containsAll(['lib/words/pending.g.dart', 'lib/journal/night.dart', 'lib/design/tokens.g.dart']));
   });
 
-  // D65 (the review of Task 12): the walk is proved on synthetic trees, so
-  // no form of a directive can carry code past it.
+  // D65 (the review of Task 12): the walk is proved on synthetic trees, one
+  // for each ordinary form of a directive (see the header for what it leaves).
   Set<String> walk(Map<String, String> tree) => reached('lib/main.dart', read: (p) => tree[p] ?? (throw StateError(p)));
 
   const j = 'lib/journal/j.dart';
