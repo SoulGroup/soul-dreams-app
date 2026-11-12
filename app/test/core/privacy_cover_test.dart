@@ -41,11 +41,24 @@ void main() {
     final cover = find.byKey(PrivacyCover.coverKey);
     expect(cover, findsOneWidget);
     expect(tester.widget<ColoredBox>(cover).color, LightColours.page.colour);
-    expect(tester.getSize(cover), tester.view.physicalSize / tester.view.devicePixelRatio);
+    final screen = tester.view.physicalSize / tester.view.devicePixelRatio;
+    expect(tester.getSize(cover), screen);
+    // D54: the whole screen, from its top left corner.
+    expect(tester.getRect(cover), Offset.zero & screen);
     expect(find.descendant(of: cover, matching: find.byType(RichText)), findsNothing);
     expect(find.descendant(of: cover, matching: find.byType(Image)), findsNothing);
     expect(find.descendant(of: cover, matching: find.byType(Icon)), findsNothing);
-    expect(find.descendant(of: cover, matching: find.byType(Widget)), findsNothing);
+    // D54: nothing at all under the cover: it is a plain box (find.byType
+    // compares exact types, so a finder for Widget never matches).
+    expect(tester.widget<ColoredBox>(cover).child, isNull);
+  });
+
+  testWidgets('a cold start while not resumed starts covered', (tester) async {
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pumpWidget(_app());
+    expect(find.byKey(PrivacyCover.coverKey), findsOneWidget);
+    await _to(tester, AppLifecycleState.resumed);
+    expect(find.byKey(PrivacyCover.coverKey), findsNothing);
   });
 
   testWidgets('the cover is on top and hides what is under it', (tester) async {
