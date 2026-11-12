@@ -38,6 +38,11 @@ TOKENS = 'app/lib/design/tokens.g.dart'
 # sha256, which G2 proves; G0 knows .txt files here only.
 FONTS = 'app/assets/fonts/'
 FINGERPRINTS = 'app/assets/fonts/fingerprints.txt'
+# The founder's screenshots, a design reference only (D56; D58): every
+# file here is listed in SCREEN_PRINTS with its sha256, which G2 proves;
+# G0 knows that one .txt file here. No word is ever taken from them.
+SCREENS = 'docs/reference/screens/'
+SCREEN_PRINTS = 'docs/reference/screens/fingerprints.txt'
 
 CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
             '.swift': 'swift', '.py': 'py', '.sh': 'sh'}

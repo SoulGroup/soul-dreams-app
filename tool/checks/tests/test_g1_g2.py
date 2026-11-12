@@ -251,6 +251,32 @@ class G2(GuardTest):
         del tree[FONTS_LIST]
         self.assertEqual(self.refused(tree), [(FONTS_LIST, 0, 'no-fingerprints')])
 
+    # D58: the screenshots, fingerprinted as the fonts are.
+    def screens(self, listed=None):
+        files = {'journal.png': b'\x89PNG\0a', 'night.png': b'\x89PNG\0b'}
+        listed = files if listed is None else listed
+        tree = {'docs/reference/screens/' + name: body for name, body in files.items()}
+        tree['docs/reference/screens/fingerprints.txt'] = ''.join(
+            hashlib.sha256(body).hexdigest() + '  ' + name + '\n' for name, body in listed.items())
+        tree.update({COPY: 'h\n', SOURCES: line(COPY, 'h\n')})
+        return tree
+
+    def test_screens_listed_pass(self):
+        self.passed(self.screens())
+
+    def test_screens_unlisted_changed_or_unprinted_refuse(self):
+        tree = self.screens(listed={'journal.png': b'\x89PNG\0a'})
+        self.assertEqual(self.refused(tree),
+                         [('docs/reference/screens/night.png', 0, 'screen-unlisted')])
+        tree = self.screens()
+        tree['docs/reference/screens/night.png'] = b'\x89PNG\0c'
+        self.assertEqual(self.refused(tree),
+                         [('docs/reference/screens/night.png', 0, 'screen-hash-mismatch')])
+        tree = self.screens()
+        del tree['docs/reference/screens/fingerprints.txt']
+        self.assertEqual(self.refused(tree),
+                         [('docs/reference/screens/fingerprints.txt', 0, 'no-fingerprints')])
+
     def test_fonts_checked_when_not_armed(self):
         tree = self.fonts()
         tree['app/assets/fonts/A-Regular.ttf'] = b'\x00b'

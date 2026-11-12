@@ -206,12 +206,17 @@ MUTATIONS = [
      ['test_g1_g2.G1.test_pending_lines_need_their_fingerprint']),
     ('g1_words.py', "if sha256(src.read(PENDING_CSV)) != m.group(1):", "if False:",
      ['test_g1_g2.G1.test_pending_fingerprint_must_match']),
-    ('g0_kinds.py', ", STRINGS_SV, PENDING_FINGERPRINT)", ", STRINGS_SV)",
+    ('g0_kinds.py', ", STRINGS_SV, PENDING_FINGERPRINT, SCREEN", ", STRINGS_SV, SCREEN",
      ['test_g0.G0.test_pending_fingerprint_known_by_path_only']),
     ('wordsgen.py', "        if handle in filed:", "        if False:",
      ['test_wordsgen.Pending.test_a_filed_handle_stops']),
     ('wordsgen.py', "        if f['status'] != PENDING_STATUS:", "        if False:",
      ['test_wordsgen.Pending.test_each_row_rule_stops']),
+    # journal-screens, Task 3 (D58): the screenshots.
+    ('g2_copies.py', "    refused += fingerprint_findings(src, SCREENS, SCREEN_PRINTS, 'screen')\n", "",
+     ['test_g1_g2.G2.test_screens_unlisted_changed_or_unprinted_refuse']),
+    ('g0_kinds.py', ", PENDING_FINGERPRINT, SCREEN_PRINTS)", ", PENDING_FINGERPRINT)",
+     ['test_g0.G0.test_screen_fingerprints_known_by_path_only']),
 ]
 
 
