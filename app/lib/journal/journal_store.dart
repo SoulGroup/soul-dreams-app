@@ -12,6 +12,8 @@
 // deleted. A save that fails removes its own temporary file.
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
+
 import '../core/safe_log.dart';
 import 'journal_files.dart';
 import 'night.dart';
@@ -35,6 +37,12 @@ final class JournalStore {
   // whether it succeeded or failed, has finished. No operation calls
   // another queued one.
   static Future<void> _tail = Future<void>.value();
+
+  /// Starts a new queue. For widget tests only: each test runs in its own
+  /// fake-async zone, and a queue left by an earlier test's zone never
+  /// moves again in the next one.
+  @visibleForTesting
+  static void newQueueForTests() => _tail = Future<void>.value();
 
   static Future<T> _run<T>(Future<T> Function() operation) {
     final result = _tail.then((_) => operation());
