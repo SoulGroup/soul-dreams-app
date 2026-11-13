@@ -6,19 +6,23 @@
 import 'package:flutter/material.dart';
 
 import '../../core/safe_log.dart';
+import '../../recording/recording.dart';
 import '../journal.dart';
 import '../journal_files.dart';
 import '../journal_store.dart';
 import 'journal_page.dart';
 
 class JournalHome extends StatefulWidget {
-  const JournalHome({super.key, required this.files, this.after});
+  const JournalHome({super.key, required this.files, this.after, this.recording});
 
   final JournalFiles files;
 
   /// A phone check (D49 c) to wait for before the folder is opened and the
   /// list loaded. Whether it passed or threw, the list follows.
   final Future<Object?>? after;
+
+  /// How to record by voice, or null (D69).
+  final Recording? recording;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -47,6 +51,6 @@ class _JournalHomeState extends State<JournalHome> {
   @override
   Widget build(BuildContext context) {
     final journal = _journal;
-    return journal == null ? const Scaffold() : JournalPage(journal: journal);
+    return journal == null ? const Scaffold() : JournalPage(journal: journal, recording: widget.recording);
   }
 }

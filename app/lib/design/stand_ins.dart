@@ -40,12 +40,17 @@ abstract final class StandIns {
   static const double bubbleGap = 12;
 
   /// Inside the typing field, and around the typing screen's parts.
-  static const fieldPadding = EdgeInsets.all(20);
+  static const fieldPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 14);
   static const double gap = 20;
 
-  /// The least height of the typing field, in lines of the dreamer's text
-  /// at the phone's text size, so it stays usable with the keyboard up (D63).
-  static const int fieldMinLines = 5;
+  /// The typing field grows with its words up to this share of the space
+  /// between Back and the buttons ("most of the screen", D70 2; D71 Q7).
+  static const double fieldCap = 0.7;
+
+  /// While recording: the level line's height, and how many recent
+  /// frames it draws (main-path.md, Recording; D71 Q7).
+  static const double levelHeight = 24;
+  static const int levelFrames = 48;
 
   /// A row's summary: the dreamer's words (type role unset).
   static const summary = TypeRoles.voiceDreamer;

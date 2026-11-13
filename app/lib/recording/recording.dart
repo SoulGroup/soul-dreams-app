@@ -76,7 +76,10 @@ final class RecordingSession {
   bool _micStarted = false;
   Future<void>? _stopping;
 
-  /// Starts recording; false when it did not start (a code is logged).
+  /// Starts recording; true once the microphone streams. False when it did
+  /// not start: a code is logged for a failure; after a stop, a cancel or
+  /// an end while starting, none is, and the session's own end is reported
+  /// by [onEnded], for a stop up to [wait] later.
   Future<bool> start() async {
     if (!_recording.on) return _fail(LogEvent.recordingOff);
     final bool allowed;

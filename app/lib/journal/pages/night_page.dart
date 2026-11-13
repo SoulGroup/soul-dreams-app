@@ -16,6 +16,7 @@ import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
 import '../../words/pending.g.dart';
+import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
 import '../night_rules.dart';
@@ -24,7 +25,7 @@ import 'parts.dart';
 import 'typing_page.dart';
 
 class NightPage extends StatefulWidget {
-  const NightPage({super.key, required this.journal, required this.id});
+  const NightPage({super.key, required this.journal, required this.id, this.recording});
 
   static const menuKey = Key('night-menu');
   static const deleteKey = Key('night-delete');
@@ -32,6 +33,9 @@ class NightPage extends StatefulWidget {
 
   final Journal journal;
   final String id;
+
+  /// How to record by voice in the typing screen, or null (D69).
+  final Recording? recording;
 
   @override
   State<NightPage> createState() => _NightPageState();
@@ -68,7 +72,12 @@ class _NightPageState extends State<NightPage> {
 
   Future<void> _type(DreamEdit? edit) async {
     if (_busy) return;
-    final page = TypingPage(journal: widget.journal, target: IntoNight(widget.id), edit: edit);
+    final page = TypingPage(
+      journal: widget.journal,
+      target: IntoNight(widget.id),
+      edit: edit,
+      recording: widget.recording,
+    );
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     await _load();
   }

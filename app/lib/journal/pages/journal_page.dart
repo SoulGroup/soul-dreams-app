@@ -12,6 +12,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
+import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
 import '../night_rules.dart';
@@ -21,9 +22,12 @@ import 'parts.dart';
 import 'typing_page.dart';
 
 class JournalPage extends StatefulWidget {
-  const JournalPage({super.key, required this.journal});
+  const JournalPage({super.key, required this.journal, this.recording});
 
   final Journal journal;
+
+  /// How to record by voice in the typing screen, or null (D69).
+  final Recording? recording;
 
   @override
   State<JournalPage> createState() => _JournalPageState();
@@ -85,7 +89,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
         SafeLog.event(LogEvent.journalListFailed);
         return;
       }
-      if (mounted) await _push(TypingPage(journal: widget.journal, target: target));
+      if (mounted) await _push(TypingPage(journal: widget.journal, target: target, recording: widget.recording));
     } finally {
       _recording = false;
     }
@@ -98,34 +102,43 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     final year = widget.journal.zone.wall(widget.journal.now()).year;
     return Scaffold(
       body: SafeArea(
-        child: Stack(children: [
-          if (nights != null && nights.isEmpty)
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
-                child: AppLine(Lines.C4_P_5.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+        child: Stack(
+          children: [
+            if (nights != null && nights.isEmpty)
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
+                  child: AppLine(Lines.C4_P_5.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                ),
               ),
+            if (nights != null && nights.isNotEmpty)
+              ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  StandIns.pageSide,
+                  0,
+                  StandIns.pageSide,
+                  StandIns.journalEnd + StandIns.recordHeight + StandIns.recordBelow,
+                ),
+                children: [
+                  for (final item in listItems(nights))
+                    switch (item) {
+                      MonthItem(year: final y, :final month) => _Divider(monthDivider(y, month, year, appLanguage)),
+                      NightItem(:final night) => _Row(
+                        night,
+                        onTap: () =>
+                            _push(NightPage(journal: widget.journal, id: night.id, recording: widget.recording)),
+                      ),
+                    },
+                ],
+              ),
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: StandIns.recordBelow,
+              child: Center(child: RecordButton(onPressed: _record)),
             ),
-          if (nights != null && nights.isNotEmpty)
-            ListView(
-              padding: const EdgeInsets.fromLTRB(StandIns.pageSide, 0, StandIns.pageSide,
-                  StandIns.journalEnd + StandIns.recordHeight + StandIns.recordBelow),
-              children: [
-                for (final item in listItems(nights))
-                  switch (item) {
-                    MonthItem(year: final y, :final month) => _Divider(monthDivider(y, month, year, appLanguage)),
-                    NightItem(:final night) =>
-                      _Row(night, onTap: () => _push(NightPage(journal: widget.journal, id: night.id))),
-                  },
-              ],
-            ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: StandIns.recordBelow,
-            child: Center(child: RecordButton(onPressed: _record)),
-          ),
-        ]),
+          ],
+        ),
       ),
     );
   }
@@ -138,12 +151,9 @@ class _Divider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(top: StandIns.dividerAbove, bottom: StandIns.dividerBelow),
-        child: Semantics(
-          header: true,
-          child: Text(text, style: TypeRoles.h4.style(Palette.of(context).text)),
-        ),
-      );
+    padding: const EdgeInsets.only(top: StandIns.dividerAbove, bottom: StandIns.dividerBelow),
+    child: Semantics(header: true, child: Text(text, style: TypeRoles.h4.style(Palette.of(context).text))),
+  );
 }
 
 /// A night's row: an unnamed night's date (h3), or a named night's name
@@ -168,19 +178,22 @@ class _Row extends StatelessWidget {
         child: Container(
           decoration: surface(p),
           padding: StandIns.rowPadding,
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            if (name == null)
-              Text(dayDigits(night.date), style: TypeRoles.h3.style(p.text))
-            else ...[
-              Text(name, style: TypeRoles.h5.style(p.text)),
-              Text(dayDigits(night.date), style: TypeRoles.button.style(p.text)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (name == null)
+                Text(dayDigits(night.date), style: TypeRoles.h3.style(p.text))
+              else ...[
+                Text(name, style: TypeRoles.h5.style(p.text)),
+                Text(dayDigits(night.date), style: TypeRoles.button.style(p.text)),
+              ],
+              const SizedBox(height: 8),
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: lines),
+                child: Text(opening(night), maxLines: 3, overflow: TextOverflow.ellipsis, style: summary),
+              ),
             ],
-            const SizedBox(height: 8),
-            ConstrainedBox(
-              constraints: BoxConstraints(minHeight: lines),
-              child: Text(opening(night), maxLines: 3, overflow: TextOverflow.ellipsis, style: summary),
-            ),
-          ]),
+          ),
         ),
       ),
     );

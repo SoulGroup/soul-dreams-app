@@ -1,6 +1,7 @@
-// The typing screen (P2 to P4, P10, P12; D58 Q4): the field only, MP·12
-// as its placeholder, MP·10 once then MP·32; Save and Back keep the text
-// as a new dream; an empty Save keeps nothing; an edit replaces.
+// The typing screen (P2 to P4, P10, P12; D58 Q4; D70; D71): the field
+// only, MP·12 as its placeholder, MP·10 once then MP·32; Save and Back
+// keep the text as a new dream; an empty Save keeps nothing; an edit
+// replaces; recording adds the words heard at the end.
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -10,13 +11,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/pages/parts.dart';
+import 'package:souldreams/design/stand_ins.dart';
+import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
+import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../memory_journal_files.dart';
+import '../../recording/fakes.dart';
 import '../zones.dart';
 import 'harness.dart';
 
@@ -387,14 +392,16 @@ void main() {
       await se(tester, scale: scale);
       final h = await open(tester);
       expect(tester.takeException(), isNull);
-      expect(tester.getSize(find.byKey(TypingPage.fieldKey)).height, greaterThanOrEqualTo(100 * scale));
-      // The window the field shows in stays usable, not only the field's own height.
-      expect(tester.getSize(find.byType(SingleChildScrollView)).height, greaterThanOrEqualTo(100));
+      expect(find.byKey(TypingPage.fieldKey).hitTestable(), findsOneWidget);
       expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
-      await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+      expect(find.byKey(TypingPage.startKey).hitTestable(), findsOneWidget);
+      await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0] * 6);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
       await tester.tap(find.byKey(TypingPage.saveKey));
       await tester.pumpAndSettle();
-      expect((await h.nights()).single.dreams, [dreams[0]]);
+      expect((await h.nights()).single.dreams, [dreams[0] * 6]);
     });
   }
 
@@ -405,8 +412,8 @@ void main() {
     expect(tester.getRect(find.byType(AppLine)).top, greaterThanOrEqualTo(tester.getRect(area).top));
     await tester.drag(area, const Offset(0, -6000));
     await tester.pumpAndSettle();
-    expect(tester.getRect(find.byType(AppLine)).bottom, lessThanOrEqualTo(tester.getRect(area).top));
-    expect(tester.getRect(find.byKey(TypingPage.fieldKey)).bottom, lessThanOrEqualTo(tester.getRect(area).bottom + 1));
+    expect(tester.getRect(find.byType(AppLine)).top, lessThan(tester.getRect(area).top - 100));
+    expect(find.byKey(TypingPage.fieldKey).hitTestable(), findsOneWidget);
     expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
   });
 
@@ -503,9 +510,9 @@ void main() {
     expect(await h.nights(), isEmpty);
   });
 
-  // 9c (the review of 9b): MP·62 sits in the scroll area, so it can never
-  // squeeze the field's window away.
-  testWidgets('a failure at largest text keeps a window, shows MP·62', (tester) async {
+  // 9c (the review of 9b): MP·62 sits in the instruction's scroll area,
+  // so it can never squeeze the field away.
+  testWidgets('a failure at largest text keeps the field, shows MP·62', (tester) async {
     await se(tester, scale: 3.1);
     final files = FlakyFiles();
     await open(tester, files: files);
@@ -515,11 +522,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     final area = tester.getRect(find.byType(SingleChildScrollView));
-    expect(area.height, greaterThanOrEqualTo(100));
-    final line = tester.getRect(find.byType(AppLine).last);
-    expect(line.top, greaterThanOrEqualTo(area.top));
-    expect(line.bottom, lessThanOrEqualTo(area.bottom));
+    // Scrolled to its top (its padding first), the instruction above it out of sight.
+    expect(tester.getRect(find.byType(AppLine).last).top, closeTo(area.top + StandIns.gap, 1));
     expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(find.byKey(TypingPage.fieldKey).hitTestable(), findsOneWidget);
     expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
   });
 
@@ -546,17 +552,290 @@ void main() {
     expect((await h.nights()).single.dreams, [dreams[0]]);
   });
 
-  testWidgets('the field fills the page when there is room', (tester) async {
+  // D70 (head's message 20, Product message 19; D71).
+  Future<Harness> tall(WidgetTester tester, {Recording? recording}) async {
     tester.view.devicePixelRatio = 2;
     tester.view.physicalSize = const Size(786, 1704);
     addTearDown(tester.view.reset);
     final h = await Harness.make();
     await h.journal.markFirstUseSeen();
-    await h.pump(tester, Opener(() async => TypingPage(journal: h.journal, target: await h.journal.targetNow())));
+    await h.pump(
+      tester,
+      Opener(() async => TypingPage(journal: h.journal, target: await h.journal.targetNow(), recording: recording)),
+    );
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
-    final area = tester.getRect(find.byType(SingleChildScrollView));
-    expect(tester.getRect(find.byKey(TypingPage.fieldKey)).bottom, closeTo(area.bottom, 1));
+    return h;
+  }
+
+  testWidgets('one line, growing with its words to 0.7 at most', (tester) async {
+    await tall(tester);
+    final field = find.byKey(TypingPage.fieldKey);
+    final one = tester.getSize(field).height;
+    expect(one, lessThan(80));
+    final space = tester.getRect(find.byKey(TypingPage.saveKey)).top - StandIns.gap -
+        tester.getRect(find.byKey(BackControl.buttonKey)).bottom;
+    await tester.enterText(field, '${dreams[0]}\n${dreams[1]}');
+    await tester.pumpAndSettle();
+    expect(tester.getSize(field).height, greaterThan(one));
+    expect(tester.getSize(field).height, lessThan(space * StandIns.fieldCap));
+    await tester.enterText(field, List.filled(12, dreams[0]).join('\n'));
+    await tester.pumpAndSettle();
+    expect(tester.getSize(field).height, closeTo(space * StandIns.fieldCap, 1));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the instruction is centred, in the button type', (tester) async {
+    await tall(tester);
+    final line = tester.widget<AppLine>(find.byType(AppLine));
+    expect(line.textAlign, TextAlign.center);
+    expect(line.style.fontFamily, TypeRoles.button.style(Colors.black).fontFamily);
+    expect(line.style.fontSize, TypeRoles.button.size);
+  });
+
+  testWidgets('Save on the left, Start Interpretation on the right', (tester) async {
+    await tall(tester);
+    final save = tester.getRect(find.byKey(TypingPage.saveKey));
+    final start = tester.getRect(find.byKey(TypingPage.startKey));
+    expect(find.text(Lines.EM_1.text(Lang.en)), findsOneWidget);
+    expect(save.left, closeTo(StandIns.pageSide, 1));
+    expect(start.right, closeTo(393 - StandIns.pageSide, 1));
+    expect(save.center.dy, closeTo(start.center.dy, 1));
+  });
+
+  testWidgets('Start Interpretation does nothing yet (D71 Q3)', (tester) async {
+    final h = await tall(tester);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+    await tester.tap(find.byKey(TypingPage.startKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    expect(await h.nights(), isEmpty);
+  });
+
+  testWidgets('no microphone in a build that does not record', (tester) async {
+    await tall(tester);
+    expect(find.byKey(TypingPage.micKey), findsNothing);
+  });
+
+  // Recording (D69, as D71 corrects it), on a microphone of silence and a
+  // stream held in memory.
+  ({SilentMicrophone mic, MemoryLink link, Recording recording}) voice({bool on = true}) {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    return (
+      mic: mic,
+      link: link,
+      recording: Recording(on: on, microphone: mic, key: () async => 'k', connect: (_) async => link),
+    );
+  }
+
+  Future<void> record(WidgetTester tester) async {
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    await tester.pump();
+  }
+
+  final tokens = inventedTokens();
+
+  testWidgets('words appear as they are heard; Save keeps them', (tester) async {
+    final lines = await logged();
+    final v = voice();
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    expect(v.mic.running, isTrue);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    expect(find.text(tokens[0] + tokens[1]), findsOneWidget);
+    v.link.reply(reply(done: [tokens[1], tokens[2]]));
+    await tester.pump();
+    expect(find.text(tokens.take(3).join()), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    expect(v.mic.running, isFalse);
+    expect(v.link.sent.last, '');
+    v.link.reply(reply(done: [tokens[3]]));
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [tokens.take(4).join()]);
+    expect(lines, ['recordingStarted', 'recordingEnded']);
+  });
+
+  testWidgets('heard words go at the end, never at the caret', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final typed = dreams[1];
+    await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    field.controller!.selection = const TextSelection.collapsed(offset: 4);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]]));
+    await tester.pump();
+    expect(field.controller!.text, '$typed ${tokens[0]}');
+    expect(field.controller!.selection, const TextSelection.collapsed(offset: 4));
+  });
+
+  testWidgets('MP·33 is told once; the level line and the timer show', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    tester.takeAnnouncements();
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    await record(tester);
+    expect([for (final a in tester.takeAnnouncements()) a.message], [Lines.MP_33.text(Lang.en)]);
+    expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+    v.mic.frame(16384);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('0:02'), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(v.mic.running, isFalse);
+    expect(tester.takeAnnouncements(), isEmpty);
+  });
+
+  testWidgets('a refused microphone shows nothing new, logs a code', (tester) async {
+    final lines = await logged();
+    final v = voice();
+    v.mic.allow = false;
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(tester.takeAnnouncements(), isEmpty);
+    expect(lines, ['recordingRefused']);
+  });
+
+  testWidgets('recording off: the microphone starts nothing', (tester) async {
+    final lines = await logged();
+    final v = voice(on: false);
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    expect(v.mic.running, isFalse);
+    expect(lines, ['recordingOff']);
+  });
+
+  testWidgets('a broken stream stops, keeping the words shown', (tester) async {
+    final lines = await logged();
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    await v.link.drop(1011);
+    await tester.pumpAndSettle();
+    expect(v.mic.running, isFalse);
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(find.text(tokens[0] + tokens[1]), findsOneWidget);
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingEnded']);
+  });
+
+  testWidgets('leaving the app while recording ends it and saves the words', (tester) async {
+    final v = voice();
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]]));
+    await tester.pump();
+    await leave(tester, AppLifecycleState.hidden);
+    expect(v.mic.running, isFalse);
+    expect(v.link.closed, isTrue);
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [tokens[0]]);
+  });
+
+  testWidgets('Back while recording waits for the last words, then saves', (tester) async {
+    final v = voice();
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await tester.tap(find.byKey(BackControl.buttonKey));
+    await tester.pump();
+    v.link.reply(reply(done: [tokens[0]], finished: true));
+    await tester.pumpAndSettle();
+    expect((await h.nights()).single.dreams, [tokens[0]]);
+  });
+
+  // D74: a session starts after typed words with one space, and goes on
+  // exactly as Soniox sends.
+  testWidgets('a second recording starts after the first with one space', (tester) async {
+    final mic = SilentMicrophone();
+    final links = <MemoryLink>[];
+    final recording = Recording(
+      on: true,
+      microphone: mic,
+      key: () async => 'k',
+      connect: (_) async => MemoryLink().._keep(links),
+    );
+    await tall(tester, recording: recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    links[0].reply(reply(done: ['dream', '.']));
+    await tester.pump();
+    expect(field.controller!.text, 'dream.');
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    links[0].reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(mic.running, isFalse);
+    await record(tester);
+    links[1].reply(reply(shown: ['I']));
+    await tester.pump();
+    expect(field.controller!.text, 'dream. I');
+    links[1].reply(reply(done: ['I'], shown: [' was']));
+    await tester.pump();
+    expect(field.controller!.text, 'dream. I was');
+    links[1].reply(reply(done: [' was', ' he']));
+    await tester.pump();
+    links[1].reply(reply(done: ['re']));
+    await tester.pump();
+    expect(field.controller!.text, 'dream. I was here');
+  });
+
+  // D74 (the re-review of Task 7b): Back or Save while the microphone is
+  // still starting.
+  testWidgets('Back while the microphone starts: it never streams', (tester) async {
+    final v = voice();
+    v.mic.startHold = Completer<void>();
+    final h = await tall(tester, recording: v.recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), tokens[0]);
+    await record(tester);
+    await tester.tap(find.byKey(BackControl.buttonKey));
+    await tester.pump();
+    v.mic.startHold!.complete();
+    await tester.pump();
+    await tester.pump();
+    expect(v.mic.stops, 1);
+    expect(v.mic.running, isFalse);
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(v.link.sent, ['']);
+    expect(v.mic.stops, 1);
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [tokens[0]]);
+  });
+
+  testWidgets('the microphone ignores taps while Save waits: no second session', (tester) async {
+    final v = voice();
+    v.mic.startHold = Completer<void>();
+    final h = await tall(tester, recording: v.recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), tokens[0]);
+    await record(tester);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    v.mic.startHold!.complete();
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    await tester.pump();
+    expect(v.mic.starts, 1);
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(v.mic.starts, 1);
+    expect(v.mic.stops, 1);
+    expect(v.mic.running, isFalse);
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [tokens[0]]);
   });
 
   // D71 Q18: the first-use read or mark failing.
@@ -589,4 +868,8 @@ void main() {
     expect(find.bySemanticsLabel(Lines.MP_10.text(Lang.en)), findsOneWidget);
     expect(lines, ['firstUseReadFailed']);
   });
+}
+
+extension on MemoryLink {
+  void _keep(List<MemoryLink> links) => links.add(this);
 }
