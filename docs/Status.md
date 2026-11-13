@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-12, at the end of branch `journal-core`, by Claude Code.
+Last updated: 2026-11-13, at the end of branch `journal-screens`, by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,13 +14,12 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`journal-core`: the journal's foundations, with no screen (D49), and two app-wide protections (D50). Plan:
-`docs/plans/journal-core.md`. The screens, the night rules (the 21:00 boundary) and typing come in
-`journal-screens`, built to Product's answers to P1 to P14.
+`journal-screens`: the journal's pages in SoulDreams Dev only (D49 O1; D56): the journal list with month dividers,
+the typing screen, a night's page with editing and deleting the night, the 21:00 rule, and Night/Day automatic, built
+to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal-screens.md`.
 
 ## Road ahead
 
-- `journal-screens`: the journal's pages, the night rules and typing, to Product's answers to P1 to P14 (D48, D49).
 - The first server feature, and before it the front door (banked item 44); then the first deploy, after "Before
   the first deploy" below.
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -70,10 +69,35 @@ rulings given during each branch are listed in this file, one line each, under "
   third-party keyboard was not offered in SoulDreams Dev and was in Notes; the app-switcher card was plain, with no
   field, keyboard, logo, words or suggestion bar, including with an invented word typed. The backup size (optional)
   was not looked at.
-- The app's analyzer baseline: `No issues found!`. The app has 60 tests, and 24 mutation checks (A1 to A24) in
+- The journal's pages (D56), in SoulDreams Dev only: `main_dev.dart` opens on `JournalHome`, and a test follows every
+  import from `main.dart` and `main_founder.dart` to prove neither reaches `lib/journal/` or the pending lines
+  (`app/test/dev_only_test.dart`). The pages: the journal list (rows newest first, the date or the name and date,
+  the first dream cut to three lines with TECH·1's framing trimmed, month dividers, the record button, C4-P·5 when
+  empty); the typing screen (MP·10 once, then MP·32; the field only, MP·12 its placeholder; Save and Back both
+  save; the same screen edits a dream); a night's page (the header, "Dreams", the dreams, "Add dreams", the "⋯" menu
+  holding only delete, one confirmation with Cancel first and Delete destructive). No Settings, search, naming,
+  recording or Start Interpretation (P7, P8).
+- The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
+  first 21:00 after its first recording in the zone then in force (format version 1, D57 Q14); the typing screen's
+  target is fixed when it opens; an empty Save keeps nothing; an emptied dream disappears; a night with no dream left
+  is deleted (D58 Q2, Q3; P9, P10).
+- Night/Day automatic (`app/lib/core/night_day.dart`): dark 21:00 to 08:00 by the phone's clock, a five-second
+  fade while the app is open, instant with Reduce Motion (read from the platform's own flag, which iOS does not put
+  in `MediaQuery`), at start and on returning (D57 Q15). The app's own lines appear a word every 60 ms, whole with
+  Reduce Motion (`app/lib/core/app_line.dart`; D58 Q17). The palette (`app/lib/design/palette.dart`) fades with the
+  theme. The app shows English only (D57 Q12; `app/lib/core/language.dart`).
+- Packages: `flutter_localizations` (SDK) and `intl` 0.20.3, the owner's pub add (D57 Q9): the month names, and
+  Flutter's own framework words, which are not ours under R1.
+- The pending lines (D57 Q11; D58 Q11): `app/assets/words/pending-lines.csv` and its fingerprint, the owner's;
+  `wordsgen.py` makes `app/lib/words/pending.g.dart`, whose `PendingLine` is not a `Line` and shows its words in
+  SoulDreams Dev only (any other flavour gets its handle), and G1 proves both. A row whose handle the register holds
+  stops the generator (`pending-filed`).
+- Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
+  founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
+  (P13).
+- The app's analyzer baseline: `No issues found!`. The app has 187 tests, and 84 mutation checks (A1 to A39, with the rows A24a to A24as among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 24 run, 24 caught`); `check_all.sh` does not call it (D55). A night's date is a day its
-  file can hold (the final review, `a559b66`; row A24).
+  (expected: `app mutations: 84 run, 84 caught`); `check_all.sh` does not call it (D55).
 
 ## The server
 
@@ -130,7 +154,10 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45):
   (`NPM_CONFIG_UPDATE_NOTIFIER=false`; D46, proved by `test_check_all.py`).
 - G1 also proves the design values; G2 also proves every file in `app/assets/fonts/` against `fingerprints.txt`,
   armed or not; G0 knows `.txt` in `app/assets/fonts/` only (D49 a).
-- Totals: 227 guard tests and 80 mutation checks.
+- G1 also proves the pending lines against `pending-fingerprint.txt` and `pending.g.dart` against the generator; G2
+  also proves every file in `docs/reference/screens/` against its `fingerprints.txt`; G0 knows those two
+  fingerprint files by exact path (D57 Q11, D58).
+- Totals: 241 guard tests and 87 mutation checks.
 
 ## Banked
 
@@ -324,6 +351,26 @@ Banked by D17 (the reviews in journal-core; D52, D54):
     and the owner runs `tool/check_all.sh` whole. Flutter may now write `~/.dart-tool`, and the app's analyzer and
     tests run in the sandbox again.
 
+Banked in journal-screens:
+
+75. `JournalStore.newQueueForTests()`: the store's one queue (D54) is static, and a widget test's fake-async zone
+    strands it for the next test; each widget test starts a new queue inside its own zone. App code never calls it.
+76. MP·39, the menu's spoken name, names naming, which is not built (D58 Q1): as written, Dev only, until naming.
+77. The stand-ins (`stand_ins.dart`) and these choices await the founder's look in Cohort 0 (P13): the summary's type
+    role (the dreamer's voice), Material's "hotel" icon for Save's sleeping person, the back arrow, the menu's form,
+    the linear fade curve, and the dark field's absent border drawn as a transparent one.
+78. A named night's row is built (D57 Q6) but nothing in the app can name a night yet (P7).
+79. Word Animation, the setting, is not built (P8): only Reduce Motion stops word by word and the fade.
+80. The month names come from `intl`'s CLDR data, assumed to match iOS's own for English and Swedish (D56).
+
+## Pending lines, to file before Cohort 1
+
+Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
+
+- MP·60 (the confirmation's Delete) and MP·61 (its Cancel), head's message 16, founder-approved.
+- W27·5's privacy-page text (head's message 16) waits for the disclosure and privacy page, under Settings; it is not
+  in the pending file.
+
 ## Rulings during branch 2
 
 - D21: answers Q1 to Q7 before Task 0: Flutter may write `~/.config/flutter` (`flutter config` and analytics denied); only the owner runs `check_all.sh` in this branch; CLAUDE.md's G5 line names Apple's loggers; a debug `--no-codesign` build per flavour; RunnerTests kept; founder scheme Run is `Release-founder`; the template's orientations kept.
@@ -403,6 +450,24 @@ Banked by D17 (the reviews in journal-core; D52, D54):
   mutations and the phone checks); the app's mutation runner committed as `tool/app_mutations.py`, run by hand like
   `tool/server_mutations.py` (D43; banked item 60 closed); `CLAUDE.md`'s G0, G1 and G2 lines name the branch's
   additions; the plan gains a Part 6, where the build differs from it.
+
+## Rulings during journal-screens
+
+- D56 (owner, 2026-11-12): the brainstorm's five leans: the scope (the journal list with month dividers, the typing
+  screen, a night's page with edit and delete night, the 21:00 rule, Night/Day automatic); pending lines in a small
+  file the owner adds; month names through Flutter's own localization package; the screenshots as design reference
+  only; Night/Day automatic now.
+- D57: the investigation's build questions: Q5, Q6, Q9 (Flutter's framework words are not ours under R1), Q10, Q11,
+  Q13 to Q16 and Q18 as leaned; Q12 English only for Cohort 0, Swedish built and tested, one switch later; Q14
+  format version 1, the owner removes and reinstalls SoulDreams Dev.
+- D58 (Product, through the head): Q1 MP·39 as written, Dev only; Q2 the typing screen's opening fixes a typed
+  night's date and 21:00; Q3 an emptied dream disappears, whitespace alone is empty (founder); Q4 editing in the
+  typing screen (founder); Q7 the first dream cut to three lines, TECH·1 whole word or phrase, ignoring case; Q8 the
+  phone's standard confirmation, Cancel first, Delete destructive (founder); Q11 MP·60 and MP·61 pending; Q17 a word
+  every 60 ms. The screenshots: not filed; the owner's reference folder, fingerprinted.
+- D59 (owner, 2026-11-12): the plan's Part 4: `CLAUDE.md`'s R1, G0, G1 and G2 lines in the plan's words, approved at
+  the prompt; Opus changes the stand-ins' numbers only; `newQueueForTests()` test-only; the other leans; the new
+  invented night committed with the plan's amendment.
 
 ## Documents as last imported
 
