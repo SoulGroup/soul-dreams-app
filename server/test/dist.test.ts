@@ -15,6 +15,7 @@ test('the compiled files and the marker, nothing else', () => {
     'hosts.js',
     'package.json',
     'parameter-names.js',
+    'parameters.js',
     'safe-log.js',
     'soniox.js',
   ]);
@@ -25,5 +26,18 @@ test('the marker makes the code a module', () => {
 });
 
 test('imports end in .js', () => {
-  assert.match(readFileSync(new URL('handler.js', CODE), 'utf8'), /from "\.\/safe-log\.js";/);
+  assert.match(readFileSync(new URL('handler.js', CODE), 'utf8'), /from "\.\/door\.js";/);
+});
+
+test("imports: its own files, Node's, and the SSM client only", () => {
+  const files = readdirSync(CODE).filter((f) => f.endsWith('.js'));
+  const outside = new Set<string>();
+  for (const file of files) {
+    const text = readFileSync(new URL(file, CODE), 'utf8');
+    for (const m of text.matchAll(/from ["']([^"']+)["']/g)) {
+      const from = m[1] ?? '';
+      if (!from.startsWith('./')) outside.add(from);
+    }
+  }
+  assert.deepEqual([...outside].sort(), ['@aws-sdk/client-ssm', 'node:crypto']);
 });

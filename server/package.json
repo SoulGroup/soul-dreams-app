@@ -11,6 +11,7 @@
     "test": "npm run build && node --test \"test/**/*.test.ts\""
   },
   "devDependencies": {
+    "@aws-sdk/client-ssm": "3.1161.0",
     "@types/node": "24.19.2",
     "aws-cdk": "2.1147.0",
     "aws-cdk-lib": "2.275.0",

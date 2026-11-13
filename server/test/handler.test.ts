@@ -1,5 +1,6 @@
-// The handler (D42 Q15): 404 with no body and one logged code; on a
-// failure, 500 and a code, never the error's message (R3).
+// The handler is the front door, wired (D71). What it decides is tested
+// in door.test.ts; here, a request it must refuse reaches neither
+// Parameter Store nor Soniox, and logs its one code.
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import { handler } from '../src/handler.ts';
@@ -9,28 +10,26 @@ let lines: string[] = [];
 let restore = (): void => {};
 beforeEach(() => {
   lines = [];
+  restore = setSink((line) => {
+    lines.push(line);
+  });
 });
 afterEach(() => {
   restore();
 });
 
-test('every request: 404, no body, one code', async () => {
-  restore = setSink((line) => {
-    lines.push(line);
-  });
-  assert.deepEqual(await handler(), { statusCode: 404 });
+test('another method: 404, no body, one code', async () => {
+  const reply = await handler({ rawPath: '/', requestContext: { http: { method: 'GET' } } });
+  assert.deepEqual(reply, { statusCode: 404 });
   assert.deepEqual(lines, ['notFound']);
 });
 
-test('a failure: 500 and a code, never its message', async () => {
-  let first = true;
-  restore = setSink((line) => {
-    if (first) {
-      first = false;
-      throw new Error('invented failure text');
-    }
-    lines.push(line);
+test('a misshapen key: 401 before anything is read', async () => {
+  const reply = await handler({
+    rawPath: '/',
+    headers: { authorization: 'Bearer short' },
+    requestContext: { http: { method: 'POST' } },
   });
-  assert.deepEqual(await handler(), { statusCode: 500 });
-  assert.deepEqual(lines, ['handlerFailed']);
+  assert.deepEqual(reply, { statusCode: 401 });
+  assert.deepEqual(lines, ['keyRefused']);
 });
