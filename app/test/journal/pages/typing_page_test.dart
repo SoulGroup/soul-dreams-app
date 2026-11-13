@@ -968,6 +968,37 @@ void main() {
     expect(field.controller!.text, '${tokens[0]} q${tokens[1]}${tokens[1]}');
   });
 
+  // D77: an edit before the piece, and the field emptied while dictating.
+  testWidgets('typed before: a copy at the old offset stays', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    field.controller!.text = 'Q${tokens[1]} ${field.controller!.text}';
+    v.link.reply(reply(done: [tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.text, 'Q${tokens[1]} ${tokens[0]}${tokens[1]}');
+  });
+
+  testWidgets('the field emptied while dictating: later words still arrive', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    field.controller!.text = '';
+    v.link.reply(reply(done: [tokens[1]]));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(field.controller!.text, tokens[1].trimLeft());
+    v.link.reply(reply(done: [tokens[2]]));
+    await tester.pump();
+    expect(field.controller!.text, tokens[1].trimLeft() + tokens[2]);
+  });
+
   // 4. Leaving the app while Save waits for the last words.
   testWidgets('leaving the app while Save waits: saved at once', (tester) async {
     final v = voice();

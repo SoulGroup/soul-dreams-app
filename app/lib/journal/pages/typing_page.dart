@@ -89,6 +89,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   RecordingSession? _session;
   String _shown = '';
   int _shownAt = 0;
+  // The text the page last set: an edit before the piece moves _shownAt (D77).
+  String _setText = '';
   // True until a final piece has been heard in this recording (D74): the
   // first piece after typed words gets one space; the rest go as sent.
   bool _gotFinal = false;
@@ -230,9 +232,10 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   void _heard(String finalText, String provisional) {
     if (!mounted) return;
     final before = _text.value;
-    final next = withHeard(before.text, _shown, finalText, provisional, first: !_gotFinal, at: _shownAt);
+    final next = withHeard(before.text, _shown, finalText, provisional, first: !_gotFinal, at: movedTo(_setText, before.text, _shownAt));
     _shown = next.shown;
     _shownAt = next.at;
+    _setText = next.text;
     if (finalText.isNotEmpty) _gotFinal = true;
     final atEnd = !before.selection.isValid ||
         (before.selection.isCollapsed && before.selection.baseOffset == before.text.length);
@@ -265,6 +268,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _session = null;
     _shown = '';
     _shownAt = 0;
+    _setText = '';
     _gotFinal = false;
     if (mounted) setState(() => _mic = _Mic.idle);
   }
