@@ -171,8 +171,8 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
   CDK 2.275.0 makes both); one output, the URL's address; logs kept 7 days, JSON, application INFO, system WARN; a
   role that writes only to its own log group, reads the two parameters only, and decrypts only through Parameter
   Store; no access logs, tracing or environment; no reserved concurrency yet (D71 Q12); termination protection on
-  (D42 Q4, Q7 to Q9). The CDK CLI's telemetry, notices and version reporting are off (D42 Q3). **Nothing is
-  deployed.**
+  (D42 Q4, Q7 to Q9). The CDK CLI's telemetry, notices and version reporting are off (D42 Q3). **Deployed once**, on
+  2026-11-13 by the owner, to the workload account (stack `SoulDreamsServer`); its address is in `hosts.dart`.
 - `npm test` proves the template in-process, with no AWS credentials, CLI or network (D42 Q16). The account is never
   in the repository: with credentials, the app refuses unless the resolved account equals `-c account=<id>` (D42 Q9).
   The template tests also pin that the role has no inline policy, that the Lambda logs to the stack's own log group,
@@ -197,7 +197,9 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Task
 4. The beta key generated (48 characters of A-Z, a-z, 0-9, D18) into `~/.soul-dreams/`; the two SecureStrings,
    `/souldreams/beta-key` and `/souldreams/soniox-key`, made in the workload account in eu-north-1 on the `aws/ssm`
    key, standard tier, never typed on a command line.
-5. The workload account is bootstrapped for the CDK in eu-north-1 (never the management account; C4-T item 15).
+5. The workload account is bootstrapped for the CDK in eu-north-1 (never the management account; C4-T item 15), with
+   `-c account=<workload id>` on the bootstrap command too: the app's account refusal runs on bootstrap as well
+   (found at the first deploy). DONE.
 6. In the workload account: Bedrock model invocation logging is off, and the retention mode is `none` under the
    service control policy (technical-answers b).
 7. The deploy runs from the workload account's profile with `-c account=<workload id>`; the app refuses any other.
