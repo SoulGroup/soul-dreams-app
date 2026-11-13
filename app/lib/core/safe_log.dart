@@ -27,6 +27,13 @@ enum LogEvent {
   /// The page stays as it was.
   journalDeleteFailed,
   journalReadFailed,
+
+  /// The journal list's read of the nights failed, on loading the list or
+  /// at the record button; the list stays as it was (D71 Q18).
+  journalListFailed,
+
+  /// The typing screen's read or mark of first use failed (D71 Q18).
+  firstUseReadFailed,
 }
 
 abstract final class SafeLog {

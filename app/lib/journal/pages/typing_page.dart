@@ -67,10 +67,24 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    widget.journal.firstUseSeen().then((seen) async {
-      if (!seen) await widget.journal.markFirstUseSeen();
-      if (mounted) setState(() => _firstUse = !seen);
-    });
+    // A failed read shows the short line and marks nothing; a failed mark
+    // still shows MP·10. Each logs a code (D71 Q18).
+    widget.journal.firstUseSeen().then(
+      (seen) async {
+        if (!seen) {
+          try {
+            await widget.journal.markFirstUseSeen();
+          } on Object {
+            SafeLog.event(LogEvent.firstUseReadFailed);
+          }
+        }
+        if (mounted) setState(() => _firstUse = !seen);
+      },
+      onError: (Object _) {
+        SafeLog.event(LogEvent.firstUseReadFailed);
+        if (mounted) setState(() => _firstUse = false);
+      },
+    );
   }
 
   @override

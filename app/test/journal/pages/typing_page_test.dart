@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/pages/parts.dart';
+import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
@@ -32,6 +33,24 @@ final class FlakyFiles extends MemoryJournalFiles {
       failures--;
       throw const FileSystemException('write');
     }
+    return super.write(name, bytes);
+  }
+}
+
+/// A folder whose listing, or whose write of the first-use flag, throws.
+final class FirstUseFiles extends MemoryJournalFiles {
+  bool listFails = false;
+  bool markFails = false;
+
+  @override
+  Future<List<String>> list() async {
+    if (listFails) throw const FileSystemException('list');
+    return super.list();
+  }
+
+  @override
+  Future<void> write(String name, Uint8List bytes) async {
+    if (markFails && name == 'first-use-seen') throw const FileSystemException('write');
     return super.write(name, bytes);
   }
 }
@@ -538,5 +557,36 @@ void main() {
     await tester.pumpAndSettle();
     final area = tester.getRect(find.byType(SingleChildScrollView));
     expect(tester.getRect(find.byKey(TypingPage.fieldKey)).bottom, closeTo(area.bottom, 1));
+  });
+
+  // D71 Q18: the first-use read or mark failing.
+  Future<Harness> firstUse(WidgetTester tester, FirstUseFiles files) async {
+    final h = await Harness.make(files: files);
+    final target = NewNight(Harness.clock);
+    await h.pump(tester, Opener(() async => TypingPage(journal: h.journal, target: target)));
+    return h;
+  }
+
+  testWidgets('a failed first-use read shows MP·32, marks nothing, logs a code', (tester) async {
+    final lines = await logged();
+    final files = FirstUseFiles();
+    await firstUse(tester, files);
+    files.listFails = true;
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(Lines.MP_32.text(Lang.en)), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_10.text(Lang.en)), findsNothing);
+    expect(lines, ['firstUseReadFailed']);
+    expect(files.files.containsKey('first-use-seen'), isFalse);
+  });
+
+  testWidgets('a failed first-use mark still shows MP·10, logs a code', (tester) async {
+    final lines = await logged();
+    final files = FirstUseFiles()..markFails = true;
+    await firstUse(tester, files);
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(Lines.MP_10.text(Lang.en)), findsOneWidget);
+    expect(lines, ['firstUseReadFailed']);
   });
 }

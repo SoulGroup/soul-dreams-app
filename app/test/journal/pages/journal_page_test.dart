@@ -2,10 +2,12 @@
 // empty journal, rows newest first with no time and no count, dividers,
 // the record button opening the typing screen, a row opening its night.
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
@@ -35,6 +37,18 @@ final class SlowFiles extends MemoryJournalFiles {
   Future<Uint8List?> read(String name) async {
     await hold?.future;
     return super.read(name);
+  }
+}
+
+/// A folder whose listing throws while [broken] is set, as a phone's
+/// failed read of the journal's folder would.
+final class BrokenFiles extends MemoryJournalFiles {
+  bool broken = false;
+
+  @override
+  Future<List<String>> list() async {
+    if (broken) throw const FileSystemException('list');
+    return super.list();
   }
 }
 
@@ -186,6 +200,45 @@ void main() {
     await tester.tap(find.byKey(BackControl.buttonKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage, skipOffstage: false), findsNothing);
+    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+  });
+
+  // D71 Q18 (the final review of journal-screens, banked items 1 and 2).
+  Future<List<String>> logged() async {
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    return lines;
+  }
+
+  testWidgets('a failed load keeps the rows shown and logs a code', (tester) async {
+    final lines = await logged();
+    final files = BrokenFiles();
+    final h = await Harness.make(files: files);
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 9, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    files.broken = true;
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(lines, ['journalListFailed']);
+  });
+
+  testWidgets('a failed read at the record button opens nothing', (tester) async {
+    final lines = await logged();
+    final files = BrokenFiles();
+    final h = await Harness.make(files: files);
+    await h.pump(tester, JournalPage(journal: h.journal));
+    files.broken = true;
+    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect(lines, ['journalListFailed']);
+    // The button works again once the folder reads.
+    files.broken = false;
     await tester.tap(find.byKey(RecordButton.buttonKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);

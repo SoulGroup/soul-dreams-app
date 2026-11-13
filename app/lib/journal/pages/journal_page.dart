@@ -7,12 +7,14 @@ import 'package:flutter/material.dart';
 
 import '../../core/app_line.dart';
 import '../../core/language.dart';
+import '../../core/safe_log.dart';
 import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
 import '../journal.dart';
 import '../night.dart';
+import '../night_rules.dart';
 import '../row_text.dart';
 import 'night_page.dart';
 import 'parts.dart';
@@ -49,8 +51,15 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) _load();
   }
 
+  // A failed read keeps what is shown and logs a code (D71 Q18, as D64).
   Future<void> _load() async {
-    final nights = await widget.journal.newestFirst();
+    final List<Night> nights;
+    try {
+      nights = await widget.journal.newestFirst();
+    } on Object {
+      SafeLog.event(LogEvent.journalListFailed);
+      return;
+    }
     if (mounted) setState(() => _nights = nights);
   }
 
@@ -68,7 +77,14 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     if (_recording) return;
     _recording = true;
     try {
-      final target = await widget.journal.targetNow();
+      final Target target;
+      try {
+        target = await widget.journal.targetNow();
+      } on Object {
+        // Nothing opens; a code is logged (D71 Q18).
+        SafeLog.event(LogEvent.journalListFailed);
+        return;
+      }
       if (mounted) await _push(TypingPage(journal: widget.journal, target: target));
     } finally {
       _recording = false;
