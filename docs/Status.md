@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-13, at the final review of branch `journal-screens`, by Claude Code.
+Last updated: 2026-11-13, in branch `recording` (its plan's Task 12), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,14 +14,21 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`journal-screens`: the journal's pages in SoulDreams Dev only (D49 O1; D56): the journal list with month dividers,
-the typing screen, a night's page with editing and deleting the night, the 21:00 rule, and Night/Day automatic, built
-to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal-screens.md`.
+`recording`: recording by voice in SoulDreams Dev only, and the server's first feature (D69, as D71 corrects it; D70;
+D71): the microphone permission (EM·3), the words shown as the dreamer speaks, Save keeping them as a dream; the
+audio never stored on the server, and in this slice not on the phone either, since it needs a connection; the
+typing screen's current design (D70 items 2, 7 and 8); the two banked read failures; one front door, a Lambda
+function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: `docs/plans/recording.md`.
 
 ## Road ahead
 
-- The first server feature, and before it the front door (banked item 44); then the first deploy, after "Before
-  the first deploy" below.
+- The first deploy, after "Before the first deploy" below; then the server's address into `hosts.dart` and the
+  phone checks (the plan's Tasks 13 to 16).
+- The next slice: offline recording, the audio held on the phone only until it is transcribed (main-path.md,
+  Recording; D71). It is an on-phone storage change, under `docs/workflow.md`, "On-phone storage changes", and it
+  brings MP·15 and MP·54.
+- The readings: our server's own spending counter comes with them (D69), and response streaming on the function
+  URL (head's message 14; whether eu-north-1 has it is checked first).
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
   6 and 11 only, with a guard G10 refusing any other `## ` heading in them, and a kind for
   `lens-register-waking-material-pass.md`, imported whole into `server/instructions/`. The importer's `KINDS` table
@@ -80,10 +87,34 @@ to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal
 - The typing screen, as ruled during the build (D62, D63): a failed save keeps the screen and the words, logs
   `journalSaveFailed` and shows MP·62 in the scroll area below the field, cleared when Save is tried again; Save,
   Back, the system back and the iPhone edge swipe (a 20 px strip, a rightward drag of 60 px or a flick of 300 px/s)
-  each save, and each retries after a failure. The field takes no focus by itself; the page scrolls, MP·10 or MP·32
-  with it, and the field fills the page, never less than `StandIns.fieldMinLines` lines. Leaving the app (hidden or
+  each save, and each retries after a failure. The field takes no focus by itself. Leaving the app (hidden or
   paused) saves once per trip away and leaves the screen; `inactive` saves nothing; whitespace alone keeps nothing
   and stays.
+- The typing screen's design (D70, TO TRY; D71): MP·10 or MP·32 centred in the button type, in its own scroll area,
+  with MP·62 under it; the field a pill (corners half one line's height) that grows with its words up to
+  `StandIns.fieldCap` (0.7) of the space between Back and the buttons; Save (MP·13) bottom left and Start
+  Interpretation (EM·1) bottom right, which does nothing yet (D71 Q3); at large text the two pills shrink their
+  words to stay on one row.
+- Recording (D69, as D71 corrects it; `app/lib/recording/`, SoulDreams Dev only): the microphone inside the field,
+  named MP·11, asks for the microphone the first time (EM·3, the phone's alert). A tap asks our server for a
+  short-lived key (one POST, the beta key as bearer, no user agent), opens Soniox's EU real-time stream with the key
+  in the handshake's header, sends exactly the settings (`stt-rt-v6`, `pcm_s16le`, 16 kHz, mono, English only), then
+  the microphone's frames as they come; an empty text frame ends it. Words heard go at the end of the field, never at
+  the caret; provisional words are replaced by the next reply. Soniox's tokens are sub-word pieces with their spaces
+  inside them, so they are joined exactly as sent; only at the start of a session, after typed words, one space joins
+  the first piece (D73, D74). If the dreamer types while a provisional piece is shown, the stale piece is dropped
+  where it was put (the page keeps its offset and carries it along an edit before it) and finals still append (D75
+  to D77; `heard_text.dart`). While it runs: a level line and a timer (stand-ins),
+  and MP·33 told once to a screen reader. A tap, Save or Back waits up to five seconds for the last words; leaving
+  the app ends it at once, also while Save waits for the last words (D75); the microphone is never left running by
+  a stop, a cancel or a Soniox error that arrives while a key, the stream or the microphone is still starting (D73,
+  D74), and a late start changes nothing once its session is not the current one (D75). No connection, no key, a refused microphone or a failed stream: the microphone does not
+  start; a stream that breaks stops, keeping the words shown; each logs a code and shows nothing new; MP·15 and
+  MP·54 are not shown (D71). Nothing in `lib/recording/` can write a file, and the `record` package is used in
+  stream mode only (`no_storage_test.dart`). Off while `Hosts.server` is empty or the build has no beta key.
+- The journal list's read failures and the typing screen's first-use read (D71 Q18): a failed list read keeps
+  the rows shown and logs `journalListFailed`; at the record button it opens nothing; a failed first-use read
+  shows MP·32, marks nothing and logs `firstUseReadFailed`; a failed mark still shows MP·10.
 - A night's page (D64): a failed delete or read logs `journalDeleteFailed` or `journalReadFailed`, keeps the page and
   shows nothing new; while a delete runs, the menu, Add dreams and the dreams ignore taps; each dream is announced as
   a button. SoulDreams Dev's list waits for the phone check before it opens the folder (D65).
@@ -99,7 +130,12 @@ to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal
   Reduce Motion (`app/lib/core/app_line.dart`; D58 Q17). The palette (`app/lib/design/palette.dart`) fades with the
   theme. The app shows English only (D57 Q12; `app/lib/core/language.dart`).
 - Packages: `flutter_localizations` (SDK) and `intl` 0.20.3, the owner's pub add (D57 Q9): the month names, and
-  Flutter's own framework words, which are not ours under R1.
+  Flutter's own framework words, which are not ours under R1. `record` 7.1.2, exactly, the owner's pub add (D71
+  Q14; its platform packages `record_ios` and `record_macos` 2.1.1, `record_android`, `record_linux`, `record_web`,
+  `record_windows`, `record_platform_interface`, `plugin_platform_interface` 2.1.8, `web` 1.1.2 and `flutter_web_plugins`
+  from the SDK; the plan's `record_darwin` is the old name, D78): the microphone, in stream mode, the built-in
+  microphone only (D71 Q15). Its native code is registered in all
+  three apps and reached from SoulDreams Dev only (D71 Q16).
 - The pending lines (D57 Q11; D58 Q11): `app/assets/words/pending-lines.csv` and its fingerprint, the owner's;
   `wordsgen.py` makes `app/lib/words/pending.g.dart`, whose `PendingLine` is not a `Line` and shows its words in
   SoulDreams Dev only (any other flavour gets its handle), and G1 proves both. A row whose handle the register holds
@@ -107,51 +143,72 @@ to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 188 tests, and 86 mutation checks (A1 to A39, with the rows A24a to A24au among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 283 tests, and 139 mutation checks (A1 to A93, A55 dropped, with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 86 run, 86 caught`); `check_all.sh` does not call it (D55).
+  (expected: `app mutations: 139 run, 139 caught`); `check_all.sh` does not call it (D55).
 
 ## The server
 
 - Node 24, pinned by `engines` in `server/package.json`; `check_all.sh` checks the running major. TypeScript, strict
-  (`server/tsconfig.json`; no `exactOptionalPropertyTypes`, D42 Q6). Five packages, for development only, at exact
+  (`server/tsconfig.json`; no `exactOptionalPropertyTypes`, D42 Q6). Six packages, for development only, at exact
   versions: `typescript` 6.0.3, `@types/node` 24.19.2, `aws-cdk-lib` 2.275.0, `constructs` 10.8.1, `aws-cdk`
-  2.1147.0 (D42 Q1, Q14). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
+  2.1147.0 (D42 Q1, Q14), and `@aws-sdk/client-ssm` at the owner's version, for its types only: the Lambda runtime
+  carries its own SDK, and the Lambda's code folder holds no package (D71 Q13 a). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
   --offline` only through `check_all.sh` (D42 Q13).
-- `server/src/`: the handler (every request 404 with no body, one logged code; D42 Q15), `safe-log.ts` (codes and
-  numbers only) and `hosts.ts` (no host yet). `server/infra/`: the CDK app, its account refusal and the stack.
+- `server/src/`: the front door (`door.ts`, head's message 14; D71): POST `/` with the beta key as a bearer token gets
+  a short-lived Soniox key (200, `{key, expiresAt}`); a missing, wrong or misshapen key 401 with no body, before
+  anything is read when misshapen; another method or path 404; Parameter Store failing 500; Soniox failing 502
+  with its status logged. It reads the method, the path and the authorization header only, never the caller's
+  address, the body or another header. The beta key's check hashes both keys and compares them in constant time
+  (`beta-key.ts`). The temporary key's request is exactly four fields: `transcribe_websocket`, 60 seconds to open,
+  single use, 1800 seconds at most (`soniox.ts`, D71 Q10), sent to `api.eu.soniox.com` (`hosts.ts`). The two keys
+  are read from Parameter Store as SecureStrings (`parameters.ts`, `parameter-names.ts`); `handler.ts` wires them.
+  `safe-log.ts` (codes and numbers only). `server/infra/`: the CDK app, its account refusal and the stack.
   `npm run build` writes `dist/src` with the module marker beside the compiled files (D42 Q5).
-- The stack: one Lambda (`nodejs24.x`, arm64, CDK's default memory and timeout) behind an HTTP API in eu-north-1;
-  logs kept 7 days, JSON, application INFO, system WARN; a role that writes only to its own log group; no access
-  logs, tracing, environment, CORS or authorizer; termination protection on (D42 Q4, Q7 to Q9). The CDK CLI's
-  telemetry, notices and version reporting are off (D42 Q3). **Nothing is deployed.**
+- The stack: one Lambda (`nodejs24.x`, arm64, CDK's default memory, a 10-second timeout, D71 Q20) behind its own
+  function URL in eu-north-1, with no authentication of the URL's own (the beta key is checked in the code), no CORS,
+  and the two permissions a public function URL needs (`InvokeFunctionUrl` and `InvokeFunction` through the URL;
+  CDK 2.275.0 makes both); one output, the URL's address; logs kept 7 days, JSON, application INFO, system WARN; a
+  role that writes only to its own log group, reads the two parameters only, and decrypts only through Parameter
+  Store; no access logs, tracing or environment; no reserved concurrency yet (D71 Q12); termination protection on
+  (D42 Q4, Q7 to Q9). The CDK CLI's telemetry, notices and version reporting are off (D42 Q3). **Nothing is
+  deployed.**
 - `npm test` proves the template in-process, with no AWS credentials, CLI or network (D42 Q16). The account is never
   in the repository: with credentials, the app refuses unless the resolved account equals `-c account=<id>` (D42 Q9).
   The template tests also pin that the role has no inline policy, that the Lambda logs to the stack's own log group,
   and that the log group is deleted with the stack (D44 a, b, c).
 - The CDK CLI's own synth was run once, with no credentials (Task 8, D45): the `Resources` section holds the nine
   types of `test/stack.test.ts` and no `AWS::CDK::Metadata`; `Parameters` holds only `BootstrapVersion`.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 28 tests, and
-  16 mutation checks (S1 to S16) in `tool/server_mutations.py`, run by hand from the repository root with
-  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 16 run, 16 caught`); `check_all.sh` does not
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 47 tests, and
+  30 mutation checks (S1 to S30) in `tool/server_mutations.py`, run by hand from the repository root with
+  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 30 run, 30 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
 ## Before the first deploy
 
-The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45):
+The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Tasks 13 and 14 give the commands.
 
-1. The front door is settled (banked item 44).
-2. The beta key (48 characters, D18) and the spending stop are built, in a branch of their own.
-3. The workload account is bootstrapped for the CDK in eu-north-1 (never the management account; C4-T item 15).
-4. In the workload account: Bedrock model invocation logging is off, and the retention mode is `none` under the
+1. DONE (head's message 14): the front door is a Lambda function URL, authorised by the beta key.
+2. DONE in `recording` (D69, D71): the beta key's check is built; the spending stop for transcription is Soniox's
+   own $20 monthly budget; our server's counter comes with the readings.
+3. In Soniox's Console: EU region access approved; an EU project; a project key with the temporary-key and
+   transcription permissions; a $20 monthly budget; the DPA countersigned (technical-answers a).
+4. The beta key generated (48 characters of A-Z, a-z, 0-9, D18) into `~/.soul-dreams/`; the two SecureStrings,
+   `/souldreams/beta-key` and `/souldreams/soniox-key`, made in the workload account in eu-north-1 on the `aws/ssm`
+   key, standard tier, never typed on a command line.
+5. The workload account is bootstrapped for the CDK in eu-north-1 (never the management account; C4-T item 15).
+6. In the workload account: Bedrock model invocation logging is off, and the retention mode is `none` under the
    service control policy (technical-answers b).
-5. The deploy runs from the workload account's profile with `-c account=<workload id>`; the app refuses any other.
+7. The deploy runs from the workload account's profile with `-c account=<workload id>`; the app refuses any other.
    Always deploy through the app, never `cdk deploy --app cdk.out` (banked item 49).
-6. After one request: CloudWatch holds codes and numbers only; no `/aws/lambda/...` log group exists; the stage has
-   no access logs (technical-answers e and p, "[ASSUMED until built and shown]").
-7. The head has ruled on the CLI's two notices (banked item 53).
-8. Optional: `npx cdk synth`, its `Resources` compared with `server/test/stack.test.ts` (run once in Task 8, D45).
+8. After the first requests (a 404, a 401 and a 200): CloudWatch holds codes and numbers only; no `/aws/lambda/...`
+   log group exists; CloudTrail records no Lambda data events; Soniox's usage log shows the stream with no reference
+   of ours (technical-answers e and p, "[ASSUMED until built and shown]").
+9. The head has ruled on the CLI's two notices (banked item 53).
+10. Reserved concurrency returns once the workload account's Lambda concurrency quota is above 100 plus the
+    reservation (D71 Q12): a branch adds it, with its template test.
+11. Optional: `npx cdk synth`, its `Resources` compared with `server/test/stack.test.ts`.
 
 ## The guards
 
@@ -257,8 +314,8 @@ Banked in branch 3 (reviewers' notes, banked by D17 under D35, D37 and the later
 
 Banked in branch 4:
 
-44. D42 Q4: the 30-second limit goes to the head and the Architecture worker before the first server feature (front
-    door for the reading call).
+44. CLOSED in `recording` (head's message 14): the front door is a function URL; a function's limit is 15 minutes,
+    against the HTTP API's 30 seconds [READ, AWS's Lambda and API Gateway quotas pages].
 45. D42 Q11: `npm audit` reports 2 moderate findings, in the `minimatch` that `aws-cdk-lib` bundles
     (GHSA-g3hv-75wg-m249). It runs at build time on the Mac and is not in the Lambda's code. No downgrade (the fix
     offered is `aws-cdk-lib` 2.239.0); recheck at each dependency change, never `npm audit fix --force`.
@@ -420,13 +477,65 @@ Banked by D68 (the reviewers' notes in journal-screens; the detail is in
     and the padding the words have 80 by 90 pt, and the circle or the padding is the lever if the founder wants them
     larger.
 
+Banked in recording:
+
+92. The `record` plugin's native code is in all three apps, unused outside SoulDreams Dev (D71 Q16, as D65). Its
+    stream is resampled to the asked rate (`AVAudioConverter`, read in `record_ios` 2.1.1, D78), so the app's 16 kHz
+    to Soniox is right whatever the hardware rate; the phone check still shows it as words that come out right.
+93. At large text the typing screen's two pills shrink their words to stay on one row (as the record button does,
+    banked item 91); the founder may prefer them to wrap (P13).
+94. Not testable on the Mac, shown at the first deploy: `parameters.ts` (the SDK call, `WithDecryption`), the
+    handler's wiring to it and to Soniox, the role's `kms:Decrypt` condition, and the runtime's own SDK resolving
+    `@aws-sdk/client-ssm`.
+95. Soniox's budget reached (402), the key's session ending (403 at 1800 s) and every other break show nothing new
+    and log a code (D71); Product's places for them are asked (D71 Q4).
+96. A test that makes real requests on loopback must sit in a file with no widget test: Flutter's test binding
+    answers every HTTP request with 400 once a widget test has run in the file. Awaiting a stream subscription's
+    `cancel()` never resumes under the widget tests' fake clock, so recording does not await it.
+97. Lambda Web Functions (AWS, 2026-10-12) are not offered in eu-north-1 [READ, AWS News Blog]; whether response
+    streaming is offered there is checked before the readings.
+98. The journal-screens final review's item 3 stays open: a row tapped while the record button's read is in flight
+    opens that night, then the typing screen over it.
+
+99. The server's front door and Parameter Store wiring, reviewers' notes (none fixed): a stored beta key with a
+    trailing newline or space makes every request 401, like a wrong key (door.ts); the SSM client has no request
+    timeout and default retries (a stalled Parameter Store is cut by the 10-second Lambda timeout, as the URL
+    service's 502 with no `parameterFailed` logged); two `GetParameter` calls per request (a cache must not keep a
+    failure); only HTTP 201 counts as Soniox's success (shown at the first deploy, with item 94); an error reply's
+    body is never read; the order of the two reads, the timeout's length and the dist test's import scan
+    (`from "..."` only) are not pinned by tests; the 200 carries no `cache-control: no-store`; `kms:Decrypt` could
+    also require the `PARAMETER_ARN` encryption context.
+100. Recording's core, reviewers' notes: nothing notices a dead connection (no ping, no watchdog); the microphone's
+     stream has no error or done handler, and the plugin's audio session is never deactivated, so a phone call or
+     Siri pauses the engine without ending the session (the level line goes flat) and music stopped by a recording
+     does not resume (candidates: `onStateChanged` and `setAudioSessionActive(false)`); a `stop()` before `start()`
+     logs `recordingEnded` though nothing started; a reply with no `tokens` and no error ends the recording as
+     `Refused(-1)`; a connect that times out leaves its socket behind; one loopback test sleeps 200 ms. An old
+     session whose `microphone.start()` outlasts a whole second key fetch, connect and start could stop a newer
+     session's microphone (the microphone object is shared). A Save that waits while the microphone is still
+     starting is not cut short by leaving the app (a few seconds at most).
+101. The typing screen: at 2x and 3.1x text, recording a long dream, MP·62 is hidden until recording ends (its live
+     region still announces it); typed words land before the heard words (`x AB`): to watch at the phone check
+     (Task 16); the microphone is a Material suffix icon, centred in a tall field (check against D70's drawing).
+102. The heard text, banked by D77 (D17, strictly): one multi-character insertion (a paste or QuickType) exactly at
+     the piece's start that goes on as the piece's own text puts words in the wrong order (`P the` + ` the cat`
+     gives `P cat the`); two edits between replies, one before and one after the piece, can remove a copy of the
+     piece's text at the old offset; deleting a selection across the piece's start leaves the rest of the stale
+     piece. A fix for the first would anchor the diff at the caret.
+103. The `record` plugin's two `print(` calls (a format-adjusted message and an interruption-resume error's text)
+     carry no dreamer's words (D78); its native code is linked into all three apps. `no_storage_test.dart` lists
+     `lib/recording/` without recursing and matches `start (` spelled with a space; `journal_home_test.dart`'s wiring
+     test reads the source text only; the microphone's comment "the built-in microphone only" is stronger than an
+     empty `categoryOptions` (a wired headset's microphone would still be used).
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
    note 1; D68).
 2. Product gives exact values for Task 14's thirteen questions below (P13).
 
-Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number:
+Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
+(questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY):
 
 1. The summary's type role: the screenshots show `TypeRoles.button` (Inter 14); switching needs the row's minimum
    height changed.
@@ -577,6 +686,42 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D68 (owner, 2026-11-13): Status.md and the plan's Part 6 carry what Task 16 held back; `/simplify` skipped (the app
   code is pinned by 84 mutation rows; revisit at the next feature branch); the final review fixes real defects only,
   test-first, in their own commits.
+
+## Rulings during recording
+
+- D69 (owner, 2026-11-13), as D71 corrects it: the scope (recording on the typing screen, Dev only: EM·3, live text,
+  Save keeps it as a dream; the audio never stored on our server, and on the phone kept only until transcribed, the
+  documents governing); the first task fixes the two banked read failures; the spending stop for transcription is
+  Soniox's $20 monthly budget; keys in Parameter Store (SecureString); the beta key 48 characters, in
+  `~/.soul-dreams` and Parameter Store, compiled into Dev through `--dart-define-from-file`; one microphone package;
+  Soniox over `dart:io`'s WebSocket; English only for Cohort 0.
+- D70 (head's message 20, Product message 19): the typing screen's items 2 (the pill field with the microphone,
+  growing, never focused by itself; TO TRY), 7 (the instruction in the button type, centred) and 8 (Save left, Start
+  Interpretation right, as built so far). The other ten items are a later journal design pass.
+- D71 (owner, 2026-11-13): the investigation's 21 questions. This slice needs a connection (no connection, key or
+  stream: the microphone does not start; a break keeps the words shown; a code, nothing new; MP·15 and MP·54 not
+  shown); offline recording is the next slice. Q2 D70's order (Product refiles main-path); Q3 Start Interpretation
+  shown, inert; Q4 the four missing places to Product; Q5 MP·11; Q6 at the end, never at the caret; Q7 the level
+  line, the timer and the 0.7 cap as stand-ins; Q8 the Authorization header; Q9 `stt-rt-v6` in one constant; Q10 60
+  s, single use, 1800 s; Q11 200, 401, 502, 500; Q12 no reserved concurrency now; Q13 (a); Q14 `record` 7.1.2
+  exactly; Q15 the built-in microphone only; Q16 accepted; Q17 the server's address committed after the deploy; Q18
+  the read failures as leaned; Q19 the structural test; Q20 10 s; Q21 Status.md in the branch.
+- D72: the plan's Part 4 questions take their leans.
+- D73: Task 7a (an ended session leaves nothing running; a close is never waited for); Soniox's tokens are sub-word
+  pieces joined exactly as sent, trimming only a leading space at the very start of an empty field; finals append
+  once, non-finals are replaced; a plan hunk that no longer applies stops and asks (D65), stale counts follow D67.
+- D74: at the start of a session only, one space joins typed words and the first piece; Task 7b (a stop while the
+  microphone starts stops it at once); Task 11's rows follow the code, A55 dropped (cancel reaches `_shut`, which sets
+  `_ended` first, so `_cancelled` is never the only thing that stops a late start), rows added for each fix.
+- D75: Task 8a (a late start acts only if its session is current; no overflow recording on an iPhone SE at 2x and
+  3.1x text with the newest words above Save; typing during a recording drops the stale provisional piece; leaving
+  the app while Save waits saves at once; the new test's transcript in `fixtures/invented-nights.json`; the keyboard's
+  composing text kept, and the missing `mounted` check).
+- D76: Task 8b (the piece's start offset kept, the piece dropped only where it was put). D77: Task 8c (a bounds
+  check, the offset carried along an edit before it by `movedTo`, `at` required); after it, a finding that needs a
+  constructed sequence of edits is banked, a crash or words lost from an ordinary edit still stops (item 102).
+- D78: Task 9's result accepted with `record_ios` and `record_macos` for the plan's `record_darwin` (item 103); Part 4
+  question 4 is answered: the plugin resamples to the asked rate, so 16 kHz is what is sent.
 
 ## Documents as last imported
 
