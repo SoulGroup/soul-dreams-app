@@ -91,6 +91,24 @@ void main() {
     expect(r.text, 'word Thedream');
   });
 
+  // D75: the dreamer types while a provisional piece is shown: the stale
+  // piece is dropped, the typed words stay, finals still append.
+  test('typed words after a provisional piece: it is dropped, never doubled', () {
+    var r = withHeard('', '', '', tokens[0] + tokens[1], first: true);
+    expect(r.text, tokens[0] + tokens[1]);
+    final typed = '${r.text}x';
+    r = withHeard(typed, r.shown, tokens[0] + tokens[1], '', first: true);
+    expect(r.text, 'x ${tokens[0]}${tokens[1]}');
+    expect(r.shown, '');
+  });
+
+  test('typed words before a provisional piece: it is still replaced', () {
+    final r = withHeard('word', '', '', ' and', first: true);
+    expect(r.text, 'word and');
+    final typed = 'typed ${r.text}';
+    expect(withHeard(typed, r.shown, ' and', '').text, 'typed word and');
+  });
+
   test('a provisional piece edited away is left alone', () {
     var r = withHeard('', '', tokens[0], tokens[1]);
     final edited = r.text.substring(0, r.text.length - 1);

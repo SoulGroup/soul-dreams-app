@@ -18,6 +18,7 @@
 // MP·33; a stop, Save or Back waits for the last words; leaving the app
 // ends it at once. A failure to start or a break shows nothing new.
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
@@ -143,7 +144,12 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   }
 
   Future<void> _save({bool leaving = false}) async {
-    if (_saving) return;
+    if (_saving) {
+      // Leaving the app while Save waits for the last words: the wait ends
+      // at once, and the save already under way goes on (D75).
+      if (leaving) unawaited(_session?.cancel());
+      return;
+    }
     // A recording ends first: at once when leaving the app, else with its
     // last words.
     final session = _session;
@@ -156,7 +162,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     // edit never deletes a dream behind the dreamer's back.
     if (leaving && isEmptyText(_text.text)) return;
     _saving = true;
-    if (_failed) setState(() => _failed = false);
+    if (_failed && mounted) setState(() => _failed = false);
     try {
       final e = widget.edit;
       if (e == null) {
@@ -198,7 +204,9 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     final session = RecordingSession(recording, onHeard: _heard, onLevel: _level, onEnded: _ended);
     _session = session;
     final started = await session.start();
-    if (!mounted) return;
+    // A start that comes late from an earlier session, ended meanwhile,
+    // changes nothing (D75).
+    if (!mounted || !identical(session, _session)) return;
     if (!started) {
       // Nothing new is shown (D71); the session logged its code.
       _session = null;
@@ -232,7 +240,12 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
             baseOffset: before.selection.baseOffset.clamp(0, next.text.length),
             extentOffset: before.selection.extentOffset.clamp(0, next.text.length),
           );
-    _text.value = TextEditingValue(text: next.text, selection: selection);
+    // The keyboard's own composing text stays while it lies in the part of
+    // the text that did not change (D75).
+    final composing = before.composing.isValid && next.text.startsWith(before.text.substring(0, before.composing.end))
+        ? before.composing
+        : TextRange.empty;
+    _text.value = TextEditingValue(text: next.text, selection: selection, composing: composing);
   }
 
   void _level(double level) {
@@ -256,6 +269,23 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   String _elapsed() {
     // Minutes and seconds: digits only, no words.
     return [(_seconds ~/ 60).toString(), (_seconds % 60).toString().padLeft(2, '0')].join(':');
+  }
+
+  // The field grows to StandIns.fieldCap of the space between Back and the
+  // buttons, but never so far that the level row and the gaps no longer fit
+  // beside it (D75): the newest words stay above Save.
+  double _fieldCap(BuildContext context, double space, bool live) {
+    var level = 0.0;
+    if (live) {
+      final painter = TextPainter(
+        text: TextSpan(text: _elapsed(), style: TypeRoles.button.style(Palette.of(context).text)),
+        textDirection: TextDirection.ltr,
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      level = StandIns.gap + max(StandIns.levelHeight, painter.height);
+      painter.dispose();
+    }
+    return min(space * StandIns.fieldCap, max(0.0, space - level - StandIns.gap));
   }
 
   @override
@@ -344,7 +374,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                               ),
                             const SizedBox(height: StandIns.gap),
                             ConstrainedBox(
-                              constraints: BoxConstraints(maxHeight: box.maxHeight * StandIns.fieldCap),
+                              constraints: BoxConstraints(maxHeight: _fieldCap(context, box.maxHeight, live)),
                               child: TextField(
                                 key: TypingPage.fieldKey,
                                 controller: _text,

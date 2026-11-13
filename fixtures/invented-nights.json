@@ -4,6 +4,10 @@
     {
       "key": "two-dreams-en",
       "lang": "en",
+      "heard": [
+        ["The", " light", "house", " was", " dark", "."],
+        ["I", " was", " there", " a", "gain", "."]
+      ],
       "dreams": [
         "A lighthouse stood in the middle of a wheat field, and its lamp turned slowly even though it was noon. I walked toward it but the field kept getting wider.",
         "Then I was in a kitchen with green tiles, sorting buttons into jars by colour. One jar would not close."

@@ -9,12 +9,16 @@ import 'package:souldreams/words/lines.g.dart' show Lang;
 
 /// One invented night, as the fixture file holds it.
 final class InventedNight {
-  const InventedNight(this.key, this.lang, this.name, this.dreams);
+  const InventedNight(this.key, this.lang, this.name, this.dreams, [this.heard = const []]);
 
   final String key;
   final String lang;
   final String? name;
   final List<String> dreams;
+
+  /// Recordings of this night as Soniox sends them: each a list of
+  /// sub-word pieces, spaces inside them (D73). Only some nights have them.
+  final List<List<String>> heard;
 }
 
 /// Every invented night, in the file's order.
@@ -23,7 +27,9 @@ List<InventedNight> inventedNights() {
   return [
     for (final n in (json as Map<String, Object?>)['nights'] as List<Object?>)
       if (n case {'key': String key, 'lang': String lang, 'dreams': List<Object?> dreams})
-        InventedNight(key, lang, (n as Map)['name'] as String?, dreams.cast<String>()),
+        InventedNight(key, lang, (n as Map)['name'] as String?, dreams.cast<String>(), [
+          for (final h in (n['heard'] as List<Object?>?) ?? const []) (h as List<Object?>).cast<String>(),
+        ]),
   ];
 }
 

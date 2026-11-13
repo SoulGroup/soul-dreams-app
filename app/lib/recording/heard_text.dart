@@ -17,6 +17,18 @@ String _join(String base, String add, {bool spaced = false}) {
   return base + add;
 }
 
+// The text without the provisional piece shown last time: taken off the
+// end if it is still there; if the dreamer typed after it (D75), the stale
+// piece is dropped from where it stands and the typed words stay; if it
+// was edited away, it is left alone.
+String _withoutShown(String text, String shown) {
+  if (shown.isEmpty) return text;
+  if (text.endsWith(shown)) return text.substring(0, text.length - shown.length);
+  final at = text.lastIndexOf(shown);
+  if (at < 0) return text;
+  return text.substring(0, at) + text.substring(at + shown.length);
+}
+
 /// The field's new text, and the provisional piece now at its end. [first]
 /// is true until a final piece has been heard in this recording session.
 ({String text, String shown}) withHeard(
@@ -26,7 +38,7 @@ String _join(String base, String add, {bool spaced = false}) {
   String provisional, {
   bool first = false,
 }) {
-  final base = shown.isNotEmpty && text.endsWith(shown) ? text.substring(0, text.length - shown.length) : text;
+  final base = _withoutShown(text, shown);
   final withFinal = _join(base, finalText, spaced: first);
   final all = _join(withFinal, provisional, spaced: first && finalText.isEmpty);
   return (text: all, shown: all.substring(withFinal.length));

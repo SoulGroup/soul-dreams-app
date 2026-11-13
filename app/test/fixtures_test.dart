@@ -29,4 +29,16 @@ void main() {
     // journal-screens: a dream long enough to be cut at three lines.
     expect(invented('long-dream-en').dreams.single.split(' ').length, greaterThan(60));
   });
+
+  test('the recordings heard are pieces: none empty, each reads as words', () {
+    final heard = invented('two-dreams-en').heard;
+    expect(heard, hasLength(2));
+    for (final session in heard) {
+      expect(session, isNotEmpty);
+      expect(session.every((p) => p.isNotEmpty), isTrue);
+      expect(session.join().trim(), isNotEmpty);
+    }
+    // The second recording has a piece with no space in front, after others.
+    expect(heard[1].skip(1).any((p) => !p.startsWith(' ')), isTrue);
+  });
 }

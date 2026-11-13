@@ -63,11 +63,18 @@ final class FirstUseFiles extends MemoryJournalFiles {
 void main() {
   final dreams = invented('two-dreams-en').dreams;
 
-  Future<Harness> open(WidgetTester tester, {DreamEdit? edit, MemoryJournalFiles? files}) async {
+  Future<Harness> open(WidgetTester tester, {DreamEdit? edit, MemoryJournalFiles? files, Recording? recording}) async {
     final h = await Harness.make(files: files);
     await h.pump(
       tester,
-      Opener(() async => TypingPage(journal: h.journal, target: await h.journal.targetNow(), edit: edit)),
+      Opener(
+        () async => TypingPage(
+          journal: h.journal,
+          target: await h.journal.targetNow(),
+          edit: edit,
+          recording: recording,
+        ),
+      ),
     );
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
@@ -553,11 +560,11 @@ void main() {
   });
 
   // D70 (head's message 20, Product message 19; D71).
-  Future<Harness> tall(WidgetTester tester, {Recording? recording}) async {
+  Future<Harness> tall(WidgetTester tester, {Recording? recording, MemoryJournalFiles? files}) async {
     tester.view.devicePixelRatio = 2;
     tester.view.physicalSize = const Size(786, 1704);
     addTearDown(tester.view.reset);
-    final h = await Harness.make();
+    final h = await Harness.make(files: files);
     await h.journal.markFirstUseSeen();
     await h.pump(
       tester,
@@ -758,6 +765,9 @@ void main() {
   // D74: a session starts after typed words with one space, and goes on
   // exactly as Soniox sends.
   testWidgets('a second recording starts after the first with one space', (tester) async {
+    final heard = invented('two-dreams-en').heard;
+    final first = heard[0].join();
+    final second = heard[1];
     final mic = SilentMicrophone();
     final links = <MemoryLink>[];
     final recording = Recording(
@@ -769,26 +779,27 @@ void main() {
     await tall(tester, recording: recording);
     final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
     await record(tester);
-    links[0].reply(reply(done: ['dream', '.']));
+    links[0].reply(reply(done: heard[0]));
     await tester.pump();
-    expect(field.controller!.text, 'dream.');
+    expect(field.controller!.text, first);
     await tester.tap(find.byKey(TypingPage.micKey));
     await tester.pump();
     links[0].reply(reply(finished: true));
     await tester.pumpAndSettle();
     expect(mic.running, isFalse);
     await record(tester);
-    links[1].reply(reply(shown: ['I']));
+    links[1].reply(reply(shown: [second[0]]));
     await tester.pump();
-    expect(field.controller!.text, 'dream. I');
-    links[1].reply(reply(done: ['I'], shown: [' was']));
+    expect(field.controller!.text, '$first ${second[0]}');
+    links[1].reply(reply(done: [second[0]], shown: [second[1]]));
     await tester.pump();
-    expect(field.controller!.text, 'dream. I was');
-    links[1].reply(reply(done: [' was', ' he']));
+    links[1].reply(reply(done: second.sublist(1, 3)));
     await tester.pump();
-    links[1].reply(reply(done: ['re']));
-    await tester.pump();
-    expect(field.controller!.text, 'dream. I was here');
+    for (final piece in second.sublist(3)) {
+      links[1].reply(reply(done: [piece]));
+      await tester.pump();
+    }
+    expect(field.controller!.text, '$first ${second.join()}');
   });
 
   // D74 (the re-review of Task 7b): Back or Save while the microphone is
@@ -835,6 +846,182 @@ void main() {
     expect(v.mic.stops, 1);
     expect(v.mic.running, isFalse);
     expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [tokens[0]]);
+  });
+
+  // D75 (the review of Task 8).
+  // 1. A start that comes late from an earlier session changes nothing.
+  Recording lateKey(SilentMicrophone mic, Completer<String> first, List<MemoryLink> links) {
+    var asked = 0;
+    return Recording(
+      on: true,
+      microphone: mic,
+      key: () => asked++ == 0 ? first.future : Future.value('k'),
+      connect: (_) async => MemoryLink().._keep(links),
+    );
+  }
+
+  Future<void> stopsTheSecond(WidgetTester tester, SilentMicrophone mic, List<MemoryLink> links) async {
+    expect(mic.running, isTrue);
+    expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    expect(mic.running, isFalse);
+    links.single.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(mic.stops, 1);
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+  }
+
+  testWidgets('a late start after leaving and coming back changes nothing', (tester) async {
+    final mic = SilentMicrophone();
+    final key = Completer<String>();
+    final links = <MemoryLink>[];
+    await tall(tester, recording: lateKey(mic, key, links));
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    await leave(tester, AppLifecycleState.hidden);
+    expect(find.byType(TypingPage), findsOneWidget);
+    await record(tester);
+    key.complete('late');
+    await tester.pump();
+    await tester.pump();
+    await stopsTheSecond(tester, mic, links);
+  });
+
+  testWidgets('a late start after a failed Save changes nothing', (tester) async {
+    final files = FlakyFiles();
+    final mic = SilentMicrophone();
+    final key = Completer<String>();
+    final links = <MemoryLink>[];
+    await tall(tester, recording: lateKey(mic, key, links), files: files);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), tokens[0]);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    files.failures = 1;
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    await record(tester);
+    key.complete('late');
+    await tester.pump();
+    await tester.pump();
+    await stopsTheSecond(tester, mic, links);
+  });
+
+  // 2. An iPhone SE with the keyboard up, recording, at each text size.
+  for (final scale in [1.0, 2.0, 3.1]) {
+    testWidgets('an iPhone SE, keyboard up, recording at ${scale}x: words above Save', (tester) async {
+      await se(tester, scale: scale);
+      final v = voice();
+      final h = await open(tester, recording: v.recording);
+      await record(tester);
+      expect(tester.takeException(), isNull);
+      final long = tokensOf(invented('long-dream-en').dreams.single);
+      v.link.reply(reply(done: long));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      expect(tester.takeException(), isNull);
+      final field = tester.getRect(find.byKey(TypingPage.fieldKey));
+      final save = tester.getRect(find.byKey(TypingPage.saveKey));
+      expect(field.bottom, lessThanOrEqualTo(save.top));
+      expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
+      expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+      await tester.tap(find.byKey(TypingPage.saveKey));
+      await tester.pump();
+      v.link.reply(reply(finished: true));
+      await tester.pumpAndSettle();
+      expect((await h.nights()).single.dreams, [long.join()]);
+    });
+  }
+
+  // 3. Typing during a recording drops the stale provisional piece.
+  testWidgets('typing while words are provisional: they never double', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(shown: [tokens[0], tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.text, tokens[0] + tokens[1]);
+    field.controller!.text = '${field.controller!.text}x';
+    v.link.reply(reply(done: [tokens[0], tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.text, 'x ${tokens[0]}${tokens[1]}');
+    v.link.reply(reply(done: [tokens[2]]));
+    await tester.pump();
+    expect(field.controller!.text, 'x ${tokens.take(3).join()}');
+  });
+
+  // 4. Leaving the app while Save waits for the last words.
+  testWidgets('leaving the app while Save waits: saved at once', (tester) async {
+    final v = voice();
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]]));
+    await tester.pump();
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    expect(v.link.closed, isFalse);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    await tester.pump();
+    await tester.pump();
+    expect(v.link.closed, isTrue);
+    expect(v.mic.running, isFalse);
+    expect((await h.nights()).single.dreams, [tokens[0]]);
+  });
+
+  // 6. The keyboard's composing text survives words arriving after it; a
+  // Save that waits does not touch a screen that has gone.
+  testWidgets('heard words keep the composing text before them', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    field.controller!.value = TextEditingValue(
+      text: tokens[0],
+      selection: TextSelection.collapsed(offset: tokens[0].length),
+      composing: TextRange(start: 0, end: tokens[0].length),
+    );
+    v.link.reply(reply(done: [tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.value.composing, TextRange(start: 0, end: tokens[0].length));
+    expect(field.controller!.text, tokens[0] + tokens[1]);
+  });
+
+  testWidgets('composing text in a changed part is dropped', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(shown: [tokens[0], tokens[1]]));
+    await tester.pump();
+    final typed = '${field.controller!.text}x';
+    field.controller!.value = TextEditingValue(
+      text: typed,
+      selection: TextSelection.collapsed(offset: typed.length),
+      composing: TextRange(start: typed.length - 1, end: typed.length),
+    );
+    v.link.reply(reply(done: [tokens[0], tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.value.composing, TextRange.empty);
+  });
+
+  testWidgets('a Save that waits survives its screen going', (tester) async {
+    final files = FlakyFiles();
+    final v = voice();
+    final h = await tall(tester, recording: v.recording, files: files);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), tokens[0]);
+    files.failures = 1;
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    await record(tester);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
     expect((await h.nights()).single.dreams, [tokens[0]]);
   });
 
