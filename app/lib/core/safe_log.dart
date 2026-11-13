@@ -34,6 +34,18 @@ enum LogEvent {
 
   /// The typing screen's read or mark of first use failed (D71 Q18).
   firstUseReadFailed,
+
+  /// Recording by voice (D69, D71). Off in this build; the microphone
+  /// refused; no key from our server (its status); Soniox's stream refused
+  /// or broken (its code); the microphone failing; a recording started,
+  /// and ended.
+  recordingOff,
+  recordingRefused,
+  recordingKeyFailed,
+  recordingStreamFailed,
+  recordingMicFailed,
+  recordingStarted,
+  recordingEnded,
 }
 
 abstract final class SafeLog {
