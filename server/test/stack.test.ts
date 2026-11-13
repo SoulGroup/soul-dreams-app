@@ -1,4 +1,4 @@
-// The template (D41, D42), synthesized in-process: no AWS credentials, no
+// The template (D41, D42; head's message 14; D71), synthesized in-process: no AWS credentials, no
 // CLI and no network. The App carries the CLI's own context, version
 // reporting on, so the stack's opt-out is what keeps the metadata out.
 import assert from 'node:assert/strict';
@@ -27,14 +27,12 @@ function only(type: string): Resource {
 
 test('these resources and no others', () => {
   assert.deepEqual(resources.map((r) => r.Type).sort(), [
-    'AWS::ApiGatewayV2::Api',
-    'AWS::ApiGatewayV2::Integration',
-    'AWS::ApiGatewayV2::Route',
-    'AWS::ApiGatewayV2::Stage',
     'AWS::IAM::Policy',
     'AWS::IAM::Role',
     'AWS::Lambda::Function',
     'AWS::Lambda::Permission',
+    'AWS::Lambda::Permission',
+    'AWS::Lambda::Url',
     'AWS::Logs::LogGroup',
   ]);
 });
@@ -44,12 +42,17 @@ test('eu-north-1, termination protection on', () => {
   assert.equal(stack.terminationProtection, true);
 });
 
-test('Node 24 on arm64, its own handler', () => {
+test('Node 24 on arm64, its own handler, 10 seconds', () => {
   template.hasResourceProperties('AWS::Lambda::Function', {
     Runtime: 'nodejs24.x',
     Architectures: ['arm64'],
     Handler: 'handler.handler',
+    Timeout: 10,
   });
+});
+
+test('no reserved concurrency yet (D71 Q12)', () => {
+  assert.equal(only('AWS::Lambda::Function').Properties?.['ReservedConcurrentExecutions'], undefined);
 });
 
 test('logs: 7 days, JSON, application INFO, system WARN', () => {
@@ -78,13 +81,44 @@ test('no environment, no tracing', () => {
   assert.equal(props['TracingConfig'], undefined);
 });
 
-test('no access logs, no CORS, no authorizer', () => {
-  assert.equal(only('AWS::ApiGatewayV2::Stage').Properties?.['AccessLogSettings'], undefined);
-  assert.equal(only('AWS::ApiGatewayV2::Api').Properties?.['CorsConfiguration'], undefined);
-  assert.equal(only('AWS::ApiGatewayV2::Route').Properties?.['AuthorizerId'], undefined);
+test('one function URL: no authentication of its own, no CORS', () => {
+  const url = only('AWS::Lambda::Url').Properties ?? {};
+  assert.deepEqual(Object.keys(url).sort(), ['AuthType', 'TargetFunctionArn']);
+  assert.equal(url['AuthType'], 'NONE');
+  assert.equal(resources.filter((r) => r.Type.startsWith('AWS::ApiGatewayV2::')).length, 0);
 });
 
-test('the role writes to its own log group only', () => {
+test('anyone may call it, through the URL only', () => {
+  const permissions = resources.filter((r) => r.Type === 'AWS::Lambda::Permission').map((r) => r.Properties ?? {});
+  const fn = { 'Fn::GetAtt': [Match.stringLikeRegexp('^Handler'), 'Arn'] };
+  assert.deepEqual(
+    permissions.map((p) => Object.keys(p).sort()),
+    [
+      ['Action', 'FunctionName', 'FunctionUrlAuthType', 'Principal'],
+      ['Action', 'FunctionName', 'InvokedViaFunctionUrl', 'Principal'],
+    ],
+  );
+  template.hasResourceProperties('AWS::Lambda::Permission', {
+    Action: 'lambda:InvokeFunctionUrl',
+    FunctionName: fn,
+    FunctionUrlAuthType: 'NONE',
+    Principal: '*',
+  });
+  template.hasResourceProperties('AWS::Lambda::Permission', {
+    Action: 'lambda:InvokeFunction',
+    FunctionName: fn,
+    InvokedViaFunctionUrl: true,
+    Principal: '*',
+  });
+});
+
+test("one output, the URL's address", () => {
+  const outputs = template.toJSON()['Outputs'] as Record<string, unknown>;
+  assert.deepEqual(Object.keys(outputs), ['Url']);
+  template.hasOutput('Url', { Value: { 'Fn::GetAtt': [Match.stringLikeRegexp('^HandlerFunctionUrl'), 'FunctionUrl'] } });
+});
+
+test('the role: its own log group, and the two keys only', () => {
   assert.equal(only('AWS::IAM::Role').Properties?.['ManagedPolicyArns'], undefined);
   // No inline policy on the role either (D44 a).
   assert.equal(only('AWS::IAM::Role').Properties?.['Policies'], undefined);
@@ -95,6 +129,24 @@ test('the role writes to its own log group only', () => {
           Action: ['logs:CreateLogStream', 'logs:PutLogEvents'],
           Effect: 'Allow',
           Resource: { 'Fn::GetAtt': [Match.stringLikeRegexp('^Logs'), 'Arn'] },
+        },
+        {
+          Action: 'ssm:GetParameter',
+          Effect: 'Allow',
+          Resource: ['beta-key', 'soniox-key'].map((name) => ({
+            'Fn::Join': [
+              '',
+              ['arn:', { Ref: 'AWS::Partition' }, ':ssm:eu-north-1:', { Ref: 'AWS::AccountId' }, `:parameter/souldreams/${name}`],
+            ],
+          })),
+        },
+        {
+          Action: 'kms:Decrypt',
+          Condition: { StringEquals: { 'kms:ViaService': 'ssm.eu-north-1.amazonaws.com' } },
+          Effect: 'Allow',
+          Resource: {
+            'Fn::Join': ['', ['arn:', { Ref: 'AWS::Partition' }, ':kms:eu-north-1:', { Ref: 'AWS::AccountId' }, ':key/*']],
+          },
         },
       ],
     },
