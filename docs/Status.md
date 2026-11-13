@@ -107,9 +107,9 @@ to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 187 tests, and 84 mutation checks (A1 to A39, with the rows A24a to A24as among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 188 tests, and 86 mutation checks (A1 to A39, with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 84 run, 84 caught`); `check_all.sh` does not call it (D55).
+  (expected: `app mutations: 86 run, 86 caught`); `check_all.sh` does not call it (D55).
 
 ## The server
 

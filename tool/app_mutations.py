@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A39, with the rows A24a to A24as of
-# the later rulings among them), then "app mutations: 84 run, 84
-# caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# Expected: every row "caught" (A1 to A39, with the rows A24a to A24au of
+# the later rulings and the final review among them), then "app
+# mutations: 86 run, 86 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -342,6 +342,15 @@ ROWS = [
      '          width: StandIns.recordWidth,\n',
      '',
      'test/journal/pages/journal_page_test.dart', 'large text cannot stretch the record button'),
+    # The journal-screens final review: one tap, one typing screen
+    ('A24at', 'lib/journal/pages/journal_page.dart',
+     '    if (_recording) return;\n',
+     '',
+     'test/journal/pages/journal_page_test.dart', 'two quick taps on the record button open one typing screen'),
+    ('A24au', 'lib/journal/pages/journal_page.dart',
+     '    } finally {\n      _recording = false;\n    }\n',
+     '    } finally {}\n',
+     'test/journal/pages/journal_page_test.dart', 'two quick taps on the record button open one typing screen'),
     # The final review: a night that is made always reads back
     ('A24', 'lib/journal/night.dart',
      "    if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');\n",

@@ -59,10 +59,20 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     await _load();
   }
 
+  // A typing screen is opening or open: another tap opens nothing, so one
+  // evening's dreams never go to two nights (the final review).
+  bool _recording = false;
+
   // The screen's target is fixed now, when it opens (P10; D58 Q2).
   Future<void> _record() async {
-    final target = await widget.journal.targetNow();
-    if (mounted) await _push(TypingPage(journal: widget.journal, target: target));
+    if (_recording) return;
+    _recording = true;
+    try {
+      final target = await widget.journal.targetNow();
+      if (mounted) await _push(TypingPage(journal: widget.journal, target: target));
+    } finally {
+      _recording = false;
+    }
   }
 
   @override

@@ -1,6 +1,9 @@
 // The journal list (main-path.md, The Journal; S5; D58 Q7; P5, P8): the
 // empty journal, rows newest first with no time and no count, dividers,
 // the record button opening the typing screen, a row opening its night.
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/design/stand_ins.dart';
@@ -13,8 +16,27 @@ import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/words/lines.g.dart';
 
 import '../../fixtures.dart';
+import '../memory_journal_files.dart';
 import '../zones.dart';
 import 'harness.dart';
+
+/// A folder whose reads wait while [hold] is open, as a phone's slow
+/// read of every night would.
+final class SlowFiles extends MemoryJournalFiles {
+  Completer<void>? hold;
+
+  @override
+  Future<List<String>> list() async {
+    await hold?.future;
+    return super.list();
+  }
+
+  @override
+  Future<Uint8List?> read(String name) async {
+    await hold?.future;
+    return super.read(name);
+  }
+}
 
 void main() {
   testWidgets('the empty journal: C4-P·5 and the record button, nothing else', (tester) async {
@@ -143,5 +165,29 @@ void main() {
     expect(tester.takeException(), isNull);
     final size = tester.getSize(find.byKey(RecordButton.buttonKey));
     expect(size, Size(StandIns.recordHeight, StandIns.recordHeight));
+  });
+
+  // The final review: the record button reads the journal before the
+  // typing screen opens, so a second tap in that time must open nothing,
+  // or one evening's dreams could be split into two nights.
+  testWidgets('two quick taps on the record button open one typing screen', (tester) async {
+    final files = SlowFiles();
+    final h = await Harness.make(files: files);
+    await h.pump(tester, JournalPage(journal: h.journal));
+    files.hold = Completer<void>();
+    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.pump(const Duration(milliseconds: 80));
+    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.pump(const Duration(milliseconds: 80));
+    files.hold!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage, skipOffstage: false), findsOneWidget);
+    // Once the screen is closed, the button opens it again.
+    await tester.tap(find.byKey(BackControl.buttonKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage, skipOffstage: false), findsNothing);
+    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
   });
 }

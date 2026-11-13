@@ -4789,5 +4789,9 @@ from the committed code, the committed code and this part govern. The implementa
 - **The counts.** At the end of the build: **187** app tests, **84** app mutation rows (`app mutations: 84 run, 84
   caught`), **241** guard tests and **87** guard mutation rows (the plan's 126, 39, 241 and 87).
 - **D68.** `/simplify` is skipped for this branch.
+- **The final review's fix.** The record button opened a typing screen for each tap that came while it read the
+  journal (two taps 80 ms apart, a slow read: two screens, so one evening's dreams could make two nights). It now
+  opens nothing while one is opening or open. One test, rows A24at and A24au: **188** app tests, **86** app mutation
+  rows (`app mutations: 86 run, 86 caught`).
 
 *No matter where you are on your journey, the steps you take are equally important.*
