@@ -6,5 +6,5 @@ abstract final class Hosts {
 
   /// Our server's function URL, set after the owner's first deploy (D71
   /// Q17). While it is empty, recording is off.
-  static const server = '';
+  static const server = 'https://rflalarrw3i56zqth2ynh6hbby0vquly.lambda-url.eu-north-1.on.aws/';
 }
