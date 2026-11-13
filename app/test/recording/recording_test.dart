@@ -126,6 +126,7 @@ void main() {
     link.reply(reply(finished: true));
     await stopping;
     expect(r.heard, [(tokens[0], tokens[1]), (tokens[1], ''), ('', '')]);
+    expect(mic.stops, 1);
     expect(link.closed, isTrue);
     expect(r.ended, [1]);
     expect(lines, ['recordingStarted', 'recordingEnded']);
@@ -147,6 +148,7 @@ void main() {
     final clock = Stopwatch()..start();
     await quick.stop();
     expect(clock.elapsedMilliseconds, greaterThanOrEqualTo(200));
+    expect(mic.stops, 1);
     expect(link.closed, isTrue);
   });
 
@@ -159,6 +161,7 @@ void main() {
     link.reply('{"error_code":402,"error_message":"x"}');
     await pumpEventQueue();
     expect(mic.running, isFalse);
+    expect(mic.stops, 1);
     expect(r.heard, [(tokens[0], '')]);
     expect(r.ended, [1]);
     expect(lines, ['recordingStarted', 'recordingStreamFailed 402', 'recordingEnded']);
@@ -172,6 +175,7 @@ void main() {
     await link.drop(1011);
     await pumpEventQueue();
     expect(mic.running, isFalse);
+    expect(mic.stops, 1);
     expect(r.ended, [1]);
     expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingEnded']);
   });
@@ -186,10 +190,178 @@ void main() {
     key.complete('k');
     expect(await started, isFalse);
     expect(mic.running, isFalse);
-    final r2 = make(memory(SilentMicrophone(), MemoryLink()));
+    expect(mic.starts, 0);
+    final mic2 = SilentMicrophone();
+    final r2 = make(memory(mic2, MemoryLink()));
     await r2.session.start();
     await r2.session.cancel();
     expect(r2.ended, [1]);
+    expect(mic2.stops, 1);
+  });
+
+  // D73 (the review of Task 7): an ended session leaves nothing running.
+  Recording held(SilentMicrophone mic, {Completer<String>? key, Completer<SonioxLink>? link, List<int>? connects}) =>
+      Recording(
+        on: true,
+        microphone: mic,
+        key: () => key != null ? key.future : Future.value('k'),
+        connect: (_) {
+          connects?.add(1);
+          return link != null ? link.future : Future.value(MemoryLink());
+        },
+      );
+
+  test('a stop while the key is fetched opens nothing', () async {
+    final mic = SilentMicrophone();
+    final key = Completer<String>();
+    final connects = <int>[];
+    final r = make(held(mic, key: key, connects: connects));
+    final started = r.session.start();
+    await pumpEventQueue();
+    await r.session.stop();
+    key.complete('k');
+    expect(await started, isFalse);
+    expect(connects, isEmpty);
+    expect(mic.starts, 0);
+    expect(mic.stops, 0);
+    expect(r.ended, [1]);
+  });
+
+  test('a stop while the stream opens closes it on arrival', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final opening = Completer<SonioxLink>();
+    final r = make(held(mic, link: opening));
+    final started = r.session.start();
+    await pumpEventQueue();
+    await r.session.stop();
+    opening.complete(link);
+    expect(await started, isFalse);
+    await pumpEventQueue();
+    expect(link.closed, isTrue);
+    expect(mic.starts, 0);
+    expect(r.ended, [1]);
+  });
+
+  test('a cancel while the stream opens closes it on arrival', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final opening = Completer<SonioxLink>();
+    final r = make(held(mic, link: opening));
+    final started = r.session.start();
+    await pumpEventQueue();
+    await r.session.cancel();
+    opening.complete(link);
+    expect(await started, isFalse);
+    await pumpEventQueue();
+    expect(link.closed, isTrue);
+    expect(mic.starts, 0);
+  });
+
+  test("Soniox's error while the microphone starts: stopped once on arrival", () async {
+    final mic = SilentMicrophone()..startHold = Completer<void>();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    final started = r.session.start();
+    await pumpEventQueue();
+    expect(mic.starts, 1);
+    link.reply('{"error_code":429,"error_message":"x"}');
+    await pumpEventQueue();
+    expect(r.ended, [1]);
+    mic.startHold!.complete();
+    expect(await started, isFalse);
+    expect(mic.stops, 1);
+    expect(mic.running, isFalse);
+    expect(link.closed, isTrue);
+    expect(lines, ['recordingStreamFailed 429', 'recordingEnded']);
+  });
+
+  test('a cancel while the microphone starts: stopped once on arrival', () async {
+    final mic = SilentMicrophone()..startHold = Completer<void>();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    final started = r.session.start();
+    await pumpEventQueue();
+    await r.session.cancel();
+    mic.startHold!.complete();
+    expect(await started, isFalse);
+    expect(mic.stops, 1);
+    expect(mic.running, isFalse);
+    expect(link.closed, isTrue);
+    expect(r.ended, [1]);
+  });
+
+  test('a second stop is the first: one end frame', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    final first = r.session.stop();
+    final second = r.session.stop();
+    expect(identical(first, second), isTrue);
+    await pumpEventQueue();
+    link.reply(reply(finished: true));
+    await Future.wait([first, second]);
+    expect(link.sent.where((m) => m == ''), hasLength(1));
+    expect(mic.stops, 1);
+    expect(r.ended, [1]);
+  });
+
+  test('a break during a stop ends it at once', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    await link.drop(1011);
+    await stopping.timeout(const Duration(seconds: 1));
+    expect(mic.stops, 1);
+    expect(r.ended, [1]);
+  });
+
+  test('a cancel while a stop waits ends it at once', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    await r.session.cancel();
+    await stopping.timeout(const Duration(seconds: 1));
+    expect(mic.stops, 1);
+    expect(r.ended, [1]);
+  });
+
+  test('a cancel after a stop changes nothing', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    link.reply(reply(finished: true));
+    await stopping;
+    await r.session.cancel();
+    expect(mic.stops, 1);
+    expect(r.ended, [1]);
+    expect(lines, ['recordingStarted', 'recordingEnded']);
+  });
+
+  test('a close that never completes holds nothing up', () async {
+    for (final stop in [false, true]) {
+      final mic = SilentMicrophone();
+      final link = MemoryLink()..closeHangs = true;
+      final r = make(memory(mic, link));
+      await r.session.start();
+      final ending = stop ? r.session.stop() : r.session.cancel();
+      await pumpEventQueue();
+      if (stop) link.reply(reply(finished: true));
+      await ending.timeout(const Duration(seconds: 1));
+      expect(r.ended, [1]);
+      expect(link.closed, isTrue);
+      expect(mic.stops, 1);
+    }
   });
 
   test('end to end on loopback: the door, Soniox, the words', () async {

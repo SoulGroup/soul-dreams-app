@@ -71,6 +71,11 @@ final class RecordingSession {
   bool _cancelled = false;
   bool _ended = false;
 
+  // The microphone has been started and not yet stopped, whether or not its
+  // frames are listened to yet.
+  bool _micStarted = false;
+  Future<void>? _stopping;
+
   /// Starts recording; false when it did not start (a code is logged).
   Future<bool> start() async {
     if (!_recording.on) return _fail(LogEvent.recordingOff);
@@ -81,7 +86,7 @@ final class RecordingSession {
       return _fail(LogEvent.recordingRefused);
     }
     if (!allowed) return _fail(LogEvent.recordingRefused);
-    if (_cancelled) return false;
+    if (_cancelled || _ended) return false;
     final String key;
     try {
       key = await _recording.key();
@@ -90,15 +95,16 @@ final class RecordingSession {
     } on Object {
       return _fail(LogEvent.recordingKeyFailed, [0]);
     }
-    if (_cancelled) return false;
+    if (_cancelled || _ended) return false;
     final SonioxLink link;
     try {
       link = await _recording.connect(key);
     } on Object {
       return _fail(LogEvent.recordingStreamFailed, [0]);
     }
-    if (_cancelled) {
-      await link.close();
+    if (_cancelled || _ended) {
+      // The session ended while the stream opened: close it, wait for nothing.
+      _closeQuietly(link);
       return false;
     }
     _link = link;
@@ -111,7 +117,10 @@ final class RecordingSession {
       await _shut();
       return false;
     }
+    _micStarted = true;
     if (_cancelled || _ended) {
+      // The session ended while the microphone started: it is on, so off.
+      await _micOff();
       await _shut();
       return false;
     }
@@ -148,7 +157,11 @@ final class RecordingSession {
 
   /// Stops: the microphone off, then Soniox's last words, waited for up to
   /// [wait].
-  Future<void> stop() async {
+  ///
+  /// A second stop is the first one.
+  Future<void> stop() => _stopping ??= _stop();
+
+  Future<void> _stop() async {
     if (_ended) return;
     await _micOff();
     final link = _link;
@@ -166,37 +179,41 @@ final class RecordingSession {
   }
 
   Future<void> _micOff() async {
+    if (!_micStarted) return;
+    _micStarted = false;
     final frames = _frames;
     _frames = null;
-    if (frames != null) {
-      // Not waited for: its future may belong to another zone, and
-      // nothing needs it.
-      unawaited(frames.cancel());
-      try {
-        await _recording.microphone.stop();
-      } on Object {
-        SafeLog.event(LogEvent.recordingMicFailed);
-      }
+    // Not waited for: its future may belong to another zone, and nothing
+    // needs it.
+    if (frames != null) unawaited(frames.cancel());
+    try {
+      await _recording.microphone.stop();
+    } on Object {
+      SafeLog.event(LogEvent.recordingMicFailed);
+    }
+  }
+
+  // A close is never waited for: on a dead connection it can take minutes.
+  void _closeQuietly(SonioxLink link) {
+    try {
+      unawaited(link.close().then((_) {}, onError: (Object _) {}));
+    } on Object {
+      // Already closed: nothing to do.
     }
   }
 
   Future<void> _shut() async {
     if (_ended) return;
     _ended = true;
+    if (!_finished.isCompleted) _finished.complete();
     await _micOff();
     final replies = _replies;
     _replies = null;
     final link = _link;
     _link = null;
     unawaited(replies?.cancel());
-    if (link != null) {
-      try {
-        await link.close();
-      } on Object {
-        // Already closed: nothing to do.
-      }
-    }
     SafeLog.event(LogEvent.recordingEnded);
     onEnded();
+    if (link != null) _closeQuietly(link);
   }
 }

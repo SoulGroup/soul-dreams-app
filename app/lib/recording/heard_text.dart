@@ -2,14 +2,10 @@
 // never at the caret. The provisional words are shown after the final
 // ones and replaced by the next reply; [shown] is the provisional piece
 // put there last time, taken off again first if it is still at the end.
-final _space = RegExp(r'\s');
-
-String _join(String base, String add) {
-  if (add.isEmpty) return base;
-  if (base.isEmpty || _space.hasMatch(base[base.length - 1])) return base + add.trimLeft();
-  if (_space.hasMatch(add[0])) return base + add;
-  return '$base $add';
-}
+// Soniox's tokens are sub-word pieces with their spaces inside them (D73),
+// so their text is joined exactly as sent; the only thing trimmed is a
+// space at the very start of an empty field.
+String _join(String base, String add) => base.isEmpty ? add.trimLeft() : base + add;
 
 /// The field's new text, and the provisional piece now at its end.
 ({String text, String shown}) withHeard(String text, String shown, String finalText, String provisional) {

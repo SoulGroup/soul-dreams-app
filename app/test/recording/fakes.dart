@@ -120,7 +120,11 @@ final class FakeDoor {
 final class SilentMicrophone implements Microphone {
   bool allow = true;
   bool fails = false;
+  int starts = 0;
   int stops = 0;
+
+  /// While set, [start] waits for it.
+  Completer<void>? startHold;
   StreamController<Uint8List>? _frames;
 
   bool get running => _frames != null;
@@ -130,6 +134,8 @@ final class SilentMicrophone implements Microphone {
 
   @override
   Future<Stream<Uint8List>> start() async {
+    starts++;
+    await startHold?.future;
     if (fails) throw StateError('microphone');
     final frames = StreamController<Uint8List>();
     _frames = frames;
@@ -160,6 +166,9 @@ final class MemoryLink implements SonioxLink {
   final sent = <Object>[];
   bool closed = false;
 
+  /// A close that never completes, as on a dead connection.
+  bool closeHangs = false;
+
   @override
   int? closeCode;
 
@@ -184,5 +193,6 @@ final class MemoryLink implements SonioxLink {
   Future<void> close() async {
     closed = true;
     if (!_replies.isClosed) unawaited(_replies.close());
+    if (closeHangs) await Completer<void>().future;
   }
 }
