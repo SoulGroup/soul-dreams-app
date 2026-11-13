@@ -17,29 +17,33 @@ String _join(String base, String add, {bool spaced = false}) {
   return base + add;
 }
 
-// The text without the provisional piece shown last time: taken off the
-// end if it is still there; if the dreamer typed after it (D75), the stale
-// piece is dropped from where it stands and the typed words stay; if it
-// was edited away, it is left alone.
-String _withoutShown(String text, String shown) {
+// The text without the provisional piece shown last time. [at] is where
+// that piece was put (D76): if it is still exactly there, it is taken out
+// of there and the typed words around it stay (D75). Otherwise it is taken
+// off the end if it is still at the end; if it can be found in neither
+// place, it is left alone. The dreamer's own copies of it are never taken.
+String _withoutShown(String text, String shown, int? at) {
   if (shown.isEmpty) return text;
+  if (at != null && at >= 0 && text.startsWith(shown, at)) {
+    return text.substring(0, at) + text.substring(at + shown.length);
+  }
   if (text.endsWith(shown)) return text.substring(0, text.length - shown.length);
-  final at = text.lastIndexOf(shown);
-  if (at < 0) return text;
-  return text.substring(0, at) + text.substring(at + shown.length);
+  return text;
 }
 
-/// The field's new text, and the provisional piece now at its end. [first]
-/// is true until a final piece has been heard in this recording session.
-({String text, String shown}) withHeard(
+/// The field's new text, the provisional piece now at its end, and where
+/// that piece starts. [first] is true until a final piece has been heard in
+/// this recording session; [at] is the start the last call returned.
+({String text, String shown, int at}) withHeard(
   String text,
   String shown,
   String finalText,
   String provisional, {
   bool first = false,
+  int? at,
 }) {
-  final base = _withoutShown(text, shown);
+  final base = _withoutShown(text, shown, at);
   final withFinal = _join(base, finalText, spaced: first);
   final all = _join(withFinal, provisional, spaced: first && finalText.isEmpty);
-  return (text: all, shown: all.substring(withFinal.length));
+  return (text: all, shown: all.substring(withFinal.length), at: withFinal.length);
 }

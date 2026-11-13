@@ -953,6 +953,21 @@ void main() {
     expect(field.controller!.text, 'x ${tokens.take(3).join()}');
   });
 
+  // D76: typed words that repeat the piece do not fool the drop.
+  testWidgets('typing a copy of the provisional piece: the shown one goes', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.text, tokens[0] + tokens[1]);
+    field.controller!.text = '${field.controller!.text} q${tokens[1]}';
+    v.link.reply(reply(done: [tokens[1]]));
+    await tester.pump();
+    expect(field.controller!.text, '${tokens[0]} q${tokens[1]}${tokens[1]}');
+  });
+
   // 4. Leaving the app while Save waits for the last words.
   testWidgets('leaving the app while Save waits: saved at once', (tester) async {
     final v = voice();

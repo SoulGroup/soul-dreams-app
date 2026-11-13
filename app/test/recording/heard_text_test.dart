@@ -31,7 +31,7 @@ void main() {
 
   test('pieces joined exactly as sent: How are you doing?', () {
     const pieces = ['How', ' are', ' you', ' do', 'ing', '?'];
-    var r = (text: '', shown: '');
+    var r = (text: '', shown: '', at: 0);
     for (final piece in pieces) {
       r = withHeard(r.text, r.shown, piece, '');
     }
@@ -97,7 +97,7 @@ void main() {
     var r = withHeard('', '', '', tokens[0] + tokens[1], first: true);
     expect(r.text, tokens[0] + tokens[1]);
     final typed = '${r.text}x';
-    r = withHeard(typed, r.shown, tokens[0] + tokens[1], '', first: true);
+    r = withHeard(typed, r.shown, tokens[0] + tokens[1], '', first: true, at: r.at);
     expect(r.text, 'x ${tokens[0]}${tokens[1]}');
     expect(r.shown, '');
   });
@@ -109,6 +109,53 @@ void main() {
     expect(withHeard(typed, r.shown, ' and', '').text, 'typed word and');
   });
 
+  // D76: the provisional piece is dropped only where it was put.
+  test('a short piece typed around: the one put there is dropped', () {
+    final heard = withHeard('w', '', '', '.');
+    expect(heard.text, 'w.');
+    expect(heard.at, 1);
+    final typed = '${heard.text} q. r';
+    expect(withHeard(typed, heard.shown, '.', '', at: heard.at).text, 'w q. r.');
+  });
+
+  test('a piece repeated in typed words: first copy goes', () {
+    final heard = withHeard('w', '', '', ' a');
+    expect(heard.text, 'w a');
+    expect(heard.at, 1);
+    final typed = '${heard.text} b a c';
+    final next = withHeard(typed, heard.shown, ' a', '', at: heard.at);
+    expect(next.text, 'w b a c a');
+    expect(next.shown, '');
+  });
+
+  test('typed onto a piece: it goes, typed stays', () {
+    final heard = withHeard('w', '', '', ' a');
+    final next = withHeard('${heard.text}nd', heard.shown, ' a', '', at: heard.at);
+    expect(next.text, 'wnd a');
+  });
+
+  test('typed before the piece: it is still found at the end', () {
+    final heard = withHeard('w', '', '', ' a');
+    final typed = 'x ${heard.text}';
+    expect(withHeard(typed, heard.shown, ' a', '', at: heard.at).text, 'x w a');
+  });
+
+  test('typed before and after the piece: it is left alone', () {
+    final heard = withHeard('w', '', '', ' a');
+    final typed = 'x ${heard.text} b';
+    expect(withHeard(typed, heard.shown, ' b', '', at: heard.at).text, 'x w a b b');
+  });
+
+  test('the offset of a new piece is where it starts', () {
+    var r = withHeard('', '', ' How', ' are');
+    expect(r.text, 'How are');
+    expect(r.shown, ' are');
+    expect(r.at, 3);
+    r = withHeard(r.text, r.shown, ' are', '', at: r.at);
+    expect(r.shown, '');
+    expect(r.text, 'How are');
+  });
+
   test('a provisional piece edited away is left alone', () {
     var r = withHeard('', '', tokens[0], tokens[1]);
     final edited = r.text.substring(0, r.text.length - 1);
@@ -117,7 +164,7 @@ void main() {
   });
 
   test('the whole invented dream, heard in pieces, reads as written', () {
-    var r = (text: '', shown: '');
+    var r = (text: '', shown: '', at: 0);
     for (var i = 0; i < tokens.length; i++) {
       r = withHeard(r.text, r.shown, tokens[i], i + 1 < tokens.length ? tokens[i + 1] : '');
     }
