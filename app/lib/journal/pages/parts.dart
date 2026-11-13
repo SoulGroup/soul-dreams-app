@@ -93,12 +93,34 @@ class RecordButton extends StatelessWidget {
       child: GestureDetector(
         key: buttonKey,
         onTap: onPressed,
-        child: Container(
-          constraints: const BoxConstraints(minHeight: StandIns.recordHeight, minWidth: StandIns.recordWidth),
-          decoration: _pill(p.recordTop, p.recordBottom),
-          padding: StandIns.buttonPadding,
-          alignment: Alignment.center,
-          child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(p.recordText)),
+        // A circle (the owner's correction, P13): as wide as tall, its corner
+        // radius half of that. Its words shrink to fit, never stretch it.
+        child: SizedBox(
+          width: StandIns.recordWidth,
+          height: StandIns.recordHeight,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [p.recordTop, p.recordBottom],
+              ),
+              borderRadius: BorderRadius.circular(StandIns.recordHeight / 2),
+            ),
+            child: Padding(
+              padding: StandIns.buttonPadding,
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    Lines.MP_11.text(appLanguage),
+                    textAlign: TextAlign.center,
+                    style: TypeRoles.button.style(p.recordText),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
       ),
     );

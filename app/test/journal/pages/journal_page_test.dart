@@ -3,6 +3,7 @@
 // the record button opening the typing screen, a row opening its night.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
@@ -58,8 +59,17 @@ void main() {
     final n = await keep(h, 'named-three-dreams-sv', stockholm(2026, 6, 2, 23));
     final name = invented('named-three-dreams-sv').name!;
     // Naming is not built (P7); a name reaches the store only directly.
-    await h.store.save(Night(
-        id: n.id, firstRecorded: n.firstRecorded, date: n.date, closes: n.closes, lang: n.lang, name: name, dreams: n.dreams));
+    await h.store.save(
+      Night(
+        id: n.id,
+        firstRecorded: n.firstRecorded,
+        date: n.date,
+        closes: n.closes,
+        lang: n.lang,
+        name: name,
+        dreams: n.dreams,
+      ),
+    );
     await h.pump(tester, JournalPage(journal: h.journal));
     final nameAt = tester.getTopLeft(find.text(name));
     final dateAt = tester.getTopLeft(find.text(dayDigits(n.date)));
@@ -111,5 +121,27 @@ void main() {
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await h.pump(tester, JournalPage(journal: h.journal));
     expect(tester.takeException(), isNull);
+  });
+
+  // 15a (the owner's correction, P13): the record button is a circle.
+  testWidgets('the record button is a circle, radius half its height', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final button = find.byKey(RecordButton.buttonKey);
+    final size = tester.getSize(button);
+    expect(size.width, size.height);
+    expect(size.height, StandIns.recordHeight);
+    final box = tester.widget<DecoratedBox>(find.descendant(of: button, matching: find.byType(DecoratedBox)).first);
+    expect((box.decoration as BoxDecoration).borderRadius, BorderRadius.circular(size.height / 2));
+  });
+
+  testWidgets('large text cannot stretch the record button', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 3;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(tester.takeException(), isNull);
+    final size = tester.getSize(find.byKey(RecordButton.buttonKey));
+    expect(size, Size(StandIns.recordHeight, StandIns.recordHeight));
   });
 }

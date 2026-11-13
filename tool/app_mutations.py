@@ -1,7 +1,7 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A39, with the rows A24a to A24aq of
-# the later rulings among them), then "app mutations: 82 run, 82
+# Expected: every row "caught" (A1 to A39, with the rows A24a to A24as of
+# the later rulings among them), then "app mutations: 84 run, 84
 # caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
@@ -333,6 +333,15 @@ ROWS = [
      '      await widget.after;\n    } on Object {',
      '      await widget.after;\n    } on ArgumentError {',
      'test/journal/pages/journal_home_test.dart', 'a phone check that throws does not keep the list away'),
+    # Task 15a (P13, the owner's correction): the record button is a circle
+    ('A24ar', 'lib/journal/pages/parts.dart',
+     'borderRadius: BorderRadius.circular(StandIns.recordHeight / 2),',
+     'borderRadius: BorderRadius.circular(Spacing.radius),',
+     'test/journal/pages/journal_page_test.dart', 'the record button is a circle, radius half its height'),
+    ('A24as', 'lib/journal/pages/parts.dart',
+     '          width: StandIns.recordWidth,\n',
+     '',
+     'test/journal/pages/journal_page_test.dart', 'large text cannot stretch the record button'),
     # The final review: a night that is made always reads back
     ('A24', 'lib/journal/night.dart',
      "    if (!_isDay(date.year, date.month, date.day)) throw ArgumentError('date');\n",
