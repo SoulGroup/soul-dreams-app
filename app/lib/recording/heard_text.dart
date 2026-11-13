@@ -35,9 +35,11 @@ String _withoutShown(String text, String shown, int at) {
 }
 
 /// Where the piece that started at [at] in [was] starts in [now], when one
-/// edit was made between the two: moved by the edit's change in length if
-/// the edit lies wholly before the piece, else where it was. Any other
-/// change leaves it to [withHeard]'s checks.
+/// edit was made between the two. The edit is placed by the longest common
+/// start and end (never overlapping), so text inserted that goes on as the
+/// piece itself is placed after it. If the edit so placed lies wholly before
+/// the piece, the offset moves by the edit's change in length, else it stays
+/// where it was. Any other change is left to [withHeard]'s checks.
 int movedTo(String was, String now, int at) {
   final most = was.length < now.length ? was.length : now.length;
   var head = 0;

@@ -185,7 +185,8 @@ void main() {
     expect(movedTo('abc.', 'abc.', 3), 3);
     expect(movedTo('abc.', 'abcXY.', 3), 5);
     expect(movedTo('', 'abc', 0), 3);
-    expect(movedTo('abc.', 'aXc.', 3), 3);
+    expect(movedTo('abc.', 'aXYc.', 3), 4);
+    expect(movedTo('aa', 'aaa', 1), 1);
   });
 
   test('an edit at or after it leaves the offset', () {
