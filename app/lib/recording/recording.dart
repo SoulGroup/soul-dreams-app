@@ -124,6 +124,12 @@ final class RecordingSession {
       await _shut();
       return false;
     }
+    if (_stopping != null) {
+      // A stop is waiting for the last words: the microphone never streams
+      // after the end frame (D74). The stop ends the session.
+      await _micOff();
+      return false;
+    }
     _frames = frames.listen((frame) {
       _link?.add(frame);
       onLevel(level(frame));

@@ -1,8 +1,9 @@
 // Words heard, joined at the end of the field's text (D71 Q6; D73). Soniox's
 // tokens are sub-word pieces with their spaces inside them, so their text
 // is joined exactly as sent; the one thing trimmed is a space at the very
-// start of an empty field. The pieces below are Soniox's own documented
-// examples, not a night.
+// start of an empty field. At the start of a recording session only (D74),
+// one space joins the typed words to the first piece heard. The pieces
+// below are Soniox's own documented examples, not a night.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/recording/heard_text.dart';
 
@@ -54,6 +55,40 @@ void main() {
     expect(withHeard('word ', '', 'and', '').text, 'word and');
     expect(withHeard('word\n', '', 'and', '').text, 'word\nand');
     expect(withHeard('word ', '', ' ', '').text, 'word  ');
+    expect(withHeard('word', '', 'The', '').text, 'wordThe');
+  });
+
+  test('a provisional-only first message, then the same piece final: no doubling', () {
+    var r = withHeard('', '', '', ' How');
+    expect(r.text, 'How');
+    r = withHeard(r.text, r.shown, ' How', '');
+    expect(r.text, 'How');
+    expect(r.shown, '');
+  });
+
+  // D74: the start of a session.
+  test('a session starts after typed words with one space', () {
+    expect(withHeard('word', '', 'The', '', first: true).text, 'word The');
+    expect(withHeard('dream.', '', 'I', '', first: true).text, 'dream. I');
+    expect(withHeard('word', '', '', 'The', first: true).text, 'word The');
+  });
+
+  test('a session starts with no space where none is wanted', () {
+    expect(withHeard('', '', 'The', '', first: true).text, 'The');
+    expect(withHeard('', '', ' The', '', first: true).text, 'The');
+    expect(withHeard('word ', '', 'The', '', first: true).text, 'word The');
+    expect(withHeard('word\n', '', 'The', '', first: true).text, 'word\nThe');
+    expect(withHeard('word', '', ' The', '', first: true).text, 'word The');
+  });
+
+  test('inside a session everything is joined exactly as sent', () {
+    expect(withHeard('word The', '', 'dr', 'eam', first: false).text, 'word Thedream');
+    var r = withHeard('word', '', '', 'The', first: true);
+    expect(r.text, 'word The');
+    r = withHeard(r.text, r.shown, 'The', 'dr', first: true);
+    expect(r.text, 'word Thedr');
+    r = withHeard(r.text, r.shown, 'dr', 'eam', first: false);
+    expect(r.text, 'word Thedream');
   });
 
   test('a provisional piece edited away is left alone', () {

@@ -291,6 +291,30 @@ void main() {
     expect(r.ended, [1]);
   });
 
+  test('a stop while the microphone starts: it never streams', () async {
+    final mic = SilentMicrophone()..startHold = Completer<void>();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    final started = r.session.start();
+    await pumpEventQueue();
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    expect(link.sent, ['']);
+    mic.startHold!.complete();
+    expect(await started, isFalse);
+    expect(mic.stops, 1);
+    expect(mic.running, isFalse);
+    link.reply(reply(done: [tokens[0]]));
+    link.reply(reply(finished: true));
+    await stopping;
+    expect(link.sent, ['']);
+    expect(r.heard, [(tokens[0], ''), ('', '')]);
+    expect(mic.stops, 1);
+    expect(link.closed, isTrue);
+    expect(r.ended, [1]);
+    expect(lines, ['recordingEnded']);
+  });
+
   test('a second stop is the first: one end frame', () async {
     final mic = SilentMicrophone();
     final link = MemoryLink();
