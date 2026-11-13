@@ -15,7 +15,10 @@ numbered question. Never settle it in code.** Never edit a copy: copies change o
 ## The rules. Each one is checked; breaking one stops the task.
 
 **R1 · Words.** You never write, translate, reword or invent a dreamer-facing line, nor a word on any check list. Every
-dreamer-facing line comes from `app/lib/words/lines.g.dart`, generated from `app/assets/words/places-register.csv`. Every
+dreamer-facing line comes from `app/lib/words/lines.g.dart`, generated from `app/assets/words/places-register.csv`.
+Lines given and approved but not yet filed are pending lines: the owner writes them in
+`app/assets/words/pending-lines.csv`, fingerprinted, the generator makes `app/lib/words/pending.g.dart`, and their words
+show in SoulDreams Dev only (D57 Q11). Every
 list word comes from `app/assets/words/founder-lists-for-technology.md`. Both are copied by the owner's import after a
 hash check. A place whose status is not "written", "written, in its parts" or "composed (stand-in written)" has no line;
 an unknown status stops the generator. Where a line is missing, use the place's handle as a visible placeholder (e.g.
@@ -85,13 +88,16 @@ merge command runs all of it. The guards (built in the first task, each with a m
 
 - **G0 file kinds** — every tracked file is a kind the guards know: code, config, or an unscanned type, name or path
   listed in `tool/checks/g0_kinds.py`. Anything else, an unknown `#!` interpreter included, is refused. A branch that
-  brings a new kind of file extends the list, and the owner approves it; and `.txt` in `app/assets/fonts/` only.
+  brings a new kind of file extends the list, and the owner approves it; and `.txt` in `app/assets/fonts/` only; and the
+  pending lines' and the screenshots' fingerprints by exact path.
 - **G1 words** — the generated words (`lines.g.dart`, `lists.g.dart`, `words.g.xcconfig` and the two
   `InfoPlist.strings`) are exactly what the generator makes from the CSV and the lists, nothing else sits in
   `app/lib/words/` or `app/assets/words/`, and the CSV's and lists' hashes match `docs/source/SOURCES`; and
-  `app/lib/design/tokens.g.dart` is exactly what `designgen.py` makes from `design-system.md`.
+  `app/lib/design/tokens.g.dart` is exactly what `designgen.py` makes from `design-system.md`; and the pending lines
+  match `pending-fingerprint.txt`, and `pending.g.dart` is what the generator makes from them.
 - **G2 copies** — every file in `docs/source/` matches its listed hash; no tracked `privacy-ethics-safety.md`, and
-  nothing in a folder named `restricted`; and every file in `app/assets/fonts/` matches `fingerprints.txt`.
+  nothing in a folder named `restricted`; and every file in `app/assets/fonts/` matches `fingerprints.txt`; and every
+  file in `docs/reference/screens/` matches its `fingerprints.txt`.
 - **G3 no literal words** — no string literal shown to a dreamer outside `app/lib/words/`; any other literal of more
   than two words needs `// not-dreamer-facing: <reason>` on its line.
 - **G4 invented only** — no string literal of twelve words or more outside `fixtures/invented-nights.json`,
