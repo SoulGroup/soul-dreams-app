@@ -4754,6 +4754,40 @@ As first asked, for the record:
 
 ## Part 6 · Where the build differs from this plan
 
-Added by the final whole-branch review.
+Added by the final whole-branch review on 2026-11-13 (D68). Part 3's blocks are left as proven; where they differ
+from the committed code, the committed code and this part govern. The implementation report
+(`.scratch/for-build-chat/journal-screens-implementation.md`) has the detail.
+
+- **D60.** Tasks 2 and 3 touch write-protected paths, so the owner applied their blocks; each was checked identical
+  to the plan by a reverse `git apply --check`. So was Task 16's `CLAUDE.md` part (`e9e03e3`), which the auto-mode
+  classifier refused to Claude Code; its `docs/Status.md` part was committed alone (`0ae2f53`).
+- **D61, Tasks 5a and 5b (`c0af6d7`, `6b140c4`).** `JournalStore.update(id, Night? Function(Night))` reads, changes and
+  writes a night in one turn of the queue; `addDream` into a night and `editDream` use it. `isEmptyText` counts
+  U+200B, U+200C, U+200D, U+2060 and U+FEFF as whitespace. `maxOpen` is 26 hours: `decodeNight` skips a night whose
+  `closes` is further from its first recording, and the `Night` constructor refuses one, both by comparing a
+  difference. Rows A24a to A24f.
+- **D62, Task 9a (`6c07ac5`).** A failed save logs `journalSaveFailed` and keeps the screen and the words; the iPhone
+  edge swipe saves (a 20 px strip); the keyboard is compared with a bare field; Task 13's 21:00 typing test is copied
+  in early. Rows A24g to A24o.
+- **D63, Tasks 9b and 9c (`6f008cb`, `7388a75`).** No autofocus; one scroll column, the field never below
+  `StandIns.fieldMinLines` lines; MP·62, a third pending line (the owner's files), in the scroll area below the field;
+  hidden or paused saves once per trip away. Rows A24p to A24z.
+- **D64, Task 10a (`83d6157`).** A night's page catches a failed delete (`journalDeleteFailed`) and read
+  (`journalReadFailed`), ignores taps while a delete runs, and `DreamBubble` is a button. Rows A24aa to A24ah.
+- **D65, Task 12a (`20d0087`).** The import walk reads every ordinary form of directive and holds `main.dart` off
+  `lib/founder/`; `JournalHome` waits for the phone check (`after`). Rows A24ai to A24aq. Task 12's `safe_log.dart`
+  hunk no longer applied (9a and 10a had added events at its anchor): the rest was applied with `--exclude` and the
+  plan's three lines inserted by hand, accepted that once.
+- **D66 (`4eb77ce`).** The walk's comments say it covers the ordinary forms and is a floor. Task 13 was applied with
+  `--exclude=app/test/journal/pages/typing_page_test.dart`: every line of that hunk was already in, from Task 9a.
+- **D67, Task 13 (`5496074`).** Rows A29 and A38 follow the code D61 and D64 rewrote: A29 breaks
+  `return dreams.isEmpty ? null : n.withDreams(dreams);`, A38 breaks `if (yes != true || !mounted) return;`.
+- **Task 14 (`875add2`).** The stand-ins' numbers from the screenshots; thirteen questions for Product, listed in
+  Status.md's "Before Cohort 1".
+- **Task 15a (`dac1dce`), the owner's correction (P13).** The record button is a fixed `SizedBox` of
+  `recordWidth` by `recordHeight` (both 120), radius half the height, its label in a `FittedBox`. Rows A24ar, A24as.
+- **The counts.** At the end of the build: **187** app tests, **84** app mutation rows (`app mutations: 84 run, 84
+  caught`), **241** guard tests and **87** guard mutation rows (the plan's 126, 39, 241 and 87).
+- **D68.** `/simplify` is skipped for this branch.
 
 *No matter where you are on your journey, the steps you take are equally important.*

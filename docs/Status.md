@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-13, at the end of branch `journal-screens`, by Claude Code.
+Last updated: 2026-11-13, at the final review of branch `journal-screens`, by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -77,6 +77,18 @@ to Product's answers P1 to P14 and the answers of D58. Plan: `docs/plans/journal
   save; the same screen edits a dream); a night's page (the header, "Dreams", the dreams, "Add dreams", the "⋯" menu
   holding only delete, one confirmation with Cancel first and Delete destructive). No Settings, search, naming,
   recording or Start Interpretation (P7, P8).
+- The typing screen, as ruled during the build (D62, D63): a failed save keeps the screen and the words, logs
+  `journalSaveFailed` and shows MP·62 in the scroll area below the field, cleared when Save is tried again; Save,
+  Back, the system back and the iPhone edge swipe (a 20 px strip, a rightward drag of 60 px or a flick of 300 px/s)
+  each save, and each retries after a failure. The field takes no focus by itself; the page scrolls, MP·10 or MP·32
+  with it, and the field fills the page, never less than `StandIns.fieldMinLines` lines. Leaving the app (hidden or
+  paused) saves once per trip away and leaves the screen; `inactive` saves nothing; whitespace alone keeps nothing
+  and stays.
+- A night's page (D64): a failed delete or read logs `journalDeleteFailed` or `journalReadFailed`, keeps the page and
+  shows nothing new; while a delete runs, the menu, Add dreams and the dreams ignore taps; each dream is announced as
+  a button. SoulDreams Dev's list waits for the phone check before it opens the folder (D65).
+- The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
+  both 120, the radius half the height; large text shrinks its words, never the circle.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
   first 21:00 after its first recording in the zone then in force (format version 1, D57 Q14); the typing screen's
   target is fixed when it opens; an empty Save keeps nothing; an emptied dream disappears; a night with no dream left
@@ -363,11 +375,87 @@ Banked in journal-screens:
 79. Word Animation, the setting, is not built (P8): only Reduce Motion stops word by word and the fade.
 80. The month names come from `intl`'s CLDR data, assumed to match iOS's own for English and Swedish (D56).
 
+Banked by D68 (the reviewers' notes in journal-screens; the detail is in
+`.scratch/for-build-chat/journal-screens-implementation.md`):
+
+81. Task 2's review: the pending lines' Dev-only rule is a run-time flavour test, so their words are built into the
+    tester and founder binaries though never shown (the checklist line in "Before Cohort 1" covers it); a
+    fingerprint with an extra blank line passes G1 (`$` before a final newline; `fullmatch` would close it); the
+    generator's control-character test lets C1 controls and format characters through; the fingerprint proves the
+    CSV and its fingerprint changed together, not who wrote them; guard mutation row 84 is caught by
+    `dart-name-clash`; the `place` column is not checked.
+82. Task 5a's re-review: in a zone whose clock moves back more than two hours (Antarctica/Casey), `closesAfter` can
+    give a `closes` beyond D61's 26 hours, which the `Night` constructor refuses, so a Save there throws (the lean:
+    accept, a Swedish cohort); the PhoneZone sweep needs a zone with a clock change to mean anything; the first
+    `instantAt` assertion repeats the implementation's expression; the U+FEFF case catches nothing (Dart trims it);
+    `update` skips an unreadable file without logging `journalFileSkipped`.
+83. Task 9's review, banked by D62: the typing screen's save ignores `addDream`'s false (the night gone) and an edit
+    of a missing index, and pops, so the words vanish silently; unreachable until a Delete journal exists.
+84. Task 9a's re-review: `on Object` also catches programming errors, and a lasting failure (a full disk) leaves the
+    dreamer on the screen with MP·62 only; `SafeLog.event` runs before `_saving` is reset (cannot throw today);
+    the edge swipe is looser than Flutter's own (a reversed swipe still leaves; 60 px or 300 px/s against half the
+    screen or about 390 px/s), stays 20 px in landscape and does not follow the finger; its detector adds an
+    unlabelled semantics node (`excludeFromSemantics: true` would remove it). Untested: either swipe threshold
+    alone, `.abs()` on the velocity, the drag-start reset, `keyboardAppearance` and `stylusHandwritingEnabled`, the
+    keyboard comparison on iOS, and a new night made across 21:00 in an empty journal.
+85. Task 9b's review: on first use at larger text sizes the field starts below the fold, with nothing hinting at it
+    (as ruled, "MP·10 scrolls away"; for the owner's look at the largest size); a brief switch to another app closes
+    the typing screen (D63 as written); `liveRegion` on MP·62 and the `paused` case are not pinned by a mutation row.
+86. Task 9c's re-review: a failure scrolls to MP·62 below the end of a long text, away from the caret, until the next
+    keystroke; at 3.1x with a keyboard of 300 or more, `ensureVisible` targets the padding, so the bottom of MP·62
+    can be clipped until the dreamer scrolls.
+87. Task 10's review, banked by D64: a night's page re-reads only when the typing screen returns, so a night gone
+    another way shows stale dreams until the next tap, which resolves safely.
+88. Task 10a's re-review: if the first read fails, the page shows Back and an enabled "⋯" menu only (D64 as written;
+    the owner may want the menu off while nothing is shown). Untested: Cancel in the confirmation then using the page
+    again (a `_busy` set before the dialog would survive); that the dreams stay after a failed read; that nothing new
+    is shown after a failure; the unreachable `if (_busy) return;` in `_delete` and `|| !mounted` after the dialog.
+89. Task 12's review, banked by D65: `JournalHome` catches the folder's open failure only; the Swift `JournalFiles`
+    channel is built into all three apps (ruled acceptable, D65).
+90. Task 12a's re-review, banked by D66: the import walk covers the ordinary forms of import, export and part and
+    is a floor: no space after the keyword, a raw string, metadata or a script tag before a directive, a `//` inside
+    an address, a different case on macOS's file system, and a `/*` inside a `//` comment each slip past it; a greedy
+    condition or block-comment pattern and `main_dev.dart` handing over a null check survive.
+91. Task 15a: the record button's label fit (`FittedBox`) is not pinned by a mutation row; with the real MP·11 words
+    and the padding the words have 80 by 90 pt, and the circle or the padding is the lever if the founder wants them
+    larger.
+
+## Before Cohort 1
+
+1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
+   note 1; D68).
+2. Product gives exact values for Task 14's thirteen questions below (P13).
+
+Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number:
+
+1. The summary's type role: the screenshots show `TypeRoles.button` (Inter 14); switching needs the row's minimum
+   height changed.
+2. The typing field: a single-line pill with a microphone in the screenshots, against D63's five-line minimum.
+3. The record button's shape: a 120 pt circle (built in Task 15a); words inside it in some screenshots, none in
+   others.
+4. A chevron at each row's trailing edge (ours have none).
+5. The month divider: centred, sometimes with the year, and a shorter two-digit-year date in one row (ours are
+   left-aligned).
+6. The journal's top bar: a settings button, and a search field in the list screens (not built, P8; the screenshots'
+   other pill is not built, R9).
+7. Fonts: the empty journal's line and the typing instruction look like Inter, centred (ours `voiceApp`).
+8. The typing screen's layout: two pill buttons at the bottom, left and right, the instruction centred (ours: one
+   Save on the right with an icon, a full-width field).
+9. The back control: a thin chevron in a round bordered button of about 41 pt (ours: Material's arrow, no circle).
+10. A night's page: the title centred, the menu a bordered pill, a floating field with a microphone and two buttons
+    at the bottom (ours: left-aligned, Material's menu button, one centred Add button).
+11. The bubbles' placement: nearly full width in the screenshot, against the Design System's `space.bubble.dreamer`;
+    nothing changed.
+12. One `gap` stand-in, three measured values (about 30, 20 and 12); separate stand-ins would need new names.
+13. The fade curve and the menu's style beyond its button cannot be measured from stills.
+
 ## Pending lines, to file before Cohort 1
 
 Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
 
 - MP·60 (the confirmation's Delete) and MP·61 (its Cancel), head's message 16, founder-approved.
+- MP·62 (the typing screen's failed save), D63 (head's message 19, Product message 18), founder-ruled; added by the
+  owner in Task 9b.
 - W27·5's privacy-page text (head's message 16) waits for the disclosure and privacy page, under Settings; it is not
   in the pending file.
 
@@ -468,6 +556,27 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D59 (owner, 2026-11-12): the plan's Part 4: `CLAUDE.md`'s R1, G0, G1 and G2 lines in the plan's words, approved at
   the prompt; Opus changes the stand-ins' numbers only; `newQueueForTests()` test-only; the other leans; the new
   invented night committed with the plan's amendment.
+- D60: `tool/checks/`, `tool/check_all.sh`, `.githooks/` and the words folders stay write-protected for Claude Code;
+  the owner applies those patches, and his applying them is the approval for `wordsgen.py`, `importer.py` and
+  `import_rows.py`.
+- D61 (Task 5's review): a read and its write are one turn of the store's queue (`JournalStore.update`); U+200B,
+  U+200C, U+200D, U+2060 and U+FEFF count as whitespace; a night open longer than 26 hours is damaged (Tasks 5a, 5b).
+- D62 (Task 9's review): a failed save keeps the screen and the words, with a code; the iPhone edge swipe saves;
+  the tests widened (Task 9a); the field's layout and the leaving question to Product; the silent drops banked.
+- D63 (head's message 19, Product message 18, founder-ruled): no automatic focus, the page scrolls, the field keeps a
+  usable height; a failed save shows MP·62; leaving the app saves (Tasks 9b, 9c).
+- D64 (A on Task 10's review): a night's page survives a failed delete or read with a code, ignores taps while a
+  delete runs, and its dreams are buttons (Task 10a); the stale page banked.
+- D65 (A on Task 12's review): the Swift channel in all three apps is acceptable; the import walk reads every form of
+  directive (Task 12a); the open-failure catch banked. Standing: a plan hunk that no longer applies is a stop and a
+  question.
+- D66 (B on Task 12a's review): the walk's constructed-input holes banked (item 90), its comments say what it covers;
+  Task 13 applied without its typing test hunk, already in from Task 9a.
+- D67 (A): Task 13's rows A29 and A38 follow the code D61 and D64 rewrote. Standing for the branch: a stale count in
+  the plan's text is replaced by the re-measured one and recorded, not a stop.
+- D68 (owner, 2026-11-13): Status.md and the plan's Part 6 carry what Task 16 held back; `/simplify` skipped (the app
+  code is pinned by 84 mutation rows; revisit at the next feature branch); the final review fixes real defects only,
+  test-first, in their own commits.
 
 ## Documents as last imported
 
