@@ -17,7 +17,14 @@ afterEach(() => {
 });
 
 test('the events are these', () => {
-  assert.deepEqual(LOG_EVENTS, ['notFound', 'handlerFailed']);
+  assert.deepEqual(LOG_EVENTS, [
+    'notFound',
+    'handlerFailed',
+    'keyIssued',
+    'keyRefused',
+    'sonioxKeyFailed',
+    'parameterFailed',
+  ]);
 });
 
 test('a code alone', () => {

@@ -3,7 +3,16 @@
 // can reach a log. Lambda sends each line to CloudWatch, kept 7 days.
 
 /** Every event the server may log. A new event is a new value here. */
-export const LOG_EVENTS = ['notFound', 'handlerFailed'] as const;
+export const LOG_EVENTS = [
+  'notFound',
+  'handlerFailed',
+  // The front door (D71): a key given, a beta key refused, Soniox's
+  // answer not a key (with its status), Parameter Store failing.
+  'keyIssued',
+  'keyRefused',
+  'sonioxKeyFailed',
+  'parameterFailed',
+] as const;
 export type LogEvent = (typeof LOG_EVENTS)[number];
 
 type Sink = (line: string) => void;

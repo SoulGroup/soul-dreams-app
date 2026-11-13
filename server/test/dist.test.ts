@@ -8,7 +8,16 @@ const CODE = new URL('../dist/src/', import.meta.url);
 
 test('the compiled files and the marker, nothing else', () => {
   const files = readdirSync(CODE, { recursive: true }).map(String).sort();
-  assert.deepEqual(files, ['handler.js', 'hosts.js', 'package.json', 'safe-log.js']);
+  assert.deepEqual(files, [
+    'beta-key.js',
+    'door.js',
+    'handler.js',
+    'hosts.js',
+    'package.json',
+    'parameter-names.js',
+    'safe-log.js',
+    'soniox.js',
+  ]);
 });
 
 test('the marker makes the code a module', () => {
