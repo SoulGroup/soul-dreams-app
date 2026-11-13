@@ -75,9 +75,10 @@ void main() {
     expect(find.byType(JournalPage), findsOneWidget);
   });
 
-  test('SoulDreams Dev hands its phone check to the list', () {
+  test('SoulDreams Dev hands its phone check and recording to the list', () {
     final text = File('lib/main_dev.dart').readAsStringSync();
-    expect(text, contains('JournalHome(files: files, after: check)'));
+    expect(text, contains('JournalHome(files: files, after: check, recording: recording)'));
+    expect(text, contains("betaKey: const String.fromEnvironment('BETA_KEY')"));
   });
 
   testWidgets('a folder that cannot open: a blank page, a code', (tester) async {

@@ -59,10 +59,11 @@ void main() {
   const pending = 'lib/words/pending.g.dart';
 
   for (final entry in ['lib/main.dart', 'lib/main_founder.dart']) {
-    test('$entry reaches no journal code and no pending line', () {
+    test('$entry reaches no journal or recording code, no pending line', () {
       final files = reached(entry);
       expect(files, contains('lib/app.dart'));
       expect(files.where((f) => f.startsWith('lib/journal/')), isEmpty);
+      expect(files.where((f) => f.startsWith('lib/recording/')), isEmpty);
       expect(files, isNot(contains(pending)));
     });
   }
@@ -72,6 +73,7 @@ void main() {
     expect(files, contains('lib/journal/pages/journal_page.dart'));
     expect(files, contains('lib/journal/pages/night_page.dart'));
     expect(files, contains(pending));
+    expect(files, contains('lib/recording/record_microphone.dart'));
   });
 
   test('the walk follows relative and package imports', () {
