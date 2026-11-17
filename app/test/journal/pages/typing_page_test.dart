@@ -937,25 +937,27 @@ void main() {
   });
 
   testWidgets('the microphone ignores taps while Save waits: no second session', (tester) async {
+    // D88: the recording has ended and Save's write is still under way.
+    final files = FlakyFiles();
     final v = voice();
-    v.mic.startHold = Completer<void>();
-    final h = await tall(tester, recording: v.recording);
-    await tester.enterText(find.byKey(TypingPage.fieldKey), tokens[0]);
+    final h = await tall(tester, recording: v.recording, files: files);
+    files.hold = Completer<void>();
     await record(tester);
+    v.link.reply(reply(done: [tokens[0]]));
+    await tester.pump();
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pump();
-    v.mic.startHold!.complete();
+    v.link.reply(reply(finished: true));
     await tester.pump();
     await tester.pump();
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
     await tester.tap(find.byKey(TypingPage.micKey));
     await tester.pump();
     await tester.pump();
     expect(v.mic.starts, 1);
-    v.link.reply(reply(finished: true));
+    files.hold!.complete();
     await tester.pumpAndSettle();
     expect(v.mic.starts, 1);
-    expect(v.mic.stops, 1);
-    expect(v.mic.running, isFalse);
     expect(find.byType(TypingPage), findsNothing);
     expect((await h.nights()).single.dreams, [tokens[0]]);
   });
