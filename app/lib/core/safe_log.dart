@@ -39,9 +39,7 @@ enum LogEvent {
   /// refused; no key from our server (its status); Soniox's stream refused
   /// or broken (its code); the microphone failing; a recording started,
   /// stopped by a call or Siri (D79 b), and ended; the phone's audio not
-  /// given back after it (D85); an edit attempt while recording that would
-  /// remove more than the dreamer's selection or one character, refused
-  /// (Task 16g).
+  /// given back after it (D85).
   recordingOff,
   recordingRefused,
   recordingKeyFailed,
@@ -51,7 +49,6 @@ enum LogEvent {
   recordingInterrupted,
   recordingEnded,
   recordingReleaseFailed,
-  recordingEditRefused,
 }
 
 abstract final class SafeLog {

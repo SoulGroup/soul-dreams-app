@@ -1,8 +1,8 @@
 // Words heard, put in at the insertion point (D87): where the caret was when
 // the recording started (the end if the dreamer had not placed it). The
 // text before it stays before, the text after it stays after. The dreamer
-// cannot edit while a recording runs: an edit attempt stops it first and
-// applies to the settled text ([editSettled]).
+// cannot edit while a recording runs: an edit attempt only stops it, and a
+// caret the dreamer placed is moved with the words ([caretSettled], D90).
 // Soniox's tokens are sub-word pieces with their spaces inside them (D73),
 // so their text is joined exactly as sent; the only thing trimmed is a
 // space at the very start of an empty field. One space joins the text
@@ -32,50 +32,12 @@ bool _white(String s, int i) => _space.hasMatch(s[i]);
   return (text: before + middle + join + after, end: before.length + middle.length);
 }
 
-/// The dreamer's one edit, made on [old] (the text then shown) as [edited],
-/// applied to [settled], the text once the last words came (D87 2). Both
-/// texts keep the same [keepStart] characters before the dictated words and
-/// [keepEnd] after them. A position in the kept text stays with it; one in
-/// the dictated words is counted from their end, where the caret was. With
-/// nothing typed, [caret] (in [old]) is moved likewise. One edit attempt
-/// never removes more than the dreamer's own selection ([selected]
-/// characters) or one character; a value that would, such as a keyboard's
-/// stale copy of the text, is refused: null (Task 16g).
-({String text, int caret})? editSettled(
-  String settled,
-  String old,
-  String edited, {
-  int? caret,
-  int selected = 0,
-  required int keepStart,
-  required int keepEnd,
-}) {
-  final oldEnd = old.length - keepEnd;
-  final settledEnd = settled.length - keepEnd;
-  int moved(int p) {
-    if (p <= keepStart) return p;
-    if (p >= oldEnd) return p + settled.length - old.length;
-    final fromEnd = settledEnd - (oldEnd - p);
-    return fromEnd < keepStart ? keepStart : fromEnd;
-  }
-
-  if (old == edited) return (text: settled, caret: moved(caret ?? old.length));
-  // The edit, placed by the longest common start and end (never
-  // overlapping), replaced old[head, oldTo) with edited[head, editedTo).
-  final most = old.length < edited.length ? old.length : edited.length;
-  var head = 0;
-  while (head < most && old.codeUnitAt(head) == edited.codeUnitAt(head)) {
-    head++;
-  }
-  var tail = 0;
-  while (tail < most - head && old.codeUnitAt(old.length - 1 - tail) == edited.codeUnitAt(edited.length - 1 - tail)) {
-    tail++;
-  }
-  final typed = edited.substring(head, edited.length - tail);
-  final removed = old.substring(head, old.length - tail);
-  if (removed.length > selected && removed.runes.length > 1) return null;
-  final from = moved(head);
-  final to = moved(old.length - tail);
-  final until = to < from ? from : to;
-  return (text: settled.substring(0, from) + typed + settled.substring(until), caret: from + typed.length);
+/// Where a caret the dreamer placed while recording, at [caret] in the text
+/// then shown ([shownLength] long), lands once the last words have come
+/// ([settledLength] long) (D90): before the insertion point [insertAt] it
+/// stays; at or after it, it moves with the words, never before them.
+int caretSettled(int caret, {required int insertAt, required int shownLength, required int settledLength}) {
+  if (caret < insertAt) return caret;
+  final moved = caret + settledLength - shownLength;
+  return moved < insertAt ? insertAt : moved;
 }

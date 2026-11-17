@@ -102,9 +102,11 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   // Where the dictated words end, and the value the page last set.
   int _insertEnd = 0;
   TextEditingValue? _shownValue;
-  // The dreamer's first edit attempt while recording, held until the last
-  // words have landed; later attempts in that wait are ignored (D87 2).
-  ({TextEditingValue old, TextEditingValue edited})? _held;
+  // Whether an edit attempt has stopped this recording, and the caret a
+  // tap put down, noted until the last words have landed; later attempts in
+  // that wait are ignored (D87 2, D90).
+  bool _attempted = false;
+  ({int caret, int shownLength})? _caret;
   final _levels = <double>[];
   int _seconds = 0;
   Timer? _ticker;
@@ -224,7 +226,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _after = value.text.substring(at);
     _finals = '';
     _provisional = '';
-    _held = null;
+    _attempted = false;
+    _caret = null;
     setState(() => _mic = _Mic.starting);
     _compose();
     final session = RecordingSession(
@@ -313,9 +316,10 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
 
   bool get _live => _mic == _Mic.recording || _mic == _Mic.stopping;
 
-  // An edit attempt while recording (D87 2): a key press, a paste or a cut
-  // (the text is put back as shown), or a tap or a handle that moves the
-  // caret or the selection. The edit is held and the recording stops. A
+  // An edit attempt while recording (D87 2, D90): a key press, a paste or a
+  // cut (the text is put back as shown, never applied), or a tap or a handle
+  // that moves the caret or the selection (its caret noted). The recording
+  // stops as Stop does. A
   // shown value exists only while a recording runs; the page's own changes,
   // and the keyboard's own composing range, are nothing new.
   void _moved() {
@@ -328,8 +332,11 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   }
 
   void _attempt(TextEditingValue old, TextEditingValue edited) {
-    if (_held != null) return;
-    _held = (old: old, edited: edited);
+    if (_attempted) return;
+    _attempted = true;
+    if (old.text == edited.text && edited.selection.isValid) {
+      _caret = (caret: edited.selection.extentOffset, shownLength: old.text.length);
+    }
     if (_mic == _Mic.recording) setState(() => _mic = _Mic.stopping);
     _session?.stop();
   }
@@ -370,26 +377,17 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _shownValue = null;
     if (!mounted) return;
     setState(() => _mic = _Mic.idle);
-    // The dreamer's held edit, applied to the settled text (D87 2).
-    final held = _held;
-    _held = null;
-    if (held == null) return;
-    final r = editSettled(
-      _text.text,
-      held.old.text,
-      held.edited.text,
-      caret: held.edited.selection.isValid ? held.edited.selection.extentOffset : null,
-      selected: held.old.selection.isValid ? held.old.selection.end - held.old.selection.start : 0,
-      keepStart: _before.length,
-      keepEnd: _after.length,
+    // A caret the dreamer tapped down, moved with the words (D90).
+    final tapped = _caret;
+    _caret = null;
+    if (tapped == null) return;
+    final at = caretSettled(
+      tapped.caret,
+      insertAt: _before.length,
+      shownLength: tapped.shownLength,
+      settledLength: _text.text.length,
     );
-    // A value that would remove more than the dreamer could in one act is
-    // refused: the settled text stays (Task 16g).
-    if (r == null) {
-      SafeLog.event(LogEvent.recordingEditRefused);
-      return;
-    }
-    _text.value = TextEditingValue(text: r.text, selection: TextSelection.collapsed(offset: r.caret));
+    _text.selection = TextSelection.collapsed(offset: at);
   }
 
   String _elapsed() {

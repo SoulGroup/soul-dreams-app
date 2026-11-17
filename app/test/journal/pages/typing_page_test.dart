@@ -986,8 +986,9 @@ void main() {
   });
 
   // Task 16a: the owner's crash. Backspace, as the phone's keyboard sends
-  // it, over the heard words while final pieces keep arriving; under D87 the
-  // first press stops the recording and the rest of the wait's are ignored.
+  // it, over the heard words while final pieces keep arriving; under D90 the
+  // first press only stops the recording and the rest of the wait's are
+  // ignored: every word stays.
   testWidgets('backspacing over heard words while finals arrive', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
@@ -1012,8 +1013,7 @@ void main() {
     v.link.reply(reply(finished: true));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    final settled = tokens.take(4).join() + tokens[4] + tokens[6] + tokens[5];
-    expect(field.controller!.text, settled.substring(0, settled.length - 1));
+    expect(field.controller!.text, tokens.take(4).join() + tokens[4] + tokens[6] + tokens[5]);
   });
 
   // D79 a: while recording, the field follows the end; scrolled up, it
@@ -1222,58 +1222,97 @@ void main() {
     expect(text.text, '${typed.substring(0, at)} ${tokens[0]}${typed.substring(at)}');
   });
 
-  testWidgets('a key press stops the recording, then lands after the words', (tester) async {
+  // D90: an edit attempt while recording only stops it; the attempt is
+  // never applied, and no character of the settled text changes.
+  Future<({MemoryLink link, SilentMicrophone mic, TextEditingController text})> dictatingInto(
+    WidgetTester tester, {
+    String typed = '',
+  }) async {
     final v = voice();
     await tall(tester, recording: v.recording);
-    await record(tester);
+    if (typed.isNotEmpty) await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
     await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    final text = fieldText(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await record(tester);
+    return (link: v.link, mic: v.mic, text: fieldText(tester));
+  }
+
+  Future<void> attemptStops(WidgetTester tester, String Function(String shown) attempt, {String typed = ''}) async {
+    final r = await dictatingInto(tester, typed: typed);
+    r.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
     await tester.pump();
-    final shown = text.text;
+    final shown = r.text.text;
+    await keyboard(tester, attempt(shown));
+    expect(r.text.text, shown);
+    expect(r.mic.running, isFalse);
+    expect(r.link.sent.last, '');
+    r.link.reply(reply(done: [tokens[1], tokens[2]], finished: true));
+    await tester.pumpAndSettle();
+    final settled = dictatedInto(typed, tokens.take(3).join(), '');
+    expect(r.text.text, settled.text);
+    expect(r.text.selection, TextSelection.collapsed(offset: settled.end));
+  }
+
+  testWidgets('a key press only stops the recording', (tester) async {
+    await attemptStops(tester, (shown) => '${shown}x');
+  });
+
+  testWidgets('a backspace only stops the recording', (tester) async {
+    await attemptStops(tester, (shown) => shown.substring(0, shown.length - 1));
+  });
+
+  testWidgets('a paste only stops the recording', (tester) async {
+    await attemptStops(tester, (shown) => shown + tokens[4] + tokens[5]);
+  });
+
+  testWidgets('a cut only stops the recording', (tester) async {
+    await attemptStops(tester, (shown) => shown.substring(0, 1), typed: dreams[1]);
+  });
+
+  testWidgets('a backspace with typed text before the words only stops it', (tester) async {
+    await attemptStops(tester, (shown) => shown.substring(0, shown.length - 1), typed: dreams[1]);
+  });
+
+  testWidgets('a backspace before any word only stops the recording', (tester) async {
+    final r = await dictatingInto(tester, typed: dreams[1]);
+    await keyboard(tester, dreams[1].substring(0, dreams[1].length - 1));
+    expect(r.text.text, dreams[1]);
+    expect(r.mic.running, isFalse);
+    r.link.reply(reply(done: [tokens[0], tokens[1]], finished: true));
+    await tester.pumpAndSettle();
+    expect(r.text.text, dictatedInto(dreams[1], tokens[0] + tokens[1], '').text);
+  });
+
+  // The reviewer's case of 16g: a one-letter first piece, one backspace,
+  // more words land: every word stays.
+  testWidgets('a one-letter first piece and one backspace: every word stays', (tester) async {
+    final r = await dictatingInto(tester);
+    r.link.reply(reply(shown: [tokens[0]]));
+    await tester.pump();
+    expect(r.text.text, tokens[0]);
+    await keyboard(tester, '');
+    r.link.reply(reply(done: [tokens[0], tokens[1], tokens[2]], finished: true));
+    await tester.pumpAndSettle();
+    expect(r.text.text, tokens.take(3).join());
+  });
+
+  testWidgets('presses during the wait are ignored', (tester) async {
+    final r = await dictatingInto(tester);
+    r.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    final shown = r.text.text;
     await keyboard(tester, '${shown}x');
-    expect(text.text, shown);
-    expect(v.mic.running, isFalse);
-    expect(v.link.sent.last, '');
-    v.link.reply(reply(done: [tokens[1], tokens[2]], finished: true));
-    await tester.pumpAndSettle();
-    expect(text.text, '${tokens.take(3).join()}x');
-    expect(text.selection.baseOffset, text.text.length);
-  });
-
-  testWidgets('a paste stops the recording; it lands after the last words', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    await record(tester);
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    final text = fieldText(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await keyboard(tester, shown.substring(0, shown.length - 1));
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
     await tester.pump();
-    await keyboard(tester, text.text + tokens[4] + tokens[5]);
-    expect(v.mic.running, isFalse);
-    v.link.reply(reply(done: [tokens[1]], finished: true));
+    expect(r.text.text, shown);
+    r.link.reply(reply(done: [tokens[1]], finished: true));
     await tester.pumpAndSettle();
-    expect(text.text, tokens[0] + tokens[1] + tokens[4] + tokens[5]);
+    expect(r.text.text, tokens[0] + tokens[1]);
+    expect(r.text.selection, TextSelection.collapsed(offset: r.text.text.length));
   });
 
-  testWidgets('a backspace stops the recording; the last settled letter goes', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    await record(tester);
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    final text = fieldText(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
-    await tester.pump();
-    await keyboard(tester, text.text.substring(0, text.text.length - 1));
-    expect(v.mic.running, isFalse);
-    // A second press during the wait is ignored.
-    await keyboard(tester, '${text.text}x');
-    v.link.reply(reply(done: [tokens[1], tokens[2]], finished: true));
-    await tester.pumpAndSettle();
-    final settled = tokens.take(3).join();
-    expect(text.text, settled.substring(0, settled.length - 1));
-  });
-
+  // A tap that moves the caret stops the recording; the caret lands where
+  // the dreamer put it, moved with the words when at or after them.
   testWidgets('a tap moving the caret stops the recording; nothing lost', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
@@ -1281,13 +1320,15 @@ void main() {
     final text = fieldText(tester);
     v.link.reply(reply(done: [tokens[0], tokens[1], tokens[2]], shown: [tokens[3]]));
     await tester.pump();
+    final shown = text.text.length;
     await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
     await tester.pump();
+    final tapped = text.selection.baseOffset;
     expect(v.mic.running, isFalse);
-    v.link.reply(reply(done: [tokens[3]], finished: true));
+    v.link.reply(reply(done: [tokens[3], tokens[4]], finished: true));
     await tester.pumpAndSettle();
-    expect(text.text, tokens.take(4).join());
-    expect(text.selection.baseOffset, lessThan(text.text.length));
+    expect(text.text, tokens.take(5).join());
+    expect(text.selection.baseOffset, tapped + text.text.length - shown);
   });
 
   testWidgets('a tap in the text before the words keeps its place', (tester) async {
@@ -1310,81 +1351,18 @@ void main() {
     expect(text.selection.baseOffset, tapped);
   });
 
-  // Task 16g: the owner's re-test of D87: one backspace while recording
-  // deleted the whole text. One backspace, with typed text before and with
-  // none, before and after words appear: one character goes, never more.
-  Future<void> oneBackspace(WidgetTester tester, {required String typed, required bool wordsFirst}) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    if (typed.isNotEmpty) await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    final text = fieldText(tester);
-    if (wordsFirst) {
-      v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
-      await tester.pump();
-    }
-    if (text.text.isNotEmpty) await keyboard(tester, text.text.substring(0, text.text.length - 1));
-    final rest = wordsFirst ? [tokens[1], tokens[2]] : [tokens[0], tokens[1], tokens[2]];
-    v.link.reply(reply(done: rest, finished: true));
-    await tester.pumpAndSettle();
-    // Exactly one character of the settled text goes (which one, when no
-    // word had appeared yet, is the owner's open question 16f-2).
-    final settled = dictatedInto(typed, tokens.take(3).join(), '').text;
-    final now = text.text;
-    expect(now.length, settled.length - 1);
-    final at = Iterable<int>.generate(now.length).firstWhere((i) => now[i] != settled[i], orElse: () => now.length);
-    expect(settled.substring(0, at) + settled.substring(at + 1), now);
-  }
-
-  testWidgets('one backspace, typed text, words shown: one letter goes', (tester) async {
-    await oneBackspace(tester, typed: dreams[1], wordsFirst: true);
-  });
-
-  testWidgets('one backspace, empty field, words shown: one letter goes', (tester) async {
-    await oneBackspace(tester, typed: '', wordsFirst: true);
-  });
-
-  testWidgets('one backspace, typed text, before any word: one letter goes', (tester) async {
-    await oneBackspace(tester, typed: dreams[1], wordsFirst: false);
-  });
-
-  // A keyboard whose own copy of the text is stale (it never saw the heard
-  // words) reports a whole other text: never applied as an edit.
-  testWidgets('a keyboard value that would remove more is never applied', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[1]);
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    final text = fieldText(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
-    await tester.pump();
-    final lines = await logged();
-    await keyboard(tester, '');
-    v.link.reply(reply(done: [tokens[1]], finished: true));
-    await tester.pumpAndSettle();
-    expect(text.text, dictatedInto(dreams[1], tokens[0] + tokens[1], '').text);
-    expect(lines, contains('recordingEditRefused'));
-  });
-
   // The owner's check 1: backspace while newer guesses keep coming.
   testWidgets('backspace while guesses keep coming: no stale piece', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    await record(tester);
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    final text = fieldText(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1], tokens[2]]));
+    final r = await dictatingInto(tester);
+    r.link.reply(reply(done: [tokens[0]], shown: [tokens[1], tokens[2]]));
     await tester.pump();
-    await keyboard(tester, text.text.substring(0, text.text.length - 1));
-    v.link.reply(reply(shown: [tokens[1], tokens[2], tokens[3]]));
+    await keyboard(tester, r.text.text.substring(0, r.text.text.length - 1));
+    r.link.reply(reply(shown: [tokens[1], tokens[2], tokens[3]]));
     await tester.pump();
-    expect(text.text, tokens.take(4).join());
-    v.link.reply(reply(done: [tokens[1], tokens[2], tokens[3]], finished: true));
+    expect(r.text.text, tokens.take(4).join());
+    r.link.reply(reply(done: [tokens[1], tokens[2], tokens[3]], finished: true));
     await tester.pumpAndSettle();
-    final settled = tokens.take(4).join();
-    expect(text.text, settled.substring(0, settled.length - 1));
+    expect(r.text.text, tokens.take(4).join());
   });
 
   testWidgets('plain dictation: one piece, never a stale one', (tester) async {
