@@ -1084,6 +1084,46 @@ void main() {
     expect(field.controller!.text, tokens[5].trimLeft());
   });
 
+  // D79 a: while recording, the field follows the end; scrolled up, it
+  // stays until the dreamer is back at the bottom.
+  ScrollPosition fieldScroll(WidgetTester tester) => tester
+      .state<ScrollableState>(find.descendant(of: find.byKey(TypingPage.fieldKey), matching: find.byType(Scrollable)))
+      .position;
+
+  testWidgets('recording: the field follows the newest words', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    for (var i = 0; i < 6; i++) {
+      v.link.reply(reply(done: tokens, shown: [tokens[0]]));
+      await tester.pump();
+    }
+    final scroll = fieldScroll(tester);
+    expect(scroll.maxScrollExtent, greaterThan(0));
+    expect(scroll.pixels, scroll.maxScrollExtent);
+  });
+
+  testWidgets('scrolled up, the field stays; back at the bottom, it follows', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    for (var i = 0; i < 6; i++) {
+      v.link.reply(reply(done: tokens));
+      await tester.pump();
+    }
+    final scroll = fieldScroll(tester);
+    scroll.jumpTo(0);
+    await tester.pump();
+    v.link.reply(reply(done: tokens));
+    await tester.pump();
+    expect(scroll.pixels, 0);
+    scroll.jumpTo(scroll.maxScrollExtent);
+    await tester.pump();
+    v.link.reply(reply(done: tokens));
+    await tester.pump();
+    expect(scroll.pixels, scroll.maxScrollExtent);
+  });
+
   testWidgets('a Save that waits survives its screen going', (tester) async {
     final files = FlakyFiles();
     final v = voice();

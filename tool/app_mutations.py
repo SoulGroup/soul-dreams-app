@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A93, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A96, A55 dropped (D74.3), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 139 run, 139 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 142 run, 142 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -638,6 +638,19 @@ ROWS = [
      '    if (_failed && mounted) setState(() => _failed = false);',
      '    if (_failed) setState(() => _failed = false);',
      'test/journal/pages/typing_page_test.dart', 'a Save that waits survives its screen going'),
+    # D79 a: the field follows the end while recording, and stays when scrolled up.
+    ('A94', 'lib/journal/pages/typing_page.dart',
+     '    if (follow) {\n',
+     '    if (true) {\n',
+     'test/journal/pages/typing_page_test.dart', 'scrolled up, the field stays; back at the bottom, it follows'),
+    ('A95', 'lib/journal/pages/typing_page.dart',
+     '    if (follow) {\n',
+     '    if (false) {\n',
+     'test/journal/pages/typing_page_test.dart', 'recording: the field follows the newest words'),
+    ('A96', 'lib/journal/pages/typing_page.dart',
+     '                                scrollController: _scroll,\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'recording: the field follows the newest words'),
 ]
 
 

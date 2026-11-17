@@ -68,6 +68,8 @@ enum _Mic { idle, starting, recording, stopping }
 
 class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   late final _text = TextEditingController(text: widget.edit?.text);
+  // The field's own scrolling: while recording it follows the end (D79 a).
+  final _scroll = ScrollController();
   bool? _firstUse;
   bool _saving = false;
   bool _failed = false;
@@ -130,6 +132,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _session = null;
     if (session != null) unawaited(session.cancel());
     _text.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -250,7 +253,15 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     final composing = before.composing.isValid && next.text.startsWith(before.text.substring(0, before.composing.end))
         ? before.composing
         : TextRange.empty;
+    // The newest words stay in view while the dreamer is at the bottom;
+    // scrolled up, the field stays put until they come back (D79 a).
+    final follow = _scroll.hasClients && _scroll.position.pixels >= _scroll.position.maxScrollExtent - 1;
     _text.value = TextEditingValue(text: next.text, selection: selection, composing: composing);
+    if (follow) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      });
+    }
   }
 
   void _level(double level) {
@@ -385,6 +396,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                               child: TextField(
                                 key: TypingPage.fieldKey,
                                 controller: _text,
+                                scrollController: _scroll,
                                 minLines: 1,
                                 maxLines: null,
                                 keyboardType: TextInputType.multiline,
