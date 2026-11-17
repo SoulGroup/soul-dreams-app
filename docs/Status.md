@@ -569,6 +569,10 @@ Banked in recording:
      if the dreamer only types; "refreshed as needed" is read as a stale advance key replaced at the tap, with no
      background refresh (the held audio covers the fetch); A73, A83 and A142 dropped as constructed microtask races
      (D17), their checks kept; pre-existing: a send on a socket the server has closed could throw.
+109. The final review of `recording`: the interruptions subscription has no `onError` (the shape of item 100; a
+     plugin error would be an uncaught async error with native text, no dreamer's words); a `finished` reply with no
+     stop pending would leave the session open with the microphone on (Soniox sends it only after the end frame:
+     D17); the five-second budget starts after the microphone's stop and the audio's release (both fast).
 
 ## Before Cohort 1
 
