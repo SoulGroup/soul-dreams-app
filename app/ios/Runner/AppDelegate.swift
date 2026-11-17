@@ -37,9 +37,10 @@ import UIKit
 
 // The phone's audio, given back when a recording ends (D79 c): the session
 // is deactivated with notify-others, so music the recording paused
-// resumes. The record package's own deactivation does not notify. Reached
-// from SoulDreams Dev only (lib/recording/record_microphone.dart). A
-// failure answers with a code only (R3).
+// resumes. The record package never deactivates the session when a
+// recording stops. Reached from SoulDreams Dev only
+// (lib/recording/record_microphone.dart). A failure answers with a code
+// only (R3).
 enum AudioSession {
   static let channelName = "souldreams/audio_session"
 

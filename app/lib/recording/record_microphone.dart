@@ -4,12 +4,13 @@
 // microphone only: no Bluetooth route and no speaker setting (D71 Q15).
 // The phone asks the dreamer the first time, with EM·3. When a recording
 // ends, the phone's audio is given back with notify-others, so music the
-// recording paused resumes (D79 c): the package's own deactivation does
-// not notify, so ours goes through the Swift channel in
-// ios/Runner/AppDelegate.swift.
+// recording paused resumes (D79 c). The package never deactivates the
+// session when a recording stops, so ours does, through the Swift channel
+// in ios/Runner/AppDelegate.swift.
 import 'package:flutter/services.dart';
 import 'package:record/record.dart';
 
+import '../core/safe_log.dart';
 import 'microphone.dart';
 
 const audioSessionChannel = 'souldreams/audio_session';
@@ -21,7 +22,15 @@ final class RecordMicrophone implements Microphone {
   final AudioRecorder _recorder;
   final MethodChannel _session;
 
-  Future<void> _release() => _session.invokeMethod<void>('release');
+  // A release that fails has its own code (D85) and never hides what the
+  // recorder did.
+  Future<void> _release() async {
+    try {
+      await _session.invokeMethod<void>('release');
+    } on Object {
+      SafeLog.event(LogEvent.recordingReleaseFailed);
+    }
+  }
 
   // The package pauses its recording when a call or Siri takes the audio
   // (its default); this app never pauses, so a pause is an interruption
@@ -47,8 +56,7 @@ final class RecordMicrophone implements Microphone {
         ),
       );
     } on Object {
-      // The start's own failure is the one reported.
-      await _release().catchError((Object _) {});
+      await _release();
       rethrow;
     }
   }

@@ -5,6 +5,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:record/record.dart';
+import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/recording/record_microphone.dart';
 
 /// The package's recorder, played: each call is noted in [calls].
@@ -41,8 +42,13 @@ void main() {
   late List<String> calls;
   late PlayedRecorder recorder;
   var releaseFails = false;
+  late List<String> lines;
+  late void Function(String) sink;
 
   setUp(() {
+    lines = [];
+    sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
     calls = [];
     releaseFails = false;
     recorder = PlayedRecorder(calls);
@@ -57,6 +63,7 @@ void main() {
   });
 
   tearDown(() {
+    SafeLog.sink = sink;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       const MethodChannel(audioSessionChannel),
       null,
@@ -87,5 +94,14 @@ void main() {
     final mic = RecordMicrophone(recorder: recorder..startFails = true);
     await expectLater(mic.start(), throwsStateError);
     expect(calls, ['start', 'release']);
+  });
+
+  // D85: a failed release has its own code; the microphone did stop.
+  test('a release that fails after a stop logs its own code', () async {
+    releaseFails = true;
+    final mic = RecordMicrophone(recorder: recorder);
+    await mic.stop();
+    expect(calls, ['stop', 'release']);
+    expect(lines, ['recordingReleaseFailed']);
   });
 }
