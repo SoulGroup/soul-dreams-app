@@ -705,6 +705,28 @@ void main() {
     expect(tester.takeAnnouncements(), isEmpty);
   });
 
+  // D79 b: a call or Siri ends the recording as Stop does.
+  testWidgets('an interruption ends the recording: words kept, the timer stops', (tester) async {
+    final lines = await logged();
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]]));
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('0:02'), findsOneWidget);
+    v.mic.interrupt();
+    await tester.pump();
+    expect(v.mic.running, isFalse);
+    v.link.reply(reply(done: [tokens[1]], finished: true));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(field.controller!.text, tokens[0] + tokens[1]);
+    expect(lines, ['recordingStarted', 'recordingInterrupted', 'recordingEnded']);
+    expect(tester.widget<IconButton>(find.byKey(TypingPage.micKey)).isSelected, isFalse);
+  });
+
   testWidgets('a refused microphone shows nothing new, logs a code', (tester) async {
     final lines = await logged();
     final v = voice();

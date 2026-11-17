@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A107, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A111, A55 dropped (D74.3), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 153 run, 153 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 157 run, 157 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -698,6 +698,23 @@ ROWS = [
      'if (!mounted || !_following || _dreamerScrolls || !_scroll.hasClients) return;',
      'if (!mounted || !_following || !_scroll.hasClients) return;',
      'test/journal/pages/typing_page_test.dart', 'words arriving during a drag toward the end: it keeps going'),
+    # D79 b: a call or Siri stops the recording as Stop does, with one code.
+    ('A108', 'lib/recording/recording.dart',
+     '      unawaited(stop());\n    });\n',
+     '    });\n',
+     'test/recording/recording_test.dart', 'an interruption stops as Stop does, the words kept, a code'),
+    ('A109', 'lib/recording/recording.dart',
+     '      SafeLog.event(LogEvent.recordingInterrupted);\n',
+     '',
+     'test/recording/recording_test.dart', 'an interruption stops as Stop does, the words kept, a code'),
+    ('A110', 'lib/recording/recording.dart',
+     '    unawaited(_interruptions?.cancel());\n',
+     '',
+     'test/recording/recording_test.dart', 'an interruption during a stop, or after the end, changes nothing'),
+    ('A111', 'lib/recording/recording.dart',
+     '      unawaited(stop());\n    });\n',
+     '      unawaited(cancel());\n    });\n',
+     'test/recording/recording_test.dart', 'an interruption stops as Stop does, the words kept, a code'),
 ]
 
 

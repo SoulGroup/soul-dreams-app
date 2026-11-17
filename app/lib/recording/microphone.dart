@@ -17,6 +17,10 @@ abstract interface class Microphone {
   Future<Stream<Uint8List>> start();
 
   Future<void> stop();
+
+  /// Each time something else takes the microphone, a call or Siri
+  /// (D79 b).
+  Stream<void> get interruptions;
 }
 
 /// How loud a frame of PCM is, from 0 to 1 (its root mean square), for

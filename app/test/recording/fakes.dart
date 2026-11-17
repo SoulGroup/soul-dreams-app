@@ -129,6 +129,14 @@ final class SilentMicrophone implements Microphone {
 
   bool get running => _frames != null;
 
+  final _interruptions = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> get interruptions => _interruptions.stream;
+
+  /// A call or Siri takes the microphone.
+  void interrupt() => _interruptions.add(null);
+
   @override
   Future<bool> allowed() async => allow;
 

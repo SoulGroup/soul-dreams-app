@@ -38,13 +38,14 @@ enum LogEvent {
   /// Recording by voice (D69, D71). Off in this build; the microphone
   /// refused; no key from our server (its status); Soniox's stream refused
   /// or broken (its code); the microphone failing; a recording started,
-  /// and ended.
+  /// stopped by a call or Siri (D79 b), and ended.
   recordingOff,
   recordingRefused,
   recordingKeyFailed,
   recordingStreamFailed,
   recordingMicFailed,
   recordingStarted,
+  recordingInterrupted,
   recordingEnded,
 }
 

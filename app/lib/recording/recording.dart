@@ -67,6 +67,7 @@ final class RecordingSession {
   SonioxLink? _link;
   StreamSubscription<String>? _replies;
   StreamSubscription<Uint8List>? _frames;
+  StreamSubscription<void>? _interruptions;
   final _finished = Completer<void>();
   bool _cancelled = false;
   bool _ended = false;
@@ -137,6 +138,12 @@ final class RecordingSession {
       _link?.add(frame);
       onLevel(level(frame));
     });
+    // A call or Siri stops the recording as Stop does: the words heard
+    // stay (D79 b).
+    _interruptions = _recording.microphone.interruptions.listen((_) {
+      SafeLog.event(LogEvent.recordingInterrupted);
+      unawaited(stop());
+    });
     SafeLog.event(LogEvent.recordingStarted);
     return true;
   }
@@ -192,6 +199,8 @@ final class RecordingSession {
     _micStarted = false;
     final frames = _frames;
     _frames = null;
+    unawaited(_interruptions?.cancel());
+    _interruptions = null;
     // Not waited for: its future may belong to another zone, and nothing
     // needs it.
     if (frames != null) unawaited(frames.cancel());

@@ -132,6 +132,47 @@ void main() {
     expect(lines, ['recordingStarted', 'recordingEnded']);
   });
 
+  // D79 b: a call or Siri stops the recording as Stop does.
+  test('an interruption stops as Stop does, the words kept, a code', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await pumpEventQueue();
+    mic.interrupt();
+    await pumpEventQueue();
+    expect(mic.running, isFalse);
+    expect(link.sent.last, '');
+    expect(r.ended, isEmpty);
+    link.reply(reply(done: [tokens[1]]));
+    link.reply(reply(finished: true));
+    await pumpEventQueue();
+    expect(r.heard, [(tokens[0], tokens[1]), (tokens[1], ''), ('', '')]);
+    expect(mic.stops, 1);
+    expect(r.ended, [1]);
+    expect(lines, ['recordingStarted', 'recordingInterrupted', 'recordingEnded']);
+  });
+
+  test('an interruption during a stop, or after the end, changes nothing', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    mic.interrupt();
+    await pumpEventQueue();
+    link.reply(reply(finished: true));
+    await stopping;
+    mic.interrupt();
+    await pumpEventQueue();
+    expect(mic.stops, 1);
+    expect(link.sent.where((m) => m == ''), hasLength(1));
+    expect(r.ended, [1]);
+    expect(lines, ['recordingStarted', 'recordingEnded']);
+  });
+
   test('a stop waits for the last words five seconds at most', () async {
     final mic = SilentMicrophone();
     final link = MemoryLink();
