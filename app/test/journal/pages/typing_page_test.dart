@@ -1198,6 +1198,76 @@ void main() {
     expect(atBottom(scroll), isFalse);
   });
 
+  // D81: a jump scheduled before the dreamer's drag never fires during it.
+  testWidgets('words arriving as an upward drag starts: it keeps going', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final scroll = await filled(tester, v.link);
+    v.link.reply(reply(done: tokens));
+    await tester.idle();
+    final drag = await tester.startGesture(tester.getCenter(find.byKey(TypingPage.fieldKey)));
+    await drag.moveBy(const Offset(0, 30));
+    await drag.moveBy(const Offset(0, 30));
+    final held = scroll.pixels;
+    await tester.pump();
+    await tester.pump();
+    expect(scroll.pixels, held);
+    await drag.moveBy(const Offset(0, 60));
+    expect(scroll.pixels, lessThan(held));
+    await drag.up();
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('words arriving as a tap moves the caret: the view stays', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final scroll = await filled(tester, v.link);
+    v.link.reply(reply(done: tokens));
+    await tester.idle();
+    final held = scroll.pixels;
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pump();
+    await tester.pump();
+    expect(scroll.pixels, held);
+    expect(atBottom(scroll), isFalse);
+  });
+
+  testWidgets('words arriving during a drag toward the end: it keeps going', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final scroll = await filled(tester, v.link);
+    await tester.drag(find.byKey(TypingPage.fieldKey), const Offset(0, 300));
+    await tester.pumpAndSettle();
+    // The keyboard moves the caret into the text and back to the end:
+    // following again, with the view still up.
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    final text = field.controller!.text;
+    for (final at in [4, text.length]) {
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(text: text, selection: TextSelection.collapsed(offset: at)),
+      );
+      await tester.pump();
+    }
+    expect(atBottom(scroll), isFalse);
+    final drag = await tester.startGesture(tester.getCenter(find.byKey(TypingPage.fieldKey)));
+    await drag.moveBy(const Offset(0, -30));
+    await drag.moveBy(const Offset(0, -30));
+    v.link.reply(reply(done: tokens));
+    await tester.idle();
+    final held = scroll.pixels;
+    await tester.pump();
+    await tester.pump();
+    expect(scroll.pixels, held);
+    await drag.moveBy(const Offset(0, -20));
+    expect(scroll.pixels, greaterThan(held));
+    await drag.up();
+    await tester.pumpAndSettle();
+  });
+
   testWidgets('a Save that waits survives its screen going', (tester) async {
     final files = FlakyFiles();
     final v = voice();

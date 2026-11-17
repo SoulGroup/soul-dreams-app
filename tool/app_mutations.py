@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A105, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A107, A55 dropped (D74.3), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 151 run, 151 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 153 run, 153 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -689,6 +689,15 @@ ROWS = [
      '_dreamerScrolls = n.dragDetails != null;',
      '_dreamerScrolls = true;',
      'test/journal/pages/typing_page_test.dart', 'the app scrolling to the bottom does not resume'),
+    # D81: a jump scheduled earlier never fires once following stopped, nor during a drag.
+    ('A106', 'lib/journal/pages/typing_page.dart',
+     'if (!mounted || !_following || _dreamerScrolls || !_scroll.hasClients) return;',
+     'if (!mounted || _dreamerScrolls || !_scroll.hasClients) return;',
+     'test/journal/pages/typing_page_test.dart', 'words arriving as a tap moves the caret: the view stays'),
+    ('A107', 'lib/journal/pages/typing_page.dart',
+     'if (!mounted || !_following || _dreamerScrolls || !_scroll.hasClients) return;',
+     'if (!mounted || !_following || !_scroll.hasClients) return;',
+     'test/journal/pages/typing_page_test.dart', 'words arriving during a drag toward the end: it keeps going'),
 ]
 
 

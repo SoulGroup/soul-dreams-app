@@ -273,10 +273,12 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     if (_following) _toEnd();
   }
 
-  // After the next layout, the field shows its end.
+  // After the next layout, the field shows its end, if it still follows
+  // then and no drag of the dreamer's is under way (D81).
   void _toEnd() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      if (!mounted || !_following || _dreamerScrolls || !_scroll.hasClients) return;
+      _scroll.jumpTo(_scroll.position.maxScrollExtent);
     });
   }
 
