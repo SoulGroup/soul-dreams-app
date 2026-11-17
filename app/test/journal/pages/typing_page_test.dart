@@ -1056,6 +1056,20 @@ void main() {
 
   // 3. (Typing during a recording: replaced by D87, below.)
   // 4. Leaving the app while Save waits for the last words.
+  testWidgets('leaving while Save waits for the stream: saved at once', (tester) async {
+    final key = Completer<String>();
+    final recording = Recording(on: true, microphone: SilentMicrophone(), key: () => key.future, connect: (_) async => MemoryLink());
+    final h = await tall(tester, recording: recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), tokens[0]);
+    await record(tester);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    await tester.pump();
+    await tester.pump();
+    expect((await h.nights()).single.dreams, [tokens[0]]);
+  });
+
   testWidgets('leaving the app while Save waits: saved at once', (tester) async {
     final v = voice();
     final h = await tall(tester, recording: v.recording);

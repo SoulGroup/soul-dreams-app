@@ -469,6 +469,20 @@ void main() {
     expect(r.ended, [1]);
   });
 
+  // The review of 16h: a cancel ends a stop that waits for the stream (D75).
+  test('a cancel ends a stop that waits for the stream', () async {
+    final mic = SilentMicrophone();
+    final key = Completer<String>();
+    final r = make(held(mic, key: key));
+    expect(await r.session.start(), isTrue);
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    await r.session.cancel();
+    await stopping.timeout(const Duration(seconds: 1));
+    expect(r.ended, [1]);
+    expect(mic.running, isFalse);
+  });
+
   test('a cancel while a stop waits ends it at once', () async {
     final mic = SilentMicrophone();
     final link = MemoryLink();

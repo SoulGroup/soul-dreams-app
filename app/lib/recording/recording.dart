@@ -116,8 +116,8 @@ final class RecordingSession {
   SonioxLink? _link;
   // The audio heard before the stream opened, in memory only (D88).
   final _held = <Uint8List>[];
-  // Opening the stream, once the microphone streams; done when it opened,
-  // failed, or the session ended.
+  // Opening the stream, once the microphone streams; done when it opened
+  // or failed (a stop also stops waiting when the session ends).
   Future<void>? _opening;
   StreamSubscription<String>? _replies;
   StreamSubscription<Uint8List>? _frames;
@@ -256,7 +256,9 @@ final class RecordingSession {
     // opens, all within the one wait for the last words (D75).
     final clock = Stopwatch()..start();
     final opening = _opening;
-    if (opening != null) await opening.timeout(wait, onTimeout: () {});
+    // A cancel or a break ends that wait at once (D75): `_shut` completes
+    // `_finished`.
+    if (opening != null) await Future.any([opening, _finished.future]).timeout(wait, onTimeout: () {});
     final link = _link;
     if (link != null && !_ended) {
       link.finish();

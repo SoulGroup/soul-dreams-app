@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A142, A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A143, A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 174 run, 174 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 175 run, 175 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -810,6 +810,10 @@ ROWS = [
     # A142 was dropped (D88): `await stopping` before a start reports false matters
     # only in a constructed microtask race (D17); the line stays, as the guarantee
     # that the session has ended by then.
+    ('A143', 'lib/recording/recording.dart',
+     'await Future.any([opening, _finished.future]).timeout',
+     'await opening.timeout',
+     'test/recording/recording_test.dart', 'a cancel ends a stop that waits for the stream'),
 ]
 
 
