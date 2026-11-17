@@ -215,7 +215,13 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     final recording = widget.recording;
     if (recording == null) return;
     setState(() => _mic = _Mic.starting);
-    final session = RecordingSession(recording, onHeard: _heard, onLevel: _level, onEnded: _ended);
+    final session = RecordingSession(
+      recording,
+      onHeard: _heard,
+      onLevel: _level,
+      onStopping: _stopClock,
+      onEnded: _ended,
+    );
     _session = session;
     final started = await session.start();
     // A start that comes late from an earlier session, ended meanwhile,
@@ -310,6 +316,13 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       _levels.add(level);
       if (_levels.length > StandIns.levelFrames) _levels.removeAt(0);
     });
+  }
+
+  // A stop began, the dreamer's or a call's: the clock stops at once, while
+  // the last words may still come (D83).
+  void _stopClock() {
+    _ticker?.cancel();
+    _ticker = null;
   }
 
   // The recording ended, by a stop or by itself: the words shown stay.

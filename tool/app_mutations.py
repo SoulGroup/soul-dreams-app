@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A111, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A115, A55 dropped (D74.3), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 157 run, 157 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 161 run, 161 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -715,6 +715,23 @@ ROWS = [
      '      unawaited(stop());\n    });\n',
      '      unawaited(cancel());\n    });\n',
      'test/recording/recording_test.dart', 'an interruption stops as Stop does, the words kept, a code'),
+    # D83: the clock stops the moment a stop begins (a tap or an interruption).
+    ('A112', 'lib/recording/recording.dart',
+     '    if (_ended) return;\n    onStopping();\n',
+     '    if (_ended) return;\n',
+     'test/recording/recording_test.dart', 'a stop and an interruption each say so at once, once'),
+    ('A113', 'lib/recording/recording.dart',
+     '    if (_ended) return;\n    onStopping();\n',
+     '    onStopping();\n    if (_ended) return;\n',
+     'test/recording/recording_test.dart', 'a stop and an interruption each say so at once, once'),
+    ('A114', 'lib/journal/pages/typing_page.dart',
+     '  void _stopClock() {\n    _ticker?.cancel();\n',
+     '  void _stopClock() {\n',
+     'test/journal/pages/typing_page_test.dart', 'Stop tapped: the clock stops, the last words still come'),
+    ('A115', 'lib/journal/pages/typing_page.dart',
+     '      onStopping: _stopClock,\n',
+     '      onStopping: () {},\n',
+     'test/journal/pages/typing_page_test.dart', 'an interruption ends the recording: words kept, the timer stops'),
 ]
 
 

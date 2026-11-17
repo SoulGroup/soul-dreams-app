@@ -46,6 +46,7 @@ final class RecordingSession {
     this._recording, {
     required this.onHeard,
     required this.onLevel,
+    required this.onStopping,
     required this.onEnded,
     this.wait = lastWords,
   });
@@ -60,6 +61,10 @@ final class RecordingSession {
 
   /// Each frame's loudness, 0 to 1.
   final void Function(double level) onLevel;
+
+  /// A stop began: a tap, Save or Back, or a call or Siri. The last words
+  /// may still come; the clock stops here (D83).
+  final void Function() onStopping;
 
   /// The recording ended, by a stop or by itself.
   final void Function() onEnded;
@@ -179,6 +184,7 @@ final class RecordingSession {
 
   Future<void> _stop() async {
     if (_ended) return;
+    onStopping();
     await _micOff();
     final link = _link;
     if (link != null) {

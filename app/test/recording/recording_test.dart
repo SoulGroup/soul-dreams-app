@@ -25,19 +25,26 @@ void main() {
   });
   tearDown(() => SafeLog.sink = sink);
 
-  ({RecordingSession session, List<(String, String)> heard, List<double> levels, List<int> ended}) make(
-    Recording recording,
-  ) {
+  ({
+    RecordingSession session,
+    List<(String, String)> heard,
+    List<double> levels,
+    List<int> ended,
+    List<int> stopping,
+  })
+  make(Recording recording) {
     final heard = <(String, String)>[];
     final levels = <double>[];
     final ended = <int>[];
+    final stopping = <int>[];
     final session = RecordingSession(
       recording,
       onHeard: (f, p) => heard.add((f, p)),
       onLevel: levels.add,
+      onStopping: () => stopping.add(1),
       onEnded: () => ended.add(1),
     );
-    return (session: session, heard: heard, levels: levels, ended: ended);
+    return (session: session, heard: heard, levels: levels, ended: ended, stopping: stopping);
   }
 
   Recording memory(SilentMicrophone mic, MemoryLink link, {bool on = true, Future<String> Function()? key}) =>
@@ -154,6 +161,39 @@ void main() {
     expect(lines, ['recordingStarted', 'recordingInterrupted', 'recordingEnded']);
   });
 
+  // D83: the page is told the moment a stop begins, once, before the last
+  // words; its clock stops there.
+  test('a stop and an interruption each say so at once, once', () async {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final r = make(memory(mic, link));
+    await r.session.start();
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    expect(r.stopping, [1]);
+    expect(r.ended, isEmpty);
+    unawaited(r.session.stop());
+    link.reply(reply(finished: true));
+    await stopping;
+    expect(r.stopping, [1]);
+    final mic2 = SilentMicrophone();
+    final r2 = make(memory(mic2, MemoryLink()));
+    await r2.session.start();
+    mic2.interrupt();
+    await pumpEventQueue();
+    expect(r2.stopping, [1]);
+    expect(r2.ended, isEmpty);
+    // A stop after the session ended by itself says nothing.
+    final link3 = MemoryLink();
+    final r3 = make(memory(SilentMicrophone(), link3));
+    await r3.session.start();
+    await link3.drop(1006);
+    await pumpEventQueue();
+    await r3.session.stop();
+    expect(r3.ended, [1]);
+    expect(r3.stopping, isEmpty);
+  });
+
   test('an interruption during a stop, or after the end, changes nothing', () async {
     final mic = SilentMicrophone();
     final link = MemoryLink();
@@ -182,6 +222,7 @@ void main() {
       memory(mic, link),
       onHeard: (_, _) {},
       onLevel: (_) {},
+      onStopping: () {},
       onEnded: () {},
       wait: const Duration(milliseconds: 200),
     );

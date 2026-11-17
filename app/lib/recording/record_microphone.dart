@@ -14,7 +14,8 @@ final class RecordMicrophone implements Microphone {
 
   // The package pauses its recording when a call or Siri takes the audio
   // (its default); this app never pauses, so a pause is an interruption
-  // (D79 b). Asked for at once, so the package listens from the start.
+  // (D79 b). Read when a recording's frames start; the package's
+  // startStream has already set up its state channel by then.
   @override
   late final Stream<void> interruptions = _recorder.onStateChanged().where((s) => s == RecordState.pause);
 
