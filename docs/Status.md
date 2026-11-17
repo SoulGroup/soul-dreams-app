@@ -1,6 +1,7 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-13, in branch `recording` (its plan's Task 12), by Claude Code.
+Last updated: 2026-11-17, in branch `recording` (Task 16, the owner's phone checks: 16a to 16d-1, D79 to D86), by
+Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -22,8 +23,8 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
 
 ## Road ahead
 
-- The first deploy, after "Before the first deploy" below; then the server's address into `hosts.dart` and the
-  phone checks (the plan's Tasks 13 to 16).
+- The owner's final phone checks of Task 16 (D83 5; the list in `.scratch/for-build-chat/recording-implementation.md`),
+  then the branch's merge. The first deploy and the server's address in `hosts.dart` are done (Tasks 13 to 15).
 - The next slice: offline recording, the audio held on the phone only until it is transcribed (main-path.md,
   Recording; D71). It is an on-phone storage change, under `docs/workflow.md`, "On-phone storage changes", and it
   brings MP·15 and MP·54.
@@ -108,7 +109,17 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
   and MP·33 told once to a screen reader. A tap, Save or Back waits up to five seconds for the last words; leaving
   the app ends it at once, also while Save waits for the last words (D75); the microphone is never left running by
   a stop, a cancel or a Soniox error that arrives while a key, the stream or the microphone is still starting (D73,
-  D74), and a late start changes nothing once its session is not the current one (D75). No connection, no key, a refused microphone or a failed stream: the microphone does not
+  D74), and a late start changes nothing once its session is not the current one (D75). While recording, the field
+  follows its end; the dreamer's upward drag or a caret put anywhere but the end pauses that, and the field back at
+  its bottom or the caret back at the end resumes it; the app's own scrolls change nothing, a jump to the end checks
+  again when it runs and never fires during the dreamer's drag, and a recording starts with the field at its end
+  (D79 a, D80, D81). A call, Siri or any other audio taker (an alarm, FaceTime) stops the recording as Stop does,
+  keeping the words, with one code, `recordingInterrupted` (D79 b). The clock stops the moment a stop begins (a tap,
+  Save or Back, an interruption), while the last words may still arrive (D83). When a recording ends, the phone's
+  audio is given back with notify-others, so music the recording paused resumes: a Swift channel in
+  `AppDelegate.swift` (`souldreams/audio_session`), built into all three apps and reached from SoulDreams Dev only,
+  as D65; the `record` package never deactivates the session itself; a failed release logs
+  `recordingReleaseFailed` (D79 c, D84, D85). No connection, no key, a refused microphone or a failed stream: the microphone does not
   start; a stream that breaks stops, keeping the words shown; each logs a code and shows nothing new; MP·15 and
   MP·54 are not shown (D71). Nothing in `lib/recording/` can write a file, and the `record` package is used in
   stream mode only (`no_storage_test.dart`). Off while `Hosts.server` is empty or the build has no beta key.
@@ -143,9 +154,9 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 283 tests, and 139 mutation checks (A1 to A93, A55 dropped, with the rows A24a to A24au among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 302 tests, and 166 mutation checks (A1 to A121, A55 and A94 dropped, with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 139 run, 139 caught`); `check_all.sh` does not call it (D55).
+  (expected: `app mutations: 166 run, 166 caught`); `check_all.sh` does not call it (D55).
 
 ## The server
 
@@ -193,7 +204,9 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Task
 2. DONE in `recording` (D69, D71): the beta key's check is built; the spending stop for transcription is Soniox's
    own $20 monthly budget; our server's counter comes with the readings.
 3. In Soniox's Console: EU region access approved; an EU project; a project key with the temporary-key and
-   transcription permissions; a $20 monthly budget; the DPA countersigned (technical-answers a).
+   transcription permissions; a $20 monthly budget; the DPA countersigned (technical-answers a). Soniox also needs a
+   payment method and a prepaid balance before it transcribes: without them it answered 402 (Task 16, 2026-11-17).
+   The owner added both and topped up by hand; autopay is off, so the balance is watched by hand.
 4. The beta key generated (48 characters of A-Z, a-z, 0-9, D18) into `~/.soul-dreams/`; the two SecureStrings,
    `/souldreams/beta-key` and `/souldreams/soniox-key`, made in the workload account in eu-north-1 on the `aws/ssm`
    key, standard tier, never typed on a command line.
@@ -507,7 +520,7 @@ Banked in recording:
     body is never read; the order of the two reads, the timeout's length and the dist test's import scan
     (`from "..."` only) are not pinned by tests; the 200 carries no `cache-control: no-store`; `kms:Decrypt` could
     also require the `PARAMETER_ARN` encryption context.
-100. Recording's core, reviewers' notes: nothing notices a dead connection (no ping, no watchdog); the microphone's
+100. Recording's core, reviewers' notes (the call or Siri and the music: CLOSED by D79 b, c in Task 16): nothing notices a dead connection (no ping, no watchdog); the microphone's
      stream has no error or done handler, and the plugin's audio session is never deactivated, so a phone call or
      Siri pauses the engine without ending the session (the level line goes flat) and music stopped by a recording
      does not resume (candidates: `onStateChanged` and `setAudioSessionActive(false)`); a `stop()` before `start()`
@@ -529,6 +542,19 @@ Banked in recording:
      `lib/recording/` without recursing and matches `start (` spelled with a space; `journal_home_test.dart`'s wiring
      test reads the source text only; the microphone's comment "the built-in microphone only" is stronger than an
      empty `categoryOptions` (a wired headset's microphone would still be used).
+104. Task 16a (the owner's answers after it): the owner's crash on 2026-11-17 was iOS refusing a new debug-JIT code page once
+     the debugger had detached (code 50, an instruction fetch 144 bytes into a fresh executable region; 31 frames),
+     not the app's code; `86f519c` pins backspacing over heard words while finals arrive. Phone checks run in a
+     profile build of Dev, or attached to `flutter run`.
+105. Follow the end (D82: D17 governs it strictly, as D77 does the heard text): a jump skipped during a drag is never
+     made up, so if the last reply after Stop lands during a drag, the last words stay below the view until the
+     dreamer scrolls; an app `animateTo` ending at the bottom during a dreamer's drag switches following on; an
+     `updateEditingValue` the iOS keyboard sends by itself with the caret mid-text would pause following (watch on
+     the phone).
+106. Interruptions (D83, D84): an audio engine that stops by itself (AirPods changing the route) sends no state
+     event, so the old symptom remains there (a known limit); no page test for Save or Back freezing the clock (the
+     session test covers its path), none pinning that a stop while starting never starts the clock (older logic),
+     and leaving the app never says a stop began (the session ends at once).
 
 ## Before Cohort 1
 
@@ -724,6 +750,20 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   constructed sequence of edits is banked, a crash or words lost from an ordinary edit still stops (item 102).
 - D78: Task 9's result accepted with `record_ios` and `record_macos` for the plan's `record_darwin` (item 103); Part 4
   question 4 is answered: the plugin resamples to the asked rate, so 16 kHz is what is sent.
+- D79 (the founder's, Task 16): (a) while recording, the field follows its end, paused while the dreamer scrolls up;
+  (b) an audio interruption stops the recording as Stop does, words kept, one code, the timer stopped; (c) the audio
+  session deactivated with notify-others when a recording ends, so music resumes; Soniox's billing recorded
+  ("Before the first deploy", item 3).
+- D80: following pauses on the dreamer's upward drag or a caret anywhere but the end, resumes at the bottom or with
+  the caret at the end; the app's own jumps change nothing; a recording starts with a jump to the end (Task 16b-1).
+- D81: a scheduled jump checks again when it runs and never fires during the dreamer's drag (Task 16b-2).
+- D82: 16b-2's notes banked (item 105); D17 governs the follow-the-end code strictly.
+- D83: the clock stops the moment Stop is tapped or an interruption arrives (Task 16c-1); the AirPods case banked
+  (item 106); alarms, FaceTime and other audio takers stopping a recording is intended; the owner's final phone checks.
+- D84: 16c-1's notes banked (item 106); Task 16d with D65's per-flavour arrangement.
+- D85: a failed release has its own code, `recordingReleaseFailed`; the comments corrected (Task 16d-1, no review).
+- D86: the full mutation run found A94 surviving (D81's check when the jump runs made `if (_following)` before it
+  redundant); the check removed and A94 dropped, its reason in the file, as A55; no review.
 
 ## Documents as last imported
 
