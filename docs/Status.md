@@ -1,7 +1,7 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-17, in branch `recording` (Task 16, the owner's phone checks: 16a to 16d-1, D79 to D86), by
-Claude Code.
+Last updated: 2026-11-17, in branch `recording` (Task 16 done: 16a to 16h, D79 to D91; the final docs task), by Claude
+Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -23,8 +23,8 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
 
 ## Road ahead
 
-- The owner's final phone checks of Task 16 (D83 5; the list in `.scratch/for-build-chat/recording-implementation.md`),
-  then the branch's merge. The first deploy and the server's address in `hosts.dart` are done (Tasks 13 to 15).
+- The owner merges `recording` (every phone check of Task 16 passed, 2026-11-17). The first deploy and the server's
+  address in `hosts.dart` are done (Tasks 13 to 15).
 - The next slice: offline recording, the audio held on the phone only until it is transcribed (main-path.md,
   Recording; D71). It is an on-phone storage change, under `docs/workflow.md`, "On-phone storage changes", and it
   brings MP·15 and MP·54.
@@ -97,32 +97,34 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
   Interpretation (EM·1) bottom right, which does nothing yet (D71 Q3); at large text the two pills shrink their
   words to stay on one row.
 - Recording (D69, as D71 corrects it; `app/lib/recording/`, SoulDreams Dev only): the microphone inside the field,
-  named MP·11, asks for the microphone the first time (EM·3, the phone's alert). A tap asks our server for a
-  short-lived key (one POST, the beta key as bearer, no user agent), opens Soniox's EU real-time stream with the key
-  in the handshake's header, sends exactly the settings (`stt-rt-v6`, `pcm_s16le`, 16 kHz, mono, English only), then
-  the microphone's frames as they come; an empty text frame ends it. Words heard go at the end of the field, never at
-  the caret; provisional words are replaced by the next reply. Soniox's tokens are sub-word pieces with their spaces
-  inside them, so they are joined exactly as sent; only at the start of a session, after typed words, one space joins
-  the first piece (D73, D74). If the dreamer types while a provisional piece is shown, the stale piece is dropped
-  where it was put (the page keeps its offset and carries it along an edit before it) and finals still append (D75
-  to D77; `heard_text.dart`). While it runs: a level line and a timer (stand-ins),
-  and MP·33 told once to a screen reader. A tap, Save or Back waits up to five seconds for the last words; leaving
-  the app ends it at once, also while Save waits for the last words (D75); the microphone is never left running by
-  a stop, a cancel or a Soniox error that arrives while a key, the stream or the microphone is still starting (D73,
-  D74), and a late start changes nothing once its session is not the current one (D75). While recording, the field
-  follows its end; the dreamer's upward drag or a caret put anywhere but the end pauses that, and the field back at
-  its bottom or the caret back at the end resumes it; the app's own scrolls change nothing, a jump to the end checks
-  again when it runs and never fires during the dreamer's drag, and a recording starts with the field at its end
-  (D79 a, D80, D81). A call, Siri or any other audio taker (an alarm, FaceTime) stops the recording as Stop does,
-  keeping the words, with one code, `recordingInterrupted` (D79 b). The clock stops the moment a stop begins (a tap,
-  Save or Back, an interruption), while the last words may still arrive (D83). When a recording ends, the phone's
-  audio is given back with notify-others, so music the recording paused resumes: a Swift channel in
+  named MP·11, asks for the microphone the first time (EM·3, the phone's alert). A tap starts the recording at once
+  (D88): the microphone and the clock start, the audio is held in memory only until the stream opens and is then
+  sent first, in order; meanwhile a short-lived key (from our server: one POST, the beta key as bearer, no user
+  agent; fetched in advance when the typing screen opens and after each recording, used once and only while under 45
+  seconds old, else fetched at the tap) opens Soniox's EU real-time stream with the key in the handshake's header,
+  the settings sent exactly (`stt-rt-v6`, `pcm_s16le`, 16 kHz, mono, English only), then the frames as they come; an
+  empty text frame ends it. A key or a stream that fails after the start stops the recording as a broken stream
+  does, holding nothing (D71, D88). The words go in at the caret where the recording started (a selection's end; the
+  end if the dreamer has not placed it); the text after stays after; one space before the words where neither side
+  has one (D74) and one after them where the text after does not start with whitespace (D87); provisional words
+  are replaced by the next reply; Soniox's sub-word pieces are joined exactly as sent (D73; `heard_text.dart`).
+  While recording, any edit attempt (a key, a paste, a cut, a tap or a handle) only stops the recording as Stop
+  does and is never applied; a tapped caret is placed after the words land (before the insertion point it stays,
+  at or after it moves with the words); further attempts in the wait are ignored; then the caret is at the end of
+  the dictated words (D87, D90). The field follows the insertion point; the dreamer's upward drag pauses that, and a
+  drag of theirs that ends with the insertion point in view resumes it; the app's own scrolls change nothing; a
+  scheduled jump checks again when it runs and never fires during the dreamer's drag (D79 a, D80, D81, D87). While
+  it runs: a level line and a timer (stand-ins), and MP·33 told once to a screen reader. A tap, Save or Back waits
+  up to five seconds, one budget for a stream still opening and the last words; leaving the app ends it at once,
+  also while Save waits (D75, D88). The clock stops the moment a stop begins (D83). A call, Siri or any other audio
+  taker (an alarm, FaceTime) stops the recording as Stop does, with one code, `recordingInterrupted` (D79 b). When a
+  recording ends, the phone's audio is given back with notify-others, so music resumes: a Swift channel in
   `AppDelegate.swift` (`souldreams/audio_session`), built into all three apps and reached from SoulDreams Dev only,
-  as D65; the `record` package never deactivates the session itself; a failed release logs
-  `recordingReleaseFailed` (D79 c, D84, D85). No connection, no key, a refused microphone or a failed stream: the microphone does not
-  start; a stream that breaks stops, keeping the words shown; each logs a code and shows nothing new; MP·15 and
-  MP·54 are not shown (D71). Nothing in `lib/recording/` can write a file, and the `record` package is used in
-  stream mode only (`no_storage_test.dart`). Off while `Hosts.server` is empty or the build has no beta key.
+  as D65; a failed release logs `recordingReleaseFailed` (D79 c, D84, D85). Recording off, a refused microphone or
+  a microphone that fails: nothing starts, a code, nothing new shown, and the field takes typing at once; a stream
+  that breaks stops, keeping the words shown; MP·15 and MP·54 are not shown (D71). Nothing in `lib/recording/` can
+  write a file, and the `record` package is used in stream mode only (`no_storage_test.dart`). Off while
+  `Hosts.server` is empty or the build has no beta key.
 - The journal list's read failures and the typing screen's first-use read (D71 Q18): a failed list read keeps
   the rows shown and logs `journalListFailed`; at the record button it opens nothing; a failed first-use read
   shows MP·32, marks nothing and logs `firstUseReadFailed`; a failed mark still shows MP·10.
@@ -154,9 +156,10 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 302 tests, and 166 mutation checks (A1 to A121, A55 and A94 dropped, with the rows A24a to A24au among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 307 tests, and 175 mutation checks (A1 to A143; A55, A73, A80 to A83, A86 to A88, A94, A99,
+  A128 to A130 and A142 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 166 run, 166 caught`); `check_all.sh` does not call it (D55).
+  (expected: `app mutations: 175 run, 175 caught`); `check_all.sh` does not call it (D55).
 
 ## The server
 
@@ -532,7 +535,7 @@ Banked in recording:
 101. The typing screen: at 2x and 3.1x text, recording a long dream, MP·62 is hidden until recording ends (its live
      region still announces it); typed words land before the heard words (`x AB`): to watch at the phone check
      (Task 16); the microphone is a Material suffix icon, centred in a tall field (check against D70's drawing).
-102. The heard text, banked by D77 (D17, strictly): one multi-character insertion (a paste or QuickType) exactly at
+102. SUPERSEDED by D87 and D90 (no editing while recording; the code it described is gone). The heard text, banked by D77 (D17, strictly): one multi-character insertion (a paste or QuickType) exactly at
      the piece's start that goes on as the piece's own text puts words in the wrong order (`P the` + ` the cat`
      gives `P cat the`); two edits between replies, one before and one after the piece, can remove a copy of the
      piece's text at the old offset; deleting a selection across the piece's start leaves the rest of the stale
@@ -555,6 +558,17 @@ Banked in recording:
      event, so the old symptom remains there (a known limit); no page test for Save or Back freezing the clock (the
      session test covers its path), none pinning that a stop while starting never starts the clock (older logic),
      and leaving the app never says a stop began (the session ends at once).
+107. Dictation and edits (D87 to D91): a selection tapped while recording comes back as a caret at its extent (D89,
+     note 3); iOS undo while recording replays the shown value from the undo history (D89, note 5; the owner's phone
+     check showed nothing harmful); the "paste" and "cut" tests send whole keyboard values, not the toolbar's paths
+     (the put-back covers any controller change); the element walk to `EditableTextState` on each reply could be a
+     `GlobalKey`.
+108. The instant start (D88, the review of 16h): a stop whose five seconds run out before the stream opens drops the
+     held audio with only `recordingEnded` (no code saying why); a stop during the permission alert followed by a
+     refusal logs that code after the end; one key is fetched from our server each time the typing screen opens, even
+     if the dreamer only types; "refreshed as needed" is read as a stale advance key replaced at the tap, with no
+     background refresh (the held audio covers the fetch); A73, A83 and A142 dropped as constructed microtask races
+     (D17), their checks kept; pre-existing: a send on a socket the server has closed could throw.
 
 ## Before Cohort 1
 
@@ -764,6 +778,17 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D85: a failed release has its own code, `recordingReleaseFailed`; the comments corrected (Task 16d-1, no review).
 - D86: the full mutation run found A94 surviving (D81's check when the jump runs made `if (_following)` before it
   redundant); the check removed and A94 dropped, its reason in the file, as A55; no review.
+- D87 (founder): replaces D71 Q6 and all editing during dictation: the words go in at the caret where the recording
+  started; any edit attempt first stops the recording; following follows the insertion point; the edit-tracking code
+  removed. The owner's answers: a selection's END; further attempts in the wait IGNORED (Task 16f).
+- D88 (founder): recording starts the instant the microphone is tapped; audio before the stream opens held in memory
+  and sent first; a key may be fetched in advance; a failing connection stops as a break, holding nothing (Task 16h).
+- D89: on the 16f review: a failed start leaves the field typeable; the stale comments; note 4 folded into 16h;
+  notes 3 and 5 banked (item 107).
+- D90 (founder): an edit attempt while recording ONLY stops it, never applied; a tapped caret is placed after the
+  words land; the replay and its guard removed (Task 16g-1, after the data loss of 16f's replay).
+- D91 (standing): when a review finding stops the build and when Claude Code decides and continues (ruling-restoring
+  fixes, stale comments, test gaps, weak rows; D17 notes banked); reports in batches.
 
 ## Documents as last imported
 

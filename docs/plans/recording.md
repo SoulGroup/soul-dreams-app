@@ -4740,3 +4740,45 @@ Bring the results as a checklist (passed, or what was seen), never a screenshot 
 7. `tool/checks/tests/run_tests.py` in the copy: 239 tests run, one error, `test_check_all`, which needs a git
    repository. No guard or check changed in this branch, and the real tree's run is `OK`, 241 tests.
 8. The scratch copies (`build-rec`, `replay-rec`, `snaps`, `stub-record`) are deleted after this plan is committed.
+
+## Part 6 · Where the build differs from this plan
+
+Added by the branch's final docs task on 2026-11-17. Part 3's blocks are left as proven; where they differ from the
+committed code, the committed code and this part govern. The implementation report
+(`.scratch/for-build-chat/recording-implementation.md`) has the detail, with every review's verdict.
+
+- **D73, Task 7a (`769b345`).** An ended session leaves nothing running; a close is never waited for; Soniox's
+  tokens are joined exactly as sent.
+- **D74, Task 7b (`7e3e51f`), Task 8 (`0a9fe5f`).** One space joins typed words and the first piece of a session; a
+  stop while the microphone starts stops it at once; the microphone ignores taps while Save waits.
+- **D75 to D77, Tasks 8a to 8c (`efb405a`, `086d346`, `1a704ac`, `6a98a6d`).** A late start changes nothing; no
+  overflow on an iPhone SE; leaving while Save waits saves at once; the stale provisional piece dropped where it was
+  put. All of 8b and 8c's edit tracking was later removed by D87 and D90.
+- **D78, Tasks 9 to 12.** `record_ios` and `record_macos` 2.1.1 in place of the plan's `record_darwin`; rows follow
+  the code (A55 dropped); Status.md as built.
+- **Tasks 13 to 15** (the owner's): the parameters, the deploy (the CDK bootstrap also needs `-c account`), the
+  server's address in `hosts.dart` (`cd67c81`, `762a948`).
+- **Task 16, the owner's phone checks, and what they brought** (D79 to D91):
+  - 16a (`86f519c`): the crash was iOS refusing debug-JIT code after the debugger detached; a guard test only.
+  - 16b to 16b-2 (`f107800`, `0fc91fa`, `53812a1`; D79 a, D80, D81) and D86 (`25b4d53`): the field follows the newest
+    words, paused by the dreamer's upward drag, never moved during a drag.
+  - 16c, 16c-1 (`9877995`, `ee0192b`; D79 b, D83): an interruption stops as Stop does; the clock stops when a stop
+    begins.
+  - 16d, 16d-1 (`f8642f0`, `a07427f`, `29a6a44`; D79 c, D84, D85): a Swift channel gives the audio back with
+    notify-others; `recordingReleaseFailed`.
+  - 16e (`21e18ef`): one provisional piece whatever the dreamer edits; superseded by 16f.
+  - 16f (`15fa6d9`; D87): the words go in at the caret where the recording started; any edit attempt stops it.
+  - 16g (`d8d22aa`): a guard on the replayed edit; its review found the real cause of the owner's data loss (a
+    one-letter first piece and one backspace removed every word), so 16g-1 (`1b39473`; D90) removed the replay: an
+    attempt only stops the recording, a tapped caret is placed after the words land.
+  - 16g-2 and 16f-1 (`748e924`; D89, D91): the field is the dreamer's again after the end or a failed start.
+  - 16h (`7aea65d`, `c2a93e4`, `b6db04d`; D88): the recording starts the instant the microphone is tapped, the audio
+    held in memory until the stream opens and sent first, a key fetched in advance; a cancel ends a stop waiting
+    for the stream.
+- **Status.md** was updated in the branch at Task 12 (`06e3da3`), after Task 14 (`762a948`), at Task 16 (`7c5a850`)
+  and in this final docs task.
+- **The counts.** At the end of the build: **307** app tests, **175** app mutation rows (`app mutations: 175 run, 175
+  caught`; A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130 and A142 dropped, each with its reason), **47**
+  server tests and **30** server mutation rows, **241** guard tests and **87** guard mutation rows.
+- **/simplify** is skipped for this branch (the code is pinned by mutation rows), unless the final review finds dead
+  code.
