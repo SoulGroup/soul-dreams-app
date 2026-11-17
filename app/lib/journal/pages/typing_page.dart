@@ -13,8 +13,9 @@
 // code is logged, and each of them tries again. D63: the field takes no
 // focus by itself, a failed save shows MP·62, and leaving the app
 // (hidden or paused, not inactive) saves what is typed. Recording (D69,
-// D71): the words heard are added at the end, never at the caret; while
-// it runs, a level line and a timer show and a screen reader is told
+// D71): the words heard go in at the caret where it started (D87); an
+// edit attempt only stops it (D90); while it runs, a level line and a
+// timer show and a screen reader is told
 // MP·33; a stop, Save or Back waits for the last words; leaving the app
 // ends it at once. A failure to start or a break shows nothing new.
 import 'dart:async';
@@ -243,9 +244,11 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     // changes nothing (D75).
     if (!mounted || !identical(session, _session)) return;
     if (!started) {
-      // Nothing new is shown (D71); the session logged its code.
+      // Nothing new is shown (D71); the session logged its code. The field
+      // is the dreamer's again at once (Task 16f-1).
       _session = null;
       setState(() => _mic = _Mic.idle);
+      _settle();
       return;
     }
     setState(() {
@@ -374,21 +377,30 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _ticker?.cancel();
     _ticker = null;
     _session = null;
-    _shownValue = null;
     if (!mounted) return;
     setState(() => _mic = _Mic.idle);
-    // A caret the dreamer tapped down, moved with the words (D90).
+    _settle();
+  }
+
+  // The recording is over or never began: the field is the dreamer's again
+  // (D87). The caret goes where the dreamer tapped it, moved with the words,
+  // else after the dictated words, whatever was tried in the wait (D90).
+  void _settle() {
+    _shownValue = null;
     final tapped = _caret;
     _caret = null;
-    if (tapped == null) return;
-    final at = caretSettled(
-      tapped.caret,
-      insertAt: _before.length,
-      shownLength: tapped.shownLength,
-      settledLength: _text.text.length,
+    _text.selection = TextSelection.collapsed(
+      offset: tapped == null
+          ? _insertEnd
+          : caretSettled(
+              tapped.caret,
+              insertAt: _before.length,
+              shownLength: tapped.shownLength,
+              settledLength: _text.text.length,
+            ),
     );
-    _text.selection = TextSelection.collapsed(offset: at);
   }
+
 
   String _elapsed() {
     // Minutes and seconds: digits only, no words.

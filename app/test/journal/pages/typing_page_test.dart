@@ -1,7 +1,7 @@
 // The typing screen (P2 to P4, P10, P12; D58 Q4; D70; D71): the field
 // only, MP·12 as its placeholder, MP·10 once then MP·32; Save and Back
 // keep the text as a new dream; an empty Save keeps nothing; an edit
-// replaces; recording adds the words heard at the end.
+// replaces; recording puts the words heard in at the caret (D87, D90).
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
@@ -745,6 +745,25 @@ void main() {
     expect(lines, ['recordingRefused']);
   });
 
+  // Task 16f-1: after a start that fails, the field is the dreamer's again
+  // at once: typing works.
+  testWidgets('after a refused microphone the field takes typing', (tester) async {
+    final v = voice();
+    v.mic.allow = false;
+    await tall(tester, recording: v.recording);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    await tester.pumpAndSettle();
+    final text = tester.widget<TextField>(find.byKey(TypingPage.fieldKey)).controller!;
+    for (final typed in [tokens[0], tokens[0] + tokens[1]]) {
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(text: typed, selection: TextSelection.collapsed(offset: typed.length)),
+      );
+      await tester.pump();
+      expect(text.text, typed);
+    }
+  });
+
   testWidgets('recording off: the microphone starts nothing', (tester) async {
     final lines = await logged();
     final v = voice(on: false);
@@ -1160,9 +1179,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  // D87: dictation goes in at the caret where the recording started; any
-  // edit attempt first stops it as Stop does, then applies to the settled
-  // text; attempts during the stop's wait are ignored (the owner's answer).
+  // D87, D90: dictation goes in at the caret where the recording started;
+  // any edit attempt only stops it as Stop does and is never applied; a
+  // tapped caret moves with the words; attempts during the wait are ignored.
   TextEditingController fieldText(WidgetTester tester) =>
       tester.widget<TextField>(find.byKey(TypingPage.fieldKey)).controller!;
 
@@ -1309,6 +1328,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(r.text.text, tokens[0] + tokens[1]);
     expect(r.text.selection, TextSelection.collapsed(offset: r.text.text.length));
+  });
+
+  // Task 16g-2: a tap during the wait is ignored even when no last words
+  // come (the stream drops): the caret ends after the dictated words (D90).
+  testWidgets('tap in the wait, then a drop: caret after the words', (tester) async {
+    final r = await dictatingInto(tester);
+    r.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    final shown = r.text.text;
+    await keyboard(tester, '${shown}x');
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pump();
+    await r.link.drop(1000);
+    await tester.pumpAndSettle();
+    expect(r.text.text, shown);
+    expect(r.text.selection, TextSelection.collapsed(offset: shown.length));
   });
 
   // A tap that moves the caret stops the recording; the caret lands where
