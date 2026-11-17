@@ -7,8 +7,6 @@
 // recording paused resumes (D79 c): the package's own deactivation does
 // not notify, so ours goes through the Swift channel in
 // ios/Runner/AppDelegate.swift.
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:record/record.dart';
 
@@ -17,9 +15,8 @@ import 'microphone.dart';
 const audioSessionChannel = 'souldreams/audio_session';
 
 final class RecordMicrophone implements Microphone {
-  RecordMicrophone({AudioRecorder? recorder, MethodChannel session = const MethodChannel(audioSessionChannel)})
-    : _recorder = recorder ?? AudioRecorder(),
-      _session = session;
+  RecordMicrophone({AudioRecorder? recorder, this._session = const MethodChannel(audioSessionChannel)})
+    : _recorder = recorder ?? AudioRecorder();
 
   final AudioRecorder _recorder;
   final MethodChannel _session;

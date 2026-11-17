@@ -2,8 +2,6 @@
 // phone's audio given back when a recording ends (D79 c): the session is
 // deactivated with notify-others, through the Swift channel in
 // ios/Runner/AppDelegate.swift, so music paused by a recording resumes.
-import 'dart:typed_data';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:record/record.dart';
