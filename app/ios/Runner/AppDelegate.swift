@@ -1,9 +1,11 @@
+import AVFoundation
 import Flutter
 import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var journalChannel: FlutterMethodChannel?
+  private var audioChannel: FlutterMethodChannel?
 
   override func application(
     _ application: UIApplication,
@@ -27,6 +29,35 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "JournalFiles") {
       journalChannel = JournalFiles.channel(messenger: registrar.messenger())
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "AudioSession") {
+      audioChannel = AudioSession.channel(messenger: registrar.messenger())
+    }
+  }
+}
+
+// The phone's audio, given back when a recording ends (D79 c): the session
+// is deactivated with notify-others, so music the recording paused
+// resumes. The record package's own deactivation does not notify. Reached
+// from SoulDreams Dev only (lib/recording/record_microphone.dart). A
+// failure answers with a code only (R3).
+enum AudioSession {
+  static let channelName = "souldreams/audio_session"
+
+  static func channel(messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {
+    let channel = FlutterMethodChannel(name: channelName, binaryMessenger: messenger)
+    channel.setMethodCallHandler { call, result in
+      guard call.method == "release" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      do {
+        try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        result(nil)
+      } catch {
+        result(FlutterError(code: "audio-session", message: nil, details: nil))
+      }
+    }
+    return channel
   }
 }
 

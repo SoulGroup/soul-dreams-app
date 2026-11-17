@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A115, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A120, A55 dropped (D74.3), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 161 run, 161 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 166 run, 166 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -732,6 +732,27 @@ ROWS = [
      '      onStopping: _stopClock,\n',
      '      onStopping: () {},\n',
      'test/journal/pages/typing_page_test.dart', 'an interruption ends the recording: words kept, the timer stops'),
+    # D79 c: the phone's audio given back, with notify-others, when a recording ends.
+    ('A116', 'lib/recording/record_microphone.dart',
+     '    } finally {\n      await _release();\n    }\n',
+     '    } finally {}\n',
+     'test/recording/record_microphone_test.dart', 'a stop gives the audio back after the recorder stops'),
+    ('A117', 'lib/recording/record_microphone.dart',
+     '    try {\n      await _recorder.stop();\n    } finally {\n      await _release();\n    }\n',
+     '    await _release();\n    await _recorder.stop();\n',
+     'test/recording/record_microphone_test.dart', 'a stop gives the audio back after the recorder stops'),
+    ('A118', 'lib/recording/record_microphone.dart',
+     '    try {\n      await _recorder.stop();\n    } finally {\n      await _release();\n    }\n',
+     '    await _recorder.stop();\n    await _release();\n',
+     'test/recording/record_microphone_test.dart', 'a recorder that fails to stop still gives the audio back'),
+    ('A119', 'lib/recording/record_microphone.dart',
+     '      await _release().catchError((Object _) {});\n',
+     '',
+     'test/recording/record_microphone_test.dart', 'a start that fails gives the audio back'),
+    ('A120', 'lib/recording/record_microphone.dart',
+     '      await _release().catchError((Object _) {});\n',
+     '      await _release();\n',
+     'test/recording/record_microphone_test.dart', 'a failed start whose release fails too reports the start'),
 ]
 
 
