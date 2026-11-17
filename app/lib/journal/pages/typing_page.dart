@@ -276,7 +276,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     } finally {
       _settingHeard = false;
     }
-    if (_following) _toEnd();
+    // The jump checks following when it runs (D81, D86).
+    _toEnd();
   }
 
   // After the next layout, the field shows its end, if it still follows

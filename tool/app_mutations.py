@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A121, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A121, A55 dropped (D74.3), A94 dropped (D86), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 167 run, 167 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 166 run, 166 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -641,12 +641,10 @@ ROWS = [
     # D79 a, as D80 rules it: the field follows the end while recording; the
     # dreamer's upward drag or a caret not at the end pauses it; back at the
     # bottom or the end resumes; the app's own scrolls change nothing.
-    ('A94', 'lib/journal/pages/typing_page.dart',
-     '    if (_following) _toEnd();\n',
-     '    _toEnd();\n',
-     'test/journal/pages/typing_page_test.dart', 'an upward drag pauses; back at the bottom, it follows'),
+    # A94 was dropped (D86): the check it broke, `if (_following)` before the
+    # jump, was made redundant by D81's check when the jump runs, and removed.
     ('A95', 'lib/journal/pages/typing_page.dart',
-     '    if (_following) _toEnd();\n',
+     '    // The jump checks following when it runs (D81, D86).\n    _toEnd();\n',
      '',
      'test/journal/pages/typing_page_test.dart', 'recording: the field follows the newest words'),
     ('A96', 'lib/journal/pages/typing_page.dart',
