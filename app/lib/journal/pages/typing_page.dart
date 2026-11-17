@@ -405,7 +405,6 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     );
   }
 
-
   String _elapsed() {
     // Minutes and seconds: digits only, no words.
     return [(_seconds ~/ 60).toString(), (_seconds % 60).toString().padLeft(2, '0')].join(':');
