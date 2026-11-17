@@ -117,6 +117,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _text.addListener(_moved);
+    // A key fetched in advance, so a recording starts at once (D88).
+    widget.recording?.warm();
     // A failed read shows the short line and marks nothing; a failed mark
     // still shows MP·10. Each logs a code (D71 Q18).
     widget.journal.firstUseSeen().then(
@@ -378,6 +380,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _ticker = null;
     _session = null;
     if (!mounted) return;
+    // The next key, fetched in advance (D88).
+    widget.recording?.warm();
     setState(() => _mic = _Mic.idle);
     _settle();
   }

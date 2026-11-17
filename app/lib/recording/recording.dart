@@ -1,10 +1,12 @@
 // Recording by voice, in SoulDreams Dev (D69, as D71 corrects it): the
 // words appear as the dreamer speaks, and the audio goes from the
-// microphone to Soniox and nowhere else; nothing of it is kept on the
-// phone. This slice needs a connection: with none, or with the key or
-// the stream failing, the microphone does not start; a stream that breaks
-// stops, keeping the words shown. Each logs a code and shows nothing new
-// (D71). Offline recording is the next slice.
+// microphone to Soniox and nowhere else; nothing of it is written on the
+// phone. A recording starts the instant the microphone is tapped (D88): the
+// microphone first, its audio held in memory until the stream opens and
+// then sent first, in order; a key may be fetched in advance. This slice
+// needs a connection: a key or a stream that fails stops the recording as a
+// broken stream does, holding nothing, keeping the words shown. Each logs a
+// code and shows nothing new (D71). Offline recording is the next slice.
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -16,7 +18,13 @@ import 'soniox.dart';
 
 /// What a typing screen needs to record.
 final class Recording {
-  const Recording({required this.on, required this.microphone, required this.key, required this.connect});
+  Recording({
+    required this.on,
+    required this.microphone,
+    required this.key,
+    required this.connect,
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   /// SoulDreams Dev's own: our server for the key, Soniox's EU endpoint for
   /// the words. Off while the server's address is empty, or the build's
@@ -33,7 +41,43 @@ final class Recording {
   final Microphone microphone;
   final Future<String> Function() key;
   final Future<SonioxLink> Function(String key) connect;
+  final DateTime Function() _now;
+
+  // A key fetched in advance (D88): single use, and used only while fresh.
+  Future<String>? _ahead;
+  DateTime? _aheadAt;
+
+  /// Fetches a key in advance, when the typing screen opens and after each
+  /// recording.
+  void warm() {
+    if (!on) return;
+    final ahead = key();
+    ahead.ignore();
+    _ahead = ahead;
+    _aheadAt = _now();
+  }
+
+  /// A key for one recording: the one fetched in advance if it is fresh and
+  /// came, else a new one.
+  Future<String> takeKey() async {
+    final ahead = _ahead;
+    final at = _aheadAt;
+    _ahead = null;
+    _aheadAt = null;
+    if (ahead != null && at != null && _now().difference(at) < keyFresh) {
+      try {
+        return await ahead;
+      } on Object {
+        // It failed: a new one below.
+      }
+    }
+    return key();
+  }
 }
+
+/// How long a key fetched in advance is used: Soniox's key opens a stream
+/// within 60 seconds of being made (D71 Q10); the rest is left for opening.
+const keyFresh = Duration(seconds: 45);
 
 final _betaShape = RegExp(r'^[A-Za-z0-9]{48}$');
 
@@ -70,6 +114,11 @@ final class RecordingSession {
   final void Function() onEnded;
 
   SonioxLink? _link;
+  // The audio heard before the stream opened, in memory only (D88).
+  final _held = <Uint8List>[];
+  // Opening the stream, once the microphone streams; done when it opened,
+  // failed, or the session ended.
+  Future<void>? _opening;
   StreamSubscription<String>? _replies;
   StreamSubscription<Uint8List>? _frames;
   StreamSubscription<void>? _interruptions;
@@ -82,10 +131,11 @@ final class RecordingSession {
   bool _micStarted = false;
   Future<void>? _stopping;
 
-  /// Starts recording; true once the microphone streams. False when it did
-  /// not start: a code is logged for a failure; after a stop, a cancel or
-  /// an end while starting, none is, and the session's own end is reported
-  /// by [onEnded], for a stop up to [wait] later.
+  /// Starts recording; true once the microphone streams, before the key
+  /// and the stream (D88). False when it did not start: a code is logged
+  /// for a failure; after a stop or a cancel while starting, none is, and
+  /// the session has ended by then. A key or a stream that fails later ends
+  /// the session as a break does, reported by [onEnded].
   Future<bool> start() async {
     if (!_recording.on) return _fail(LogEvent.recordingOff);
     final bool allowed;
@@ -96,51 +146,28 @@ final class RecordingSession {
     }
     if (!allowed) return _fail(LogEvent.recordingRefused);
     if (_cancelled || _ended) return false;
-    final String key;
-    try {
-      key = await _recording.key();
-    } on KeyFailure catch (e) {
-      return _fail(LogEvent.recordingKeyFailed, [e.status]);
-    } on Object {
-      return _fail(LogEvent.recordingKeyFailed, [0]);
-    }
-    if (_cancelled || _ended) return false;
-    final SonioxLink link;
-    try {
-      link = await _recording.connect(key);
-    } on Object {
-      return _fail(LogEvent.recordingStreamFailed, [0]);
-    }
-    if (_cancelled || _ended) {
-      // The session ended while the stream opened: close it, wait for nothing.
-      _closeQuietly(link);
-      return false;
-    }
-    _link = link;
-    _replies = link.replies.listen(_reply, onError: (Object _) => _broke(0), onDone: () => _broke(link.closeCode ?? 0));
     final Stream<Uint8List> frames;
     try {
       frames = await _recording.microphone.start();
     } on Object {
-      SafeLog.event(LogEvent.recordingMicFailed);
-      await _shut();
-      return false;
+      return _fail(LogEvent.recordingMicFailed);
     }
     _micStarted = true;
-    if (_cancelled || _ended) {
-      // The session ended while the microphone started: it is on, so off.
+    final stopping = _stopping;
+    if (_cancelled || _ended || stopping != null) {
+      // The session ended, or a stop came, while the microphone started: it
+      // is on, so off; with no stream yet the stop ends it at once.
       await _micOff();
-      await _shut();
-      return false;
-    }
-    if (_stopping != null) {
-      // A stop is waiting for the last words: the microphone never streams
-      // after the end frame (D74). The stop ends the session.
-      await _micOff();
+      await stopping;
       return false;
     }
     _frames = frames.listen((frame) {
-      _link?.add(frame);
+      final link = _link;
+      if (link != null) {
+        link.add(frame);
+      } else {
+        _held.add(frame);
+      }
       onLevel(level(frame));
     });
     // A call or Siri stops the recording as Stop does: the words heard
@@ -150,7 +177,46 @@ final class RecordingSession {
       unawaited(stop());
     });
     SafeLog.event(LogEvent.recordingStarted);
+    _opening = _open();
     return true;
+  }
+
+  // The key and the stream, while the microphone already streams (D88).
+  Future<void> _open() async {
+    final String key;
+    try {
+      key = await _recording.takeKey();
+    } on KeyFailure catch (e) {
+      return _brokeOff(LogEvent.recordingKeyFailed, e.status);
+    } on Object {
+      return _brokeOff(LogEvent.recordingKeyFailed, 0);
+    }
+    if (_ended) return;
+    final SonioxLink link;
+    try {
+      link = await _recording.connect(key);
+    } on Object {
+      return _brokeOff(LogEvent.recordingStreamFailed, 0);
+    }
+    if (_ended) {
+      // The session ended while the stream opened: close it, wait for nothing.
+      _closeQuietly(link);
+      return;
+    }
+    _link = link;
+    _replies = link.replies.listen(_reply, onError: (Object _) => _broke(0), onDone: () => _broke(link.closeCode ?? 0));
+    // The held audio first, in order; then the frames as they come.
+    for (final frame in _held) {
+      link.add(frame);
+    }
+    _held.clear();
+  }
+
+  // No key or no stream: as a break, holding nothing (D88).
+  void _brokeOff(LogEvent code, int number) {
+    if (_ended) return;
+    SafeLog.event(code, [number]);
+    unawaited(_shut());
   }
 
   bool _fail(LogEvent code, [List<num> numbers = const []]) {
@@ -186,10 +252,15 @@ final class RecordingSession {
     if (_ended) return;
     onStopping();
     await _micOff();
+    // The stream may still be opening (D88): the held audio goes when it
+    // opens, all within the one wait for the last words (D75).
+    final clock = Stopwatch()..start();
+    final opening = _opening;
+    if (opening != null) await opening.timeout(wait, onTimeout: () {});
     final link = _link;
-    if (link != null) {
+    if (link != null && !_ended) {
       link.finish();
-      await _finished.future.timeout(wait, onTimeout: () {});
+      await _finished.future.timeout(wait - clock.elapsed, onTimeout: () {});
     }
     await _shut();
   }
@@ -230,6 +301,7 @@ final class RecordingSession {
     if (_ended) return;
     _ended = true;
     if (!_finished.isCompleted) _finished.complete();
+    _held.clear();
     await _micOff();
     final replies = _replies;
     _replies = null;

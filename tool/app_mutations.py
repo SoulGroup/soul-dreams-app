@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A132, A55 dropped (D74.3), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A142, A55 dropped (D74.3), A73 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 167 run, 167 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 175 run, 175 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -471,7 +471,7 @@ ROWS = [
      '',
      'test/recording/recording_test.dart', 'the microphone refused: no key asked, a code'),
     ('A52', 'lib/recording/recording.dart',
-     '      await _finished.future.timeout(wait, onTimeout: () {});\n',
+     '      await _finished.future.timeout(wait - clock.elapsed, onTimeout: () {});\n',
      '',
      'test/recording/recording_test.dart', 'words come back; a stop waits for the last ones'),
     ('A53', 'lib/recording/recording.dart',
@@ -535,13 +535,13 @@ ROWS = [
     # which sets _ended before it awaits anything, so _cancelled is never the
     # only thing that stops a late start.
     ('A68', 'lib/recording/recording.dart',
-     '    if (_cancelled || _ended) return false;\n    final SonioxLink link;\n',
-     '    final SonioxLink link;\n',
-     'test/recording/recording_test.dart', 'a stop while the key is fetched opens nothing'),
+     '    if (_ended) {\n      // The session ended while the stream opened',
+     '    if (false) {\n      // The session ended while the stream opened',
+     'test/recording/recording_test.dart', 'a cancel while the stream opens closes it on arrival'),
     ('A69', 'lib/recording/recording.dart',
-     '      _closeQuietly(link);\n      return false;\n',
-     '      return false;\n',
-     'test/recording/recording_test.dart', 'a stop while the stream opens closes it on arrival'),
+     '      _closeQuietly(link);\n      return;\n',
+     '      return;\n',
+     'test/recording/recording_test.dart', 'a cancel while the stream opens closes it on arrival'),
     ('A70', 'lib/recording/recording.dart',
      '    if (link != null) _closeQuietly(link);\n',
      '    if (link != null) await link.close();\n',
@@ -549,15 +549,14 @@ ROWS = [
     ('A71', 'lib/recording/recording.dart',
      '    if (link != null) _closeQuietly(link);\n',
      '',
-     'test/recording/recording_test.dart', 'the microphone failing: the stream closed, a code'),
+     'test/recording/recording_test.dart', 'words come back; a stop waits for the last ones'),
     ('A72', 'lib/recording/recording.dart',
-     '(_cancelled || _ended) {\n      // The session ended while the m',
-     '(false) {\n      // The session ended while the m',
+     '(_cancelled || _ended || stopping != null) {',
+     '(false) {',
      'test/recording/recording_test.dart', 'a cancel while the microphone starts: stopped once on arrival'),
-    ('A73', 'lib/recording/recording.dart',
-     '    if (_stopping != null) {\n',
-     '    if (false) {\n',
-     'test/recording/recording_test.dart', 'a stop while the microphone starts: it never streams'),
+    # A73 was dropped (D88): with the microphone first, a stop while it starts
+    # ends the session at once, so the pending-stop check it broke coincides
+    # with _ended except in a constructed microtask race (D17); the check stays.
     ('A74', 'lib/recording/recording.dart',
      'Future<void> stop() => _stopping ??= _stop();',
      'Future<void> stop() => _stop();',
@@ -772,6 +771,46 @@ ROWS = [
      '          ? _insertEnd\n',
      '          ? _text.selection.extentOffset\n',
      'test/journal/pages/typing_page_test.dart', 'tap in the wait, then a drop: caret after the words'),
+    # Task 16h (D88): the microphone at once, the held audio first, a key fetched in advance.
+    ('A133', 'lib/recording/recording.dart',
+     '    for (final frame in _held) {\n      link.add(frame);\n    }\n',
+     '',
+     'test/recording/recording_test.dart', 'the microphone starts at once; held audio goes first, in order'),
+    ('A134', 'lib/recording/recording.dart',
+     '        _held.add(frame);\n',
+     '',
+     'test/recording/recording_test.dart', 'the microphone starts at once; held audio goes first, in order'),
+    ('A135', 'lib/recording/recording.dart',
+     '    _opening = _open();\n',
+     '    unawaited(_open());\n',
+     'test/recording/recording_test.dart', 'a stop while the key comes: held audio, then the end'),
+    ('A136', 'lib/recording/recording.dart',
+     '      return _brokeOff(LogEvent.recordingKeyFailed, 0);\n    }\n    if (_ended) return;\n',
+     '      return _brokeOff(LogEvent.recordingKeyFailed, 0);\n    }\n',
+     'test/recording/recording_test.dart', 'a cancel before the stream opens sends nothing'),
+    ('A137', 'lib/recording/recording.dart',
+     '    SafeLog.event(code, [number]);\n    unawaited(_shut());\n',
+     '    SafeLog.event(code, [number]);\n',
+     'test/recording/recording_test.dart', 'no key: it stops as a broken stream does, a code'),
+    ('A138', 'lib/recording/recording.dart',
+     '_now().difference(at) < keyFresh) {',
+     'true) {',
+     'test/recording/recording_test.dart', 'a key older than its freshness is never used'),
+    ('A139', 'lib/recording/recording.dart',
+     '        return await ahead;\n',
+     '        return ahead;\n',
+     'test/recording/recording_test.dart', 'a key fetched in advance that failed: the tap fetches again'),
+    ('A140', 'lib/journal/pages/typing_page.dart',
+     '(D88).\n    widget.recording?.warm();\n    // A failed read',
+     '(D88).\n    // A failed read',
+     'test/journal/pages/typing_page_test.dart', 'the key fetched on opening is used by the tap'),
+    ('A141', 'lib/journal/pages/typing_page.dart',
+     '    // The next key, fetched in advance (D88).\n    widget.recording?.warm();\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'the key fetched on opening is used by the tap'),
+    # A142 was dropped (D88): `await stopping` before a start reports false matters
+    # only in a constructed microtask race (D17); the line stays, as the guarantee
+    # that the session has ended by then.
 ]
 
 

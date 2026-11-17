@@ -764,6 +764,67 @@ void main() {
     }
   });
 
+  // D88: the recording starts the instant the microphone is tapped.
+  testWidgets('the clock starts on the tap, before the stream opens', (tester) async {
+    final mic = SilentMicrophone();
+    final key = Completer<String>();
+    final recording = Recording(on: true, microphone: mic, key: () => key.future, connect: (_) async => MemoryLink());
+    await tall(tester, recording: recording);
+    await record(tester);
+    expect(mic.running, isTrue);
+    expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('0:02'), findsOneWidget);
+  });
+
+  testWidgets('the key fetched on opening is used by the tap', (tester) async {
+    var fetched = 0;
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () async => '${fetched++}',
+      connect: (_) async => MemoryLink(),
+    );
+    await tall(tester, recording: recording);
+    expect(fetched, 1);
+    await record(tester);
+    await tester.pump();
+    expect(fetched, 1);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump(lastWords);
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(fetched, 2);
+  });
+
+  // The re-review of 16f-1: a stop while the microphone starts ends the
+  // session before the start reports; the field is then the dreamer's.
+  testWidgets('a key press while the microphone starts, then typing works', (tester) async {
+    final mic = SilentMicrophone()..startHold = Completer<void>();
+    final recording = Recording(on: true, microphone: mic, key: () async => 'k', connect: (_) async => MemoryLink());
+    await tall(tester, recording: recording);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    Future<void> type(String text) async {
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length)),
+      );
+      await tester.pump();
+    }
+
+    await type(tokens[0]);
+    mic.startHold!.complete();
+    await tester.pumpAndSettle();
+    expect(mic.running, isFalse);
+    final text = tester.widget<TextField>(find.byKey(TypingPage.fieldKey)).controller!;
+    expect(text.text, '');
+    await type(tokens[0]);
+    await type(tokens[0] + tokens[1]);
+    expect(text.text, tokens[0] + tokens[1]);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('recording off: the microphone starts nothing', (tester) async {
     final lines = await logged();
     final v = voice(on: false);
@@ -867,9 +928,9 @@ void main() {
     await tester.pump();
     expect(v.mic.stops, 1);
     expect(v.mic.running, isFalse);
-    v.link.reply(reply(finished: true));
     await tester.pumpAndSettle();
-    expect(v.link.sent, ['']);
+    // D88: the stream never opened; nothing was sent.
+    expect(v.link.sent, isEmpty);
     expect(v.mic.stops, 1);
     expect(find.byType(TypingPage), findsNothing);
     expect((await h.nights()).single.dreams, [tokens[0]]);
@@ -911,15 +972,18 @@ void main() {
     );
   }
 
+  // D88: the first session's microphone started and was stopped; its late
+  // key opens no stream; only the second session's stream exists.
   Future<void> stopsTheSecond(WidgetTester tester, SilentMicrophone mic, List<MemoryLink> links) async {
     expect(mic.running, isTrue);
     expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+    final before = mic.stops;
     await tester.tap(find.byKey(TypingPage.micKey));
     await tester.pump();
     expect(mic.running, isFalse);
     links.single.reply(reply(finished: true));
     await tester.pumpAndSettle();
-    expect(mic.stops, 1);
+    expect(mic.stops, before + 1);
     expect(find.byKey(TypingPage.levelKey), findsNothing);
   }
 
@@ -950,6 +1014,9 @@ void main() {
     await tester.pump();
     files.failures = 1;
     await tester.tap(find.byKey(TypingPage.saveKey));
+    // D88: Save waits, at most the five seconds of D75, for the stream that
+    // never opens; then the write fails and the screen stays.
+    await tester.pump(lastWords);
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
     await record(tester);
