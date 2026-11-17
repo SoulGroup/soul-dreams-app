@@ -1309,6 +1309,74 @@ void main() {
     await tester.pumpAndSettle();
   });
 
+  // Task 16e: the field never holds more than one provisional piece, and
+  // never a stale one after a newer reply, whatever the dreamer edits.
+  Future<TextEditingController> dictating(WidgetTester tester, MemoryLink link) async {
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    link.reply(reply(done: [tokens[0]], shown: [tokens[1], tokens[2]]));
+    await tester.pump();
+    return field.controller!;
+  }
+
+  Future<void> backspace(WidgetTester tester, TextEditingController text, int times) async {
+    final cut = text.text.substring(0, text.text.length - times);
+    tester.testTextInput.updateEditingValue(
+      TextEditingValue(text: cut, selection: TextSelection.collapsed(offset: cut.length)),
+    );
+    await tester.pump();
+  }
+
+  testWidgets('backspace into the provisional piece: newer guesses replace it', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final text = await dictating(tester, v.link);
+    for (var i = 0; i < 3; i++) {
+      await backspace(tester, text, 1);
+      v.link.reply(reply(shown: [tokens[1], tokens[2], tokens[3]]));
+      await tester.pump();
+      expect(text.text, tokens[0] + tokens[1] + tokens[2] + tokens[3]);
+    }
+    v.link.reply(reply(done: [tokens[1], tokens[2], tokens[3]]));
+    await tester.pump();
+    expect(text.text, tokens.take(4).join());
+  });
+
+  testWidgets('backspace through the piece and into the words before it', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final text = await dictating(tester, v.link);
+    v.link.reply(reply(done: [tokens[1]], shown: [tokens[2]]));
+    await tester.pump();
+    await backspace(tester, text, tokens[2].length + 2);
+    final kept = text.text;
+    v.link.reply(reply(shown: [tokens[3]]));
+    await tester.pump();
+    expect(text.text, kept + tokens[3]);
+    v.link.reply(reply(shown: [tokens[3], tokens[4]]));
+    await tester.pump();
+    expect(text.text, kept + tokens[3] + tokens[4]);
+  });
+
+  testWidgets('plain dictation: one piece, never a stale one', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    for (var n = 1; n <= 5; n++) {
+      v.link.reply(reply(shown: tokens.take(n).toList()));
+      await tester.pump();
+      expect(field.controller!.text, tokens.take(n).join().trimLeft());
+    }
+    v.link.reply(reply(done: tokens.take(3).toList(), shown: [tokens[3]]));
+    await tester.pump();
+    v.link.reply(reply(shown: [tokens[3], tokens[4]]));
+    await tester.pump();
+    expect(field.controller!.text, tokens.take(5).join().trimLeft());
+  });
+
   testWidgets('a Save that waits survives its screen going', (tester) async {
     final files = FlakyFiles();
     final v = voice();

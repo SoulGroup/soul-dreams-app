@@ -2,219 +2,202 @@
 // tokens are sub-word pieces with their spaces inside them, so their text
 // is joined exactly as sent; the one thing trimmed is a space at the very
 // start of an empty field. At the start of a recording session only (D74),
-// one space joins the typed words to the first piece heard. The pieces
-// below are Soniox's own documented examples, not a night.
+// one space joins the typed words to the first piece heard. The field never
+// holds more than one provisional piece, and never a stale one after a newer
+// reply, whatever the dreamer edits (Task 16e): what the edit left of the
+// piece goes, the dreamer's own characters stay. The pieces below are
+// Soniox's own documented examples, not a night.
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/recording/heard_text.dart';
 
 import 'fakes.dart';
 
+typedef Heard = ({String text, String shown, int at});
+
 void main() {
   final tokens = inventedTokens();
+  const none = (text: '', shown: '', at: 0);
+
+  // The next reply, the field's text being [now] (the dreamer's edit, if
+  // any, made since [r] was set).
+  Heard next(Heard r, String finalText, String provisional, {String? now, bool first = false}) => withHeard(
+    withoutPiece(r.text, now ?? r.text, r.at, r.shown.length),
+    finalText,
+    provisional,
+    first: first,
+  );
 
   test('into an empty field: no space in front', () {
-    final r = withHeard('', '', tokens[0], tokens[1], at: 0);
+    final r = withHeard('', tokens[0], tokens[1]);
     expect(r.text, tokens[0] + tokens[1]);
     expect(r.shown, tokens[1]);
-    expect(withHeard('', '', ' How', '', at: 0).text, 'How');
-    expect(withHeard('', '', '', ' How', at: 0).text, 'How');
+    expect(withHeard('', ' How', '').text, 'How');
+    expect(withHeard('', '', ' How').text, 'How');
   });
 
   test('provisional words are replaced, never doubled', () {
-    var r = withHeard('', '', '', tokens[0], at: 0);
-    r = withHeard(r.text, r.shown, '', tokens[0] + tokens[1], at: r.at);
+    var r = next(none, '', tokens[0]);
+    r = next(r, '', tokens[0] + tokens[1]);
     expect(r.text, tokens[0] + tokens[1]);
-    r = withHeard(r.text, r.shown, tokens[0] + tokens[1], '', at: r.at);
+    r = next(r, tokens[0] + tokens[1], '');
     expect(r.text, tokens[0] + tokens[1]);
     expect(r.shown, '');
   });
 
   test('pieces joined exactly as sent: How are you doing?', () {
-    const pieces = ['How', ' are', ' you', ' do', 'ing', '?'];
-    var r = (text: '', shown: '', at: 0);
-    for (final piece in pieces) {
-      r = withHeard(r.text, r.shown, piece, '', at: r.at);
+    var r = none;
+    for (final piece in ['How', ' are', ' you', ' do', 'ing', '?']) {
+      r = next(r, piece, '');
     }
     expect(r.text, 'How are you doing?');
   });
 
   test('a word split across replies gets no space inside', () {
-    var r = withHeard('', '', ' San', ' Franc', at: 0);
+    var r = next(none, ' San', ' Franc');
     expect(r.text, 'San Franc');
-    r = withHeard(r.text, r.shown, ' Franc', 'isc', at: r.at);
+    r = next(r, ' Franc', 'isc');
     expect(r.text, 'San Francisc');
-    r = withHeard(r.text, r.shown, 'isc', 'o,', at: r.at);
+    r = next(r, 'isc', 'o,');
     expect(r.text, 'San Francisco,');
-    r = withHeard(r.text, r.shown, 'o,', '', at: r.at);
+    r = next(r, 'o,', '');
     expect(r.text, 'San Francisco,');
     expect(r.shown, '');
   });
 
   test('after typed words, the heard text is added exactly as sent', () {
-    expect(withHeard('word', '', ' and', ' more', at: 0).text, 'word and more');
-    expect(withHeard('word ', '', 'and', '', at: 0).text, 'word and');
-    expect(withHeard('word\n', '', 'and', '', at: 0).text, 'word\nand');
-    expect(withHeard('word ', '', ' ', '', at: 0).text, 'word  ');
-    expect(withHeard('word', '', 'The', '', at: 0).text, 'wordThe');
+    expect(withHeard('word', ' and', ' more').text, 'word and more');
+    expect(withHeard('word ', 'and', '').text, 'word and');
+    expect(withHeard('word\n', 'and', '').text, 'word\nand');
+    expect(withHeard('word ', ' ', '').text, 'word  ');
+    expect(withHeard('word', 'The', '').text, 'wordThe');
   });
 
   test('a provisional-only first message, then the same piece final: no doubling', () {
-    var r = withHeard('', '', '', ' How', at: 0);
+    var r = next(none, '', ' How');
     expect(r.text, 'How');
-    r = withHeard(r.text, r.shown, ' How', '', at: r.at);
+    r = next(r, ' How', '');
     expect(r.text, 'How');
     expect(r.shown, '');
   });
 
   // D74: the start of a session.
   test('a session starts after typed words with one space', () {
-    expect(withHeard('word', '', 'The', '', first: true, at: 0).text, 'word The');
-    expect(withHeard('dream.', '', 'I', '', first: true, at: 0).text, 'dream. I');
-    expect(withHeard('word', '', '', 'The', first: true, at: 0).text, 'word The');
+    expect(withHeard('word', 'The', '', first: true).text, 'word The');
+    expect(withHeard('dream.', 'I', '', first: true).text, 'dream. I');
+    expect(withHeard('word', '', 'The', first: true).text, 'word The');
   });
 
   test('a session starts with no space where none is wanted', () {
-    expect(withHeard('', '', 'The', '', first: true, at: 0).text, 'The');
-    expect(withHeard('', '', ' The', '', first: true, at: 0).text, 'The');
-    expect(withHeard('word ', '', 'The', '', first: true, at: 0).text, 'word The');
-    expect(withHeard('word\n', '', 'The', '', first: true, at: 0).text, 'word\nThe');
-    expect(withHeard('word', '', ' The', '', first: true, at: 0).text, 'word The');
+    expect(withHeard('', 'The', '', first: true).text, 'The');
+    expect(withHeard('', ' The', '', first: true).text, 'The');
+    expect(withHeard('word ', 'The', '', first: true).text, 'word The');
+    expect(withHeard('word\n', 'The', '', first: true).text, 'word\nThe');
+    expect(withHeard('word', ' The', '', first: true).text, 'word The');
   });
 
   test('inside a session everything is joined exactly as sent', () {
-    expect(withHeard('word The', '', 'dr', 'eam', first: false, at: 0).text, 'word Thedream');
-    var r = withHeard('word', '', '', 'The', first: true, at: 0);
+    expect(withHeard('word The', 'dr', 'eam').text, 'word Thedream');
+    var r = withHeard('word', '', 'The', first: true);
     expect(r.text, 'word The');
-    r = withHeard(r.text, r.shown, 'The', 'dr', first: true, at: r.at);
+    r = next(r, 'The', 'dr', first: true);
     expect(r.text, 'word Thedr');
-    r = withHeard(r.text, r.shown, 'dr', 'eam', first: false, at: r.at);
+    r = next(r, 'dr', 'eam');
     expect(r.text, 'word Thedream');
   });
 
-  // D75: the dreamer types while a provisional piece is shown: the stale
-  // piece is dropped, the typed words stay, finals still append.
+  test('the offset of a new piece is where it starts', () {
+    var r = withHeard('', ' How', ' are');
+    expect(r.text, 'How are');
+    expect(r.shown, ' are');
+    expect(r.at, 3);
+    r = next(r, ' are', '');
+    expect(r.shown, '');
+    expect(r.text, 'How are');
+  });
+
+  // D75: typed after a provisional piece: it goes, the typed words stay,
+  // finals still append.
   test('typed words after a provisional piece: it is dropped, never doubled', () {
-    var r = withHeard('', '', '', tokens[0] + tokens[1], first: true, at: 0);
-    expect(r.text, tokens[0] + tokens[1]);
-    final typed = '${r.text}x';
-    r = withHeard(typed, r.shown, tokens[0] + tokens[1], '', first: true, at: r.at);
+    var r = withHeard('', '', tokens[0] + tokens[1], first: true);
+    r = next(r, tokens[0] + tokens[1], '', now: '${r.text}x', first: true);
     expect(r.text, 'x ${tokens[0]}${tokens[1]}');
     expect(r.shown, '');
   });
 
-  test('typed words before a provisional piece: it is still replaced', () {
-    final r = withHeard('word', '', '', ' and', first: true, at: 0);
-    expect(r.text, 'word and');
-    final typed = 'typed ${r.text}';
-    expect(withHeard(typed, r.shown, ' and', '', at: r.at).text, 'typed word and');
-  });
-
-  // D76: the provisional piece is dropped only where it was put.
-  test('a short piece typed around: the one put there is dropped', () {
-    final heard = withHeard('w', '', '', '.', at: 0);
-    expect(heard.text, 'w.');
-    expect(heard.at, 1);
-    final typed = '${heard.text} q. r';
-    expect(withHeard(typed, heard.shown, '.', '', at: heard.at).text, 'w q. r.');
-  });
-
-  test('a piece repeated in typed words: first copy goes', () {
-    final heard = withHeard('w', '', '', ' a', at: 0);
-    expect(heard.text, 'w a');
-    expect(heard.at, 1);
-    final typed = '${heard.text} b a c';
-    final next = withHeard(typed, heard.shown, ' a', '', at: heard.at);
-    expect(next.text, 'w b a c a');
-    expect(next.shown, '');
-  });
-
   test('typed onto a piece: it goes, typed stays', () {
-    final heard = withHeard('w', '', '', ' a', at: 0);
-    final next = withHeard('${heard.text}nd', heard.shown, ' a', '', at: heard.at);
-    expect(next.text, 'wnd a');
+    final r = withHeard('w', '', ' a');
+    expect(next(r, ' a', '', now: '${r.text}nd').text, 'wnd a');
   });
 
-  test('typed before the piece: it is still found at the end', () {
-    final heard = withHeard('w', '', '', ' a', at: 0);
-    final typed = 'x ${heard.text}';
-    expect(withHeard(typed, heard.shown, ' a', '', at: heard.at).text, 'x w a');
+  // D76: the dreamer's own copies of the piece are never taken.
+  test('a short piece typed around: the one put there is dropped', () {
+    final r = withHeard('w', '', '.');
+    expect(r.at, 1);
+    expect(next(r, '.', '', now: '${r.text} q. r').text, 'w q. r.');
   });
 
-  test('typed before and after the piece: it is left alone', () {
-    final heard = withHeard('w', '', '', ' a', at: 0);
-    final typed = 'x ${heard.text} b';
-    expect(withHeard(typed, heard.shown, ' b', '', at: heard.at).text, 'x w a b b');
+  test('a piece repeated in typed words: the one put there goes', () {
+    final r = withHeard('w', '', ' a');
+    final n = next(r, ' a', '', now: '${r.text} b a c');
+    expect(n.text, 'w b a c a');
+    expect(n.shown, '');
   });
 
-  test('the offset of a new piece is where it starts', () {
-    var r = withHeard('', '', ' How', ' are', at: 0);
-    expect(r.text, 'How are');
-    expect(r.shown, ' are');
-    expect(r.at, 3);
-    r = withHeard(r.text, r.shown, ' are', '', at: r.at);
-    expect(r.shown, '');
-    expect(r.text, 'How are');
-  });
-
-  // D77: the text got shorter than the offset; no crash, the heard words stay.
-  test('the field emptied or shortened past the piece: no crash', () {
-    final heard = withHeard('w', '', '', ' a', at: 0);
-    expect(heard.text, 'w a');
-    expect(withHeard('', heard.shown, ' a', '', at: heard.at).text, 'a');
-    expect(withHeard('w', heard.shown, ' a', '', at: heard.at).text, 'w a');
-    expect(withHeard('', heard.shown, '', ' b', at: heard.at).text, 'b');
-    expect(withHeard('w a', heard.shown, '', '', at: 99).text, 'w');
-    expect(withHeard('w a', heard.shown, '', '', at: -1).text, 'w');
-  });
-
-  // D77: an edit wholly before the piece moves the offset with it.
-  test('typed at the start: the offset moves, the right copy goes', () {
-    final heard = withHeard('a.b', '', '', '.', at: 0);
-    expect(heard.text, 'a.b.');
-    expect(heard.at, 3);
-    final typed = 'XY${heard.text}';
-    final at = movedTo(heard.text, typed, heard.at);
-    expect(at, 5);
-    expect(withHeard(typed, heard.shown, '', '', at: at).text, 'XYa.b');
-  });
-
-  test('an edit before the piece shifts the offset', () {
-    expect(movedTo('abc.', 'XYabc.', 3), 5);
-    expect(movedTo('abc.', 'bc.', 3), 2);
-    expect(movedTo('abc.', 'abXc.', 3), 4);
-    expect(movedTo('abc.', 'abc.', 3), 3);
-    expect(movedTo('abc.', 'abcXY.', 3), 5);
-    expect(movedTo('', 'abc', 0), 3);
-    expect(movedTo('abc.', 'aXYc.', 3), 4);
-    expect(movedTo('aa', 'aaa', 1), 1);
-  });
-
-  test('an edit at or after it leaves the offset', () {
-    expect(movedTo('abc.', 'abc.XY', 3), 3);
-    expect(movedTo('abc.', 'ab', 3), 3);
-    expect(movedTo('abc.', 'abc', 3), 3);
-    expect(movedTo('abc.', 'X', 3), 3);
+  // D77: an edit wholly before the piece moves it.
+  test('typed before the piece: it goes from where it moved', () {
+    final r = withHeard('w', '', ' a');
+    expect(next(r, ' a', '', now: 'x ${r.text}').text, 'x w a');
+    final dot = withHeard('a.b', '', '.');
+    expect(next(dot, '', '', now: 'XY${dot.text}').text, 'XYa.b');
   });
 
   test('a copy at the old offset is left alone', () {
-    final heard = withHeard('I', '', '', ' was', at: 0);
-    final typed = 'Q was ${heard.text}';
-    expect(typed.startsWith(' was', heard.at), isTrue);
-    final at = movedTo(heard.text, typed, heard.at);
-    expect(withHeard(typed, heard.shown, ' was', '', at: at).text, 'Q was I was');
+    final r = withHeard('I', '', ' was');
+    expect(next(r, ' was', '', now: 'Q was ${r.text}').text, 'Q was I was');
   });
 
-  test('a provisional piece edited away is left alone', () {
-    var r = withHeard('', '', tokens[0], tokens[1], at: 0);
-    final edited = r.text.substring(0, r.text.length - 1);
-    r = withHeard(edited, r.shown, tokens[1], '', at: r.at);
-    expect(r.text, edited + tokens[1]);
+  test('the field emptied: the heard words arrive into it', () {
+    final r = withHeard('w', '', ' a');
+    expect(next(r, ' a', '', now: '').text, 'a');
+    expect(next(r, '', ' b', now: '').text, 'b');
+  });
+
+  // Task 16e: backspace into, through and past the piece.
+  test('backspace into the piece: what is left of it goes', () {
+    var r = withHeard(tokens[0], '', tokens[1] + tokens[2]);
+    for (var cut = 1; cut < (tokens[1] + tokens[2]).length; cut++) {
+      final edited = r.text.substring(0, r.text.length - 1);
+      r = next(r, '', tokens[1] + tokens[2], now: edited);
+      expect(r.text, tokens[0] + tokens[1] + tokens[2]);
+    }
+    r = next(r, tokens[1] + tokens[2], '', now: r.text.substring(0, r.text.length - 3));
+    expect(r.text, tokens[0] + tokens[1] + tokens[2]);
+  });
+
+  test('backspace through the piece and past it: the cut stays', () {
+    final heard = tokens[0] + tokens[1];
+    final r = withHeard(heard, '', tokens[2]);
+    final edited = heard.substring(0, heard.length - 2);
+    expect(next(r, '', tokens[3], now: edited).text, edited + tokens[3]);
+  });
+
+  test('typed inside the piece: typed characters stay, piece goes', () {
+    expect(withoutPiece('w abc', 'w aXbc', 1, 4), 'wX');
+    // A letter typed beside its own twin: the common start and end never overlap.
+    expect(withoutPiece('w abc', 'w abbc', 1, 4), 'wb');
+    expect(withoutPiece('w abc', 'w ab', 1, 4), 'w');
+    expect(withoutPiece('w abc', 'w', 1, 4), 'w');
+    expect(withoutPiece('w abc', '', 1, 4), '');
+    expect(withoutPiece('w abc', 'Yw abc', 1, 4), 'Yw');
+    expect(withoutPiece('w abc', 'w abcZ', 1, 4), 'wZ');
+    expect(withoutPiece('w abc', 'w abc', 1, 4), 'w');
+    expect(withoutPiece('w abc', 'w abc', 1, 0), 'w abc');
   });
 
   test('the whole invented dream, heard in pieces, reads as written', () {
-    var r = (text: '', shown: '', at: 0);
+    var r = none;
     for (var i = 0; i < tokens.length; i++) {
-      r = withHeard(r.text, r.shown, tokens[i], i + 1 < tokens.length ? tokens[i + 1] : '', at: r.at);
+      r = next(r, tokens[i], i + 1 < tokens.length ? tokens[i + 1] : '');
     }
     expect(r.text, tokens.join());
     expect(r.shown, '');

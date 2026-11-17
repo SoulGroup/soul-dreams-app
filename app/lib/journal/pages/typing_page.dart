@@ -98,7 +98,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   RecordingSession? _session;
   String _shown = '';
   int _shownAt = 0;
-  // The text the page last set: an edit before the piece moves _shownAt (D77).
+  // The text the page last set: the dreamer's edit since is found against it,
+  // and what it left of the piece goes (Task 16e).
   String _setText = '';
   // True until a final piece has been heard in this recording (D74): the
   // first piece after typed words gets one space; the rest go as sent.
@@ -252,7 +253,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   void _heard(String finalText, String provisional) {
     if (!mounted) return;
     final before = _text.value;
-    final next = withHeard(before.text, _shown, finalText, provisional, first: !_gotFinal, at: movedTo(_setText, before.text, _shownAt));
+    final base = withoutPiece(_setText, before.text, _shownAt, _shown.length);
+    final next = withHeard(base, finalText, provisional, first: !_gotFinal);
     _shown = next.shown;
     _shownAt = next.at;
     _setText = next.text;

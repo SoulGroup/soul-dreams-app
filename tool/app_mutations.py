@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A121, A55 dropped (D74.3), A94 dropped (D86), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A125, A55 dropped (D74.3), A80 and A81 dropped (Task 16e), A94 dropped (D86), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 166 run, 166 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 168 run, 168 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -459,9 +459,9 @@ ROWS = [
      '',
      'test/recording/soniox_test.dart', 'final and provisional words, markers dropped'),
     ('A49', 'lib/recording/heard_text.dart',
-     '  if (text.endsWith(shown)) return text.substring(0, text.length - shown.length);\n',
-     '  if (text.endsWith(shown)) return text;\n',
-     'test/recording/heard_text_test.dart', 'typed words before a provisional piece: it is still replaced'),
+     '    return now.substring(0, at) + now.substring(end);\n',
+     '    return now;\n',
+     'test/recording/heard_text_test.dart', 'provisional words are replaced, never doubled'),
     ('A50', 'lib/recording/heard_text.dart',
      "    return '$base $add';",
      '    return base + add;',
@@ -575,25 +575,19 @@ ROWS = [
      'spaced: first',
      'test/recording/heard_text_test.dart', 'inside a session everything is joined exactly as sent'),
     ('A78', 'lib/recording/heard_text.dart',
-     '(at >= 0 && at <= text.length && text.startsWith(shown, at)) {',
-     '(false) {',
-     'test/recording/heard_text_test.dart', 'a piece repeated in typed words: first copy goes'),
+     '    final moved = at + now.length - was.length;\n',
+     '    final moved = at;\n',
+     'test/recording/heard_text_test.dart', 'typed before the piece: it goes from where it moved'),
     ('A79', 'lib/recording/heard_text.dart',
-     'if (at >= 0 && at <= text.length && text.startsWith(shown, at))',
-     'if (at >= 0 && text.startsWith(shown, at))',
-     'test/recording/heard_text_test.dart', 'the field emptied or shortened past the piece: no crash'),
-    ('A80', 'lib/recording/heard_text.dart',
-     '? at + now.length - was.length : at;',
-     '? at : at;',
-     'test/recording/heard_text_test.dart', 'an edit before the piece shifts the offset'),
-    ('A81', 'lib/recording/heard_text.dart',
-     'return was.length - tail <= at',
-     'return was.length - tail < at',
-     'test/recording/heard_text_test.dart', 'an edit before the piece shifts the offset'),
+     '  final before = at < head ? at : head;\n',
+     '  final before = at;\n',
+     'test/recording/heard_text_test.dart', 'the field emptied: the heard words arrive into it'),
+    # A80 and A81 were dropped (Task 16e): the offset arithmetic they broke is
+    # gone; the new branch boundaries give the same text either way.
     ('A82', 'lib/recording/heard_text.dart',
      'while (tail < most - head &&',
      'while (tail < most &&',
-     'test/recording/heard_text_test.dart', 'an edit before the piece shifts the offset'),
+     'test/recording/heard_text_test.dart', 'typed inside the piece: typed characters stay, piece goes'),
     ('A83', 'lib/journal/pages/typing_page.dart',
      'if (!mounted || !identical(session, _session)) return;',
      'if (!mounted) return;',
@@ -623,8 +617,8 @@ ROWS = [
      'max(0.0, space - StandIns.gap)',
      'test/journal/pages/typing_page_test.dart', 'an iPhone SE, keyboard up, recording at 3.1x: words above Save'),
     ('A90', 'lib/journal/pages/typing_page.dart',
-     'at: movedTo(_setText, before.text, _shownAt)',
-     'at: _shownAt',
+     'withoutPiece(_setText, before.text, _shownAt, _shown.length)',
+     'withoutPiece(before.text, before.text, _shownAt, _shown.length)',
      'test/journal/pages/typing_page_test.dart', 'typed before: a copy at the old offset stays'),
     ('A91', 'lib/journal/pages/typing_page.dart',
      '    _setText = next.text;\n',
@@ -756,6 +750,23 @@ ROWS = [
      '      SafeLog.event(LogEvent.recordingReleaseFailed);\n',
      '',
      'test/recording/record_microphone_test.dart', 'a release that fails after a stop logs its own code'),
+    # Task 16e: one provisional piece, never a stale one, whatever the dreamer edits.
+    ('A122', 'lib/recording/heard_text.dart',
+     ' + now.substring(head, nowEnd) + ',
+     ' + ',
+     'test/recording/heard_text_test.dart', 'typed inside the piece: typed characters stay, piece goes'),
+    ('A123', 'lib/recording/heard_text.dart',
+     'end > wasEnd ? end - wasEnd : 0',
+     '0',
+     'test/recording/heard_text_test.dart', 'typed inside the piece: typed characters stay, piece goes'),
+    ('A124', 'lib/recording/heard_text.dart',
+     '  final before = at < head ? at : head;\n',
+     '  final before = head;\n',
+     'test/recording/heard_text_test.dart', 'backspace into the piece: what is left of it goes'),
+    ('A125', 'lib/journal/pages/typing_page.dart',
+     '    _setText = next.text;\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'backspace into the provisional piece: newer guesses replace it'),
 ]
 
 
