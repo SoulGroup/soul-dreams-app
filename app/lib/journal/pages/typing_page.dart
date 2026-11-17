@@ -68,15 +68,13 @@ enum _Mic { idle, starting, recording, stopping }
 
 class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   late final _text = TextEditingController(text: widget.edit?.text);
-  // The field's own scrolling: while recording it follows the end (D79 a),
-  // until the dreamer looks elsewhere: an upward drag, or the caret put
-  // anywhere but the end. Back at the bottom, or the caret back at the end,
-  // it follows again. The app's own jumps, Flutter's scroll to the caret
-  // among them, change nothing (D80).
+  // The field's own scrolling: while recording it follows the insertion
+  // point (D79 a, D87 3) until the dreamer drags upward; a drag of theirs
+  // that ends with the insertion point in view follows again. The app's own
+  // jumps change nothing (D80).
   final _scroll = ScrollController();
   bool _following = false;
   bool _dreamerScrolls = false;
-  bool _settingHeard = false;
   bool? _firstUse;
   bool _saving = false;
   bool _failed = false;
@@ -92,18 +90,21 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   static const _swipeFast = 300.0;
   double _swiped = 0;
 
-  // Recording: its state, the provisional words now at the field's end,
-  // the recent levels, and the time it has run.
+  // Recording: its state; the text before and after the insertion point
+  // and the words heard so far, final then provisional (D87); the recent
+  // levels, and the time it has run.
   _Mic _mic = _Mic.idle;
   RecordingSession? _session;
-  String _shown = '';
-  int _shownAt = 0;
-  // The text the page last set: the dreamer's edit since is found against it,
-  // and what it left of the piece goes (Task 16e).
-  String _setText = '';
-  // True until a final piece has been heard in this recording (D74): the
-  // first piece after typed words gets one space; the rest go as sent.
-  bool _gotFinal = false;
+  String _before = '';
+  String _after = '';
+  String _finals = '';
+  String _provisional = '';
+  // Where the dictated words end, and the value the page last set.
+  int _insertEnd = 0;
+  TextEditingValue? _shownValue;
+  // The dreamer's first edit attempt while recording, held until the last
+  // words have landed; later attempts in that wait are ignored (D87 2).
+  ({TextEditingValue old, TextEditingValue edited})? _held;
   final _levels = <double>[];
   int _seconds = 0;
   Timer? _ticker;
@@ -112,7 +113,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _text.addListener(_caretMoved);
+    _text.addListener(_moved);
     // A failed read shows the short line and marks nothing; a failed mark
     // still shows MP·10. Each logs a code (D71 Q18).
     widget.journal.firstUseSeen().then(
@@ -215,7 +216,17 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   Future<void> _startRecording() async {
     final recording = widget.recording;
     if (recording == null) return;
+    // The insertion point: the caret, or a selection's end (the selected
+    // words stay), or the end if the dreamer has not placed it (D87 1).
+    final value = _text.value;
+    final at = value.selection.isValid ? value.selection.end : value.text.length;
+    _before = value.text.substring(0, at);
+    _after = value.text.substring(at);
+    _finals = '';
+    _provisional = '';
+    _held = null;
     setState(() => _mic = _Mic.starting);
+    _compose();
     final session = RecordingSession(
       recording,
       onHeard: _heard,
@@ -239,76 +250,99 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       _levels.clear();
       _seconds = 0;
     });
-    // A recording starts at the end, wherever the field was (D80 2).
+    // A recording starts with the insertion point in view (D80 2, D87 3).
     _following = true;
-    _toEnd();
+    _reveal();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _seconds++);
     });
     SemanticsService.sendAnnouncement(View.of(context), Lines.MP_33.text(appLanguage), TextDirection.ltr);
   }
 
-  // Heard words go at the end of the text, never at the caret (D71 Q6);
-  // a caret at the end stays at the end.
+  // Heard words go in at the insertion point (D87 1).
   void _heard(String finalText, String provisional) {
     if (!mounted) return;
-    final before = _text.value;
-    final base = withoutPiece(_setText, before.text, _shownAt, _shown.length);
-    final next = withHeard(base, finalText, provisional, first: !_gotFinal);
-    _shown = next.shown;
-    _shownAt = next.at;
-    _setText = next.text;
-    if (finalText.isNotEmpty) _gotFinal = true;
-    final atEnd = !before.selection.isValid ||
-        (before.selection.isCollapsed && before.selection.baseOffset == before.text.length);
-    final selection = atEnd
-        ? TextSelection.collapsed(offset: next.text.length)
-        : TextSelection(
-            baseOffset: before.selection.baseOffset.clamp(0, next.text.length),
-            extentOffset: before.selection.extentOffset.clamp(0, next.text.length),
-          );
-    // The keyboard's own composing text stays while it lies in the part of
-    // the text that did not change (D75).
-    final composing = before.composing.isValid && next.text.startsWith(before.text.substring(0, before.composing.end))
-        ? before.composing
-        : TextRange.empty;
-    _settingHeard = true;
-    try {
-      _text.value = TextEditingValue(text: next.text, selection: selection, composing: composing);
-    } finally {
-      _settingHeard = false;
-    }
+    _finals += finalText;
+    _provisional = provisional;
+    _compose();
     // The jump checks following when it runs (D81, D86).
-    _toEnd();
+    _reveal();
   }
 
-  // After the next layout, the field shows its end, if it still follows
-  // then and no drag of the dreamer's is under way (D81).
-  void _toEnd() {
+  // The field's text: the words between the text before and after them,
+  // the caret at their end.
+  void _compose() {
+    final r = dictatedInto(_before, _finals + _provisional, _after);
+    _insertEnd = r.end;
+    final value = TextEditingValue(text: r.text, selection: TextSelection.collapsed(offset: r.end));
+    // Noted first, so the listener sees the page's own change as nothing new.
+    _shownValue = value;
+    _text.value = value;
+  }
+
+  // After the next layout, the field shows the insertion point, if it still
+  // follows then and no drag of the dreamer's is under way (D81, D87 3).
+  void _reveal() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_following || _dreamerScrolls || !_scroll.hasClients) return;
-      _scroll.jumpTo(_scroll.position.maxScrollExtent);
+      _editable()?.bringIntoView(TextPosition(offset: _insertEnd));
     });
+  }
+
+  EditableTextState? _editable() {
+    EditableTextState? found;
+    void visit(Element e) {
+      if (found != null) return;
+      if (e is StatefulElement && e.state is EditableTextState) {
+        found = e.state as EditableTextState;
+      } else {
+        e.visitChildElements(visit);
+      }
+    }
+
+    if (mounted) context.visitChildElements(visit);
+    return found;
+  }
+
+  bool _insertionInView() {
+    final editable = _editable()?.renderEditable;
+    if (editable == null) return false;
+    final caret = editable.getLocalRectForCaret(TextPosition(offset: _insertEnd));
+    return caret.top >= -1 && caret.bottom <= editable.size.height + 1;
   }
 
   bool get _live => _mic == _Mic.recording || _mic == _Mic.stopping;
 
-  // The dreamer moved the caret (D80): at the end it follows, elsewhere it
-  // pauses. The heard words' own changes to the text are not the dreamer's.
-  void _caretMoved() {
-    if (_settingHeard) return;
-    final caret = _text.selection;
-    _following = caret.isCollapsed && caret.baseOffset == _text.text.length;
+  // An edit attempt while recording (D87 2): a key press, a paste or a cut
+  // (the text is put back as shown), or a tap or a handle that moves the
+  // caret or the selection. The edit is held and the recording stops. A
+  // shown value exists only while a recording runs; the page's own changes,
+  // and the keyboard's own composing range, are nothing new.
+  void _moved() {
+    final shown = _shownValue;
+    if (shown == null) return;
+    final now = _text.value;
+    if (now.text == shown.text && now.selection == shown.selection) return;
+    _attempt(shown, now);
+    if (now.text != shown.text) _text.value = shown;
+  }
+
+  void _attempt(TextEditingValue old, TextEditingValue edited) {
+    if (_held != null) return;
+    _held = (old: old, edited: edited);
+    if (_mic == _Mic.recording) setState(() => _mic = _Mic.stopping);
+    _session?.stop();
   }
 
   // The dreamer's own drags (D80): upward pauses; a scroll of theirs that
-  // ends at the bottom follows again. Scrolls with no drag are the app's.
+  // ends with the insertion point in view follows again (D87 3). Scrolls
+  // with no drag are the app's.
   bool _scrolled(ScrollNotification n) {
     if (n is ScrollStartNotification) _dreamerScrolls = n.dragDetails != null;
     if (n is ScrollUpdateNotification && n.dragDetails != null && (n.scrollDelta ?? 0) < 0) _following = false;
     if (n is ScrollEndNotification && _dreamerScrolls) {
       _dreamerScrolls = false;
-      if (n.metrics.pixels >= n.metrics.maxScrollExtent - 1) _following = true;
+      if (_insertionInView()) _following = true;
     }
     return false;
   }
@@ -333,11 +367,22 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _ticker?.cancel();
     _ticker = null;
     _session = null;
-    _shown = '';
-    _shownAt = 0;
-    _setText = '';
-    _gotFinal = false;
-    if (mounted) setState(() => _mic = _Mic.idle);
+    _shownValue = null;
+    if (!mounted) return;
+    setState(() => _mic = _Mic.idle);
+    // The dreamer's held edit, applied to the settled text (D87 2).
+    final held = _held;
+    _held = null;
+    if (held == null) return;
+    final r = editSettled(
+      _text.text,
+      held.old.text,
+      held.edited.text,
+      caret: held.edited.selection.isValid ? held.edited.selection.extentOffset : null,
+      keepStart: _before.length,
+      keepEnd: _after.length,
+    );
+    _text.value = TextEditingValue(text: r.text, selection: TextSelection.collapsed(offset: r.caret));
   }
 
   String _elapsed() {

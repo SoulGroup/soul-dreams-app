@@ -671,20 +671,6 @@ void main() {
     expect(lines, ['recordingStarted', 'recordingEnded']);
   });
 
-  testWidgets('heard words go at the end, never at the caret', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final typed = dreams[1];
-    await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    field.controller!.selection = const TextSelection.collapsed(offset: 4);
-    await record(tester);
-    v.link.reply(reply(done: [tokens[0]]));
-    await tester.pump();
-    expect(field.controller!.text, '$typed ${tokens[0]}');
-    expect(field.controller!.selection, const TextSelection.collapsed(offset: 4));
-  });
-
   testWidgets('MP·33 is told once; the level line and the timer show', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
@@ -979,70 +965,7 @@ void main() {
     });
   }
 
-  // 3. Typing during a recording drops the stale provisional piece.
-  testWidgets('typing while words are provisional: they never double', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    v.link.reply(reply(shown: [tokens[0], tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.text, tokens[0] + tokens[1]);
-    field.controller!.text = '${field.controller!.text}x';
-    v.link.reply(reply(done: [tokens[0], tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.text, 'x ${tokens[0]}${tokens[1]}');
-    v.link.reply(reply(done: [tokens[2]]));
-    await tester.pump();
-    expect(field.controller!.text, 'x ${tokens.take(3).join()}');
-  });
-
-  // D76: typed words that repeat the piece do not fool the drop.
-  testWidgets('typing a copy of the provisional piece: the shown one goes', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.text, tokens[0] + tokens[1]);
-    field.controller!.text = '${field.controller!.text} q${tokens[1]}';
-    v.link.reply(reply(done: [tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.text, '${tokens[0]} q${tokens[1]}${tokens[1]}');
-  });
-
-  // D77: an edit before the piece, and the field emptied while dictating.
-  testWidgets('typed before: a copy at the old offset stays', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
-    await tester.pump();
-    field.controller!.text = 'Q${tokens[1]} ${field.controller!.text}';
-    v.link.reply(reply(done: [tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.text, 'Q${tokens[1]} ${tokens[0]}${tokens[1]}');
-  });
-
-  testWidgets('the field emptied while dictating: later words still arrive', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
-    await tester.pump();
-    field.controller!.text = '';
-    v.link.reply(reply(done: [tokens[1]]));
-    await tester.pump();
-    expect(tester.takeException(), isNull);
-    expect(field.controller!.text, tokens[1].trimLeft());
-    v.link.reply(reply(done: [tokens[2]]));
-    await tester.pump();
-    expect(field.controller!.text, tokens[1].trimLeft() + tokens[2]);
-  });
-
+  // 3. (Typing during a recording: replaced by D87, below.)
   // 4. Leaving the app while Save waits for the last words.
   testWidgets('leaving the app while Save waits: saved at once', (tester) async {
     final v = voice();
@@ -1061,44 +984,9 @@ void main() {
     expect((await h.nights()).single.dreams, [tokens[0]]);
   });
 
-  // 6. The keyboard's composing text survives words arriving after it; a
-  // Save that waits does not touch a screen that has gone.
-  testWidgets('heard words keep the composing text before them', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    field.controller!.value = TextEditingValue(
-      text: tokens[0],
-      selection: TextSelection.collapsed(offset: tokens[0].length),
-      composing: TextRange(start: 0, end: tokens[0].length),
-    );
-    v.link.reply(reply(done: [tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.value.composing, TextRange(start: 0, end: tokens[0].length));
-    expect(field.controller!.text, tokens[0] + tokens[1]);
-  });
-
-  testWidgets('composing text in a changed part is dropped', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await record(tester);
-    v.link.reply(reply(shown: [tokens[0], tokens[1]]));
-    await tester.pump();
-    final typed = '${field.controller!.text}x';
-    field.controller!.value = TextEditingValue(
-      text: typed,
-      selection: TextSelection.collapsed(offset: typed.length),
-      composing: TextRange(start: typed.length - 1, end: typed.length),
-    );
-    v.link.reply(reply(done: [tokens[0], tokens[1]]));
-    await tester.pump();
-    expect(field.controller!.value.composing, TextRange.empty);
-  });
-
   // Task 16a: the owner's crash. Backspace, as the phone's keyboard sends
-  // it, over the heard words while final pieces keep arriving.
+  // it, over the heard words while final pieces keep arriving; under D87 the
+  // first press stops the recording and the rest of the wait's are ignored.
   testWidgets('backspacing over heard words while finals arrive', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
@@ -1114,18 +1002,17 @@ void main() {
         TextEditingValue(text: cut, selection: TextSelection.collapsed(offset: cut.length)),
       );
       await tester.pump();
-      if (i.isEven) {
+      if (i.isEven && i < 6) {
         v.link.reply(reply(done: [tokens[4 + i % 3]], shown: [tokens[5 + i % 3]]));
         await tester.pump();
       }
       expect(tester.takeException(), isNull);
     }
-    tester.testTextInput.updateEditingValue(TextEditingValue.empty);
-    await tester.pump();
-    v.link.reply(reply(done: [tokens[5]]));
-    await tester.pump();
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    expect(field.controller!.text, tokens[5].trimLeft());
+    final settled = tokens.take(4).join() + tokens[4] + tokens[6] + tokens[5];
+    expect(field.controller!.text, settled.substring(0, settled.length - 1));
   });
 
   // D79 a: while recording, the field follows the end; scrolled up, it
@@ -1160,16 +1047,13 @@ void main() {
     await filled(tester, v.link);
   });
 
-  // D80 2: an edit opens at its top; recording jumps to the end at once,
-  // and the caret the dreamer left mid-text does not stop it.
+  // D80 2: an edit opens at its top; recording at its end jumps there at once.
   testWidgets('an edit opened at its top follows from the start', (tester) async {
     final v = voice();
     final long = List.filled(8, tokens.join()).join(' ');
     await tall(tester, recording: v.recording, edit: (id: 'n', index: 0, text: long));
     final scroll = fieldScroll(tester);
     expect(scroll.pixels, 0);
-    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
-    await tester.pump();
     await record(tester);
     await tester.pump();
     expect(atBottom(scroll), isTrue);
@@ -1196,38 +1080,12 @@ void main() {
     expect(atBottom(scroll), isTrue);
   });
 
-  testWidgets('a tap mid-text pauses; the caret back at the end resumes', (tester) async {
-    final v = voice();
-    await tall(tester, recording: v.recording);
-    await record(tester);
-    final scroll = await filled(tester, v.link);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
-    await tester.pumpAndSettle();
-    expect(field.controller!.selection.baseOffset, lessThan(field.controller!.text.length));
-    final paused = scroll.pixels;
-    await hear(tester, v.link, tokens);
-    expect(scroll.pixels, paused);
-    expect(atBottom(scroll), isFalse);
-    // The keyboard moves the caret back to the end.
-    final text = field.controller!.text;
-    tester.testTextInput.updateEditingValue(
-      TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length),
-      ),
-    );
-    await tester.pump();
-    await hear(tester, v.link, tokens);
-    expect(atBottom(scroll), isTrue);
-  });
-
   testWidgets('the app scrolling to the bottom does not resume', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
     await record(tester);
     final scroll = await filled(tester, v.link);
-    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.drag(find.byKey(TypingPage.fieldKey), const Offset(0, 120));
     await tester.pumpAndSettle();
     scroll.jumpTo(0);
     await tester.pump();
@@ -1260,15 +1118,15 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('words arriving as a tap moves the caret: the view stays', (tester) async {
+  testWidgets('words arriving as a short upward drag ends: the view stays', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
     await record(tester);
     final scroll = await filled(tester, v.link);
     v.link.reply(reply(done: tokens));
     await tester.idle();
+    await tester.drag(find.byKey(TypingPage.fieldKey), const Offset(0, 120));
     final held = scroll.pixels;
-    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
     await tester.pump();
     await tester.pump();
     expect(scroll.pixels, held);
@@ -1277,27 +1135,19 @@ void main() {
 
   testWidgets('words arriving during a drag toward the end: it keeps going', (tester) async {
     final v = voice();
-    await tall(tester, recording: v.recording);
+    final long = List.filled(8, tokens.join()).join(' ');
+    await tall(tester, recording: v.recording, edit: (id: 'n', index: 0, text: long));
+    // Dictation near the top: the insertion point in view, following on.
+    tester.widget<TextField>(find.byKey(TypingPage.fieldKey)).controller!.selection =
+        const TextSelection.collapsed(offset: 4);
+    await tester.pump();
     await record(tester);
-    final scroll = await filled(tester, v.link);
-    await tester.drag(find.byKey(TypingPage.fieldKey), const Offset(0, 300));
-    await tester.pumpAndSettle();
-    // The keyboard moves the caret into the text and back to the end:
-    // following again, with the view still up.
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    final text = field.controller!.text;
-    for (final at in [4, text.length]) {
-      tester.testTextInput.updateEditingValue(
-        TextEditingValue(text: text, selection: TextSelection.collapsed(offset: at)),
-      );
-      await tester.pump();
-    }
-    expect(atBottom(scroll), isFalse);
+    await hear(tester, v.link, [tokens[1]]);
+    final scroll = fieldScroll(tester);
     final drag = await tester.startGesture(tester.getCenter(find.byKey(TypingPage.fieldKey)));
     await drag.moveBy(const Offset(0, -30));
-    await drag.moveBy(const Offset(0, -30));
-    v.link.reply(reply(done: tokens));
+    await drag.moveBy(const Offset(0, -60));
+    v.link.reply(reply(done: [tokens[2]]));
     await tester.idle();
     final held = scroll.pixels;
     await tester.pump();
@@ -1309,72 +1159,213 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  // Task 16e: the field never holds more than one provisional piece, and
-  // never a stale one after a newer reply, whatever the dreamer edits.
-  Future<TextEditingController> dictating(WidgetTester tester, MemoryLink link) async {
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
-    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
-    link.reply(reply(done: [tokens[0]], shown: [tokens[1], tokens[2]]));
-    await tester.pump();
-    return field.controller!;
-  }
+  // D87: dictation goes in at the caret where the recording started; any
+  // edit attempt first stops it as Stop does, then applies to the settled
+  // text; attempts during the stop's wait are ignored (the owner's answer).
+  TextEditingController fieldText(WidgetTester tester) =>
+      tester.widget<TextField>(find.byKey(TypingPage.fieldKey)).controller!;
 
-  Future<void> backspace(WidgetTester tester, TextEditingController text, int times) async {
-    final cut = text.text.substring(0, text.text.length - times);
+  Future<void> keyboard(WidgetTester tester, String text) async {
     tester.testTextInput.updateEditingValue(
-      TextEditingValue(text: cut, selection: TextSelection.collapsed(offset: cut.length)),
+      TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length)),
     );
     await tester.pump();
   }
 
-  testWidgets('backspace into the provisional piece: newer guesses replace it', (tester) async {
+  testWidgets('dictation goes in at the caret; the rest stays after', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
+    final typed = dreams[1];
+    await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
+    final text = fieldText(tester);
+    final at = typed.indexOf(' ');
+    text.selection = TextSelection.collapsed(offset: at);
     await record(tester);
-    final text = await dictating(tester, v.link);
-    for (var i = 0; i < 3; i++) {
-      await backspace(tester, text, 1);
-      v.link.reply(reply(shown: [tokens[1], tokens[2], tokens[3]]));
-      await tester.pump();
-      expect(text.text, tokens[0] + tokens[1] + tokens[2] + tokens[3]);
-    }
-    v.link.reply(reply(done: [tokens[1], tokens[2], tokens[3]]));
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
     await tester.pump();
-    expect(text.text, tokens.take(4).join());
+    final head = typed.substring(0, at);
+    final tail = typed.substring(at);
+    expect(text.text, '$head ${tokens[0]}${tokens[1]}$tail');
+    expect(text.selection.baseOffset, at + 1 + (tokens[0] + tokens[1]).length);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    v.link.reply(reply(done: [tokens[1], tokens[2]], finished: true));
+    await tester.pumpAndSettle();
+    expect(text.text, '$head ${tokens.take(3).join()}$tail');
   });
 
-  testWidgets('backspace through the piece and into the words before it', (tester) async {
+  testWidgets('dictation after a space: one space before the words after it', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final typed = dreams[1];
+    await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
+    final text = fieldText(tester);
+    final at = typed.indexOf(' ') + 1;
+    text.selection = TextSelection.collapsed(offset: at);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0], tokens[1]]));
+    await tester.pump();
+    expect(text.text, '${typed.substring(0, at)}${tokens[0]}${tokens[1]} ${typed.substring(at)}');
+  });
+
+  testWidgets('a selected range: the words go in after it, it stays', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final typed = dreams[1];
+    await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
+    final text = fieldText(tester);
+    final at = typed.indexOf(' ');
+    text.selection = TextSelection(baseOffset: 0, extentOffset: at);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0]]));
+    await tester.pump();
+    expect(text.text, '${typed.substring(0, at)} ${tokens[0]}${typed.substring(at)}');
+  });
+
+  testWidgets('a key press stops the recording, then lands after the words', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
     await record(tester);
-    final text = await dictating(tester, v.link);
-    v.link.reply(reply(done: [tokens[1]], shown: [tokens[2]]));
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    final text = fieldText(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
     await tester.pump();
-    await backspace(tester, text, tokens[2].length + 2);
-    final kept = text.text;
-    v.link.reply(reply(shown: [tokens[3]]));
+    final shown = text.text;
+    await keyboard(tester, '${shown}x');
+    expect(text.text, shown);
+    expect(v.mic.running, isFalse);
+    expect(v.link.sent.last, '');
+    v.link.reply(reply(done: [tokens[1], tokens[2]], finished: true));
+    await tester.pumpAndSettle();
+    expect(text.text, '${tokens.take(3).join()}x');
+    expect(text.selection.baseOffset, text.text.length);
+  });
+
+  testWidgets('a paste stops the recording; it lands after the last words', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    final text = fieldText(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
     await tester.pump();
-    expect(text.text, kept + tokens[3]);
-    v.link.reply(reply(shown: [tokens[3], tokens[4]]));
+    await keyboard(tester, text.text + tokens[4] + tokens[5]);
+    expect(v.mic.running, isFalse);
+    v.link.reply(reply(done: [tokens[1]], finished: true));
+    await tester.pumpAndSettle();
+    expect(text.text, tokens[0] + tokens[1] + tokens[4] + tokens[5]);
+  });
+
+  testWidgets('a backspace stops the recording; the last settled letter goes', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    final text = fieldText(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
     await tester.pump();
-    expect(text.text, kept + tokens[3] + tokens[4]);
+    await keyboard(tester, text.text.substring(0, text.text.length - 1));
+    expect(v.mic.running, isFalse);
+    // A second press during the wait is ignored.
+    await keyboard(tester, '${text.text}x');
+    v.link.reply(reply(done: [tokens[1], tokens[2]], finished: true));
+    await tester.pumpAndSettle();
+    final settled = tokens.take(3).join();
+    expect(text.text, settled.substring(0, settled.length - 1));
+  });
+
+  testWidgets('a tap moving the caret stops the recording; nothing lost', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final text = fieldText(tester);
+    v.link.reply(reply(done: [tokens[0], tokens[1], tokens[2]], shown: [tokens[3]]));
+    await tester.pump();
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pump();
+    expect(v.mic.running, isFalse);
+    v.link.reply(reply(done: [tokens[3]], finished: true));
+    await tester.pumpAndSettle();
+    expect(text.text, tokens.take(4).join());
+    expect(text.selection.baseOffset, lessThan(text.text.length));
+  });
+
+  testWidgets('a tap in the text before the words keeps its place', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final typed = dreams[1];
+    await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
+    final text = fieldText(tester);
+    text.selection = TextSelection.collapsed(offset: typed.length);
+    await record(tester);
+    v.link.reply(reply(done: [tokens[0], tokens[1]]));
+    await tester.pump();
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pump();
+    final tapped = text.selection.baseOffset;
+    expect(tapped, lessThan(typed.length));
+    v.link.reply(reply(done: [tokens[2]], finished: true));
+    await tester.pumpAndSettle();
+    expect(text.text, '$typed ${tokens.take(3).join()}');
+    expect(text.selection.baseOffset, tapped);
+  });
+
+  // The owner's check 1: backspace while newer guesses keep coming.
+  testWidgets('backspace while guesses keep coming: no stale piece', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    final text = fieldText(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1], tokens[2]]));
+    await tester.pump();
+    await keyboard(tester, text.text.substring(0, text.text.length - 1));
+    v.link.reply(reply(shown: [tokens[1], tokens[2], tokens[3]]));
+    await tester.pump();
+    expect(text.text, tokens.take(4).join());
+    v.link.reply(reply(done: [tokens[1], tokens[2], tokens[3]], finished: true));
+    await tester.pumpAndSettle();
+    final settled = tokens.take(4).join();
+    expect(text.text, settled.substring(0, settled.length - 1));
   });
 
   testWidgets('plain dictation: one piece, never a stale one', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
     await record(tester);
-    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    final text = fieldText(tester);
     for (var n = 1; n <= 5; n++) {
       v.link.reply(reply(shown: tokens.take(n).toList()));
       await tester.pump();
-      expect(field.controller!.text, tokens.take(n).join().trimLeft());
+      expect(text.text, tokens.take(n).join().trimLeft());
     }
     v.link.reply(reply(done: tokens.take(3).toList(), shown: [tokens[3]]));
     await tester.pump();
     v.link.reply(reply(shown: [tokens[3], tokens[4]]));
     await tester.pump();
-    expect(field.controller!.text, tokens.take(5).join().trimLeft());
+    expect(text.text, tokens.take(5).join().trimLeft());
+  });
+
+  // D87 3: following follows the insertion point.
+  bool insertionInView(WidgetTester tester) {
+    final editable = tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+    final rect = editable.getLocalRectForCaret(TextPosition(offset: fieldText(tester).selection.baseOffset));
+    return rect.top >= -1 && rect.bottom <= editable.size.height + 1;
+  }
+
+  testWidgets('dictation into a long text follows the insertion point', (tester) async {
+    final v = voice();
+    final long = List.filled(8, tokens.join()).join(' ');
+    await tall(tester, recording: v.recording, edit: (id: 'n', index: 0, text: long));
+    fieldText(tester).selection = const TextSelection.collapsed(offset: 4);
+    await tester.pump();
+    await record(tester);
+    for (var i = 0; i < 6; i++) {
+      await hear(tester, v.link, tokens);
+      expect(insertionInView(tester), isTrue);
+    }
+    final scroll = fieldScroll(tester);
+    expect(scroll.pixels, greaterThan(0));
+    expect(scroll.pixels, lessThan(scroll.maxScrollExtent));
   });
 
   testWidgets('a Save that waits survives its screen going', (tester) async {
