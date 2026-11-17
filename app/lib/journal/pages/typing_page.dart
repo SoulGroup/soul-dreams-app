@@ -379,9 +379,16 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       held.old.text,
       held.edited.text,
       caret: held.edited.selection.isValid ? held.edited.selection.extentOffset : null,
+      selected: held.old.selection.isValid ? held.old.selection.end - held.old.selection.start : 0,
       keepStart: _before.length,
       keepEnd: _after.length,
     );
+    // A value that would remove more than the dreamer could in one act is
+    // refused: the settled text stays (Task 16g).
+    if (r == null) {
+      SafeLog.event(LogEvent.recordingEditRefused);
+      return;
+    }
     _text.value = TextEditingValue(text: r.text, selection: TextSelection.collapsed(offset: r.caret));
   }
 

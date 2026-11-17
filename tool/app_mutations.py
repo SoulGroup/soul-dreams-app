@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A127, A55 dropped (D74.3), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A130, A55 dropped (D74.3), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 166 run, 166 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 169 run, 169 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -762,6 +762,19 @@ ROWS = [
      '      keepStart: _before.length,\n',
      '      keepStart: 0,\n',
      'test/journal/pages/typing_page_test.dart', 'a tap in the text before the words keeps its place'),
+    # Task 16g: one edit attempt never removes more than the selection or one character.
+    ('A128', 'lib/recording/heard_text.dart',
+     '  if (removed.length > selected && removed.runes.length > 1) return null;\n',
+     '',
+     'test/recording/heard_text_test.dart', 'an edit that would remove more is refused'),
+    ('A129', 'lib/recording/heard_text.dart',
+     'removed.length > selected && removed.runes.length > 1',
+     'removed.runes.length > 1',
+     'test/recording/heard_text_test.dart', 'an edit that would remove more is refused'),
+    ('A130', 'lib/journal/pages/typing_page.dart',
+     '      SafeLog.event(LogEvent.recordingEditRefused);\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'a keyboard value that would remove more is never applied'),
 ]
 
 

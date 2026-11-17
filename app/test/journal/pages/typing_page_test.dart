@@ -15,6 +15,7 @@ import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
+import 'package:souldreams/recording/heard_text.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
@@ -1307,6 +1308,64 @@ void main() {
     await tester.pumpAndSettle();
     expect(text.text, '$typed ${tokens.take(3).join()}');
     expect(text.selection.baseOffset, tapped);
+  });
+
+  // Task 16g: the owner's re-test of D87: one backspace while recording
+  // deleted the whole text. One backspace, with typed text before and with
+  // none, before and after words appear: one character goes, never more.
+  Future<void> oneBackspace(WidgetTester tester, {required String typed, required bool wordsFirst}) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    if (typed.isNotEmpty) await tester.enterText(find.byKey(TypingPage.fieldKey), typed);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    final text = fieldText(tester);
+    if (wordsFirst) {
+      v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+      await tester.pump();
+    }
+    if (text.text.isNotEmpty) await keyboard(tester, text.text.substring(0, text.text.length - 1));
+    final rest = wordsFirst ? [tokens[1], tokens[2]] : [tokens[0], tokens[1], tokens[2]];
+    v.link.reply(reply(done: rest, finished: true));
+    await tester.pumpAndSettle();
+    // Exactly one character of the settled text goes (which one, when no
+    // word had appeared yet, is the owner's open question 16f-2).
+    final settled = dictatedInto(typed, tokens.take(3).join(), '').text;
+    final now = text.text;
+    expect(now.length, settled.length - 1);
+    final at = Iterable<int>.generate(now.length).firstWhere((i) => now[i] != settled[i], orElse: () => now.length);
+    expect(settled.substring(0, at) + settled.substring(at + 1), now);
+  }
+
+  testWidgets('one backspace, typed text, words shown: one letter goes', (tester) async {
+    await oneBackspace(tester, typed: dreams[1], wordsFirst: true);
+  });
+
+  testWidgets('one backspace, empty field, words shown: one letter goes', (tester) async {
+    await oneBackspace(tester, typed: '', wordsFirst: true);
+  });
+
+  testWidgets('one backspace, typed text, before any word: one letter goes', (tester) async {
+    await oneBackspace(tester, typed: dreams[1], wordsFirst: false);
+  });
+
+  // A keyboard whose own copy of the text is stale (it never saw the heard
+  // words) reports a whole other text: never applied as an edit.
+  testWidgets('a keyboard value that would remove more is never applied', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[1]);
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    final text = fieldText(tester);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]]));
+    await tester.pump();
+    final lines = await logged();
+    await keyboard(tester, '');
+    v.link.reply(reply(done: [tokens[1]], finished: true));
+    await tester.pumpAndSettle();
+    expect(text.text, dictatedInto(dreams[1], tokens[0] + tokens[1], '').text);
+    expect(lines, contains('recordingEditRefused'));
   });
 
   // The owner's check 1: backspace while newer guesses keep coming.

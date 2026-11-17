@@ -37,12 +37,16 @@ bool _white(String s, int i) => _space.hasMatch(s[i]);
 /// texts keep the same [keepStart] characters before the dictated words and
 /// [keepEnd] after them. A position in the kept text stays with it; one in
 /// the dictated words is counted from their end, where the caret was. With
-/// nothing typed, [caret] (in [old]) is moved likewise.
-({String text, int caret}) editSettled(
+/// nothing typed, [caret] (in [old]) is moved likewise. One edit attempt
+/// never removes more than the dreamer's own selection ([selected]
+/// characters) or one character; a value that would, such as a keyboard's
+/// stale copy of the text, is refused: null (Task 16g).
+({String text, int caret})? editSettled(
   String settled,
   String old,
   String edited, {
   int? caret,
+  int selected = 0,
   required int keepStart,
   required int keepEnd,
 }) {
@@ -68,6 +72,8 @@ bool _white(String s, int i) => _space.hasMatch(s[i]);
     tail++;
   }
   final typed = edited.substring(head, edited.length - tail);
+  final removed = old.substring(head, old.length - tail);
+  if (removed.length > selected && removed.runes.length > 1) return null;
   final from = moved(head);
   final to = moved(old.length - tail);
   final until = to < from ? from : to;
