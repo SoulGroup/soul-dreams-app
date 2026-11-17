@@ -560,7 +560,7 @@ void main() {
   });
 
   // D70 (head's message 20, Product message 19; D71).
-  Future<Harness> tall(WidgetTester tester, {Recording? recording, MemoryJournalFiles? files}) async {
+  Future<Harness> tall(WidgetTester tester, {Recording? recording, MemoryJournalFiles? files, DreamEdit? edit}) async {
     tester.view.devicePixelRatio = 2;
     tester.view.physicalSize = const Size(786, 1704);
     addTearDown(tester.view.reset);
@@ -568,7 +568,10 @@ void main() {
     await h.journal.markFirstUseSeen();
     await h.pump(
       tester,
-      Opener(() async => TypingPage(journal: h.journal, target: await h.journal.targetNow(), recording: recording)),
+      Opener(
+        () async =>
+            TypingPage(journal: h.journal, target: await h.journal.targetNow(), recording: recording, edit: edit),
+      ),
     );
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
@@ -1090,38 +1093,109 @@ void main() {
       .state<ScrollableState>(find.descendant(of: find.byKey(TypingPage.fieldKey), matching: find.byType(Scrollable)))
       .position;
 
+  // Words heard, and a frame more for the field's new height (D80).
+  Future<void> hear(WidgetTester tester, MemoryLink link, List<String> done) async {
+    link.reply(reply(done: done));
+    await tester.pump();
+    await tester.pump();
+  }
+
+  bool atBottom(ScrollPosition scroll) => scroll.pixels >= scroll.maxScrollExtent - 1;
+
+  Future<ScrollPosition> filled(WidgetTester tester, MemoryLink link) async {
+    for (var i = 0; i < 6; i++) {
+      await hear(tester, link, tokens);
+    }
+    final scroll = fieldScroll(tester);
+    expect(scroll.maxScrollExtent, greaterThan(0));
+    expect(atBottom(scroll), isTrue);
+    return scroll;
+  }
+
   testWidgets('recording: the field follows the newest words', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
     await record(tester);
-    for (var i = 0; i < 6; i++) {
-      v.link.reply(reply(done: tokens, shown: [tokens[0]]));
-      await tester.pump();
-    }
-    final scroll = fieldScroll(tester);
-    expect(scroll.maxScrollExtent, greaterThan(0));
-    expect(scroll.pixels, scroll.maxScrollExtent);
+    await filled(tester, v.link);
   });
 
-  testWidgets('scrolled up, the field stays; back at the bottom, it follows', (tester) async {
+  // D80 2: an edit opens at its top; recording jumps to the end at once,
+  // and the caret the dreamer left mid-text does not stop it.
+  testWidgets('an edit opened at its top follows from the start', (tester) async {
+    final v = voice();
+    final long = List.filled(8, tokens.join()).join(' ');
+    await tall(tester, recording: v.recording, edit: (id: 'n', index: 0, text: long));
+    final scroll = fieldScroll(tester);
+    expect(scroll.pixels, 0);
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pump();
+    await record(tester);
+    await tester.pump();
+    expect(atBottom(scroll), isTrue);
+    await hear(tester, v.link, tokens);
+    expect(scroll.pixels, greaterThan(0));
+    expect(atBottom(scroll), isTrue);
+  });
+
+  testWidgets('an upward drag pauses; back at the bottom, it follows', (tester) async {
     final v = voice();
     await tall(tester, recording: v.recording);
     await record(tester);
-    for (var i = 0; i < 6; i++) {
-      v.link.reply(reply(done: tokens));
-      await tester.pump();
-    }
-    final scroll = fieldScroll(tester);
+    final scroll = await filled(tester, v.link);
+    await tester.drag(find.byKey(TypingPage.fieldKey), const Offset(0, 120));
+    await tester.pumpAndSettle();
+    final paused = scroll.pixels;
+    expect(atBottom(scroll), isFalse);
+    await hear(tester, v.link, tokens);
+    expect(scroll.pixels, paused);
+    await tester.drag(find.byKey(TypingPage.fieldKey), const Offset(0, -3000));
+    await tester.pumpAndSettle();
+    expect(atBottom(scroll), isTrue);
+    await hear(tester, v.link, tokens);
+    expect(atBottom(scroll), isTrue);
+  });
+
+  testWidgets('a tap mid-text pauses; the caret back at the end resumes', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final scroll = await filled(tester, v.link);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pumpAndSettle();
+    expect(field.controller!.selection.baseOffset, lessThan(field.controller!.text.length));
+    final paused = scroll.pixels;
+    await hear(tester, v.link, tokens);
+    expect(scroll.pixels, paused);
+    expect(atBottom(scroll), isFalse);
+    // The keyboard moves the caret back to the end.
+    final text = field.controller!.text;
+    tester.testTextInput.updateEditingValue(
+      TextEditingValue(
+        text: text,
+        selection: TextSelection.collapsed(offset: text.length),
+      ),
+    );
+    await tester.pump();
+    await hear(tester, v.link, tokens);
+    expect(atBottom(scroll), isTrue);
+  });
+
+  testWidgets('the app scrolling to the bottom does not resume', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    final scroll = await filled(tester, v.link);
+    await tester.tapAt(tester.getTopLeft(find.byKey(TypingPage.fieldKey)) + const Offset(40, 30));
+    await tester.pumpAndSettle();
     scroll.jumpTo(0);
     await tester.pump();
-    v.link.reply(reply(done: tokens));
-    await tester.pump();
-    expect(scroll.pixels, 0);
     scroll.jumpTo(scroll.maxScrollExtent);
     await tester.pump();
-    v.link.reply(reply(done: tokens));
-    await tester.pump();
-    expect(scroll.pixels, scroll.maxScrollExtent);
+    final paused = scroll.pixels;
+    await hear(tester, v.link, tokens);
+    expect(scroll.pixels, paused);
+    expect(atBottom(scroll), isFalse);
   });
 
   testWidgets('a Save that waits survives its screen going', (tester) async {

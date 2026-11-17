@@ -1,8 +1,8 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
-# Expected: every row "caught" (A1 to A96, A55 dropped (D74.3), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A105, A55 dropped (D74.3), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 142 run, 142 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 151 run, 151 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -638,19 +638,57 @@ ROWS = [
      '    if (_failed && mounted) setState(() => _failed = false);',
      '    if (_failed) setState(() => _failed = false);',
      'test/journal/pages/typing_page_test.dart', 'a Save that waits survives its screen going'),
-    # D79 a: the field follows the end while recording, and stays when scrolled up.
+    # D79 a, as D80 rules it: the field follows the end while recording; the
+    # dreamer's upward drag or a caret not at the end pauses it; back at the
+    # bottom or the end resumes; the app's own scrolls change nothing.
     ('A94', 'lib/journal/pages/typing_page.dart',
-     '    if (follow) {\n',
-     '    if (true) {\n',
-     'test/journal/pages/typing_page_test.dart', 'scrolled up, the field stays; back at the bottom, it follows'),
+     '    if (_following) _toEnd();\n',
+     '    _toEnd();\n',
+     'test/journal/pages/typing_page_test.dart', 'an upward drag pauses; back at the bottom, it follows'),
     ('A95', 'lib/journal/pages/typing_page.dart',
-     '    if (follow) {\n',
-     '    if (false) {\n',
-     'test/journal/pages/typing_page_test.dart', 'recording: the field follows the newest words'),
-    ('A96', 'lib/journal/pages/typing_page.dart',
-     '                                scrollController: _scroll,\n',
+     '    if (_following) _toEnd();\n',
      '',
      'test/journal/pages/typing_page_test.dart', 'recording: the field follows the newest words'),
+    ('A96', 'lib/journal/pages/typing_page.dart',
+     '                                  scrollController: _scroll,\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'recording: the field follows the newest words'),
+    ('A97', 'lib/journal/pages/typing_page.dart',
+     '    _following = true;\n    _toEnd();\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'an edit opened at its top follows from the start'),
+    ('A98', 'lib/journal/pages/typing_page.dart',
+     '    _following = true;\n    _toEnd();\n',
+     '    _following = true;\n',
+     'test/journal/pages/typing_page_test.dart', 'an edit opened at its top follows from the start'),
+    ('A99', 'lib/journal/pages/typing_page.dart',
+     '    _settingHeard = true;\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'an edit opened at its top follows from the start'),
+    ('A100', 'lib/journal/pages/typing_page.dart',
+     '    _text.addListener(_caretMoved);\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'a tap mid-text pauses; the caret back at the end resumes'),
+    ('A101', 'lib/journal/pages/typing_page.dart',
+     '    _following = caret.isCollapsed && caret.baseOffset == _text.text.length;',
+     '    _following = true;',
+     'test/journal/pages/typing_page_test.dart', 'a tap mid-text pauses; the caret back at the end resumes'),
+    ('A102', 'lib/journal/pages/typing_page.dart',
+     '    _following = caret.isCollapsed && caret.baseOffset == _text.text.length;',
+     '    _following = _following && caret.isCollapsed && caret.baseOffset == _text.text.length;',
+     'test/journal/pages/typing_page_test.dart', 'a tap mid-text pauses; the caret back at the end resumes'),
+    ('A103', 'lib/journal/pages/typing_page.dart',
+     '(n.scrollDelta ?? 0) < 0) _following = false;',
+     '(n.scrollDelta ?? 0) < 0) {}',
+     'test/journal/pages/typing_page_test.dart', 'an upward drag pauses; back at the bottom, it follows'),
+    ('A104', 'lib/journal/pages/typing_page.dart',
+     '      if (n.metrics.pixels >= n.metrics.maxScrollExtent - 1) _following = true;\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'an upward drag pauses; back at the bottom, it follows'),
+    ('A105', 'lib/journal/pages/typing_page.dart',
+     '_dreamerScrolls = n.dragDetails != null;',
+     '_dreamerScrolls = true;',
+     'test/journal/pages/typing_page_test.dart', 'the app scrolling to the bottom does not resume'),
 ]
 
 

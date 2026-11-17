@@ -68,8 +68,15 @@ enum _Mic { idle, starting, recording, stopping }
 
 class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   late final _text = TextEditingController(text: widget.edit?.text);
-  // The field's own scrolling: while recording it follows the end (D79 a).
+  // The field's own scrolling: while recording it follows the end (D79 a),
+  // until the dreamer looks elsewhere: an upward drag, or the caret put
+  // anywhere but the end. Back at the bottom, or the caret back at the end,
+  // it follows again. The app's own jumps, Flutter's scroll to the caret
+  // among them, change nothing (D80).
   final _scroll = ScrollController();
+  bool _following = false;
+  bool _dreamerScrolls = false;
+  bool _settingHeard = false;
   bool? _firstUse;
   bool _saving = false;
   bool _failed = false;
@@ -104,6 +111,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _text.addListener(_caretMoved);
     // A failed read shows the short line and marks nothing; a failed mark
     // still shows MP·10. Each logs a code (D71 Q18).
     widget.journal.firstUseSeen().then(
@@ -224,6 +232,9 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       _levels.clear();
       _seconds = 0;
     });
+    // A recording starts at the end, wherever the field was (D80 2).
+    _following = true;
+    _toEnd();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _seconds++);
     });
@@ -253,15 +264,42 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     final composing = before.composing.isValid && next.text.startsWith(before.text.substring(0, before.composing.end))
         ? before.composing
         : TextRange.empty;
-    // The newest words stay in view while the dreamer is at the bottom;
-    // scrolled up, the field stays put until they come back (D79 a).
-    final follow = _scroll.hasClients && _scroll.position.pixels >= _scroll.position.maxScrollExtent - 1;
-    _text.value = TextEditingValue(text: next.text, selection: selection, composing: composing);
-    if (follow) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted && _scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
-      });
+    _settingHeard = true;
+    try {
+      _text.value = TextEditingValue(text: next.text, selection: selection, composing: composing);
+    } finally {
+      _settingHeard = false;
     }
+    if (_following) _toEnd();
+  }
+
+  // After the next layout, the field shows its end.
+  void _toEnd() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+    });
+  }
+
+  bool get _live => _mic == _Mic.recording || _mic == _Mic.stopping;
+
+  // The dreamer moved the caret (D80): at the end it follows, elsewhere it
+  // pauses. The heard words' own changes to the text are not the dreamer's.
+  void _caretMoved() {
+    if (_settingHeard) return;
+    final caret = _text.selection;
+    _following = caret.isCollapsed && caret.baseOffset == _text.text.length;
+  }
+
+  // The dreamer's own drags (D80): upward pauses; a scroll of theirs that
+  // ends at the bottom follows again. Scrolls with no drag are the app's.
+  bool _scrolled(ScrollNotification n) {
+    if (n is ScrollStartNotification) _dreamerScrolls = n.dragDetails != null;
+    if (n is ScrollUpdateNotification && n.dragDetails != null && (n.scrollDelta ?? 0) < 0) _following = false;
+    if (n is ScrollEndNotification && _dreamerScrolls) {
+      _dreamerScrolls = false;
+      if (n.metrics.pixels >= n.metrics.maxScrollExtent - 1) _following = true;
+    }
+    return false;
   }
 
   void _level(double level) {
@@ -318,7 +356,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       borderRadius: BorderRadius.circular(oneLine / 2),
       borderSide: BorderSide(color: p.fieldBorder),
     );
-    final live = _mic == _Mic.recording || _mic == _Mic.stopping;
+    final live = _live;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -393,35 +431,38 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                             const SizedBox(height: StandIns.gap),
                             ConstrainedBox(
                               constraints: BoxConstraints(maxHeight: _fieldCap(context, box.maxHeight, live)),
-                              child: TextField(
-                                key: TypingPage.fieldKey,
-                                controller: _text,
-                                scrollController: _scroll,
-                                minLines: 1,
-                                maxLines: null,
-                                keyboardType: TextInputType.multiline,
-                                textCapitalization: TextCapitalization.sentences,
-                                style: TypeRoles.voiceDreamer.style(p.fieldText),
-                                cursorColor: p.fieldText,
-                                decoration: InputDecoration(
-                                  hintText: Lines.MP_12.text(appLanguage),
-                                  hintStyle: TypeRoles.button.style(p.placeholder),
-                                  filled: true,
-                                  fillColor: p.field,
-                                  contentPadding: StandIns.fieldPadding,
-                                  border: edge,
-                                  enabledBorder: edge,
-                                  focusedBorder: edge,
-                                  suffixIcon: widget.recording == null
-                                      ? null
-                                      : IconButton(
-                                          key: TypingPage.micKey,
-                                          tooltip: Lines.MP_11.text(appLanguage),
-                                          isSelected: live,
-                                          onPressed: _toggleMic,
-                                          icon: Icon(Icons.mic_none, color: p.placeholder),
-                                          selectedIcon: Icon(Icons.stop_rounded, color: p.fieldText),
-                                        ),
+                              child: NotificationListener<ScrollNotification>(
+                                onNotification: _scrolled,
+                                child: TextField(
+                                  key: TypingPage.fieldKey,
+                                  controller: _text,
+                                  scrollController: _scroll,
+                                  minLines: 1,
+                                  maxLines: null,
+                                  keyboardType: TextInputType.multiline,
+                                  textCapitalization: TextCapitalization.sentences,
+                                  style: TypeRoles.voiceDreamer.style(p.fieldText),
+                                  cursorColor: p.fieldText,
+                                  decoration: InputDecoration(
+                                    hintText: Lines.MP_12.text(appLanguage),
+                                    hintStyle: TypeRoles.button.style(p.placeholder),
+                                    filled: true,
+                                    fillColor: p.field,
+                                    contentPadding: StandIns.fieldPadding,
+                                    border: edge,
+                                    enabledBorder: edge,
+                                    focusedBorder: edge,
+                                    suffixIcon: widget.recording == null
+                                        ? null
+                                        : IconButton(
+                                            key: TypingPage.micKey,
+                                            tooltip: Lines.MP_11.text(appLanguage),
+                                            isSelected: live,
+                                            onPressed: _toggleMic,
+                                            icon: Icon(Icons.mic_none, color: p.placeholder),
+                                            selectedIcon: Icon(Icons.stop_rounded, color: p.fieldText),
+                                          ),
+                                  ),
                                 ),
                               ),
                             ),
