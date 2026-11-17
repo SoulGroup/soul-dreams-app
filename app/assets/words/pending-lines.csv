@@ -2,3 +2,5 @@ handle,place,status,english,swedish,given
 MP·60,The delete confirmation's destructive choice,pending,Delete,Radera,"head's messages 16 and 18 (Product message 17), founder-approved"
 MP·61,The delete confirmation's cancel choice,pending,Cancel,Avbryt,"head's messages 16 and 18 (Product message 17), founder-approved"
 MP·62,The typing screen's failed-save notice,pending,Couldn't save just now. Your words are still here.,Det gick inte att spara just nu. Dina ord finns kvar här.,"head's message 19 (Product message 18), founder-ruled"
+MP·63,The microphone refused,pending,"To record by voice, allow the microphone in your phone's Settings. You can still type.","För att spela in med rösten, tillåt mikrofonen i telefonens inställningar. Du kan fortfarande skriva.","head's message 21 (Product message 20), founder-approved"
+MP·64,The stop control's spoken name,pending,Stop recording,Stoppa inspelningen,"head's message 21 (Product message 20), founder-approved"
