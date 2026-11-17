@@ -1053,6 +1053,37 @@ void main() {
     expect(field.controller!.value.composing, TextRange.empty);
   });
 
+  // Task 16a: the owner's crash. Backspace, as the phone's keyboard sends
+  // it, over the heard words while final pieces keep arriving.
+  testWidgets('backspacing over heard words while finals arrive', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    await tester.showKeyboard(find.byKey(TypingPage.fieldKey));
+    await record(tester);
+    v.link.reply(reply(done: tokens.take(4).toList(), shown: [tokens[4]]));
+    await tester.pump();
+    for (var i = 0; i < 40; i++) {
+      final now = field.controller!.text;
+      final cut = now.isEmpty ? '' : now.substring(0, now.length - 1);
+      tester.testTextInput.updateEditingValue(
+        TextEditingValue(text: cut, selection: TextSelection.collapsed(offset: cut.length)),
+      );
+      await tester.pump();
+      if (i.isEven) {
+        v.link.reply(reply(done: [tokens[4 + i % 3]], shown: [tokens[5 + i % 3]]));
+        await tester.pump();
+      }
+      expect(tester.takeException(), isNull);
+    }
+    tester.testTextInput.updateEditingValue(TextEditingValue.empty);
+    await tester.pump();
+    v.link.reply(reply(done: [tokens[5]]));
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(field.controller!.text, tokens[5].trimLeft());
+  });
+
   testWidgets('a Save that waits survives its screen going', (tester) async {
     final files = FlakyFiles();
     final v = voice();
