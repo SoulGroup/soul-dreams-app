@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 const networkChannel = 'souldreams/network';
 
@@ -19,8 +20,11 @@ abstract interface class Connection {
 }
 
 final class ChannelConnection implements Connection {
-  ChannelConnection([EventChannel channel = const EventChannel(networkChannel)]) {
-    channel.receiveBroadcastStream().listen(
+  ChannelConnection([EventChannel? channel]) {
+    // Made in main(), before runApp: the channel needs the bindings, and a
+    // listen before them fails silently, leaving the phone online for ever.
+    if (channel == null) WidgetsFlutterBinding.ensureInitialized();
+    (channel ?? const EventChannel(networkChannel)).receiveBroadcastStream().listen(
       (event) {
         if (event is! bool || event == _online) return;
         _online = event;
