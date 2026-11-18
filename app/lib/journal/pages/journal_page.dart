@@ -1,8 +1,11 @@
 // The journal list, the app's home (main-path.md, The Journal, design 1;
 // C131-I items 1, 2; S5): one row per night, newest first, never a time;
 // a month divider over each month with nights; the record button bottom
-// centre; C4-P·5 when there is no night. No Settings entry and no search
-// (P8). Nothing on a row grades it: no badge, count or status.
+// centre; C4-P·5 when there is no night. Straight from onboarding, the
+// first empty journal also shows MP·9 with an arrow to the record button,
+// once (main-path.md, Onboarding, 5); the logo above it waits for the
+// founder's file. No Settings entry and no search (P8). Nothing on a row
+// grades it: no badge, count or status.
 import 'package:flutter/material.dart';
 
 import '../../core/app_line.dart';
@@ -22,9 +25,15 @@ import 'parts.dart';
 import 'typing_page.dart';
 
 class JournalPage extends StatefulWidget {
-  const JournalPage({super.key, required this.journal, this.recording});
+  const JournalPage({super.key, required this.journal, this.recording, this.firstTime = false});
 
   final Journal journal;
+
+  /// Straight from onboarding: while the journal is empty, MP·9 and its
+  /// arrow, until a night is there.
+  final bool firstTime;
+
+  static const arrowKey = Key('first-arrow');
 
   /// How to record by voice in the typing screen, or null (D69).
   final Recording? recording;
@@ -35,6 +44,7 @@ class JournalPage extends StatefulWidget {
 
 class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   List<Night>? _nights;
+  late bool _first = widget.firstTime;
 
   @override
   void initState() {
@@ -66,7 +76,12 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
       SafeLog.event(LogEvent.journalListFailed);
       return;
     }
-    if (mounted) setState(() => _nights = nights);
+    if (!mounted) return;
+    setState(() {
+      _nights = nights;
+      // Shown once: a night there ends it, even one deleted later.
+      if (nights.isNotEmpty) _first = false;
+    });
   }
 
   Future<void> _push(Widget page) async {
@@ -134,6 +149,20 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
                     },
                 ],
               ),
+            if (nights != null && nights.isEmpty && _first)
+              Positioned(
+                left: StandIns.pageSide,
+                right: StandIns.pageSide,
+                bottom: StandIns.recordBelow + StandIns.recordHeight + StandIns.arrowGap,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AppLine(Lines.MP_9.text(appLanguage), style: TypeRoles.button.style(p.text)),
+                    const SizedBox(height: StandIns.arrowGap),
+                    _Arrow(key: JournalPage.arrowKey, colour: p.text),
+                  ],
+                ),
+              ),
             Positioned(
               left: 0,
               right: 0,
@@ -145,6 +174,53 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
       ),
     );
   }
+}
+
+/// The first empty journal's arrow, down to the record button: a thin line
+/// with a thin head, drawn as the chevrons are. Heard as nothing.
+class _Arrow extends StatelessWidget {
+  const _Arrow({super.key, required this.colour});
+
+  final Color colour;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: SizedBox.fromSize(
+      size: StandIns.firstArrow,
+      child: CustomPaint(painter: _ArrowLine(colour)),
+    ),
+  );
+}
+
+class _ArrowLine extends CustomPainter {
+  _ArrowLine(this.colour);
+
+  final Color colour;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const inset = StandIns.chevronStroke / 2;
+    final mid = size.width / 2;
+    final tip = size.height - inset;
+    final path = Path()
+      ..moveTo(mid, inset)
+      ..lineTo(mid, tip)
+      ..moveTo(inset, tip - mid)
+      ..lineTo(mid, tip)
+      ..lineTo(size.width - inset, tip - mid);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = colour
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = StandIns.chevronStroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ArrowLine old) => old.colour != colour;
 }
 
 // Three empty lines: the summary's least height, as laid out.

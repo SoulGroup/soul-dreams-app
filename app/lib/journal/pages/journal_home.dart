@@ -1,5 +1,11 @@
 // SoulDreams Dev's first page (D49 O1; D56): it opens the journal's
-// folder on the phone, then shows the journal list. Until the folder is
+// folder on the phone, then shows onboarding until the dreamer has agreed
+// (D103), held in the light theme, and then the journal list; the first
+// time, the journal list's first empty state (main-path.md, Onboarding, 5).
+// Nothing leaves the phone before the consent: the recording and its
+// retries start only with the journal. When the consent goes, withdrawn or
+// deleted with the journal, it returns to onboarding's start, closing every
+// page above it (D103 item 4). Until the folder is
 // open the page is blank; if it cannot be opened it stays blank and logs
 // a code, never a night's words (R3). A phone check it is handed (D65)
 // finishes first, so its probe never shows as a row. The recording it is
@@ -11,7 +17,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../core/always_light.dart';
 import '../../core/safe_log.dart';
+import '../../onboarding/onboarding.dart';
 import '../../recording/recording.dart';
 import '../journal.dart';
 import '../journal_audio.dart';
@@ -36,8 +44,14 @@ class JournalHome extends StatefulWidget {
 }
 
 class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
+  JournalStore? _store;
   Journal? _journal;
   Recording? _recording;
+  // Null until the consent is read; then whether it is given.
+  bool? _agreed;
+  // The journal's first showing, straight from "I agree".
+  bool _first = false;
+  bool _agreeing = false;
 
   @override
   void initState() {
@@ -49,6 +63,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _journal?.consentGone.removeListener(_restart);
     _recording?.retries?.dispose();
     super.dispose();
   }
@@ -69,23 +84,80 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     } on Object {
       // The check logs its own result; the list does not depend on it.
     }
-    JournalStore.open(widget.files).then((store) {
-      if (!mounted) return;
-      final audio = JournalAudio(store);
-      setState(() {
-        _journal = Journal(store);
-        _recording = widget.recording?.keeping(audio, waiting: audio);
-      });
-      // D98: the counts at launch and after each retry, for DevTools.
-      unawaited(audio.logCounts());
-      _recording?.retries?.afterRetry = audio.logCounts;
-      _recording?.retries?.kick();
-    }, onError: (Object _) => SafeLog.event(LogEvent.journalOpenFailed));
+    final JournalStore store;
+    try {
+      store = await JournalStore.open(widget.files);
+    } on Object {
+      SafeLog.event(LogEvent.journalOpenFailed);
+      return;
+    }
+    final journal = Journal(store)..consentGone.addListener(_restart);
+    bool agreed;
+    try {
+      agreed = await journal.consented();
+    } on Object {
+      // Asked again: nothing is shown as agreed that is not kept.
+      SafeLog.event(LogEvent.consentReadFailed);
+      agreed = false;
+    }
+    if (!mounted) return;
+    _store = store;
+    _journal = journal;
+    agreed ? _enter() : _onboard();
+  }
+
+  // Onboarding, always in the light theme (main-path.md, Every Screen).
+  void _onboard() {
+    AlwaysLight.hold(context, true);
+    setState(() => _agreed = false);
+  }
+
+  // The journal, once the dreamer has agreed: only now may anything leave
+  // the phone, so the recording and its retries begin here (D103).
+  void _enter({bool first = false}) {
+    AlwaysLight.hold(context, false);
+    final audio = JournalAudio(_store!);
+    setState(() {
+      _agreed = true;
+      _first = first;
+      _recording = widget.recording?.keeping(audio, waiting: audio);
+    });
+    // D98: the counts at launch and after each retry, for DevTools.
+    unawaited(audio.logCounts());
+    _recording?.retries?.afterRetry = audio.logCounts;
+    _recording?.retries?.kick();
+  }
+
+  // "I agree": the consent kept, then the journal. A consent that cannot be
+  // kept logs a code; the journal opens, and the next opening asks again.
+  Future<void> _agree() async {
+    if (_agreeing) return;
+    _agreeing = true;
+    try {
+      await _journal!.keepConsent();
+    } on Object {
+      SafeLog.event(LogEvent.consentKeepFailed);
+    }
+    _agreeing = false;
+    if (mounted) _enter(first: true);
+  }
+
+  // The consent gone (D103 item 4): every page above closes, the retries
+  // stop, and onboarding starts again.
+  void _restart() {
+    if (!mounted) return;
+    _recording?.retries?.dispose();
+    _recording = null;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    _onboard();
   }
 
   @override
   Widget build(BuildContext context) {
-    final journal = _journal;
-    return journal == null ? const Scaffold() : JournalPage(journal: journal, recording: _recording);
+    return switch (_agreed) {
+      null => const Scaffold(),
+      false => Onboarding(onAgreed: _agree),
+      true => JournalPage(journal: _journal!, recording: _recording, firstTime: _first),
+    };
   }
 }

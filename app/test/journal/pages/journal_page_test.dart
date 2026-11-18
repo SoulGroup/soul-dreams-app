@@ -66,6 +66,45 @@ void main() {
     expect(find.byType(TextField), findsNothing);
   });
 
+  // Onboarding's last step (main-path.md, Onboarding, 5): the first empty
+  // journal adds MP·9 with an arrow to the record button, shown once: gone
+  // when a night is there, and never on a later empty journal.
+  testWidgets('the first empty journal: MP·9 above the record button, once', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal, firstTime: true));
+    final pointer = find.bySemanticsLabel(Lines.MP_9.text(Lang.en));
+    expect(pointer, findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
+    expect(find.byKey(JournalPage.arrowKey), findsOneWidget);
+    final arrow = tester.getRect(find.byKey(JournalPage.arrowKey));
+    final record = tester.getRect(find.byKey(RecordButton.buttonKey));
+    expect(arrow.bottom, lessThanOrEqualTo(record.top));
+    expect(arrow.center.dx, closeTo(record.center.dx, 1));
+    expect(tester.getRect(find.byType(AppLine).last).bottom, lessThanOrEqualTo(arrow.top));
+    // A night comes, then goes, on the same visit: MP·9 does not return.
+    final night = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 7));
+    Future<void> back() async {
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+    }
+
+    await back();
+    expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
+    await h.journal.delete(night.id);
+    await back();
+    expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
+    expect(find.byKey(JournalPage.arrowKey), findsNothing);
+  });
+
+  testWidgets('a later empty journal has no MP·9', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
+    expect(find.byKey(JournalPage.arrowKey), findsNothing);
+  });
+
   // Head's message 20, item 7: the empty journal's line in the button type,
   // centred.
   testWidgets("the empty journal's line: the button type, centred", (tester) async {

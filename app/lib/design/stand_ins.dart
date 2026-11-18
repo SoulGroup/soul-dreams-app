@@ -44,6 +44,11 @@ abstract final class StandIns {
   /// (head's message 20, item 10).
   static const double menuWidth = 55;
 
+  /// The first empty journal's arrow to the record button (main-path.md,
+  /// Onboarding, 5): its size, and the space above and below it.
+  static const firstArrow = Size(12, 32);
+  static const double arrowGap = 8;
+
   /// The record button.
   static const double recordHeight = 120;
   static const double recordWidth = 120;

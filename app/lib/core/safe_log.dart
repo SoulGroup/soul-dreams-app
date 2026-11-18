@@ -44,6 +44,12 @@ enum LogEvent {
   /// The typing screen's read or mark of first use failed (D71 Q18).
   firstUseReadFailed,
 
+  /// Onboarding (D103): the consent could not be read, so onboarding asks
+  /// again; or it could not be kept, so the journal opens and the next
+  /// opening asks again.
+  consentReadFailed,
+  consentKeepFailed,
+
   /// Recording by voice (D69, D71). Off in this build; the microphone
   /// refused; no key from our server (its status); Soniox's stream refused
   /// or broken (its code); the microphone failing; a recording started,
