@@ -155,7 +155,9 @@ class _NightPageState extends State<NightPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
+              child: Row(
               children: [
                 BackControl(onPressed: () => Navigator.of(context).pop()),
                 const Spacer(),
@@ -174,6 +176,7 @@ class _NightPageState extends State<NightPage> {
                   ],
                 ),
               ],
+            ),
             ),
             if (n != null)
               Expanded(

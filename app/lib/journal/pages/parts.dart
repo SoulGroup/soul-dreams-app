@@ -218,7 +218,9 @@ class _ChevronLine extends CustomPainter {
   bool shouldRepaint(_ChevronLine old) => old.colour != colour || old.left != left;
 }
 
-/// The back control, top left: an arrow whose spoken name is MP·14.
+/// The back control, top left: a thin chevron in a round bordered button
+/// (color.button), about 41 across (head's message 20, item 9); its spoken
+/// name is MP·14.
 class BackControl extends StatelessWidget {
   const BackControl({super.key, required this.onPressed});
 
@@ -227,10 +229,33 @@ class BackControl extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-    key: buttonKey,
-    onPressed: onPressed,
-    tooltip: Lines.MP_14.text(appLanguage),
-    icon: Icon(Icons.arrow_back_ios_new, color: Palette.of(context).text),
-  );
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Tooltip(
+      message: Lines.MP_14.text(appLanguage),
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          key: buttonKey,
+          behavior: HitTestBehavior.opaque,
+          onTap: onPressed,
+          child: SizedBox.square(
+            dimension: StandIns.backSize,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [p.buttonTop, p.buttonBottom],
+                ),
+                border: Border.all(color: p.buttonBorder),
+              ),
+              child: Center(child: Chevron(colour: p.buttonText, size: StandIns.backChevron, left: true)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

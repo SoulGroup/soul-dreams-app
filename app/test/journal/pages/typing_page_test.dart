@@ -618,6 +618,27 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // Head's message 20, item 9: a thin chevron in a round bordered button
+  // of about 41, on the page's margin, heard as a button named MP·14.
+  testWidgets('the back control: a round bordered button, a chevron', (tester) async {
+    await tall(tester);
+    final back = find.byKey(BackControl.buttonKey);
+    expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
+    expect(tester.getTopLeft(back).dx, closeTo(StandIns.pageSide, 1));
+    final box = tester.widget<DecoratedBox>(find.descendant(of: back, matching: find.byType(DecoratedBox)));
+    final look = box.decoration as BoxDecoration;
+    expect(look.shape, BoxShape.circle);
+    expect(look.border, Border.all(color: LightColours.button.border!));
+    expect((look.gradient! as LinearGradient).colors, [LightColours.button.colour, LightColours.button.colour]);
+    final chevron = tester.widget<Chevron>(find.descendant(of: back, matching: find.byType(Chevron)));
+    expect(chevron.left, isTrue);
+    expect(chevron.colour, LightColours.button.text);
+    expect(find.byTooltip(Lines.MP_14.text(Lang.en)), findsOneWidget);
+    final handle = tester.ensureSemantics();
+    expect(tester.getSemantics(back).flagsCollection.isButton, isTrue);
+    handle.dispose();
+  });
+
   testWidgets('the instruction is centred, in the button type', (tester) async {
     await tall(tester);
     final line = tester.widget<AppLine>(find.byType(AppLine));

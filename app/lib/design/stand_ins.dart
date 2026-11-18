@@ -30,6 +30,11 @@ abstract final class StandIns {
   /// Below a month divider.
   static const double dividerBelow = 12;
 
+  /// The back control: a round button about 41 across (head's message 20,
+  /// item 9), and its chevron.
+  static const double backSize = 41;
+  static const backChevron = Size(9, 16);
+
   /// The record button.
   static const double recordHeight = 120;
   static const double recordWidth = 120;
