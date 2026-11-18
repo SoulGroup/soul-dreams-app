@@ -2,7 +2,8 @@
 
 Branch `journal-design`, from `main` at `536d916`. Investigation, spec and plan in one (docs/workflow.md steps 3, 5
 and 6), under D91 and D95. Written by Claude Code (Opus) on 2026-11-18. The owner's checks are by eye only, with no
-DevTools (D99).
+DevTools (D99). Amended the same day for D101 (the founder's answers to Part 4): the floating field is out of this
+branch, and Task 7's block records the ruling.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -24,8 +25,8 @@ once, not only after Stop. The words stop coming, the recording goes on, and its
 words later, exactly as at any other break. MP·54 stays until the next tap of the microphone or until the screen
 closes.
 
-One part of item 10 is not built: the floating field on a night's page. What it does, and its words, are a question
-for Product (Part 4, Q1); it gets its own task once answered.
+One part of item 10 is not built: the floating field on a night's page. It comes with the readings, since the
+conversation it opens needs the model's instructions and its own storage change (D101).
 
 ### What this branch builds
 
@@ -60,7 +61,7 @@ for Product (Part 4, Q1); it gets its own task once answered.
 
 ### What it does not build
 
-- The night's page's floating field with its microphone (Part 4, Q1).
+- The night's page's floating field with its microphone: it comes with the readings (D101).
 - Item 6 (settings and search, P8), and anything Product has not ruled. Seen in the founder's screens and not ruled,
   so left as built: the "Dreams" label's place (left on our page, centred in the drawing); the menu's own words (the
   phone's text style).
@@ -69,6 +70,7 @@ for Product (Part 4, Q1); it gets its own task once answered.
 ### The decisions, by number
 
 - Head's message 20 (Product message 19), items 1, 3 to 5, 7 and 9 to 13; item 12 TO TRY; item 6 not in scope.
+- D101 (founder): Part 4 answered. Q1, the floating field is not built in this branch; Q2 to Q6 as leaned.
 - D100 (founder): MP·54 at once when the phone reports its connection lost during a recording; it stays until the
   next tap or the screen closes.
 - D91 (standing): what is decided here and what is asked. D95: during a task, only the rows of the files changed.
@@ -80,7 +82,7 @@ for Product (Part 4, Q1); it gets its own task once answered.
 1. **The phone's standard menu** is Flutter's `CupertinoMenuAnchor` with one `CupertinoMenuItem`: Flutter's own
    rendering of iOS's pull-down menu, in the pinned SDK (3.47.9), no package. A truly native `UIMenu` would need a
    platform view and Swift; not worth it for one item. Its item keeps the phone's text style (the drawing's menu is
-   the phone's), and stays plain (Part 4, Q3).
+   the phone's), and stays plain (D101, Q3).
 2. **The chevrons are drawn** (a `CustomPainter`, two round-capped strokes), not taken from an icon font: Flutter's
    `CupertinoIcons` need the `cupertino_icons` package (a new dependency, R10), and Material's are not thin.
 3. **The stand-ins' new values**, from the founder's screenshots (P13), all in `stand_ins.dart`: the row's chevron 10
@@ -107,7 +109,7 @@ for Product (Part 4, Q1); it gets its own task once answered.
 ### The places this branch uses
 
 MP·11, MP·14, MP·15, MP·27, MP·29, MP·38, MP·39, MP·54, EM·1, EM·11 (its second part), C4-P·5, MP·60 and MP·61
-(pending). No new line, and no handle placeholder: the field that would need one waits (Q1).
+(pending). No new line, and no handle placeholder: the field that would need one is not built (D101).
 
 ### The tests (test-first, on the Mac)
 
@@ -141,8 +143,8 @@ Every Claude Code task ends green:
   count given;
 - the hook: `guards (staged): all passed`.
 
-**Implementation waits for Part 4's answers.** Q2 to Q6 are built here as their leans say; an answer that differs is
-an amendment to the task named before it is applied. Q1 gets its own task once answered.
+**Part 4 is answered (D101).** Q2 to Q6 took their leans, which the blocks build; Q1 keeps the floating field out of
+this branch. Nothing waits.
 
 ### Task 0 · Baselines
 
@@ -1133,7 +1135,7 @@ index 3eeeaed..28e232b 100644
 
 The header centred; the "⋯" menu a bordered pill opening `CupertinoMenuAnchor`; the bubbles on the screen's edges
 (`Spacing.bubbleDreamer`); Add dreams left and Start Interpretation right, inert, in the shared `ButtonRow` (the
-typing screen's pair moves into it, unchanged to the eye). The floating field is not here (Part 4, Q1). Tests:
+typing screen's pair moves into it, unchanged to the eye). No floating field: it comes with the readings (D101). Tests:
 `night_page_test.dart` (5 new; the menu's two checks follow `CupertinoMenuItem`).
 
 Expected: 431 app tests. Commit:
@@ -1812,8 +1814,8 @@ index 9032c52..d4e5172 100644
 
 ### Task 7 · Status.md
 
-Status.md for the branch. Replace `<the day of this task>` with the date. If Product has answered Part 4 by then, add
-one line for each answer under "Rulings during journal-design", as given.
+Status.md for the branch, with D101 under "Rulings during journal-design". Replace `<the day of this task>` with
+the date.
 
 Expected: 432 app tests. Commit:
 
@@ -1823,7 +1825,7 @@ Expected: 432 app tests. Commit:
 
 ~~~~diff
 diff --git a/docs/Status.md b/docs/Status.md
-index f70c4a2..7364123 100644
+index f70c4a2..5f116cb 100644
 --- a/docs/Status.md
 +++ b/docs/Status.md
 @@ -1,6 +1,6 @@
@@ -1845,14 +1847,14 @@ index f70c4a2..7364123 100644
 -`docs/plans/offline-recording.md`.
 +`journal-design`: the journal design pass in SoulDreams Dev (head's message 20, Product message 19, items 1, 3 to 5, 7
 +and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recording shows MP·54 at once). Plan:
-+`docs/plans/journal-design.md`. The night's page's floating field waits for Product (the plan's Part 4, Q1).
++`docs/plans/journal-design.md`. The night's page's floating field comes with the readings (D101).
  
  ## Road ahead
  
 -- The owner's rehearsal of the night file's version 2 passed (the plan's Task 3, 2026-11-18, on the phone, with
 -  invented nights written by `main`). The owner runs the phone checks (Task 10), and merges `offline-recording`.
 +- The owner's by-eye review of `journal-design` (the plan's Task 8, with the founder's verdict on the growing pill
-+  and the spacings), and the merge. The night's page's floating field, once Product answers the plan's Part 4 Q1.
++  and the spacings), and the merge. The night's page's floating field comes with the readings (D101).
  - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
    URL (head's message 14; whether eu-north-1 has it is checked first).
  - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -1868,7 +1870,7 @@ index f70c4a2..7364123 100644
 +  rendering of the phone's pull-down menu), the dreamer's bubbles 30 from the screen's left edge and 10 from its
 +  right (`Spacing.bubbleDreamer`), and at its foot Add dreams (MP·29) left and Start Interpretation (EM·1) right,
 +  inert (P3, as D71 Q3), the same `ButtonRow` as the typing screen's; the side margins 30 and the rows 12 apart
-+  (TO TRY). Not built: the night's page's floating field (the plan's Part 4, Q1).
++  (TO TRY). Not built: the night's page's floating field, which comes with the readings (D101).
  - The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
    both 120, the radius half the height; large text shrinks its words, never the circle.
  - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
@@ -1918,17 +1920,18 @@ index f70c4a2..7364123 100644
       live recording is shown as MP·54 only at Stop, after the five-second wait, since the stream gives no sign
       (the lean: leave it; the phone's own connection state could show it at once, a change to what the dreamer
       sees); (b) D97's "new night" is built as wherever a new Save would go, which is the open night if there is
-@@ -638,7 +647,8 @@ Banked in recording:
+@@ -638,7 +647,9 @@ Banked in recording:
  2. Product gives exact values for Task 14's thirteen questions below (P13).
  
  Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
 -(questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY):
 +(questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY; questions 1, 3, 4, 5, 7, 9 to 13 by head's
-+message 20 and built in `journal-design`, except the night's page's field in 10; 6 waits for P8):
++message 20 and built in `journal-design`, except the night's page's field in 10, which comes with the readings
++(D101); 6 waits for P8):
  
  1. The summary's type role: the screenshots show `TypeRoles.button` (Inter 14); switching needs the row's minimum
     height changed.
-@@ -881,6 +891,15 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
+@@ -881,6 +892,19 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
  - D99 (owner, 2026-11-18): Soniox's endpoint detection on, with Soniox's defaults for its delay, sensitivity and
    latency; `<end>` tokens never shown (as D73). From then on the owner's checks are by eye only, with no DevTools.
  
@@ -1940,6 +1943,10 @@ index f70c4a2..7364123 100644
 +- D100 (founder): during a recording, when the phone reports it has lost its connection, MP·54 shows at once (the
 +  words stop; the audio is kept, as built), not only at Stop; it stays until the next tap or the screen closes. The
 +  offline-recording final review's Q2 (item 115 b) stays as built.
++- D101 (founder): the plan's Part 4. Q1: the night's page's floating field is not built in this branch; it comes with
++  the readings (the conversation needs the model's instructions and its own storage change). Q2 to Q6 as leaned:
++  MP·29 "Add dreams"; "Delete this" plain; the 30 pt margins left and right only; a named night's date centred under
++  the name; the bubbles' margins from the screen's edges.
 +
  ## Documents as last imported
  
@@ -1985,31 +1992,15 @@ bring it to the Build chat; nothing is fixed on the phone.
 
 ## Part 4 · Questions (numbered; a blank is not a yes)
 
-For Product, through the Build chat. Only Q1 holds back work (its own task, written once it is answered); the others
-are built as their lean says, and a different answer is a small change before the merge.
+Answered by D101 (founder, 2026-11-18). The questions as asked are in the plan's first commit (`1fcc5d2`).
 
-1. **The floating field on a night's page** (item 10). In the founder's drawing it floats above the two buttons with
-   a microphone, and its placeholder invites the dreamer to type or record to reflect: that is the space below the
-   dreams (main-path.md, The Journal, design 3), where the app answers with a reflection. The space is not built: it
-   needs the model's instructions (R7, still waiting) and a change to how a night is stored (a storage change ships
-   alone, docs/workflow.md (c)). Which, for this branch? (a) Not built until the space is built. (b) Shown as drawn but
-   inert, like Start Interpretation (P3): it takes no typing and its microphone does nothing; its placeholder needs a
-   place and a line in the register (or a pending line), since the drawing's words are not filed (R1). (c) Something
-   else. **Lean: (b), with the line from Product**, so the founder can judge the page whole; (a) if a field that does
-   nothing would mislead in Cohort 0.
-2. **The left button's words** (item 10 says "Record More"). The register's line for adding a dream to a night is
-   MP·29, "Add dreams", which is what the page shows; under R1 we cannot write "Record More". **Lean: MP·29 as it
-   stands**; if Product wants "Record More", it is refiled in the register and comes in by the owner's import.
-3. **"Delete this" in the menu**: plain, as built (D58 put the red on the confirmation's Delete), or red, as iOS
-   shows a destructive item in a pull-down menu? **Lean: plain, as built.**
-4. **"About 30 pt outer margins"** (item 12): the sides only, or also above the top controls and below the bottom
-   ones? **Lean: the sides only**; above and below keep what is built (the phone's safe area, and 20 below the bottom
-   buttons, 40 below the record button).
-5. **A named night's header** (item 10 says "date or name centred"): the date under a name is centred too. **Lean:
-   yes, both centred** (built; no night can be named yet, P7).
-6. **The bubbles' margins** (item 11): design-system.md's "30px from the left edge, 10px from the right" read as the
-   screen's edges, so a bubble reaches past the page's 30 margin on the right. **Lean: the screen's edges, as
-   written** (built). The other reading puts them inside the page's margins (60 and 40 from the screen).
+1. **The floating field on a night's page** (item 10): **not built in this branch**; it comes with the readings (the
+   conversation needs the model's instructions and its own storage change).
+2. **The left button's words**: MP·29, "Add dreams", as it stands.
+3. **"Delete this" in the menu**: plain, as built.
+4. **"About 30 pt outer margins"**: left and right only.
+5. **A named night's header**: the date centred under the name.
+6. **The bubbles' margins**: from the screen's edges, as design-system.md writes them.
 
 ## Part 5 · How this plan was proven
 
@@ -2035,5 +2026,10 @@ are built as their lean says, and a different answer is a small change before th
    recording at once; the fade's feel.
 8. The guards and their tests, the server, Swift and the words are unchanged (241 guard tests, 47 server tests).
 9. The scratch copies (`./.scratch/jd/`) are deleted after this plan is committed.
+10. **The D101 amendment.** Only Task 7's block changed (Status.md: the field comes with the readings; D101 under the
+    branch's rulings); Tasks 1 to 6 are byte for byte as first proven. Re-proven on a fresh copy of `536d916`
+    (`./.scratch/jd2`): the blocks of Tasks 1 to 6 taken from this file and the new Task 7 block applied in order with
+    `git apply`; then `guards (walk): all passed`, `No issues found!`, `+432: All tests passed!`; the blocks in this
+    file byte-identical to those applied.
 
 *No matter where you are on your journey, the steps you take are equally important.*
