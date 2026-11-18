@@ -262,6 +262,47 @@ void main() {
     await tester.pump(const Duration(seconds: 11));
   });
 
+  // D91 item 2 ("I agree" twice in a row agrees once), review of Tasks 1 to 4:
+  // a second tap landing after the keep is done and before onboarding has left
+  // the tree must not open the journal a second time, which would leave a
+  // retry engine nobody stops.
+  testWidgets('a second I agree after the journal opened starts nothing more', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = MemoryJournalFiles();
+    await waiting(files);
+    final links = <MemoryLink>[];
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links))));
+    await tester.pumpAndSettle();
+    final agree = tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed;
+    agree();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(JournalPage), findsOneWidget);
+    expect(links, hasLength(1));
+    agree();
+    await tester.pump();
+    await tester.pump();
+    expect(links, hasLength(1));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 11));
+  });
+
+  // The fix above keeps the guard set once agreed; the start-over resets it,
+  // so the next onboarding can agree again.
+  testWidgets('after the consent goes, a new I agree opens the journal', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = agreed(MemoryJournalFiles());
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
+    await tester.pumpAndSettle();
+    await tester.widget<JournalPage>(find.byType(JournalPage)).journal.withdrawConsent();
+    await tester.pumpAndSettle();
+    expect(find.byType(Onboarding), findsOneWidget);
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
+    await tester.pumpAndSettle();
+    expect(find.byType(JournalPage), findsOneWidget);
+    expect(files.files.keys, contains(JournalStore.consentFile));
+  });
+
   testWidgets('a consent that cannot be kept: the journal, a code', (tester) async {
     JournalStore.newQueueForTests();
     final lines = <String>[];

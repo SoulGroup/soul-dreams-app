@@ -108,6 +108,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
 
   // Onboarding, always in the light theme (main-path.md, Every Screen).
   void _onboard() {
+    _agreeing = false;
     AlwaysLight.hold(context, true);
     setState(() => _agreed = false);
   }
@@ -138,7 +139,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     } on Object {
       SafeLog.event(LogEvent.consentKeepFailed);
     }
-    _agreeing = false;
+    // Not reset here: a tap that lands before onboarding has left the tree
+    // must not open the journal twice. `_onboard` resets it.
     if (mounted) _enter(first: true);
   }
 

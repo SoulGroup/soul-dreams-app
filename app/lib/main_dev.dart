@@ -1,5 +1,6 @@
 // SoulDreams Dev (app.souldreams.dev): the owner's test app, invented
-// nights only. It opens on the journal (D49 O1; D56).
+// nights only. It opens on onboarding until the dreamer agrees, then on the
+// journal (D49 O1; D56; D103).
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
