@@ -948,6 +948,46 @@ void main() {
     expect(r.session.left, (audio: id, from: 0));
   });
 
+  // Writes still queued when every word is already final must not make a
+  // file after the audio was discarded.
+  test('all final with a write queued: nothing is left behind', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..gate = Completer<void>();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 22);
+    final stopped = r.session.stop();
+    await pumpEventQueue();
+    link.reply(reply(finished: true));
+    await pumpEventQueue();
+    keep.gate!.complete();
+    await stopped;
+    await pumpEventQueue();
+    expect(keep.audio, isEmpty);
+    expect(keep.discarded, hasLength(1));
+  });
+
+  // A stop that comes while a cancel is ending the session returns when the
+  // ending is done, with what waits known.
+  test('a stop during a cancel returns when the ending is done', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..gate = Completer<void>();
+    final r = kept(mic, keep, connection: FakeConnection()..online = false);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 5);
+    unawaited(r.session.cancel());
+    await pumpEventQueue();
+    var done = false;
+    final stopping = r.session.stop().then((_) => done = true);
+    await pumpEventQueue();
+    expect(done, isFalse);
+    keep.gate!.complete();
+    await stopping;
+    expect(r.ended, [1]);
+    expect(r.session.left, (audio: keep.audio.keys.single, from: 0));
+  });
+
   test('refused or off: no audio, no id', () async {
     final keep = MemoryKeep();
     final refused = kept(SilentMicrophone()..allow = false, keep);

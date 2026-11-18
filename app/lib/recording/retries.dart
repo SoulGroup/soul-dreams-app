@@ -147,6 +147,8 @@ final class Retries extends ChangeNotifier {
       // the next chance tries them first again.
       final failed = <String>{};
       while (!_halted) {
+        // The connection went during the run: the rest wait for its return.
+        if (!(_recording.connection?.online ?? true)) break;
         final all = [for (final p in await _audio.waiting()) if (!failed.contains(p.audio)) p];
         if (all.isEmpty || _halted) break;
         // A recording heard whole that still waits as it was: the journal

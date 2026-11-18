@@ -1824,6 +1824,26 @@ void main() {
     expect((await h.nights()).single.entries, [Waiting(v.keep.audio.keys.single)]);
   });
 
+  // The Save waits for the last write of the audio: it keeps what was really
+  // kept, never less.
+  testWidgets('Save waits for a slow last write, then keeps the recording', (tester) async {
+    final v = offline();
+    v.keep.gate = Completer<void>();
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 2);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(TypingPage), findsOneWidget);
+    expect(await h.nights(), isEmpty);
+    v.keep.gate!.complete();
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.entries, [Waiting(v.keep.audio.keys.single)]);
+    expect(v.keep.audio.values.single, hasLength(6400));
+  });
+
   // D96 Q1: a keep that fails once the recording is cut stops it, and the
   // notice that the audio stays on the phone goes.
   testWidgets('keep fails offline: recording stops, the notice goes', (tester) async {

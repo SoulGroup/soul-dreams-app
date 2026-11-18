@@ -445,7 +445,8 @@ final class RecordingSession {
   Future<void> stop() => _stopping ??= _stop();
 
   Future<void> _stop() async {
-    if (_ended) return;
+    // Already ending (a cancel, a failed keep): wait for the ending.
+    if (_ended) return _shut();
     onStopping();
     await _micOff();
     // The stream may still be opening (D88): the held audio goes when it
@@ -534,6 +535,9 @@ final class RecordingSession {
         return;
       }
     }
+    // Writes still queued must land first, or one would make a file after
+    // the discard that no night names.
+    await _written;
     _recording.keep!.discard(audio).catchError((Object _) {});
   }
 }

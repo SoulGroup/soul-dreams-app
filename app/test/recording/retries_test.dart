@@ -294,6 +294,20 @@ void main() {
     expect(seen.first, x);
   });
 
+  // The connection goes during a run: the recordings behind are not tried.
+  test('connection going in a run: no key asked for the rest', () async {
+    await waits(first, [Waiting(x), Waiting(y)], {x: 3200, y: 3200});
+    key = () async {
+      connection.set(false);
+      throw const KeyFailure(502);
+    };
+    final r = retries();
+    r.kick();
+    await pumpEventQueue();
+    expect(lines, ['retryStarted', 'retryFailed 502']);
+    expect(r.transcribing, isNull);
+  });
+
   // D93 Q7, P10: no words, and the recording goes; a night left with
   // nothing at all is deleted.
   test('silence: the recording goes, and an emptied night with it', () async {
