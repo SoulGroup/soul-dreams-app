@@ -88,6 +88,9 @@ final class Retries extends ChangeNotifier {
   /// screen closed, or the connection returned.
   void kick() {
     if (!_recording.on || _stopped) return;
+    // The phone says there is no connection: no key to ask for, and AI·6
+    // would only flash; the connection returning is the next chance.
+    if (!(_recording.connection?.online ?? true)) return;
     if (_running) {
       _again = true;
       return;
@@ -139,8 +142,12 @@ final class Retries extends ChangeNotifier {
     _stop = Completer<void>();
     try {
       Pending? done;
+      // The recordings whose retry failed in this run: at the back of the
+      // queue, so those behind them get their turn (D96 Q4). Never deleted;
+      // the next chance tries them first again.
+      final failed = <String>{};
       while (!_halted) {
-        final all = await _audio.waiting();
+        final all = [for (final p in await _audio.waiting()) if (!failed.contains(p.audio)) p];
         if (all.isEmpty || _halted) break;
         // A recording heard whole that still waits as it was: the journal
         // did not take its words, so stop rather than go round (a code).
@@ -148,8 +155,15 @@ final class Retries extends ChangeNotifier {
           SafeLog.event(LogEvent.retryFailed, [-3]);
           break;
         }
-        if (!await _one(all.first)) break;
-        done = all.first;
+        final next = all.first;
+        if (await _one(next)) {
+          done = next;
+        } else {
+          // Cut short by the app leaving or a typing screen, or failed: the
+          // run ends if halted, else the next one has its turn.
+          failed.add(next.audio);
+          if (_transcribing != null) _show(null);
+        }
       }
     } on Object {
       SafeLog.event(LogEvent.retryFailed, [-2]);

@@ -227,6 +227,73 @@ void main() {
     expect(lines, ['retryStarted', 'retryFailed 402', 'retryCut']);
   });
 
+  // D96 Q4: a recording whose retry failed goes to the back of the queue,
+  // never deleted, so the ones behind it get their turn.
+  test('a failing recording does not hold back the two behind', () async {
+    final z = '3' * 32;
+    await waits(first, [Waiting(x), Waiting(y), Waiting(z)], {x: 3200, y: 3200, z: 3200});
+    final r = retries();
+    final seen = <String?>[];
+    r.addListener(() => seen.add(r.transcribing));
+    r.kick();
+    await pumpEventQueue();
+    links[0].reply('{"tokens":[],"error_code":402}');
+    await pumpEventQueue();
+    expect(links, hasLength(2));
+    links[1].reply(reply(done: [tokens[0]], finished: true));
+    await pumpEventQueue();
+    expect(links, hasLength(3));
+    links[2].reply(reply(done: [tokens[1]], finished: true));
+    await pumpEventQueue();
+    expect(await entries(first), [Waiting(x), Told(tokens[0].trimLeft()), Told(tokens[1].trimLeft())]);
+    expect(files.files.keys.where((n) => n.contains(x)), isNotEmpty);
+    expect(r.transcribing, isNull);
+    expect(seen.indexOf(x), lessThan(seen.indexOf(null)));
+    expect(seen.indexOf(null), lessThan(seen.indexOf(y)));
+    expect(lines.where((l) => l == 'retryFailed 402'), hasLength(1));
+    // The next chance tries it again, and it is not lost.
+    r.kick();
+    await pumpEventQueue();
+    expect(links, hasLength(4));
+    links[3].reply(reply(done: [tokens[2]], finished: true));
+    await pumpEventQueue();
+    expect(await entries(first), [Told(tokens[2].trimLeft()), Told(tokens[0].trimLeft()), Told(tokens[1].trimLeft())]);
+    expect(files.files.keys.where((n) => n.startsWith('audio-')), isEmpty);
+  });
+
+  test('all failing: each tried once per run, then it stops', () async {
+    await waits(first, [Waiting(x), Waiting(y)], {x: 3200, y: 3200});
+    key = () async => throw const KeyFailure(502);
+    final r = retries();
+    r.kick();
+    await pumpEventQueue();
+    expect(lines, ['retryStarted', 'retryFailed 502', 'retryStarted', 'retryFailed 502']);
+    expect(await entries(first), [Waiting(x), Waiting(y)]);
+    expect(r.transcribing, isNull);
+  });
+
+  // The phone says there is no connection: nothing is tried, nothing shows
+  // (AI·6 would flash until a key request failed); it starts when the
+  // connection returns.
+  test('offline, no retry and no AI·6; the connection returning starts it', () async {
+    await waits(first, [Waiting(x)], {x: 3200});
+    connection.set(false);
+    final r = retries();
+    final seen = <String?>[];
+    r.addListener(() => seen.add(r.transcribing));
+    r.kick();
+    r.back();
+    r.release();
+    await pumpEventQueue();
+    expect(links, isEmpty);
+    expect(lines, isEmpty);
+    expect(seen, isEmpty);
+    connection.set(true);
+    await pumpEventQueue();
+    expect(links, hasLength(1));
+    expect(seen.first, x);
+  });
+
   // D93 Q7, P10: no words, and the recording goes; a night left with
   // nothing at all is deleted.
   test('silence: the recording goes, and an emptied night with it', () async {

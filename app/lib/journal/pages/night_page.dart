@@ -86,10 +86,21 @@ class _NightPageState extends State<NightPage> {
     }
     if (!mounted) return;
     if (n == null) {
-      Navigator.of(context).pop();
+      _leave();
       return;
     }
     setState(() => _night = n);
+  }
+
+  // The page leaves by its own route: with a question or a typing screen
+  // open above it, popping would close that instead (D96).
+  void _leave() {
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) {
+      Navigator.of(context).pop();
+    } else {
+      Navigator.of(context).removeRoute(route);
+    }
   }
 
   Future<void> _type(DreamEdit? edit) async {

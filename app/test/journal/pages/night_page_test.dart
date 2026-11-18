@@ -180,6 +180,48 @@ void main() {
     await tester.pump(const Duration(seconds: 11));
   });
 
+  // D96: the page leaves by its own route. A night that goes while the delete
+  // question is open (its only recording heard as silence) must not close the
+  // question in the page's place.
+  testWidgets('night gone under a question: page leaves, question stays', (tester) async {
+    h = await Harness.make();
+    n = await keep(h, 'one-dream-sv', stockholm(2026, 6, 2, 23));
+    final x = '1' * 32;
+    await h.store.save(n.withEntries([Waiting(x)]));
+    await h.store.appendAudio(x, Uint8List(3200));
+    final links = <MemoryLink>[];
+    final audio = JournalAudio(h.store);
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () async => 'k',
+      connect: (_) async {
+        final link = MemoryLink();
+        links.add(link);
+        return link;
+      },
+    ).keeping(audio, waiting: audio);
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, recording: recording)));
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(NightPage.menuKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(NightPage.deleteKey));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    recording.retries!.kick();
+    await tester.pump();
+    await tester.pump();
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+    links.single.reply(reply(finalMs: 100, finished: true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(find.byType(NightPage), findsNothing);
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+    expect(await h.store.nights(), isEmpty);
+    await tester.pump(const Duration(seconds: 11));
+  });
+
   testWidgets('an emptied dream disappears; the others remain', (tester) async {
     await open(tester);
     await tester.tap(find.text(n.dreams[0]));
