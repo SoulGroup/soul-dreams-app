@@ -133,6 +133,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _text.addListener(_moved);
+    // No retry while this screen is open, so no dream moves under it (D94).
+    widget.recording?.retries?.hold();
     // A key fetched in advance, so a recording starts at once (D88).
     widget.recording?.warm();
     // A failed read shows the short line and marks nothing; a failed mark
@@ -158,6 +160,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    widget.recording?.retries?.release();
     _ticker?.cancel();
     final session = _session;
     _session = null;
@@ -207,7 +210,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       if (e == null) {
         await widget.journal.addDream(widget.target, _text.text, appLanguage, waiting: waiting);
       } else {
-        await widget.journal.editDream(e.id, e.index, _text.text, waiting: waiting);
+        await widget.journal.editDream(e.id, e.index, _text.text, waiting: waiting, was: e.text);
       }
       _waiting.clear();
     } on Object {

@@ -6,11 +6,14 @@
 // MP·60, pending lines); the dreams under "Dreams" (MP·38), each opening
 // the typing screen to edit it; "Add dreams" (MP·29). A recording that
 // waits to be turned into text shows nothing in its place and cannot be
-// tapped (D93 Q3). Not built: naming, Start Interpretation, and the space
-// below the dreams.
+// tapped; while it is being turned into text, AI·6 shows in its place,
+// heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
+// When its words come, the page shows them. Not built: naming, Start
+// Interpretation, and the space below the dreams.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../core/app_line.dart';
 import '../../core/language.dart';
 import '../../core/safe_log.dart';
 import '../../design/palette.dart';
@@ -32,6 +35,7 @@ class NightPage extends StatefulWidget {
   static const menuKey = Key('night-menu');
   static const deleteKey = Key('night-delete');
   static const addKey = Key('night-add');
+  static const transcribingKey = Key('night-transcribing');
 
   final Journal journal;
   final String id;
@@ -53,6 +57,22 @@ class _NightPageState extends State<NightPage> {
   void initState() {
     super.initState();
     _load();
+    widget.recording?.retries?.addListener(_retried);
+  }
+
+  @override
+  void dispose() {
+    widget.recording?.retries?.removeListener(_retried);
+    super.dispose();
+  }
+
+  String? get _transcribing => widget.recording?.retries?.transcribing;
+
+  // A retry began, ended, or brought words (D94): shown at once.
+  void _retried() {
+    if (!mounted) return;
+    setState(() {});
+    if (!_busy) _load();
   }
 
   // A night gone (every dream emptied) leaves its page (P10).
@@ -169,6 +189,13 @@ class _NightPageState extends State<NightPage> {
                     for (final (i, d) in n.entries.indexed)
                       if (d case Told(:final text)) ...[
                         DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
+                        const SizedBox(height: StandIns.bubbleGap),
+                      ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
+                        Semantics(
+                          key: NightPage.transcribingKey,
+                          liveRegion: true,
+                          child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                        ),
                         const SizedBox(height: StandIns.bubbleGap),
                       ],
                     const SizedBox(height: StandIns.gap),

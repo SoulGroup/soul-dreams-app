@@ -60,6 +60,15 @@ enum LogEvent {
   recordingOffline,
   recordingCapped,
   audioKeepFailed,
+
+  /// A waiting recording replayed to Soniox (D94): begun; all of it in
+  /// words; cut short, its progress kept; failed (Soniox's code, our
+  /// server's status, 0 for no answer, -2 for the journal, -3 for words
+  /// the journal did not take).
+  retryStarted,
+  retryDone,
+  retryCut,
+  retryFailed,
 }
 
 abstract final class SafeLog {

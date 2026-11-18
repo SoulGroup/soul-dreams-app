@@ -41,11 +41,13 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _load();
+    widget.recording?.retries?.addListener(_load);
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    widget.recording?.retries?.removeListener(_load);
     super.dispose();
   }
 

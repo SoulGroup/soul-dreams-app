@@ -18,6 +18,7 @@ import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/recording/heard_text.dart';
 import 'package:souldreams/recording/recording.dart';
+import 'package:souldreams/recording/retries.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
 
@@ -42,6 +43,26 @@ final class FlakyFiles extends MemoryJournalFiles {
     }
     return super.write(name, bytes);
   }
+}
+
+/// Recordings waiting, as the retries see them: none; it counts the looks.
+final class NoneWaiting implements WaitingAudio {
+  int looks = 0;
+
+  @override
+  Future<List<Pending>> waiting() async {
+    looks++;
+    return const [];
+  }
+
+  @override
+  Future<({int start, int size})?> part(String audio) async => null;
+
+  @override
+  Future<Uint8List> read(String audio, int start, int at, int length) async => Uint8List(0);
+
+  @override
+  Future<void> heard(Pending pending, String words, int to, {required bool done}) async {}
 }
 
 /// A folder whose listing, or whose write of the first-use flag, throws.
@@ -1773,6 +1794,19 @@ void main() {
     expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft())]);
     expect(v.keep.discarded, hasLength(1));
     expect(find.byKey(TypingPage.noticeKey), findsNothing);
+  });
+
+  // D94: no retry while a typing screen is open; its closing starts one.
+  testWidgets('the typing screen holds the retries while it is open', (tester) async {
+    final none = NoneWaiting();
+    final recording = offline().recording.keeping(MemoryKeep(), waiting: none);
+    await tall(tester, recording: recording);
+    recording.retries!.kick();
+    await tester.pump();
+    expect(none.looks, 0);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(none.looks, 1);
   });
 
   testWidgets('a failed Save keeps the waiting recording for the next', (tester) async {

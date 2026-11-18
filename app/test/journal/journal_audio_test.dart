@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/journal_store.dart';
 
+import '../fixtures.dart';
 import 'io_journal_files.dart';
 
 void main() {
@@ -33,5 +34,19 @@ void main() {
     expect(files.everything().values.single, [1, 2, 3, 4]);
     await keep.discard(id);
     expect(files.everything(), isEmpty);
+  });
+
+  // D92 item 4: words for a recording its night no longer names change
+  // nothing, and its audio goes.
+  test('words for a recording no night names: its audio goes', () async {
+    final store = await JournalStore.open(files);
+    final keep = JournalAudio(store);
+    final night = nightsFromFixtures().first;
+    await store.save(night);
+    final id = '1' * 32;
+    await keep.add(id, Uint8List(6400), last: true);
+    await keep.heard((night: night.id, audio: id, from: 0), 'x', 3200, done: false);
+    expect(await store.nights(), [night]);
+    expect(files.everything().keys, [JournalStore.fileOf(night.id)]);
   });
 }

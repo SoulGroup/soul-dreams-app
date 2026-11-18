@@ -23,6 +23,7 @@ void main() {
       'microphone.dart',
       'record_microphone.dart',
       'recording.dart',
+      'retries.dart',
       'soniox.dart',
     });
   });

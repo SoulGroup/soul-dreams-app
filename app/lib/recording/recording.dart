@@ -25,6 +25,7 @@ import 'audio_keep.dart';
 import 'connection.dart';
 import 'key_client.dart';
 import 'microphone.dart';
+import 'retries.dart';
 import 'soniox.dart';
 
 /// What a typing screen needs to record.
@@ -72,17 +73,26 @@ final class Recording {
   final int cap;
   final DateTime Function() _now;
 
-  /// The same recording, keeping its audio in [keep].
-  Recording keeping(AudioKeep keep) => Recording(
-    on: on,
-    microphone: microphone,
-    key: key,
-    connect: connect,
-    keep: keep,
-    connection: connection,
-    cap: cap,
-    now: _now,
-  );
+  /// The same recording, keeping its audio in [keep]; with [waiting], it
+  /// also retries the recordings waiting there (D94).
+  Recording keeping(AudioKeep keep, {WaitingAudio? waiting}) {
+    final kept = Recording(
+      on: on,
+      microphone: microphone,
+      key: key,
+      connect: connect,
+      keep: keep,
+      connection: connection,
+      cap: cap,
+      now: _now,
+    );
+    if (waiting != null) kept._retries = Retries(kept, waiting);
+    return kept;
+  }
+
+  /// The retries of the recordings waiting on the phone, or null.
+  Retries? get retries => _retries;
+  Retries? _retries;
 
   // A key fetched in advance (D88): single use, and used only while fresh.
   Future<String>? _ahead;

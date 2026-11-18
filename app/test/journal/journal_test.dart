@@ -78,6 +78,20 @@ void main() {
     expect(await entries(), [Told(b[0]), x, y, z]);
   });
 
+  // D94: words that came for a recording may move a dream while its screen
+  // is open; the edit finds it by the words it opened with.
+  test('an edit finds its dream by its words once moved', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final n = (await journal.newestFirst()).single;
+    await journal.addDream(IntoNight(n.id), a[1], Lang.en);
+    final w = Waiting('1' * 32);
+    await (await JournalStore.open(files)).save(n.withEntries([Told(b[0]), w, Told(a[0]), Told(a[1])]));
+    await journal.editDream(n.id, 1, 'x', was: a[1]);
+    expect((await journal.night(n.id))!.entries, [Told(b[0]), w, Told(a[0]), const Told('x')]);
+    await journal.editDream(n.id, 2, '', was: a[0]);
+    expect((await journal.night(n.id))!.entries, [Told(b[0]), w, const Told('x')]);
+  });
+
   test('an empty Save keeps nothing', () async {
     for (final text in ['', '  \n ']) {
       expect(await journal.addDream(await journal.targetNow(), text, Lang.en), isFalse);

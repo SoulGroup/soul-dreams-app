@@ -73,11 +73,16 @@ final class Journal {
   /// Replaces dream [index] of night [id] with [text], and puts the
   /// recordings [waiting] for their words after it (at the night's end if
   /// that dream is gone). The index counts every dream, told or waiting; a
-  /// waiting one is never replaced.
-  Future<void> editDream(String id, int index, String text, {List<Waiting> waiting = const []}) async {
+  /// waiting one is never replaced. With [was], the dream's words when its
+  /// screen opened: if words that came for a recording moved it meanwhile
+  /// (D94), it is found by them.
+  Future<void> editDream(String id, int index, String text, {List<Waiting> waiting = const [], String? was}) async {
     await _store.update(id, (n) {
       final entries = [...n.entries];
       var at = entries.length;
+      if (was != null && !(index >= 0 && index < entries.length && entries[index] == Told(was))) {
+        index = entries.indexOf(Told(was));
+      }
       if (index >= 0 && index < entries.length && entries[index] is Told) {
         if (isEmptyText(text)) {
           entries.removeAt(index);

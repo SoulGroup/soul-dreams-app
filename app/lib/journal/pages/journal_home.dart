@@ -3,7 +3,10 @@
 // open the page is blank; if it cannot be opened it stays blank and logs
 // a code, never a night's words (R3). A phone check it is handed (D65)
 // finishes first, so its probe never shows as a row. The recording it is
-// handed keeps its audio in the journal's folder (D92).
+// handed keeps its audio in the journal's folder (D92), and retries the
+// recordings waiting there while the app is open: when the journal opens,
+// when the app comes back, and when the connection returns; leaving the
+// app cuts a retry short (D92 item 3, D94).
 import 'package:flutter/material.dart';
 
 import '../../core/safe_log.dart';
@@ -30,14 +33,32 @@ class JournalHome extends StatefulWidget {
   State<JournalHome> createState() => _JournalHomeState();
 }
 
-class _JournalHomeState extends State<JournalHome> {
+class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   Journal? _journal;
   Recording? _recording;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _open();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _recording?.retries?.dispose();
+    super.dispose();
+  }
+
+  // No background task: a retry runs only while the app is open (D92
+  // item 3). `inactive` changes nothing.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final retries = _recording?.retries;
+    if (retries == null) return;
+    if (state == AppLifecycleState.resumed) retries.back();
+    if (state == AppLifecycleState.hidden || state == AppLifecycleState.paused) retries.away();
   }
 
   Future<void> _open() async {
@@ -48,10 +69,12 @@ class _JournalHomeState extends State<JournalHome> {
     }
     JournalStore.open(widget.files).then((store) {
       if (!mounted) return;
+      final audio = JournalAudio(store);
       setState(() {
         _journal = Journal(store);
-        _recording = widget.recording?.keeping(JournalAudio(store));
+        _recording = widget.recording?.keeping(audio, waiting: audio);
       });
+      _recording?.retries?.kick();
     }, onError: (Object _) => SafeLog.event(LogEvent.journalOpenFailed));
   }
 

@@ -8,16 +8,20 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
+import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
+import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
+import '../../recording/fakes.dart';
 import '../memory_journal_files.dart';
 import '../zones.dart';
 import 'harness.dart';
@@ -129,6 +133,51 @@ void main() {
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
     expect((await h.journal.night(n.id))!.entries, [w1, Told(n.dreams[0]), w2, Told(other)]);
+  });
+
+  // D93 Q3: while a waiting recording is turned into words, AI·6 shows in
+  // its place, heard by a screen reader; then its words, as its own dream.
+  testWidgets('AI·6 shows in its place while it is transcribed', (tester) async {
+    h = await Harness.make();
+    n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    final x = '1' * 32;
+    await h.store.save(n.withEntries([Told(n.dreams[0]), Waiting(x), Told(n.dreams[1])]));
+    await h.store.appendAudio(x, Uint8List(6400));
+    final links = <MemoryLink>[];
+    final audio = JournalAudio(h.store);
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () async => 'k',
+      connect: (_) async {
+        final link = MemoryLink();
+        links.add(link);
+        return link;
+      },
+    ).keeping(audio, waiting: audio);
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, recording: recording)));
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    expect(find.byKey(NightPage.transcribingKey), findsNothing);
+    recording.retries!.kick();
+    await tester.pump();
+    await tester.pump();
+    final label = find.byKey(NightPage.transcribingKey);
+    expect(label, findsOneWidget);
+    expect(tester.widget<Semantics>(label).properties.liveRegion, isTrue);
+    final line = tester.widget<AppLine>(find.descendant(of: label, matching: find.byType(AppLine)));
+    expect(line.text, Lines.AI_6.text(Lang.en));
+    expect(tester.getTopLeft(label).dy, greaterThan(tester.getTopLeft(find.text(n.dreams[0])).dy));
+    expect(tester.getTopLeft(label).dy, lessThan(tester.getTopLeft(find.text(n.dreams[1])).dy));
+    await tester.pump(const Duration(milliseconds: 300));
+    final word = n.dreams[1].split(' ').first;
+    links.single.reply(reply(done: [word], finished: true));
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.byKey(NightPage.transcribingKey), findsNothing);
+    expect(find.byType(DreamBubble), findsNWidgets(3));
+    expect((await h.journal.night(n.id))!.entries, [Told(n.dreams[0]), Told(word), Told(n.dreams[1])]);
+    await tester.pump(const Duration(seconds: 11));
   });
 
   testWidgets('an emptied dream disappears; the others remain', (tester) async {

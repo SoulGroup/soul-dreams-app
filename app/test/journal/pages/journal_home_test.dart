@@ -1,6 +1,7 @@
 // SoulDreams Dev's first page: the journal, once its folder is open.
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,10 +9,12 @@ import 'package:souldreams/app.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/journal_store.dart';
+import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/recording/recording.dart';
 
+import '../../fixtures.dart';
 import '../../recording/fakes.dart';
 import '../memory_journal_files.dart';
 
@@ -57,6 +60,50 @@ void main() {
     final handed = tester.widget<JournalPage>(find.byType(JournalPage)).recording!;
     expect(handed.keep, isA<JournalAudio>());
     expect(handed.microphone, same(recording.microphone));
+  });
+
+  // D92 item 3: a recording waiting is retried only while the app is open:
+  // when the journal opens and when the app comes back; leaving cuts it.
+  testWidgets('the journal opening retries; leaving cuts it; back resumes', (tester) async {
+    JournalStore.newQueueForTests();
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    final files = MemoryJournalFiles();
+    final store = await JournalStore.open(files);
+    final x = '1' * 32;
+    await store.save(nightsFromFixtures().first.withEntries([Waiting(x)]));
+    await store.appendAudio(x, Uint8List(32000));
+    final links = <MemoryLink>[];
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () async => 'k',
+      connect: (_) async {
+        final link = MemoryLink();
+        links.add(link);
+        return link;
+      },
+    );
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: recording)));
+    await tester.pump();
+    await tester.pump();
+    expect(links, hasLength(1));
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(links.single.closed, isFalse);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(links.single.closed, isTrue);
+    expect(lines, ['retryStarted', 'retryCut']);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump();
+    expect(links, hasLength(2));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 11));
   });
 
   // D65: with the phone check, its probe never shows as a row, because the
