@@ -186,12 +186,24 @@ final class MemoryKeep implements AudioKeep {
   /// Every add from now on fails, as a full disk would.
   bool fails = false;
 
+  /// Only the add that ends a recording (`last`) fails.
+  bool failsLast = false;
+
+  /// How many adds were asked for.
+  int calls = 0;
+
+  /// While set, an add waits for it before it writes or fails.
+  Completer<void>? gate;
+
   @override
   String newId() => (++_next).toRadixString(16).padLeft(32, '0');
 
   @override
   Future<void> add(String id, Uint8List bytes, {bool last = false}) async {
-    if (fails) throw StateError('keep');
+    calls++;
+    final held = gate;
+    if (held != null) await held.future;
+    if (fails || (failsLast && last)) throw StateError('keep');
     (audio[id] ??= []).addAll(bytes);
     if (last) ended.add(id);
   }

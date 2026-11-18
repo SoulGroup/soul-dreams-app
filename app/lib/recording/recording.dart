@@ -152,6 +152,8 @@ enum Trouble { refused, offline, broke }
 
 void _noTrouble(Trouble _) {}
 
+void _nothing() {}
+
 /// One recording, from the microphone's tap to its end.
 final class RecordingSession {
   RecordingSession(
@@ -161,6 +163,7 @@ final class RecordingSession {
     required this.onStopping,
     required this.onEnded,
     this.onTrouble = _noTrouble,
+    this.onTroubleOver = _nothing,
     this.wait = lastWords,
   });
 
@@ -185,6 +188,9 @@ final class RecordingSession {
   /// Something the dreamer is told (D93 Q4).
   final void Function(Trouble trouble) onTrouble;
 
+  /// What [onTrouble] told no longer holds (D96 Q1).
+  final void Function() onTroubleOver;
+
   SonioxLink? _link;
   // The audio heard before the stream opened, in memory only (D88).
   final _held = <Uint8List>[];
@@ -205,6 +211,9 @@ final class RecordingSession {
   String? _audio;
   final _unkept = BytesBuilder(copy: false);
   bool _keepFailed = false;
+  // The last write asked of the keep; each waits for the one before, so the
+  // audio is written in order and never past a write that failed (D96).
+  Future<void> _written = Future<void>.value();
   int _recorded = 0;
   int _covered = 0;
   // Every word final: Soniox finished after the end frame.
@@ -306,11 +315,33 @@ final class RecordingSession {
     if (audio == null || _keepFailed) return;
     final bytes = _unkept.takeBytes();
     if (bytes.isEmpty && !last) return;
-    _recording.keep!.add(audio, bytes, last: last).catchError((Object _) {
-      if (_keepFailed) return;
-      _keepFailed = true;
-      SafeLog.event(LogEvent.audioKeepFailed);
-    });
+    _written = _write(audio, bytes, last);
+  }
+
+  // One write, after the one before it; it never throws. After a failure
+  // nothing more is written: a later write would leave a gap, or begin in
+  // the middle of a sample.
+  Future<void> _write(String audio, Uint8List bytes, bool last) async {
+    await _written;
+    if (_keepFailed) return;
+    try {
+      await _recording.keep!.add(audio, bytes, last: last);
+    } on Object {
+      _failKeep();
+    }
+  }
+
+  // The keep failed (a full phone): logged once. With no stream the
+  // recording has nothing left to go on with, so it stops as a broken
+  // stream does, and the notice that the audio stays on the phone goes
+  // (D96 Q1); with a stream, the words still come (D71).
+  void _failKeep() {
+    if (_keepFailed) return;
+    _keepFailed = true;
+    SafeLog.event(LogEvent.audioKeepFailed);
+    if (!_cut) return;
+    onTroubleOver();
+    if (!_ended) unawaited(_shut());
   }
 
   // The stream is gone or never came, with the audio kept: the recording
@@ -464,8 +495,13 @@ final class RecordingSession {
     }
   }
 
-  Future<void> _shut() async {
-    if (_ended) return;
+  // Every caller waits for the one ending, so a stop that finds the session
+  // already ending returns only when it has ended (`left` is set by then).
+  Future<void>? _shutting;
+
+  Future<void> _shut() => _shutting ??= _end();
+
+  Future<void> _end() async {
     _ended = true;
     if (!_finished.isCompleted) _finished.complete();
     _held.clear();
@@ -475,7 +511,7 @@ final class RecordingSession {
     final link = _link;
     _link = null;
     unawaited(replies?.cancel());
-    _settleAudio();
+    await _settleAudio();
     SafeLog.event(LogEvent.recordingEnded);
     onEnded();
     if (link != null) _closeQuietly(link);
@@ -484,16 +520,20 @@ final class RecordingSession {
   // The audio, once the recording is over: deleted at once when every word
   // is final, or nothing was recorded past the final words; else it waits
   // from there, and the words not yet final leave the field (D93 Q5, D94).
-  void _settleAudio() {
+  // It waits for the last write: what waits is what was really kept.
+  Future<void> _settleAudio() async {
     final audio = _audio;
     if (audio == null) return;
     final from = math.min(_covered, _recorded) & ~1;
-    if (_keepFailed || _allFinal || _recorded <= from) {
-      _recording.keep!.discard(audio).catchError((Object _) {});
-      return;
+    if (!_keepFailed && !_allFinal && _recorded > from) {
+      _handOn(last: true);
+      await _written;
+      if (!_keepFailed) {
+        _left = (audio: audio, from: from);
+        onHeard('', '');
+        return;
+      }
     }
-    _handOn(last: true);
-    _left = (audio: audio, from: from);
-    onHeard('', '');
+    _recording.keep!.discard(audio).catchError((Object _) {});
   }
 }

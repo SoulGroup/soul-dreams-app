@@ -615,7 +615,13 @@ void main() {
   // Offline recording (D92 to D94): every recording's audio is kept from its
   // first frame; all final, it is deleted at once; else it waits from the
   // last final word.
-  ({RecordingSession session, List<(String, String)> heard, List<Trouble> troubles, List<int> ended}) kept(
+  ({
+    RecordingSession session,
+    List<(String, String)> heard,
+    List<Trouble> troubles,
+    List<int> ended,
+    List<int> cleared,
+  }) kept(
     SilentMicrophone mic,
     MemoryKeep keep, {
     MemoryLink? link,
@@ -626,6 +632,7 @@ void main() {
     final heard = <(String, String)>[];
     final troubles = <Trouble>[];
     final ended = <int>[];
+    final cleared = <int>[];
     final recording = Recording(
       on: true,
       microphone: mic,
@@ -642,9 +649,10 @@ void main() {
       onStopping: () {},
       onEnded: () => ended.add(1),
       onTrouble: troubles.add,
+      onTroubleOver: () => cleared.add(1),
       wait: const Duration(milliseconds: 200),
     );
-    return (session: session, heard: heard, troubles: troubles, ended: ended);
+    return (session: session, heard: heard, troubles: troubles, ended: ended, cleared: cleared);
   }
 
   // [n] frames of a tenth of a second, each its own value.
@@ -821,6 +829,123 @@ void main() {
     expect(r.troubles, isEmpty);
     expect(r.session.left, isNull);
     expect(lines, ['recordingStarted', 'audioKeepFailed', 'recordingStreamFailed 1011', 'recordingEnded']);
+  });
+
+  // D96 Q1: a keep that fails once the recording is cut (no stream, or none
+  // at all) stops it as a broken stream does, one code, and the notice
+  // (MP·15 or MP·54, "it stays on your phone") goes.
+  test('keep fails when offline: stops, one code, notice goes', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..fails = true;
+    final r = kept(mic, keep, connection: FakeConnection()..online = false);
+    expect(await r.session.start(), isTrue);
+    expect(r.troubles, [Trouble.offline]);
+    await frames(mic, 11);
+    await pumpEventQueue();
+    expect(mic.running, isFalse);
+    expect(r.ended, [1]);
+    expect(r.cleared, [1]);
+    expect(r.session.left, isNull);
+    expect(keep.discarded, hasLength(1));
+    expect(lines, ['recordingStarted', 'recordingOffline', 'audioKeepFailed', 'recordingEnded']);
+  });
+
+  test('keep fails after a break: stops, one code, notice goes', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 5);
+    await link.drop(1011);
+    await pumpEventQueue();
+    expect(r.troubles, [Trouble.broke]);
+    expect(mic.running, isTrue);
+    keep.fails = true;
+    await frames(mic, 12, 6);
+    await pumpEventQueue();
+    expect(mic.running, isFalse);
+    expect(r.ended, [1]);
+    expect(r.cleared, [1]);
+    expect(r.session.left, isNull);
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'audioKeepFailed', 'recordingEnded']);
+  });
+
+  test('keep fails with a live stream: it goes on', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..fails = true;
+    final r = kept(mic, keep);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 11);
+    expect(mic.running, isTrue);
+    expect(r.cleared, isEmpty);
+    expect(r.ended, isEmpty);
+  });
+
+  // The last write is waited for: a recording is left waiting only when all
+  // its audio really was kept (D92; D96).
+  test('last write fails: nothing waits, audio deleted, one code', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..failsLast = true;
+    final r = kept(mic, keep, connection: FakeConnection()..online = false);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 5);
+    await r.session.stop();
+    await pumpEventQueue();
+    expect(r.session.left, isNull);
+    expect(keep.discarded, hasLength(1));
+    expect(r.cleared, [1]);
+    expect(lines, ['recordingStarted', 'recordingOffline', 'audioKeepFailed', 'recordingEnded']);
+  });
+
+  test('a failed write: no later write, no gap, no half sample', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..gate = Completer<void>();
+    final r = kept(mic, keep);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 22);
+    expect(keep.calls, 1);
+    keep.fails = true;
+    keep.gate!.complete();
+    await pumpEventQueue();
+    await frames(mic, 5, 23);
+    expect(keep.calls, 1);
+    expect(keep.audio, isEmpty);
+    expect(lines, ['recordingStarted', 'audioKeepFailed']);
+  });
+
+  test('the writes go one at a time, in order', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..gate = Completer<void>();
+    final r = kept(mic, keep);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 22);
+    expect(keep.calls, 1);
+    keep.gate!.complete();
+    await pumpEventQueue();
+    expect(keep.calls, 2);
+    final id = keep.audio.keys.single;
+    expect(keep.audio[id], hasLength(64000));
+    expect(firstSample(keep.audio[id]!, 0), 1);
+    expect(firstSample(keep.audio[id]!, 32000), 11);
+  });
+
+  // A stop that finds the session already ending (a cancel while it waited,
+  // the app left during a Save) returns only when the ending is done: what
+  // waits is known by then, so a Save never misses it.
+  test('cancel during a stop: it returns with what waits known', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final r = kept(mic, keep, link: MemoryLink());
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 5);
+    final stopping = r.session.stop();
+    await pumpEventQueue();
+    unawaited(r.session.cancel());
+    await stopping.timeout(const Duration(seconds: 1));
+    expect(r.ended, [1]);
+    final id = keep.audio.keys.single;
+    expect(r.session.left, (audio: id, from: 0));
   });
 
   test('refused or off: no audio, no id', () async {
