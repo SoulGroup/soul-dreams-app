@@ -88,9 +88,6 @@ final class Retries extends ChangeNotifier {
   /// screen closed, or the connection returned.
   void kick() {
     if (!_recording.on || _stopped) return;
-    // The phone says there is no connection: no key to ask for, and AI·6
-    // would only flash; the connection returning is the next chance.
-    if (!(_recording.connection?.online ?? true)) return;
     if (_running) {
       _again = true;
       return;
@@ -147,7 +144,8 @@ final class Retries extends ChangeNotifier {
       // the next chance tries them first again.
       final failed = <String>{};
       while (!_halted) {
-        // The connection went during the run: the rest wait for its return.
+        // The phone says there is no connection: no key to ask for, and AI·6
+        // would only flash; the connection returning is the next chance.
         if (!(_recording.connection?.online ?? true)) break;
         final all = [for (final p in await _audio.waiting()) if (!failed.contains(p.audio)) p];
         if (all.isEmpty || _halted) break;

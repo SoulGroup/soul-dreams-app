@@ -90,24 +90,44 @@ void main() {
     [first, second, ...] = nightsFromFixtures();
   });
 
-  tearDown(() => SafeLog.sink = sink);
+  // A retry a test leaves running waits out Soniox's last words and then logs
+  // a cut: into the next test's lines. Each is ended here, and finishes, before
+  // the log goes back.
+  final made = <Retries>[];
 
-  Retries retries({bool on = true, double pace = 0}) => Retries(
-    Recording(
-      on: on,
-      microphone: SilentMicrophone(),
-      key: () => key(),
-      connect: (_) async {
-        final link = MemoryLink();
-        links.add(link);
-        return link;
-      },
-      connection: connection,
-    ),
-    audio,
-    pace: pace,
-    wait: const Duration(milliseconds: 100),
-  );
+  tearDown(() async {
+    for (final r in made) {
+      try {
+        r.dispose();
+      } on Object {
+        // Its test disposed it.
+      }
+    }
+    made.clear();
+    await pumpEventQueue();
+    SafeLog.sink = sink;
+  });
+
+  Retries retries({bool on = true, double pace = 0}) {
+    final r = Retries(
+      Recording(
+        on: on,
+        microphone: SilentMicrophone(),
+        key: () => key(),
+        connect: (_) async {
+          final link = MemoryLink();
+          links.add(link);
+          return link;
+        },
+        connection: connection,
+      ),
+      audio,
+      pace: pace,
+      wait: const Duration(milliseconds: 100),
+    );
+    made.add(r);
+    return r;
+  }
 
   Future<void> waits(Night n, List<Dream> entries, Map<String, int> bytes) async {
     await store.save(n.withEntries(entries));
@@ -388,6 +408,7 @@ void main() {
     r.kick();
     await pumpEventQueue();
     expect(links, hasLength(1));
+    expect(lines, isNot(contains('retryFailed -2')));
   });
 
   test('words the journal does not take: a code, no going round', () async {
