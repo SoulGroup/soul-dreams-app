@@ -925,6 +925,24 @@ void main() {
     expect(lines, ['recordingStarted', 'recordingKeyFailed 502', 'recordingSettled 0 200', 'recordingEnded']);
   });
 
+  test('the connection lost, then the key fails: told once', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final key = Completer<String>();
+    final r = kept(mic, keep, connection: connection, key: () => key.future);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 2);
+    connection.set(false);
+    await pumpEventQueue();
+    key.completeError(const KeyFailure(0));
+    await pumpEventQueue();
+    expect(r.troubles, [Trouble.broke]);
+    expect(r.heard, [('', '')]);
+    await r.session.stop();
+    expect(lines, ['recordingStarted', 'recordingConnectionLost', 'recordingSettled 0 200', 'recordingEnded']);
+  });
+
   test('the connection lost during a stop: it ends at once, MP·54', () async {
     final mic = SilentMicrophone();
     final keep = MemoryKeep();
@@ -1007,10 +1025,12 @@ void main() {
     final r = kept(mic, keep, link: link, connection: connection);
     expect(await r.session.start(), isTrue);
     await frames(mic, 2);
+    expect(connection.listened, isTrue);
     final stopped = r.session.stop();
     await pumpEventQueue();
     link.reply(reply(done: [tokens[0]], finalMs: 200, finished: true));
     await stopped;
+    expect(connection.listened, isFalse);
     connection.set(false);
     await pumpEventQueue();
     expect(r.troubles, isEmpty);

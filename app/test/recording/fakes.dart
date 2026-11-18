@@ -229,6 +229,9 @@ final class FakeConnection implements Connection {
     online = value;
     _changes.add(value);
   }
+
+  /// Whether anything watches the changes now.
+  bool get listened => _changes.hasListener;
 }
 
 /// A link held in memory: what was sent, and replies the test pushes.
