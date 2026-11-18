@@ -1,7 +1,8 @@
 // Values design-system.md leaves unset ("[to set in Framer]", §5, §7),
 // each a named stand-in matched by eye to the founder's screenshots
 // (P13; D58), never added to tokens.g.dart. The founder corrects them in
-// Cohort 0. Every one is listed in docs/plans/journal-screens.md.
+// Cohort 0. Every one is listed in docs/plans/journal-screens.md, or, for
+// those of journal-design, in docs/plans/journal-design.md.
 import 'package:flutter/painting.dart';
 
 abstract final class StandIns {

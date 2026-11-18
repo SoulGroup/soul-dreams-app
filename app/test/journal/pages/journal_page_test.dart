@@ -195,7 +195,7 @@ void main() {
     expect(text.maxLines, 3);
     expect(text.overflow, TextOverflow.ellipsis);
     final short = find.text(invented('one-dream-sv').dreams.single);
-    expect(tester.getSize(short).height, closeTo(tester.getSize(long).height, 1));
+    expect(tester.getSize(short).height, closeTo(tester.getSize(long).height, 0.5));
   });
 
   testWidgets('the record button opens typing; a Save adds a row', (tester) async {

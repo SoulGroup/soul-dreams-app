@@ -202,8 +202,8 @@ final class RecordingSession {
   StreamSubscription<String>? _replies;
   StreamSubscription<Uint8List>? _frames;
   StreamSubscription<void>? _interruptions;
-  // The phone's connection, watched while the stream is open or opening
-  // (D100).
+  // The phone's connection, watched from the tap until the session ends
+  // (D100); a loss counts only while the stream is open or opening.
   StreamSubscription<bool>? _connection;
   // Done when the wait for the last words can end: Soniox finished, the
   // stream went while a stop waits, or the session ended.
@@ -440,8 +440,8 @@ final class RecordingSession {
     _cutOff();
   }
 
-  // The phone reports no connection while the stream is open or opening
-  // (D100): the same as a break, at once.
+  // The phone reports no connection (D100): the same as a break, at once,
+  // unless the recording is already cut or has all its words.
   void _lost() {
     if (_ended || _finished.isCompleted || _cut) return;
     SafeLog.event(LogEvent.recordingConnectionLost);
@@ -480,8 +480,9 @@ final class RecordingSession {
     final clock = Stopwatch()..start();
     final opening = _opening;
     // A cancel or a break ends that wait at once (D75): `_shut` completes
-    // `_finished`.
-    if (opening != null) await Future.any([opening, _finished.future]).timeout(wait, onTimeout: () {});
+    // `_finished`. Already cut (D100), the opening's result is thrown away:
+    // nothing to wait for.
+    if (opening != null && !_cut) await Future.any([opening, _finished.future]).timeout(wait, onTimeout: () {});
     final link = _link;
     if (link != null && !_ended) {
       link.finish();

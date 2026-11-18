@@ -265,14 +265,19 @@ void main() {
   });
 
   testWidgets('the menu: spoken as MP·39, holding only delete, plain', (tester) async {
+    final handle = tester.ensureSemantics();
     await open(tester);
     expect(find.byTooltip(Lines.MP_39.text(Lang.en)), findsOneWidget);
+    final spoken = tester.getSemantics(find.byTooltip(Lines.MP_39.text(Lang.en)));
+    expect(spoken.tooltip, Lines.MP_39.text(Lang.en));
+    expect(spoken.flagsCollection.isButton, isTrue);
     await openMenu(tester);
     final items = tester.widgetList<CupertinoMenuItem>(find.byType(CupertinoMenuItem));
     expect(items, hasLength(1));
     expect(items.single.isDestructiveAction, isFalse);
     expect(find.text(Lines.EM_11.parts(Lang.en)[1]), findsOneWidget);
     expect(find.text(Lines.MP_28.text(Lang.en)), findsNothing);
+    handle.dispose();
   });
 
   testWidgets('one confirmation: Cancel first keeps the night', (tester) async {
@@ -444,7 +449,9 @@ void main() {
   // Item 10: at the foot, Add dreams on the left and Start Interpretation on
   // the right, which does nothing yet (P3, as D71 Q3).
   testWidgets('Add dreams bottom left, Start Interpretation bottom right', (tester) async {
+    final handle = tester.ensureSemantics();
     await open(tester);
+    expect(tester.getSemantics(find.byKey(NightPage.startKey)).flagsCollection.isButton, isTrue);
     final size = tester.getSize(find.byType(NightPage));
     final add = tester.getRect(find.byKey(NightPage.addKey));
     final start = tester.getRect(find.byKey(NightPage.startKey));
@@ -458,6 +465,7 @@ void main() {
     expect(find.byType(NightPage), findsOneWidget);
     expect(find.byType(TypingPage), findsNothing);
     expect((await h.journal.night(n.id))!.dreams, n.dreams);
+    handle.dispose();
   });
 
   testWidgets('the date is heard as a heading', (tester) async {

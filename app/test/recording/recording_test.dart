@@ -876,6 +876,42 @@ void main() {
     expect(lines, ['recordingStarted', 'recordingConnectionLost', 'recordingSettled 0 500', 'recordingEnded']);
   });
 
+  // The cut came before Stop, while the key was still coming: Stop has no
+  // stream to wait for and ends at once, however long its wait (D100).
+  test('a loss while the key comes, then Stop: ends at once', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final troubles = <Trouble>[];
+    final session = RecordingSession(
+      Recording(
+        on: true,
+        microphone: mic,
+        key: () => Completer<String>().future,
+        connect: (_) async => MemoryLink(),
+        keep: keep,
+        connection: connection,
+      ),
+      onHeard: (_, _) {},
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () {},
+      onTrouble: troubles.add,
+      wait: const Duration(seconds: 30),
+    );
+    expect(await session.start(), isTrue);
+    await frames(mic, 3);
+    connection.set(false);
+    await pumpEventQueue();
+    expect(troubles, [Trouble.broke]);
+    var done = false;
+    unawaited(session.stop().then((_) => done = true));
+    await pumpEventQueue();
+    expect(done, isTrue);
+    expect(troubles, [Trouble.broke]);
+    expect(session.left, (audio: keep.audio.keys.single, from: 0));
+  });
+
   test('the connection lost while opening: a stream that comes is closed', () async {
     final mic = SilentMicrophone();
     final keep = MemoryKeep();
@@ -987,6 +1023,7 @@ void main() {
     connection.set(false);
     await pumpEventQueue();
     expect(r.troubles, [Trouble.offline]);
+    expect(connection.listened, isFalse);
     await r.session.stop();
     expect(lines, isNot(contains('recordingConnectionLost')));
   });
