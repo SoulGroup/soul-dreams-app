@@ -1,7 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-17, in branch `recording` (Task 16 done: 16a to 16h, D79 to D91; the final docs task), by Claude
-Code.
+Last updated: 2026-11-18, in branch `offline-recording` (its plan's Task 9), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -15,19 +14,16 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`recording`: recording by voice in SoulDreams Dev only, and the server's first feature (D69, as D71 corrects it; D70;
-D71): the microphone permission (EM·3), the words shown as the dreamer speaks, Save keeping them as a dream; the
-audio never stored on the server, and in this slice not on the phone either, since it needs a connection; the
-typing screen's current design (D70 items 2, 7 and 8); the two banked read failures; one front door, a Lambda
-function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: `docs/plans/recording.md`.
+`offline-recording`: offline recording in SoulDreams Dev only (D92 to D94): every recording's audio kept in the
+journal's folder until its words are final; no connection, or a failure, and the recording goes on and waits;
+retries through Soniox's real-time stream only while the app is open, progress kept; MP·15, MP·54, MP·63, MP·64 and
+AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow.md` (c)). Plan:
+`docs/plans/offline-recording.md`.
 
 ## Road ahead
 
-- The owner merges `recording` (every phone check of Task 16 passed, 2026-11-17). The first deploy and the server's
-  address in `hosts.dart` are done (Tasks 13 to 15).
-- The next slice: offline recording, the audio held on the phone only until it is transcribed (main-path.md,
-  Recording; D71). It is an on-phone storage change, under `docs/workflow.md`, "On-phone storage changes", and it
-  brings MP·15 and MP·54.
+- The owner's rehearsal of the night file's version 2 passed (the plan's Task 3, 2026-11-18, on the phone, with
+  invented nights written by `main`). The owner runs the phone checks (Task 10), and merges `offline-recording`.
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
   URL (head's message 14; whether eu-north-1 has it is checked first).
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -57,7 +53,8 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
 - The fonts (D49 a): Tangerine, Sorts Mill Goudy, Inter (Regular and SemiBold, the 18pt statics), Nunito (Regular,
   Italic) and Habibi, static TTFs with their OFL licences in `app/assets/fonts/`, each listed in `fingerprints.txt`
   (G2), declared in `pubspec.yaml`. The owner's download; never fetched at run time (R10).
-- The journal's store (D49 b, c), with no screen yet: `app/lib/journal/`. One JSON file per night, format version 1,
+- The journal's store (D49 b, c), with no screen yet: `app/lib/journal/`. One JSON file per night, format version 2
+  (version 1 still read; D93 Q2: a dream is told in words or a recording waiting, `{"waiting", "from"}`),
   in `Library/Application Support/Journal`; the folder excluded from backup; the folder and every file with complete
   file protection, through the Swift channel in `AppDelegate.swift`. A save writes a temporary file, flushes it to the
   disk (F_FULLFSYNC, else fsync) and renames it; a failed save removes its own temporary file. Every store operation
@@ -122,9 +119,23 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
   `AppDelegate.swift` (`souldreams/audio_session`), built into all three apps and reached from SoulDreams Dev only,
   as D65; a failed release logs `recordingReleaseFailed` (D79 c, D84, D85). Recording off, a refused microphone or
   a microphone that fails: nothing starts, a code, nothing new shown, and the field takes typing at once; a stream
-  that breaks stops, keeping the words shown; MP·15 and MP·54 are not shown (D71). Nothing in `lib/recording/` can
-  write a file, and the `record` package is used in stream mode only (`no_storage_test.dart`). Off while
-  `Hosts.server` is empty or the build has no beta key.
+  that breaks stops, keeping the words shown, when no audio is kept (D71). Nothing in `lib/recording/` can write a
+  file, and the `record` package is used in stream mode only (`no_storage_test.dart`). Off while `Hosts.server` is
+  empty or the build has no beta key. A refused microphone shows MP·63 where MP·62 shows, until the next tap; the
+  microphone is named MP·64 while it records (head's message 21).
+- Offline recording (D92 to D94; SoulDreams Dev only). Every recording's audio is kept from its first frame in the
+  journal's folder (`audio-<id>-<start>.pcm`, plain 16 kHz PCM, complete protection, `JournalAudio`), and deleted at
+  once when every word is final. No connection at the tap (our own Swift channel over Apple's path monitor,
+  `souldreams/network`): no key, MP·15, no MP·33. A key, a stream or Soniox's budget failing: MP·54, and the
+  recording goes on; the words not yet final leave the field; what is not in final words waits, from Soniox's
+  `final_audio_proc_ms`. Every recording stops itself at ten minutes. A Save puts each waiting recording after its
+  words, as a dream of its own; nothing typed but a recording waiting keeps the night. The retries
+  (`lib/recording/retries.dart`): the saved audio replayed through the real-time stream with a fresh key, at
+  real-time pace, one at a time, oldest night first, only while the app is open (when the journal opens, the app
+  comes back, a typing screen closes or the connection returns), never while a typing screen is open; progress kept
+  on any cut (the final words a dream before it, the audio they cover cut away). AI·6 in the waiting dream's place
+  on the night's page while it runs (no shimmer, a stand-in). Deleting a night deletes its waiting audio; at open,
+  audio no night names is swept (`audioSwept`). The phone check has steps 6 and 7 for a probe of silence.
 - The journal list's read failures and the typing screen's first-use read (D71 Q18): a failed list read keeps
   the rows shown and logs `journalListFailed`; at the record button it opens nothing; a failed first-use read
   shows MP·32, marks nothing and logs `firstUseReadFailed`; a failed mark still shows MP·10.
@@ -156,10 +167,11 @@ function URL authorised by the beta key, issuing short-lived Soniox keys. Plan: 
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 307 tests, and 175 mutation checks (A1 to A143; A55, A73, A80 to A83, A86 to A88, A94, A99,
-  A128 to A130 and A142 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 398 tests, and 251 mutation checks (A1 to A220; A55, A73, A80 to A83, A86 to A88, A94, A99,
+  A128 to A130, A142 and A213 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 175 run, 175 caught`); `check_all.sh` does not call it (D55).
+  (expected: `app mutations: 251 run, 251 caught`); `check_all.sh` does not call it (D55). During a task only the
+  rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
 
@@ -573,6 +585,32 @@ Banked in recording:
      plugin error would be an uncaught async error with native text, no dreamer's words); a `finished` reply with no
      stop pending would leave the session open with the microphone on (Soniox sends it only after the end frame:
      D17); the five-second budget starts after the microphone's stop and the audio's release (both fast).
+110. Offline recording (the plan's decisions under D91): a crash during a recording loses that recording's audio,
+     swept at the next open, as it loses unsaved typing; a keep that fails (a full phone) logs `audioKeepFailed`:
+     with a stream the recording goes on as D71 has it, with none it stops as a broken stream does and the notice
+     goes (D96 Q1); AI·6 has no shimmer; a retry does not keep the screen awake, so the dreamer's lock pauses it (its
+     progress kept); a recording's audio is retried with no cap on attempts until its words come or its night is
+     deleted, a failed retry going to the back of the queue so the others have their turn (D96 Q4); the Swift
+     channel's new methods and the path monitor are proved by the owner's build and phone checks only.
+111. The reviews of `offline-recording`, banked (none changes what the dreamer sees):
+     - Test gaps. Task 2: the version-1 inputs are made by the new encoder with `version` set to 1, not frozen bytes
+       (the owner's rehearsal on the phone, with files the old app wrote, covers it). Task 4: no test deletes a
+       damaged night that names audio; the open's sweep has no leftover `.tmp-audio-` file; the Swift checks are
+       text matches, which cannot see a wrong order inside `append` or `copyTail`. Task 6: no widget test for Back,
+       the edge swipe, or leaving during a Save's wait with a recording waiting; none for nothing typed into an
+       existing night; the failed Save with a recording does not check that the audio file survives. Task 7: no
+       test has `hold()` cut a running retry and keep its progress, nor two typing screens held and one released,
+       nor `editDream(was:)` through an open typing screen while a retry moves its dream, nor `JournalHome`'s
+       lifecycle calls.
+     - A cut reads the rest of the audio into memory at once (`readToEnd`); with the ten-minute cap that is at most
+       19.2 MB.
+     - After a Soniox budget refusal (402) each recording of the run still opens a stream that is refused; stopping
+       the run on 402 is not built.
+112. Open question for the owner (raised in the re-review of D96's fixes; asked at the plan's Task 10): a Save that
+     cannot land is a failed Save (D96 Q3), and Back, the system back and the edge swipe go through the same Save, so
+     when a typing screen's night is gone the dreamer cannot leave it (every try shows MP·62). It needs a night to go
+     while the screen is open: a retry finishing the night's only recording as silence, in the moment after the
+     screen opened. The lean: in that case the Save goes into a new night.
 
 ## Before Cohort 1
 
@@ -611,6 +649,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - MP·60 (the confirmation's Delete) and MP·61 (its Cancel), head's message 16, founder-approved.
 - MP·62 (the typing screen's failed save), D63 (head's message 19, Product message 18), founder-ruled; added by the
   owner in Task 9b.
+- MP·63 (the microphone refused) and MP·64 (the stop control's spoken name), head's message 21 (Product message 20),
+  founder-approved; built in `offline-recording`.
 - W27·5's privacy-page text (head's message 16) waits for the disclosure and privacy page, under Settings; it is not
   in the pending file.
 
@@ -793,6 +833,28 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   words land; the replay and its guard removed (Task 16g-1, after the data loss of 16f's replay).
 - D91 (standing): when a review finding stops the build and when Claude Code decides and continues (ruling-restoring
   fixes, stale comments, test gaps, weak rows; D17 notes banked); reports in batches.
+
+## Rulings during offline-recording
+
+- D92 (owner, 2026-11-17): every recording's audio kept in the journal's folder until its text is final, then
+  deleted at once; retries replay it through Soniox's real-time stream with a fresh key; retries only while the app
+  is open (launch, foreground, connection back), no background task; deleting a night deletes its waiting audio;
+  plain 16 kHz mono PCM under complete protection. Product (head's message 21): MP·54 for a cut connection and a
+  reached budget, MP·15 with no connection at the tap; MP·63 and MP·64.
+- D93 (founder, 2026-11-17): the investigation's Q2 to Q7 as leaned (a retried recording's words a dream of their
+  own in its place; nothing shown while it waits, AI·6 while transcribed; the lines where MP·62 shows until the next
+  tap, MP·15 heard instead of MP·33; the words not yet final leave at a break; nothing typed but a recording waiting
+  keeps the night), except Q6: a ten-minute cap on every recording. Its Q1 B (Soniox's file API) is replaced by D94.
+- D94 (founder): route D: retries through the real-time stream (D92 item 2 restored), only while the app is open,
+  progress kept across openings, words may appear in parts; no server, AWS or Soniox change.
+- D95 (owner, standing): the full app mutation run (every row) once, at the end of a branch before the final review,
+  or when the Build chat asks; during a task, only the rows that target the files changed.
+- D96 (owner, 2026-11-18): after the reviews of Tasks 5 to 7. Q1: a keep that fails with no stream stops the
+  recording as a broken stream does, the notice clears, one code. Q2: leaving the app never removes a dream; an
+  emptied field on leaving keeps the old words; only a Save removes it. Q3: a Save that cannot land is a failed Save
+  (MP·62; the screen, words and recordings kept). Q4: a failed retry goes to the back of the queue, never deleted.
+  The four fixes of the reviews (the keep's writes in order and awaited, the night page leaving by its own route, no
+  retry offline, an edit finding its dream by where it was) approved.
 
 ## Documents as last imported
 
