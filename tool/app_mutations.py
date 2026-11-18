@@ -842,15 +842,43 @@ def run_row(code, path, old, new, test, name):
     return 'caught' if caught else 'SURVIVED'
 
 
-def main():
+# The rows to run, in order, or None for bad arguments (D95). No argument:
+# every row. `--rows A1,A7` names rows by code; `--files lib/a.dart,lib/b.dart`
+# takes every row that breaks one of those files (a path may start with
+# `app/`). Both together: the rows either asks for.
+def select(argv):
+    codes, files = None, None
+    i = 0
+    while i < len(argv):
+        flag = argv[i]
+        if flag not in ('--rows', '--files') or i + 1 >= len(argv) or not argv[i + 1]:
+            return None
+        values = argv[i + 1].split(',')
+        if flag == '--rows':
+            codes = (codes or []) + values
+        else:
+            files = (files or []) + [v[4:] if v.startswith('app/') else v for v in values]
+        i += 2
+    if codes is None and files is None:
+        return list(ROWS)
+    if codes is not None and not set(codes) <= {row[0] for row in ROWS}:
+        return None
+    return [row for row in ROWS if row[0] in (codes or []) or row[1] in (files or [])]
+
+
+def main(argv=()):
+    rows = select(list(argv))
+    if rows is None:
+        report('app mutations: bad arguments')
+        return 2
     caught = 0
-    for row in ROWS:
+    for row in rows:
         result = run_row(*row)
         caught += result == 'caught'
         report('%s: %s' % (row[0], result))
-    report('app mutations: %d run, %d caught' % (len(ROWS), caught))
-    return 0 if caught == len(ROWS) else 1
+    report('app mutations: %d run, %d caught' % (len(rows), caught))
+    return 0 if caught == len(rows) else 1
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(sys.argv[1:]))
