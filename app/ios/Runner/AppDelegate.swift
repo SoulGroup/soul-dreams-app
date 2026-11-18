@@ -66,7 +66,10 @@ enum AudioSession {
 // Support/Journal, excluded from backup, the folder and every file with
 // complete file protection. Plain file operations; the store's rules are
 // in Dart (lib/journal/). A failure answers with a code only, never a
-// path or a message (R3).
+// path or a message (R3). A recording's audio is kept here too until its
+// words come (D92): appended as it is recorded, every file created with
+// complete protection, read back in ranges, and its front cut away by
+// copying the rest to a new file (D94).
 enum JournalFiles {
   static let channelName = "souldreams/journal_files"
   private static func allowed(_ c: Unicode.Scalar) -> Bool {
@@ -74,7 +77,7 @@ enum JournalFiles {
       || c == "." || c == "_" || c == "-"
   }
 
-  enum Failure: Error { case name, arguments, rename, flush, delete }
+  enum Failure: Error { case name, arguments, rename, flush, delete, create }
 
   static func channel(messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {
     let channel = FlutterMethodChannel(name: channelName, binaryMessenger: messenger)
@@ -152,6 +155,48 @@ enum JournalFiles {
     case "delete":
       let url = try file(call.arguments)
       if fm.fileExists(atPath: url.path) { try fm.removeItem(at: url) }
+      return nil
+    case "append":
+      let a = try arguments(call)
+      guard let bytes = a["bytes"] as? FlutterStandardTypedData, let sync = a["sync"] as? Bool else {
+        throw Failure.arguments
+      }
+      let url = try file(a["name"])
+      if !fm.fileExists(atPath: url.path) {
+        guard fm.createFile(
+          atPath: url.path, contents: nil, attributes: [.protectionKey: FileProtectionType.complete])
+        else { throw Failure.create }
+      }
+      let handle = try FileHandle(forWritingTo: url)
+      defer { try? handle.close() }
+      try handle.seekToEnd()
+      try handle.write(contentsOf: bytes.data)
+      if sync { try flush(url) }
+      return nil
+    case "size":
+      let url = try file(call.arguments)
+      guard fm.fileExists(atPath: url.path) else { return nil }
+      return (try fm.attributesOfItem(atPath: url.path)[.size] as? NSNumber)?.int64Value
+    case "readRange":
+      let a = try arguments(call)
+      guard let offset = a["offset"] as? Int, let length = a["length"] as? Int, offset >= 0, length >= 0 else {
+        throw Failure.arguments
+      }
+      let handle = try FileHandle(forReadingFrom: try file(a["name"]))
+      defer { try? handle.close() }
+      try handle.seek(toOffset: UInt64(offset))
+      return FlutterStandardTypedData(bytes: try handle.read(upToCount: length) ?? Data())
+    case "copyTail":
+      let a = try arguments(call)
+      guard let offset = a["offset"] as? Int, offset >= 0 else { throw Failure.arguments }
+      let from = try file(a["from"])
+      let to = try file(a["to"])
+      let handle = try FileHandle(forReadingFrom: from)
+      defer { try? handle.close() }
+      try handle.seek(toOffset: UInt64(offset))
+      let rest = try handle.readToEnd() ?? Data()
+      try rest.write(to: to, options: [.completeFileProtection])
+      try flush(to)
       return nil
     case "deleteAll":
       // Every entry, whatever its name (D54): one that cannot be removed

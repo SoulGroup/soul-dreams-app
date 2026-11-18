@@ -2,7 +2,9 @@
 // named files. On the phone it is Library/Application Support/Journal,
 // excluded from backup, every file with complete file protection
 // (ChannelJournalFiles and AppDelegate.swift). In tests, a folder on the
-// Mac.
+// Mac. A recording's audio is kept here too, until its words come (D92):
+// appended as it is recorded, read back in ranges, and cut from the front
+// as its words arrive (D94).
 import 'dart:typed_data';
 
 final _name = RegExp(r'^[A-Za-z0-9._-]+$');
@@ -29,6 +31,20 @@ abstract interface class JournalFiles {
 
   /// Deletes the file; nothing happens when there is none.
   Future<void> delete(String name);
+
+  /// Adds [bytes] at the file's end, creating it if needed; with [sync],
+  /// the file's bytes are forced to the disk.
+  Future<void> append(String name, Uint8List bytes, {bool sync = false});
+
+  /// The file's size in bytes, or null when there is no such file.
+  Future<int?> size(String name);
+
+  /// Up to [length] of the file's bytes from [offset]; fewer at its end.
+  Future<Uint8List> readRange(String name, int offset, int length);
+
+  /// Writes the bytes of [from] after its first [offset] to [to], replacing
+  /// it, forced to the disk.
+  Future<void> copyTail(String from, String to, int offset);
 
   /// Deletes every entry in the folder, whatever its name (D54): files and
   /// anything else, and it does not stop at one it cannot name.

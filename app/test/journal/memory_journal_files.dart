@@ -43,5 +43,33 @@ class MemoryJournalFiles implements JournalFiles {
   }
 
   @override
+  Future<void> append(String name, Uint8List bytes, {bool sync = false}) async {
+    _check(name);
+    files[name] = Uint8List.fromList([...?files[name], ...bytes]);
+  }
+
+  @override
+  Future<int?> size(String name) async {
+    _check(name);
+    return files[name]?.length;
+  }
+
+  @override
+  Future<Uint8List> readRange(String name, int offset, int length) async {
+    _check(name);
+    final bytes = files[name]!;
+    final start = offset.clamp(0, bytes.length);
+    return Uint8List.fromList(bytes.sublist(start, (start + length).clamp(start, bytes.length)));
+  }
+
+  @override
+  Future<void> copyTail(String from, String to, int offset) async {
+    _check(from);
+    _check(to);
+    final bytes = files[from]!;
+    files[to] = Uint8List.fromList(bytes.sublist(offset.clamp(0, bytes.length)));
+  }
+
+  @override
   Future<void> deleteAll() async => files.clear();
 }

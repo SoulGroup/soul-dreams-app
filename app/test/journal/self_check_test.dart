@@ -21,6 +21,13 @@ final class Says implements JournalProtection {
 
 const all = Says((excluded: true, folderComplete: true, fileComplete: true));
 
+/// Every protection in place but the audio file's.
+final class AudioUnprotected implements JournalProtection {
+  @override
+  Future<Protection> protection(String name) async =>
+      (excluded: true, folderComplete: true, fileComplete: !name.startsWith('audio-'));
+}
+
 final class NoRename extends IoJournalFiles {
   NoRename(super.dir);
 
@@ -63,6 +70,14 @@ void main() {
       expect(lines, ['journalCheckFailed 3']);
       expect(files.everything(), isEmpty);
     }
+  });
+
+  // D92 item 5: the audio's own file must have complete protection.
+  test('an unprotected audio file fails at step 6, leaving nothing', () async {
+    final files = IoJournalFiles(dir);
+    expect(await journalSelfCheck(files, AudioUnprotected()), isFalse);
+    expect(lines, ['journalCheckFailed 6']);
+    expect(files.everything(), isEmpty);
   });
 
   test('a save that cannot finish fails at step 2', () async {

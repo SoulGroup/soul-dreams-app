@@ -39,6 +39,26 @@ final class ChannelJournalFiles implements JournalFiles, JournalProtection {
   Future<void> delete(String name) => _channel.invokeMethod<void>('delete', _checked(name));
 
   @override
+  Future<void> append(String name, Uint8List bytes, {bool sync = false}) =>
+      _channel.invokeMethod<void>('append', {'name': _checked(name), 'bytes': bytes, 'sync': sync});
+
+  @override
+  Future<int?> size(String name) => _channel.invokeMethod<int>('size', _checked(name));
+
+  @override
+  Future<Uint8List> readRange(String name, int offset, int length) async =>
+      await _channel.invokeMethod<Uint8List>('readRange', {
+        'name': _checked(name),
+        'offset': offset,
+        'length': length,
+      }) ??
+      Uint8List(0);
+
+  @override
+  Future<void> copyTail(String from, String to, int offset) =>
+      _channel.invokeMethod<void>('copyTail', {'from': _checked(from), 'to': _checked(to), 'offset': offset});
+
+  @override
   Future<void> deleteAll() => _channel.invokeMethod<void>('deleteAll');
 
   @override

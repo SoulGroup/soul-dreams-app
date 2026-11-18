@@ -44,6 +44,33 @@ class IoJournalFiles implements JournalFiles {
   }
 
   @override
+  Future<void> append(String name, Uint8List bytes, {bool sync = false}) async =>
+      _file(name).writeAsBytesSync(bytes, mode: FileMode.append, flush: sync);
+
+  @override
+  Future<int?> size(String name) async {
+    final f = _file(name);
+    return f.existsSync() ? f.lengthSync() : null;
+  }
+
+  @override
+  Future<Uint8List> readRange(String name, int offset, int length) async {
+    final f = _file(name).openSync();
+    try {
+      f.setPositionSync(offset);
+      return f.readSync(length);
+    } finally {
+      f.closeSync();
+    }
+  }
+
+  @override
+  Future<void> copyTail(String from, String to, int offset) async {
+    final bytes = _file(from).readAsBytesSync();
+    _file(to).writeAsBytesSync(bytes.sublist(offset.clamp(0, bytes.length)), flush: true);
+  }
+
+  @override
   Future<void> deleteAll() async {
     for (final e in dir.listSync()) {
       e.deleteSync(recursive: true);

@@ -17,6 +17,10 @@ enum LogEvent {
   journalCheckPassed,
   journalCheckFailed,
 
+  /// A recording's audio that no night names, or an older copy of it,
+  /// removed when the journal opens (D92).
+  audioSwept,
+
   /// SoulDreams Dev's journal could not open its folder (journal-screens).
   journalOpenFailed,
 

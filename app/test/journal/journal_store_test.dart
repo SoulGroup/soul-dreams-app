@@ -36,6 +36,9 @@ List<List<int>> traces(Night n) => [
       utf8.encode(n.id),
     ];
 
+/// [n] bytes of made-up audio, every byte telling its place.
+Uint8List sound(int n, [int from = 0]) => Uint8List.fromList([for (var i = from; i < from + n; i++) i % 251]);
+
 /// The rename fails: a save interrupted between its two steps.
 final class BrokenRename extends IoJournalFiles {
   BrokenRename(super.dir);
@@ -143,6 +146,115 @@ void main() {
     }
     expect(await store.nights(), [for (final n in nights) n == nights[1] ? changed : n]);
     expect(lines, isEmpty);
+  });
+
+  // D92 item 1: a recording's audio is kept in the journal's folder,
+  // appended as it comes, read back in ranges.
+  test('audio grows as appended, and reads back in ranges', () async {
+    final store = await JournalStore.open(files);
+    final id = 'a' * 32;
+    await store.appendAudio(id, sound(6400));
+    await store.appendAudio(id, sound(3200, 6400), sync: true);
+    expect(files.everything().keys, [JournalStore.audioOf(id, 0)]);
+    expect(await store.audioPart(id), (start: 0, size: 9600));
+    expect(await store.readAudio(id, 0, 6000, 1000), sound(1000, 6000));
+    expect(await store.readAudio(id, 0, 9000, 1000), sound(600, 9000));
+    expect(await store.audioPart('b' * 32), isNull);
+  });
+
+  // D94: the part whose words are in is cut away; the rest keeps its place.
+  test('a cut keeps only the rest, under its new start', () async {
+    final store = await JournalStore.open(files);
+    final id = 'a' * 32;
+    await store.appendAudio(id, sound(64000), sync: true);
+    await store.cutAudio(id, 32000);
+    expect(files.everything().keys, [JournalStore.audioOf(id, 32000)]);
+    expect(await store.audioPart(id), (start: 32000, size: 32000));
+    expect(await store.readAudio(id, 32000, 40000, 100), sound(100, 40000));
+    await store.cutAudio(id, 32000);
+    await store.cutAudio(id, 2);
+    expect(files.everything().keys, [JournalStore.audioOf(id, 32000)]);
+    await store.cutAudio(id, 64000);
+    expect(await store.audioPart(id), (start: 64000, size: 0));
+  });
+
+  test('a misshapen audio id or start is refused before any file', () {
+    expect(() => JournalStore.audioOf('A' * 32, 0), throwsArgumentError);
+    expect(() => JournalStore.audioOf('a' * 32, 3), throwsArgumentError);
+    expect(() => JournalStore.audioOf('a' * 32, -2), throwsArgumentError);
+    expect(JournalStore.audioOf('a' * 32, 64000), 'audio-${'a' * 32}-64000.pcm');
+  });
+
+  // D92 item 4 (R11; workflow (d)): deleting a night deletes the audio of
+  // every recording of it still waiting, and nothing of another night.
+  test("deleting a night deletes its waiting audio, no other's", () async {
+    final store = await JournalStore.open(files);
+    final [first, second, ...] = nightsFromFixtures();
+    final (x, y, z) = ('1' * 32, '2' * 32, '3' * 32);
+    await store.save(first.withEntries([...first.entries, Waiting(x), Waiting(y, 32000)]));
+    await store.save(second.withEntries([Waiting(z), ...second.entries]));
+    for (final id in [x, y, z]) {
+      await store.appendAudio(id, sound(64000));
+    }
+    await store.cutAudio(y, 32000);
+    await files.write('${JournalStore.tempPrefix}${JournalStore.audioOf(x, 640)}', sound(10));
+    await store.delete(first.id);
+    final after = files.everything();
+    expect(after.keys.toSet(), {JournalStore.fileOf(second.id), JournalStore.audioOf(z, 0)});
+    for (final bytes in after.values) {
+      for (final t in [...traces(first), utf8.encode(x), utf8.encode(y)]) {
+        expect(holds(bytes, t), isFalse);
+      }
+    }
+  });
+
+  test('discarding a recording removes every part of it', () async {
+    final store = await JournalStore.open(files);
+    final id = 'a' * 32;
+    await store.appendAudio(id, sound(64000));
+    await files.write(JournalStore.audioOf(id, 32000), sound(10));
+    await store.discardAudio(id);
+    expect(files.everything(), isEmpty);
+  });
+
+  // An interrupted recording, a night deleted before its audio, or a cut
+  // that did not finish leaves audio no night needs: swept at open.
+  test('at open, audio no night names is swept with a code', () async {
+    await files.open();
+    final [first, second, ...] = nightsFromFixtures();
+    final (kept, old, damaged, loose) = ('1' * 32, '2' * 32, '3' * 32, '4' * 32);
+    await files.write(JournalStore.fileOf(first.id), encodeNight(first.withEntries([Waiting(kept), Waiting(old, 64)])));
+    final unreadable = utf8.decode(encodeNight(second.withEntries([Waiting(damaged)])));
+    final damagedBytes = utf8.encode(unreadable.replaceFirst('"version":2', '"version":3'));
+    await files.write(JournalStore.fileOf(second.id), damagedBytes);
+    for (final name in [
+      JournalStore.audioOf(kept, 0),
+      JournalStore.audioOf(old, 0),
+      JournalStore.audioOf(old, 64),
+      JournalStore.audioOf(damaged, 0),
+      JournalStore.audioOf(loose, 0),
+      JournalStore.audioOf(loose, 64),
+    ]) {
+      await files.write(name, sound(128));
+    }
+    await JournalStore.open(files);
+    expect(files.everything().keys.toSet(), {
+      JournalStore.fileOf(first.id),
+      JournalStore.fileOf(second.id),
+      JournalStore.audioOf(kept, 0),
+      JournalStore.audioOf(old, 64),
+      JournalStore.audioOf(damaged, 0),
+    });
+    expect(lines, ['audioSwept', 'audioSwept', 'audioSwept']);
+  });
+
+  test('deleting the journal takes the audio too', () async {
+    final store = await JournalStore.open(files);
+    final first = nightsFromFixtures().first;
+    await store.save(first.withEntries([Waiting('1' * 32)]));
+    await store.appendAudio('1' * 32, sound(640));
+    await store.deleteAll();
+    expect(files.everything(), isEmpty);
   });
 
   test('deleting a night leaves nothing of it anywhere', () async {
