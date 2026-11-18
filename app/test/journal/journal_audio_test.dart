@@ -5,8 +5,10 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/journal_store.dart';
+import 'package:souldreams/journal/night.dart';
 
 import '../fixtures.dart';
 import 'io_journal_files.dart';
@@ -48,5 +50,27 @@ void main() {
     await keep.heard((night: night.id, audio: id, from: 0), 'x', 3200, done: false);
     expect(await store.nights(), [night]);
     expect(files.everything().keys, [JournalStore.fileOf(night.id)]);
+  });
+
+  // D98: a line for DevTools, numbers only (R3): the audio files in the
+  // folder, then the recordings its nights name as waiting.
+  test('the counts line: audio files, then waiting recordings', () async {
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    final store = await JournalStore.open(files);
+    final keep = JournalAudio(store);
+    await keep.logCounts();
+    expect(lines, ['journalAudio 0 0']);
+    final night = nightsFromFixtures().first;
+    final (x, y, z) = ('1' * 32, '2' * 32, '3' * 32);
+    await store.save(night.withEntries([Told(night.dreams[0]), Waiting(x), Waiting(y)]));
+    await keep.add(x, Uint8List(64), last: true);
+    await keep.add(y, Uint8List(64), last: true);
+    await keep.add(z, Uint8List(64), last: true);
+    await keep.logCounts();
+    expect(lines.last, 'journalAudio 3 2');
+    expect(lines, hasLength(2));
   });
 }

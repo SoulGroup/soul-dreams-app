@@ -77,7 +77,7 @@ class TypingPage extends StatefulWidget {
 
 enum _Mic { idle, starting, recording, stopping }
 
-// A Save whose night was not there: a failed Save (D96 Q3). Carries no text.
+// A Save that could not be written anywhere: a failed Save (D96 Q3, D97). Carries no text.
 final class _NotLanded implements Exception {
   const _NotLanded();
 }
@@ -213,18 +213,28 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       final e = widget.edit;
       final waiting = List.of(_waiting);
       final text = _text.text;
-      final bool landed;
+      final something = !isEmptyText(text) || waiting.isNotEmpty;
+      var landed = false;
       if (e == null) {
-        // Nothing to keep is not a failure; a Save that cannot land is (D96 Q3).
-        final something = !isEmptyText(text) || waiting.isNotEmpty;
-        landed = await widget.journal.addDream(widget.target, text, appLanguage, waiting: waiting) || !something;
+        landed = await widget.journal.addDream(widget.target, text, appLanguage, waiting: waiting);
       } else {
         // Leaving never removes a dream: an emptied field keeps the old
         // words, and only a Save removes it (D96 Q2).
         final words = leaving && isEmptyText(text) ? e.text : text;
         landed = await widget.journal.editDream(e.id, e.index, words, waiting: waiting, was: e.text);
       }
-      if (!landed) throw const _NotLanded();
+      // The night is gone: what was said goes into a new night, so nothing
+      // is lost and the screen can be left (D97). Nothing to keep is not a
+      // failure; a Save that cannot be written anywhere is.
+      if (!landed && something) {
+        landed = await widget.journal.addDream(
+          await widget.journal.targetNow(),
+          text,
+          appLanguage,
+          waiting: waiting,
+        );
+        if (!landed) throw const _NotLanded();
+      }
       _waiting.clear();
     } on Object {
       SafeLog.event(LogEvent.journalSaveFailed);

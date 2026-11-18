@@ -7,6 +7,8 @@
 // recordings waiting there while the app is open: when the journal opens,
 // when the app comes back, and when the connection returns; leaving the
 // app cuts a retry short (D92 item 3, D94).
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/safe_log.dart';
@@ -74,6 +76,9 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         _journal = Journal(store);
         _recording = widget.recording?.keeping(audio, waiting: audio);
       });
+      // D98: the counts at launch and after each retry, for DevTools.
+      unawaited(audio.logCounts());
+      _recording?.retries?.afterRetry = audio.logCounts;
       _recording?.retries?.kick();
     }, onError: (Object _) => SafeLog.event(LogEvent.journalOpenFailed));
   }

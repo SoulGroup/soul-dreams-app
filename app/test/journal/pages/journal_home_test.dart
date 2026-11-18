@@ -43,7 +43,8 @@ void main() {
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: MemoryJournalFiles())));
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
-    expect(lines, isEmpty);
+    // The diagnostic at launch (D98), numbers only; nothing else.
+    expect(lines, ['journalAudio 0 0']);
   });
 
   // D92: the recording the pages get keeps its audio in the journal's folder.
@@ -96,7 +97,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
     await tester.pump(const Duration(milliseconds: 150));
     expect(links.single.closed, isTrue);
-    expect(lines, ['retryStarted', 'retryCut']);
+    expect(lines, ['journalAudio 1 1', 'retryStarted', 'retryCut 0 0', 'journalAudio 1 1']);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();

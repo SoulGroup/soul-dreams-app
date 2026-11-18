@@ -1707,7 +1707,7 @@ void main() {
     await tester.pumpAndSettle();
     final id = v.keep.audio.keys.single;
     expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft()), Waiting(id, 3200)]);
-    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingEnded']);
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingSettled 100 500', 'recordingEnded']);
   });
 
   testWidgets('MP·54 goes at the next tap of the microphone', (tester) async {
@@ -1908,9 +1908,9 @@ void main() {
     expect((await e.h.journal.night(e.n.id))!.entries, [Waiting(id), Told(e.n.dreams[1])]);
   });
 
-  // D96 Q3: a Save that cannot land is a failed Save: MP·62, the screen, the
-  // words and the recordings kept.
-  testWidgets('Save into a vanished night fails: MP·62, words stay', (tester) async {
+  // D97 (Q5): a Save into a night that is gone goes into a new night, so the
+  // words and the recordings are never lost and the screen can always be left.
+  testWidgets('Save into a vanished night goes into a new night', (tester) async {
     final lines = await logged();
     final e = await editingWith(tester, null);
     await e.h.journal.delete(e.n.id);
@@ -1918,14 +1918,14 @@ void main() {
     await tester.enterText(find.byKey(TypingPage.fieldKey), other);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
-    expect(find.byType(TypingPage), findsOneWidget);
-    expect(find.text(other), findsOneWidget);
-    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
-    expect(lines, ['journalSaveFailed']);
+    expect(find.byType(TypingPage), findsNothing);
+    final nights = await e.h.nights();
+    expect(nights.single.dreams, [other]);
+    expect(nights.single.id, isNot(e.n.id));
+    expect(lines, isEmpty);
   });
 
-  testWidgets('Save into a vanished night keeps the recording, MP·62', (tester) async {
-    final lines = await logged();
+  testWidgets('Save into a vanished night keeps the recording, new night', (tester) async {
     final v = offline();
     final h = await Harness.make();
     final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 8));
@@ -1935,14 +1935,40 @@ void main() {
     );
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
     await record(tester);
     await frames(tester, v.mic, 1);
     await h.journal.delete(n.id);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    final saved = (await h.nights()).single;
+    expect(saved.id, isNot(n.id));
+    expect(saved.entries, [Told(dreams[0]), Waiting(v.keep.audio.keys.single)]);
+  });
+
+  // Still a failed Save when the new night cannot be written either.
+  testWidgets('a vanished night and a failed write: MP·62, then it lands', (tester) async {
+    final lines = await logged();
+    final files = FlakyFiles();
+    final h = await Harness.make(files: files);
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 8));
+    await h.pump(tester, Opener(() async => TypingPage(journal: h.journal, target: IntoNight(n.id))));
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    await h.journal.delete(n.id);
+    files.failures = 1;
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
+    expect(find.text(dreams[0]), findsOneWidget);
     expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
-    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingEnded', 'journalSaveFailed']);
+    expect(lines, ['journalSaveFailed']);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [dreams[0]]);
   });
 
   testWidgets('empty Save into a vanished night keeps nothing, closes', (tester) async {

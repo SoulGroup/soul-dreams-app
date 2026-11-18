@@ -21,6 +21,11 @@ enum LogEvent {
   /// removed when the journal opens (D92).
   audioSwept,
 
+  /// SoulDreams Dev's diagnostic (D98), numbers only: the audio files in the
+  /// journal's folder, then the recordings its nights name as waiting; at
+  /// launch and after each retry.
+  journalAudio,
+
   /// SoulDreams Dev's journal could not open its folder (journal-screens).
   journalOpenFailed,
 
@@ -61,8 +66,14 @@ enum LogEvent {
   recordingCapped,
   audioKeepFailed,
 
+  /// A recording that leaves audio waiting, as it ends (D98's diagnostic),
+  /// numbers only: the milliseconds Soniox had made final, then the
+  /// milliseconds recorded.
+  recordingSettled,
+
   /// A waiting recording replayed to Soniox (D94): begun; all of it in
-  /// words; cut short, its progress kept; failed (Soniox's code, our
+  /// words; cut short, its progress kept (with the bytes of audio now in
+  /// words and the milliseconds Soniox said it had made final); failed (Soniox's code, our
   /// server's status, 0 for no answer, -2 for the journal, -3 for words
   /// the journal did not take).
   retryStarted,

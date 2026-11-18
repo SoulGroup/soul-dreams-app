@@ -8,6 +8,7 @@
 import 'dart:math';
 import 'dart:typed_data';
 
+import '../core/safe_log.dart';
 import '../recording/audio_keep.dart';
 import '../recording/retries.dart';
 import 'journal_store.dart';
@@ -28,6 +29,17 @@ final class JournalAudio implements AudioKeep, WaitingAudio {
 
   @override
   Future<void> discard(String id) => _store.discardAudio(id);
+
+  /// SoulDreams Dev's diagnostic (D98): the audio files in the folder and
+  /// the recordings waiting, as two numbers (R3). It never throws.
+  Future<void> logCounts() async {
+    try {
+      final c = await _store.audioCounts();
+      SafeLog.event(LogEvent.journalAudio, [c.files, c.waiting]);
+    } on Object {
+      // A diagnostic: nothing depends on it.
+    }
+  }
 
   @override
   Future<List<Pending>> waiting() async => [

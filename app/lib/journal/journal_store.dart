@@ -203,6 +203,20 @@ final class JournalStore {
   Future<void> appendAudio(String id, Uint8List bytes, {bool sync = false}) =>
       _run(() => _files.append(audioOf(id, 0), bytes, sync: sync));
 
+  /// How many audio files the folder holds, and how many recordings its
+  /// nights that read name as waiting (D98's diagnostic).
+  Future<({int files, int waiting})> audioCounts() => _run(() async {
+    final names = await _files.list();
+    var waiting = 0;
+    for (final name in names) {
+      if (_nightFile.firstMatch(name) == null) continue;
+      final bytes = await _files.read(name);
+      final night = bytes == null ? null : decodeNight(bytes);
+      if (night != null) waiting += night.entries.whereType<Waiting>().length;
+    }
+    return (files: _audio(names).length, waiting: waiting);
+  });
+
   /// What is left of recording [id], or null when nothing is.
   Future<AudioPart?> audioPart(String id) => _run(() => _part(id));
 

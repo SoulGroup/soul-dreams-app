@@ -66,6 +66,10 @@ final class Retries extends ChangeNotifier {
   /// How long the end waits for Soniox's last words.
   final Duration wait;
 
+  /// Called after each recording's retry, whatever came of it (D98's
+  /// diagnostic); never waited on for long, never throws into the loop.
+  Future<void> Function()? afterRetry;
+
   StreamSubscription<bool>? _changes;
   int _holds = 0;
   bool _away = false;
@@ -156,7 +160,13 @@ final class Retries extends ChangeNotifier {
           break;
         }
         final next = all.first;
-        if (await _one(next)) {
+        final retried = await _one(next);
+        try {
+          await afterRetry?.call();
+        } on Object {
+          // A diagnostic: nothing depends on it.
+        }
+        if (retried) {
           done = next;
         } else {
           // Cut short by the app leaving or a typing screen, or failed: the
@@ -266,7 +276,7 @@ final class Retries extends ChangeNotifier {
       await _audio.heard(p, words.toString(), to, done: false);
       _changed();
     }
-    SafeLog.event(LogEvent.retryCut);
+    SafeLog.event(LogEvent.retryCut, [to > at ? to - at : 0, heardMs]);
     return false;
   }
 

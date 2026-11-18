@@ -183,7 +183,7 @@ void main() {
     expect(await entries(first), [Told(tokens[0].trimLeft()), Waiting(x, 9600)]);
     expect(files.files.keys.where((n) => n.startsWith('audio-')), [JournalStore.audioOf(x, 9600)]);
     expect(files.files[JournalStore.audioOf(x, 9600)], sound(22400, 9600));
-    expect(lines, ['retryStarted', 'retryCut']);
+    expect(lines, ['retryStarted', 'retryCut 9600 300']);
     audio.open = 1 << 30;
     r.back();
     await pumpEventQueue();
@@ -244,7 +244,7 @@ void main() {
     links.single.reply('{"tokens":[],"error_code":402}');
     await pumpEventQueue();
     expect(await entries(first), [Waiting(x)]);
-    expect(lines, ['retryStarted', 'retryFailed 402', 'retryCut']);
+    expect(lines, ['retryStarted', 'retryFailed 402', 'retryCut 0 0']);
   });
 
   // D96 Q4: a recording whose retry failed goes to the back of the queue,
@@ -326,6 +326,24 @@ void main() {
     await pumpEventQueue();
     expect(lines, ['retryStarted', 'retryFailed 502']);
     expect(r.transcribing, isNull);
+  });
+
+  // D98: after each recording's retry, whatever came of it, the journal is
+  // told, for its diagnostic line.
+  test('a hook is called after each recording, done or failed', () async {
+    await waits(first, [Waiting(x), Waiting(y)], {x: 3200, y: 3200});
+    var calls = 0;
+    final r = retries();
+    r.afterRetry = () async => calls++;
+    r.kick();
+    await pumpEventQueue();
+    expect(calls, 0);
+    links[0].reply('{"tokens":[],"error_code":402}');
+    await pumpEventQueue();
+    expect(calls, 1);
+    links[1].reply(reply(done: [tokens[0]], finished: true));
+    await pumpEventQueue();
+    expect(calls, 2);
   });
 
   // D93 Q7, P10: no words, and the recording goes; a night left with

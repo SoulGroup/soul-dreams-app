@@ -702,7 +702,7 @@ void main() {
     expect(keep.audio[id], hasLength(16000));
     expect(keep.ended, [id]);
     expect(r.session.left, (audio: id, from: 0));
-    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingEnded']);
+    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingSettled 0 500', 'recordingEnded']);
   });
 
   test('a key that fails: it goes on, MP·54, it all waits', () async {
@@ -720,7 +720,7 @@ void main() {
     final id = keep.audio.keys.single;
     expect(keep.audio[id], hasLength(19200));
     expect(r.session.left, (audio: id, from: 0));
-    expect(lines, ['recordingStarted', 'recordingKeyFailed 502', 'recordingEnded']);
+    expect(lines, ['recordingStarted', 'recordingKeyFailed 502', 'recordingSettled 0 600', 'recordingEnded']);
   });
 
   test('a break: final words stay; the rest waits from Soniox\'s count', () async {
@@ -745,7 +745,7 @@ void main() {
     final id = keep.audio.keys.single;
     expect(keep.audio[id], hasLength(19200));
     expect(r.session.left, (audio: id, from: 6400));
-    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingEnded']);
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingSettled 200 600', 'recordingEnded']);
   });
 
   test('a stop whose last words never all come: the rest waits', () async {
@@ -807,7 +807,7 @@ void main() {
     expect(mic.running, isFalse);
     expect(r.ended, [1]);
     expect(r.session.left, (audio: keep.audio.keys.single, from: 0));
-    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingCapped', 'recordingEnded']);
+    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingCapped', 'recordingSettled 0 300', 'recordingEnded']);
   });
 
   test('every recording stops at ten minutes (D93 Q6)', () {

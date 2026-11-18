@@ -531,6 +531,7 @@ final class RecordingSession {
       await _written;
       if (!_keepFailed) {
         _left = (audio: audio, from: from);
+        SafeLog.event(LogEvent.recordingSettled, [_covered * 1000 ~/ bytesPerSecond, _recorded * 1000 ~/ bytesPerSecond]);
         onHeard('', '');
         return;
       }
