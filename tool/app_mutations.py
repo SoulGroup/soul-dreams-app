@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A236, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A238, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 265 run, 265 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 267 run, 267 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1193,6 +1193,15 @@ ROWS = [
      'if (!_finished.isCompleted && !_ended && _keeping) _broke(0);',
      'if (!_finished.isCompleted && !_ended && _keeping && _link != null) _broke(0);',
      'test/recording/recording_test.dart', 'stop while still opening, in vain: MP·54, all waits'),
+    # D99 (A237, A238): endpoint detection on, and its <end> token never shown.
+    ('A237', 'lib/recording/soniox.dart',
+     "  'enable_endpoint_detection': true,\n",
+     '',
+     'test/recording/soniox_test.dart', 'the settings: exactly these, English only, stt-rt-v6, no key in them'),
+    ('A238', 'lib/recording/soniox.dart',
+     "const _markers = {'<fin>', '<end>'};",
+     "const _markers = {'<fin>'};",
+     'test/recording/soniox_test.dart', 'the <end> token is dropped, final or not, among the words'),
 ]
 
 

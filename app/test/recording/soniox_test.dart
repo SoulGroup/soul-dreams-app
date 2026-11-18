@@ -21,6 +21,9 @@ void main() {
       'num_channels': 1,
       'language_hints': ['en'],
       'language_hints_strict': true,
+      // D99: Soniox's endpoint detection on, its three tunings at their
+      // defaults (none sent).
+      'enable_endpoint_detection': true,
     });
   });
 
@@ -39,6 +42,18 @@ void main() {
     expect(r.provisional, tokens[1] + tokens[2]);
     expect(r.finished, isFalse);
     expect((readReply(reply(finished: true)) as Heard).finished, isTrue);
+  });
+
+  // D99: with endpoint detection Soniox ends each stretch of speech with an
+  // <end> token: never shown, as <fin> (D73), wherever it comes.
+  test('the <end> token is dropped, final or not, among the words', () {
+    final r = readReply(reply(done: [tokens[0], '<end>', tokens[1]], shown: ['<end>', tokens[2]]));
+    r as Heard;
+    expect(r.finalText, tokens[0] + tokens[1]);
+    expect(r.provisional, tokens[2]);
+    final alone = readReply(reply(done: ['<end>'])) as Heard;
+    expect(alone.finalText, isEmpty);
+    expect(alone.provisional, isEmpty);
   });
 
   // D94: how much of the audio is in final words, Soniox's own count.

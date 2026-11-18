@@ -167,10 +167,10 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 407 tests, and 265 mutation checks (A1 to A236; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 408 tests, and 267 mutation checks (A1 to A238; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 265 run, 265 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 267 run, 267 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -606,22 +606,16 @@ Banked in recording:
        19.2 MB.
      - After a Soniox budget refusal (402) each recording of the run still opens a stream that is refused; stopping
        the run on 402 is not built.
-112. Open question for the owner (from phone checks 2 and 3 of `offline-recording`): the stream sends neither
-     endpoint detection nor Soniox's `finalize` message, and Soniox's documentation names only those two as
-     triggers of final tokens, so during continuous speech the words may all stay provisional until the stream
-     ends. That would explain both a cut live recording losing all its words (check 2) and a retry cut at Home
-     keeping no progress (check 3: no final milliseconds to keep). It is unproved: the new lines `recordingSettled
-     <final ms> <recorded ms>` and `retryCut <bytes now in words> <final ms>` show it (0 final ms means so). The
-     fix is a change to what is sent to Soniox: either `enable_endpoint_detection` in the settings (finals at
-     pauses; the documented cost is slightly lower accuracy), or `{"type":"finalize"}` every few seconds (the docs
-     advise about 200 ms of silence before it, and not too often). Not built; asked.
+112. Phone checks 2 and 3 (all words lost at a cut; no progress kept at Home) were the stream sending no endpoint
+     detection, which Soniox's documentation names, with a manual `finalize`, as the only trigger of final tokens:
+     answered by D99 (`enable_endpoint_detection` on, its three tunings at Soniox's defaults, `<end>` never shown).
+     The owner's phone checks 6 to 8 after it are by eye only (D99).
 113. Banked from the re-review of the phone-check fixes: `ChannelConnection` makes the bindings itself, but
      `main_dev.dart` could also call `WidgetsFlutterBinding.ensureInitialized()` first, removing a dependency on two
      calls being deferred; `JournalAudio.logCounts` still reads the nights after each retry in a release build
      (nothing is printed); no vanished-night test for leaving the app, nor for an edit with a recording waiting.
      Phone check 6's missing MP·54 is fixed (a stop that waits in vain for the last words says so, with the audio
-     kept, and it stays until the next tap); the words still leave when none were final, and phone checks 6 and 7
-     (progress kept) wait on item 112.
+     kept, and it stays until the next tap).
 
 ## Before Cohort 1
 
@@ -868,6 +862,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   retry offline, an edit finding its dream by where it was) approved.
 - D97 (owner, 2026-11-18): a Save into a night that is gone goes into a new night. (Task 10's checks: 1 to 3, 5, 8,
   9, 11, 12 and 13 passed; 4 failed on the connection watcher, built before the bindings existed, now fixed.)
+- D99 (owner, 2026-11-18): Soniox's endpoint detection on, with Soniox's defaults for its delay, sensitivity and
+  latency; `<end>` tokens never shown (as D73). From then on the owner's checks are by eye only, with no DevTools.
 - D98 (owner, 2026-11-18): the VoiceOver checks wait for one full pass when the app is complete; container downloads
   are dropped; SoulDreams Dev logs `journalAudio <files> <waiting>` (numbers only) at launch and after each retry.
 

@@ -21,6 +21,10 @@ Map<String, Object> sonioxSettings() => {
   'num_channels': 1,
   'language_hints': ['en'],
   'language_hints_strict': true,
+  // D99: Soniox ends each stretch of speech at a pause and makes its words
+  // final (its `<end>` token is never shown); its delay, sensitivity and
+  // latency tunings are left at Soniox's defaults, so none is sent.
+  'enable_endpoint_detection': true,
 };
 
 sealed class SonioxReply {
