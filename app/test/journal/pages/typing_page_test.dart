@@ -1844,6 +1844,32 @@ void main() {
     expect(v.keep.audio.values.single, hasLength(6400));
   });
 
+  // Phone check 6: a cut nothing reported. Stop waits for the last words, in
+  // vain; MP·54 shows and stays until the next tap (D93 Q4); the words that
+  // were final stay, the provisional ones leave, the rest waits.
+  testWidgets('a stop that waits in vain shows MP·54, and it stays', (tester) async {
+    final v = offline(online: true);
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 4);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 100));
+    await tester.pump();
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    expect(field.controller!.text, tokens[0].trimLeft());
+    await tester.pump(const Duration(seconds: 30));
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    final id = v.keep.audio.keys.single;
+    expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft()), Waiting(id, 3200)]);
+  });
+
   // D96 Q1: a keep that fails once the recording is cut stops it, and the
   // notice that the audio stays on the phone goes.
   testWidgets('keep fails offline: recording stops, the notice goes', (tester) async {

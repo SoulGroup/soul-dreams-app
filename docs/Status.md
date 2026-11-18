@@ -167,10 +167,10 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 402 tests, and 261 mutation checks (A1 to A232; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 407 tests, and 265 mutation checks (A1 to A236; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 261 run, 261 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 265 run, 265 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -619,7 +619,9 @@ Banked in recording:
      `main_dev.dart` could also call `WidgetsFlutterBinding.ensureInitialized()` first, removing a dependency on two
      calls being deferred; `JournalAudio.logCounts` still reads the nights after each retry in a release build
      (nothing is printed); no vanished-night test for leaving the app, nor for an edit with a recording waiting.
-     Checks 2 and 3 are not fixed; phone check 6 (a cut live recording) and 7 (progress kept) wait on item 112.
+     Phone check 6's missing MP·54 is fixed (a stop that waits in vain for the last words says so, with the audio
+     kept, and it stays until the next tap); the words still leave when none were final, and phone checks 6 and 7
+     (progress kept) wait on item 112.
 
 ## Before Cohort 1
 

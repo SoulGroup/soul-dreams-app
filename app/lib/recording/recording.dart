@@ -461,6 +461,10 @@ final class RecordingSession {
       link.finish();
       await _finished.future.timeout(wait - clock.elapsed, onTimeout: () {});
     }
+    // Nothing answered in time, and no break was reported: the stream is as
+    // good as gone. With the audio kept, the rest waits and the dreamer is
+    // told, as for a break (MP·54, D93 Q4; phone check 6).
+    if (!_finished.isCompleted && !_ended && _keeping) _broke(0);
     await _shut();
   }
 

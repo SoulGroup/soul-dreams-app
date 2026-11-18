@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A232, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A236, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 261 run, 261 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 265 run, 265 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1176,6 +1176,23 @@ ROWS = [
      '[_covered * 1000 ~/ bytesPerSecond, _recorded * 1000 ~/ bytesPerSecond]',
      '[_recorded * 1000 ~/ bytesPerSecond, _covered * 1000 ~/ bytesPerSecond]',
      'test/recording/recording_test.dart', "a break: final words stay; the rest waits from Soniox's count"),
+    # Phone check 6 (A233 to A236): a stop that waits in vain says so, with the audio kept.
+    ('A233', 'lib/recording/recording.dart',
+     '    if (!_finished.isCompleted && !_ended && _keeping) _broke(0);\n',
+     '',
+     'test/recording/recording_test.dart', 'a stop that waits in vain: MP·54, the rest waits'),
+    ('A234', 'lib/recording/recording.dart',
+     '    if (!_finished.isCompleted && !_ended && _keeping) _broke(0);\n',
+     '',
+     'test/journal/pages/typing_page_test.dart', 'a stop that waits in vain shows MP·54, and it stays'),
+    ('A235', 'lib/recording/recording.dart',
+     'if (!_finished.isCompleted && !_ended && _keeping) _broke(0);',
+     'if (!_finished.isCompleted && !_ended) _broke(0);',
+     'test/recording/recording_test.dart', 'no keep: a stop that waits in vain just ends'),
+    ('A236', 'lib/recording/recording.dart',
+     'if (!_finished.isCompleted && !_ended && _keeping) _broke(0);',
+     'if (!_finished.isCompleted && !_ended && _keeping && _link != null) _broke(0);',
+     'test/recording/recording_test.dart', 'stop while still opening, in vain: MP·54, all waits'),
 ]
 
 

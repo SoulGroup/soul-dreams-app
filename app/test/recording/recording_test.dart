@@ -763,6 +763,66 @@ void main() {
     expect(keep.discarded, isEmpty);
   });
 
+  // Phone check 6: a cut that no break reported (the stream just stopped
+  // answering): the stop waits in vain, and then says so (MP·54, D93 Q4).
+  test('a stop that waits in vain: MP·54, the rest waits', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final r = kept(mic, keep, link: MemoryLink());
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 4);
+    expect(r.troubles, isEmpty);
+    await r.session.stop();
+    expect(r.troubles, [Trouble.broke]);
+    expect(r.session.left, (audio: keep.audio.keys.single, from: 0));
+    expect(r.heard.last, ('', ''));
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 0', 'recordingSettled 0 400', 'recordingEnded']);
+  });
+
+  // With no audio kept (D71) nothing waits: a stop that waits in vain just ends.
+  test('no keep: a stop that waits in vain just ends', () async {
+    final mic = SilentMicrophone();
+    final ended = <int>[];
+    final session = RecordingSession(
+      memory(mic, MemoryLink()),
+      onHeard: (_, _) {},
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () => ended.add(1),
+      wait: const Duration(milliseconds: 200),
+    );
+    await session.start();
+    await session.stop();
+    expect(ended, [1]);
+    expect(lines, ['recordingStarted', 'recordingEnded']);
+  });
+
+  test('stop while still opening, in vain: MP·54, all waits', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final r = kept(mic, keep, key: () => Completer<String>().future);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 3);
+    await r.session.stop();
+    expect(r.troubles, [Trouble.broke]);
+    expect(r.session.left, (audio: keep.audio.keys.single, from: 0));
+  });
+
+  test('a stop that is answered in time shows nothing', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 4);
+    final stopped = r.session.stop();
+    await pumpEventQueue();
+    link.reply(reply(done: [tokens[0]], finalMs: 400, finished: true));
+    await stopped;
+    expect(r.troubles, isEmpty);
+    expect(r.session.left, isNull);
+  });
+
   test('a cancel mid-stream: the rest waits; unsettled words leave', () async {
     final mic = SilentMicrophone();
     final keep = MemoryKeep();
