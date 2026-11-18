@@ -291,9 +291,12 @@ void main() {
   // so the next onboarding can agree again.
   testWidgets('after the consent goes, a new I agree opens the journal', (tester) async {
     JournalStore.newQueueForTests();
-    final files = agreed(MemoryJournalFiles());
+    final files = MemoryJournalFiles();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
     await tester.pumpAndSettle();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
+    await tester.pumpAndSettle();
+    expect(find.byType(JournalPage), findsOneWidget);
     await tester.widget<JournalPage>(find.byType(JournalPage)).journal.withdrawConsent();
     await tester.pumpAndSettle();
     expect(find.byType(Onboarding), findsOneWidget);
