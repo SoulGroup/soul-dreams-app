@@ -195,10 +195,10 @@ phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 471 tests, and 333 mutation checks (A1 to A304; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 471 tests, and 334 mutation checks (A1 to A305; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 333 run, 333 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 334 run, 334 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -690,7 +690,9 @@ Banked in onboarding (the plan's decisions; none changes what the dreamer sees b
      before Settings); the onboarding test "I agree is told once" taps once, the guard being `JournalHome`'s (A297,
      A303). The re-review of the fix found no defect; its notes: the consent going while a keep is in flight would reset
      the guard (nothing a dreamer can do reaches it), and the second-tap test checks the streams two pumps after the
-     tap (A303 is caught as written).
+     tap (A303 is caught as written). The full mutation run (D95) found three older rows (A24an, A39, A66) naming the
+     dev-only test by its old name, which Task 4 renamed; they follow it (D67), and A305 pins the tester build's walk
+     reaching no `lib/onboarding/`.
 122. OPEN, for the owner: at night the page shown while the folder opens and the consent is read (a blank `Scaffold`)
      is in Night/Day's dark theme, so a dreamer sees a dark blank, then the light onboarding. Whether it should be
      held light, as onboarding is, changes what is seen, so it is asked and not built.
