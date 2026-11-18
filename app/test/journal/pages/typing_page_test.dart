@@ -618,6 +618,21 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // D102 (2): looks 41, takes a tap in a box of 44, and nothing else moves.
+  testWidgets('the back control takes a tap anywhere in 44, nothing moved', (tester) async {
+    final h = await tall(tester);
+    final back = find.byKey(BackControl.buttonKey);
+    expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
+    final space = tester.getRect(find.byKey(TypingPage.saveKey)).top - StandIns.gap -
+        tester.getRect(back).bottom;
+    expect(tester.getSize(find.byKey(TypingPage.fieldKey)).height, lessThan(space));
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+    await tester.tapAt(tester.getTopLeft(back) + const Offset(StandIns.hitMin - 1, StandIns.hitMin - 1));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.dreams, [dreams[0]]);
+  });
+
   // Head's message 20, item 9: a thin chevron in a round bordered button
   // of about 41, on the page's margin, heard as a button named MP·14.
   testWidgets('the back control: a round bordered button, a chevron', (tester) async {

@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A266, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A273, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 295 run, 295 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 302 run, 302 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -509,8 +509,8 @@ ROWS = [
      'mainAxisAlignment: MainAxisAlignment.start,',
      'test/journal/pages/typing_page_test.dart', 'Save on the left, Start Interpretation on the right'),
     ('A62', 'lib/journal/pages/typing_page.dart',
-     '(first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),\n                                          style: TypeRoles.button.style(p.text),',
-     '(first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),\n                                          style: TypeRoles.voiceApp.style(p.text),',
+     '(first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),\n                                            style: TypeRoles.button.style(p.text),',
+     '(first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),\n                                            style: TypeRoles.voiceApp.style(p.text),',
      'test/journal/pages/typing_page_test.dart', 'the instruction is centred, in the button type'),
     ('A63', 'lib/journal/pages/typing_page.dart',
      '                            if (live)\n',
@@ -1291,20 +1291,20 @@ ROWS = [
      'message: Lines.MP_38.text(appLanguage),',
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A260', 'lib/journal/pages/parts.dart',
-     '        button: true,\n        child: GestureDetector(\n          key: buttonKey,\n          behavior',
-     '        button: false,\n        child: GestureDetector(\n          key: buttonKey,\n          behavior',
+     '        button: true,\n        child: GestureDetector(\n          behavior',
+     '        button: false,\n        child: GestureDetector(\n          behavior',
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A261', 'lib/journal/pages/night_page.dart',
      '? Text(dayDigits(n.date), textAlign: TextAlign.center,',
      '? Text(dayDigits(n.date),',
      'test/journal/pages/night_page_test.dart', 'the header is centred, the date or the name and date'),
     ('A262', 'lib/journal/pages/night_page.dart',
-     '                border: Border.all(color: p.buttonBorder),\n              ),\n              child: Icon(',
-     '              ),\n              child: Icon(',
+     '                    border: Border.all(color: p.buttonBorder),\n                  ),\n                  child: Icon(',
+     '                  ),\n                  child: Icon(',
      'test/journal/pages/night_page_test.dart', 'the menu: a bordered pill, top right'),
     ('A263', 'lib/journal/pages/night_page.dart',
-     '                child: ListView(\n                  children: [',
-     '                child: ListView(\n                  padding: side,\n                  children: [',
+     '                  child: ListView(\n                    children: [',
+     '                  child: ListView(\n                    padding: side,\n                    children: [',
      'test/journal/pages/night_page_test.dart', "the bubbles: 30 from the left edge, 10 from the right"),
     ('A264', 'lib/journal/pages/night_page.dart',
      'child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),',
@@ -1318,6 +1318,34 @@ ROWS = [
      'if (opening != null && !_cut) await',
      'if (opening != null) await',
      'test/recording/recording_test.dart', 'a loss while the key comes, then Stop: ends at once'),
+    ('A267', 'lib/journal/pages/night_page.dart',
+     'consumeOutsideTaps: true,',
+     'consumeOutsideTaps: false,',
+     'test/journal/pages/night_page_test.dart', 'a tap outside the open menu only closes it'),
+    ('A268', 'lib/journal/pages/parts.dart',
+     'dimension: StandIns.hitMin,',
+     'dimension: StandIns.backSize,',
+     'test/journal/pages/night_page_test.dart', 'the back control and the pill take a tap in 44'),
+    ('A269', 'lib/journal/pages/night_page.dart',
+     'height: StandIns.hitMin,',
+     'height: StandIns.backSize,',
+     'test/journal/pages/night_page_test.dart', 'the back control and the pill take a tap in 44'),
+    ('A270', 'lib/journal/pages/parts.dart',
+     'minHeight: box.maxHeight + extra,\n        maxHeight: box.maxHeight + extra,',
+     'minHeight: box.maxHeight,\n        maxHeight: box.maxHeight,',
+     'test/journal/pages/night_page_test.dart', 'the back control and the pill: nothing moved'),
+    ('A271', 'lib/journal/pages/parts.dart',
+     'minHeight: box.maxHeight + extra,\n        maxHeight: box.maxHeight + extra,',
+     'minHeight: box.maxHeight,\n        maxHeight: box.maxHeight,',
+     'test/journal/pages/typing_page_test.dart', 'one line, growing with its words to 0.7 at most'),
+    ('A272', 'lib/journal/pages/parts.dart',
+     'alignment: Alignment.topLeft,',
+     'alignment: Alignment.center,',
+     'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
+    ('A273', 'lib/journal/pages/night_page.dart',
+     'alignment: Alignment.topCenter,',
+     'alignment: Alignment.center,',
+     'test/journal/pages/night_page_test.dart', 'the menu: a bordered pill, top right'),
 ]
 
 

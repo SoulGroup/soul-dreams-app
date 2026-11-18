@@ -154,6 +154,8 @@ class _NightPageState extends State<NightPage> {
   // The "⋯" menu: a bordered pill (color.button) opening the phone's menu;
   // while a delete runs, a tap opens nothing (D64).
   Widget _menu(Palette p) => CupertinoMenuAnchor(
+    // A tap outside the open menu only closes it (D102).
+    consumeOutsideTaps: true,
     menuChildren: [
       CupertinoMenuItem(
         key: NightPage.deleteKey,
@@ -166,26 +168,35 @@ class _NightPageState extends State<NightPage> {
       child: Semantics(
         button: true,
         child: GestureDetector(
-          key: NightPage.menuKey,
           behavior: HitTestBehavior.opaque,
           onTap: () {
             if (_busy) return;
             controller.isOpen ? controller.close() : controller.open();
           },
+          // A tap box of at least 44 around the look, anchored to the top
+          // (D102).
           child: SizedBox(
             width: StandIns.menuWidth,
-            height: StandIns.backSize,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [p.buttonTop, p.buttonBottom],
+            height: StandIns.hitMin,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: SizedBox(
+                key: NightPage.menuKey,
+                width: StandIns.menuWidth,
+                height: StandIns.backSize,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [p.buttonTop, p.buttonBottom],
+                    ),
+                    borderRadius: BorderRadius.circular(StandIns.backSize / 2),
+                    border: Border.all(color: p.buttonBorder),
+                  ),
+                  child: Icon(Icons.more_horiz, color: p.buttonText),
                 ),
-                borderRadius: BorderRadius.circular(StandIns.backSize / 2),
-                border: Border.all(color: p.buttonBorder),
               ),
-              child: Icon(Icons.more_horiz, color: p.buttonText),
             ),
           ),
         ),
@@ -217,48 +228,50 @@ class _NightPageState extends State<NightPage> {
               Expanded(
                 // The bubbles keep their own margins from the screen's edges
                 // (design-system.md §5); everything else keeps the page's.
-                child: ListView(
-                  children: [
-                    Padding(
-                      padding: Spacing.nightHeader.add(side),
-                      child: Semantics(
-                        header: true,
-                        child: n.name == null
-                            ? Text(dayDigits(n.date), textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text))
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Text(n.name!, textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text)),
-                                  Text(
-                                    dayDigits(n.date),
-                                    textAlign: TextAlign.center,
-                                    style: TypeRoles.button.style(p.text),
-                                  ),
-                                ],
-                              ),
-                      ),
-                    ),
-                    Padding(
-                      padding: side,
-                      child: Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
-                    ),
-                    const SizedBox(height: StandIns.gap),
-                    for (final (i, d) in n.entries.indexed)
-                      if (d case Told(:final text)) ...[
-                        DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
-                        const SizedBox(height: StandIns.bubbleGap),
-                      ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
-                        Padding(
-                          padding: side,
-                          child: Semantics(
-                            key: NightPage.transcribingKey,
-                            liveRegion: true,
-                            child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
-                          ),
+                child: BelowTapBox(
+                  child: ListView(
+                    children: [
+                      Padding(
+                        padding: Spacing.nightHeader.add(side),
+                        child: Semantics(
+                          header: true,
+                          child: n.name == null
+                              ? Text(dayDigits(n.date), textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text))
+                              : Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(n.name!, textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text)),
+                                    Text(
+                                      dayDigits(n.date),
+                                      textAlign: TextAlign.center,
+                                      style: TypeRoles.button.style(p.text),
+                                    ),
+                                  ],
+                                ),
                         ),
-                        const SizedBox(height: StandIns.bubbleGap),
-                      ],
-                  ],
+                      ),
+                      Padding(
+                        padding: side,
+                        child: Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
+                      ),
+                      const SizedBox(height: StandIns.gap),
+                      for (final (i, d) in n.entries.indexed)
+                        if (d case Told(:final text)) ...[
+                          DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
+                          const SizedBox(height: StandIns.bubbleGap),
+                        ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
+                          Padding(
+                            padding: side,
+                            child: Semantics(
+                              key: NightPage.transcribingKey,
+                              liveRegion: true,
+                              child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                            ),
+                          ),
+                          const SizedBox(height: StandIns.bubbleGap),
+                        ],
+                    ],
+                  ),
                 ),
               ),
               Padding(

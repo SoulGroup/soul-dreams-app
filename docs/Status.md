@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-18, in branch `journal-design` (the plan's Tasks 1 to 6; waiting for the owner's by-eye review, Task 8, and the merge), by Claude Code.
+Last updated: 2026-11-18, in branch `journal-design` (the plan's Tasks 1 to 7, the review fixes and D102; the owner's by-eye review passed; waiting for the merge), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -20,8 +20,9 @@ and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recordin
 
 ## Road ahead
 
-- The owner's by-eye review of `journal-design` (the plan's Task 8, with the founder's verdict on the growing pill
-  and the spacings), and the merge. The night's page's floating field comes with the readings (D101).
+- The merge of `journal-design`. The owner's by-eye review (the plan's Task 8) passed; his verdicts for Product: the
+  growing pill field is good as built, and so are the spacings (30, 20, 12). The night's page's floating field comes
+  with the readings (D101).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
   URL (head's message 14; whether eu-north-1 has it is checked first).
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -148,7 +149,10 @@ and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recordin
   rendering of the phone's pull-down menu), the dreamer's bubbles 30 from the screen's left edge and 10 from its
   right (`Spacing.bubbleDreamer`), and at its foot Add dreams (MP·29) left and Start Interpretation (EM·1) right,
   inert (P3, as D71 Q3), the same `ButtonRow` as the typing screen's; the side margins 30 and the rows 12 apart
-  (TO TRY). Not built: the night's page's floating field, which comes with the readings (D101).
+  (TO TRY). Not built: the night's page's floating field, which comes with the readings (D101). The back control and
+  the menu's pill look 41 and take a tap in a box of 44 (`StandIns.hitMin`, D102), their looks anchored to the row's top
+  and the page's margin; what stands below starts where the looks end (`BelowTapBox`), so nothing moved. A tap outside
+  the open menu only closes it (D102).
 - The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
   both 120, the radius half the height; large text shrinks its words, never the circle.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
@@ -174,10 +178,10 @@ and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recordin
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 433 tests, and 295 mutation checks (A1 to A266; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 437 tests, and 302 mutation checks (A1 to A273; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 295 run, 295 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 302 run, 302 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -904,6 +908,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   the readings (the conversation needs the model's instructions and its own storage change). Q2 to Q6 as leaned:
   MP·29 "Add dreams"; "Delete this" plain; the 30 pt margins left and right only; a named night's date centred under
   the name; the bubbles' margins from the screen's edges.
+- D102 (founder): a tap outside the open "⋯" menu only closes it (`consumeOutsideTaps: true`); the pill and the back
+  control keep their look at 41 pt and each get an invisible tap box of at least 44 pt (Apple's minimum). The owner's
+  by-eye review of the branch passed, and matches his design; his verdicts for Product: the growing pill field and the
+  spacings (30 / 20 / 12) are good as built.
 
 ## Documents as last imported
 

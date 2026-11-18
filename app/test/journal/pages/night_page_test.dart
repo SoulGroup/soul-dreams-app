@@ -434,6 +434,48 @@ void main() {
     expect(look.borderRadius, BorderRadius.circular(StandIns.backSize / 2));
   });
 
+  // D102 (1): a tap outside the open menu only closes it.
+  testWidgets('a tap outside the open menu only closes it', (tester) async {
+    await open(tester);
+    for (final outside in [find.byKey(NightPage.addKey), find.text(n.dreams[0]), find.byKey(BackControl.buttonKey)]) {
+      await openMenu(tester);
+      expect(find.byType(CupertinoMenuItem), findsOneWidget);
+      await tester.tap(outside, warnIfMissed: false);
+      await tester.pumpAndSettle();
+      expect(find.byType(CupertinoMenuItem), findsNothing);
+      expect(find.byType(TypingPage), findsNothing);
+      expect(find.byType(NightPage), findsOneWidget);
+    }
+  });
+
+  // D102 (2): the pill and the back control look 41 and take a tap in a
+  // box of 44 (Apple's minimum); the look and the layout are as reviewed.
+  testWidgets('the back control and the pill take a tap in 44', (tester) async {
+    await open(tester);
+    final menu = tester.getTopLeft(find.byKey(NightPage.menuKey));
+    await tester.tapAt(menu + const Offset(27, StandIns.hitMin - 1));
+    await tester.pumpAndSettle();
+    expect(find.byType(CupertinoMenuItem), findsOneWidget);
+    await tester.tapAt(const Offset(2, 2));
+    await tester.pumpAndSettle();
+    final back = tester.getTopLeft(find.byKey(BackControl.buttonKey));
+    await tester.tapAt(back + const Offset(StandIns.hitMin - 1, 20));
+    await tester.pumpAndSettle();
+    expect(find.byType(NightPage), findsNothing);
+  });
+
+  testWidgets('the back control and the pill: nothing moved', (tester) async {
+    await open(tester);
+    final back = find.byKey(BackControl.buttonKey);
+    expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
+    expect(tester.getSize(find.byKey(NightPage.menuKey)).height, StandIns.backSize);
+    final top = tester.getTopLeft(back).dy;
+    expect(tester.getTopLeft(find.text(dayDigits(n.date))).dy, closeTo(top + StandIns.backSize + Spacing.nightHeader.top, 1));
+    await tester.tapAt(tester.getTopLeft(back) + const Offset(20, StandIns.hitMin - 1));
+    await tester.pumpAndSettle();
+    expect(find.byType(NightPage), findsNothing);
+  });
+
   // Item 11: the dreamer's bubbles 30 from the screen's left edge and 10
   // from its right (design-system.md §5).
   testWidgets("the bubbles: 30 from the left edge, 10 from the right", (tester) async {

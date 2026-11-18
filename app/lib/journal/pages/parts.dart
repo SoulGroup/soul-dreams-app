@@ -240,8 +240,10 @@ class _ChevronLine extends CustomPainter {
 }
 
 /// The back control, top left: a thin chevron in a round bordered button
-/// (color.button), about 41 across (head's message 20, item 9); its spoken
-/// name is MP·14.
+/// (color.button), about 41 across (head's message 20, item 9), in a tap
+/// box of at least 44 that shows nothing (D102); its spoken name is MP·14.
+/// The look is anchored to the box's top left, so it stays on the page's
+/// margin and the row's top, as reviewed.
 class BackControl extends StatelessWidget {
   const BackControl({super.key, required this.onPressed});
 
@@ -257,25 +259,53 @@ class BackControl extends StatelessWidget {
       child: Semantics(
         button: true,
         child: GestureDetector(
-          key: buttonKey,
           behavior: HitTestBehavior.opaque,
           onTap: onPressed,
           child: SizedBox.square(
-            dimension: StandIns.backSize,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [p.buttonTop, p.buttonBottom],
+            dimension: StandIns.hitMin,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox.square(
+                key: buttonKey,
+                dimension: StandIns.backSize,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [p.buttonTop, p.buttonBottom],
+                    ),
+                    border: Border.all(color: p.buttonBorder),
+                  ),
+                  child: Center(child: Chevron(colour: p.buttonText, size: StandIns.backChevron, left: true)),
                 ),
-                border: Border.all(color: p.buttonBorder),
               ),
-              child: Center(child: Chevron(colour: p.buttonText, size: StandIns.backChevron, left: true)),
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// What stands below a row whose tap boxes are taller than its looks (the
+/// back control and the menu's pill, D102): it starts where the looks end,
+/// as before the boxes grew, and overlaps the boxes' empty foot.
+class BelowTapBox extends StatelessWidget {
+  const BelowTapBox({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    const extra = StandIns.hitMin - StandIns.backSize;
+    return LayoutBuilder(
+      builder: (context, box) => OverflowBox(
+        alignment: Alignment.bottomCenter,
+        minHeight: box.maxHeight + extra,
+        maxHeight: box.maxHeight + extra,
+        child: child,
       ),
     );
   }

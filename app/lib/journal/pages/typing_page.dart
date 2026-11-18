@@ -531,113 +531,116 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                       child: BackControl(onPressed: _save),
                     ),
                     Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, box) => Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Expanded(
-                              child: Center(
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      if (first != null)
-                                        AppLine(
-                                          (first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),
-                                          style: TypeRoles.button.style(p.text),
-                                        ),
-                                      if (trouble != null)
-                                        Padding(
-                                          key: TypingPage.noticeKey,
-                                          padding: const EdgeInsets.only(top: StandIns.gap),
-                                          child: Semantics(
-                                            liveRegion: true,
-                                            child: AppLine(
-                                              _troubleText(trouble),
-                                              style: TypeRoles.button.style(p.text),
+                      // What stands below the back control starts where its look ends (D102).
+                      child: BelowTapBox(
+                        child: LayoutBuilder(
+                          builder: (context, box) => Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: Center(
+                                  child: SingleChildScrollView(
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        if (first != null)
+                                          AppLine(
+                                            (first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),
+                                            style: TypeRoles.button.style(p.text),
+                                          ),
+                                        if (trouble != null)
+                                          Padding(
+                                            key: TypingPage.noticeKey,
+                                            padding: const EdgeInsets.only(top: StandIns.gap),
+                                            child: Semantics(
+                                              liveRegion: true,
+                                              child: AppLine(
+                                                _troubleText(trouble),
+                                                style: TypeRoles.button.style(p.text),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      if (_failed)
-                                        Padding(
-                                          key: _failure,
-                                          padding: const EdgeInsets.only(top: StandIns.gap),
-                                          child: Semantics(
-                                            liveRegion: true,
-                                            child: AppLine(
-                                              PendingLines.MP_62.text(appLanguage),
-                                              style: TypeRoles.button.style(p.text),
+                                        if (_failed)
+                                          Padding(
+                                            key: _failure,
+                                            padding: const EdgeInsets.only(top: StandIns.gap),
+                                            child: Semantics(
+                                              liveRegion: true,
+                                              child: AppLine(
+                                                PendingLines.MP_62.text(appLanguage),
+                                                style: TypeRoles.button.style(p.text),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            if (live)
-                              ExcludeSemantics(
-                                child: Padding(
-                                  padding: const EdgeInsets.only(top: StandIns.gap),
-                                  child: Row(
-                                    key: TypingPage.levelKey,
-                                    children: [
-                                      Expanded(
-                                        child: SizedBox(
-                                          height: StandIns.levelHeight,
-                                          child: CustomPaint(painter: _LevelLine(List.of(_levels), p.text)),
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Text(_elapsed(), style: TypeRoles.button.style(p.text)),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            const SizedBox(height: StandIns.gap),
-                            ConstrainedBox(
-                              constraints: BoxConstraints(maxHeight: _fieldCap(context, box.maxHeight, live)),
-                              child: NotificationListener<ScrollNotification>(
-                                onNotification: _scrolled,
-                                child: TextField(
-                                  key: TypingPage.fieldKey,
-                                  controller: _text,
-                                  scrollController: _scroll,
-                                  minLines: 1,
-                                  maxLines: null,
-                                  keyboardType: TextInputType.multiline,
-                                  textCapitalization: TextCapitalization.sentences,
-                                  style: TypeRoles.voiceDreamer.style(p.fieldText),
-                                  cursorColor: p.fieldText,
-                                  decoration: InputDecoration(
-                                    hintText: Lines.MP_12.text(appLanguage),
-                                    hintStyle: TypeRoles.button.style(p.placeholder),
-                                    filled: true,
-                                    fillColor: p.field,
-                                    contentPadding: StandIns.fieldPadding,
-                                    border: edge,
-                                    enabledBorder: edge,
-                                    focusedBorder: edge,
-                                    suffixIcon: widget.recording == null
-                                        ? null
-                                        : IconButton(
-                                            key: TypingPage.micKey,
-                                            // The stop control's own name while it
-                                            // records (D93; MP·64 replaces MP·11).
-                                            tooltip: live
-                                                ? PendingLines.MP_64.text(appLanguage)
-                                                : Lines.MP_11.text(appLanguage),
-                                            isSelected: live,
-                                            onPressed: _toggleMic,
-                                            icon: Icon(Icons.mic_none, color: p.placeholder),
-                                            selectedIcon: Icon(Icons.stop_rounded, color: p.fieldText),
+                              if (live)
+                                ExcludeSemantics(
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(top: StandIns.gap),
+                                    child: Row(
+                                      key: TypingPage.levelKey,
+                                      children: [
+                                        Expanded(
+                                          child: SizedBox(
+                                            height: StandIns.levelHeight,
+                                            child: CustomPaint(painter: _LevelLine(List.of(_levels), p.text)),
                                           ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(_elapsed(), style: TypeRoles.button.style(p.text)),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              const SizedBox(height: StandIns.gap),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(maxHeight: _fieldCap(context, box.maxHeight, live)),
+                                child: NotificationListener<ScrollNotification>(
+                                  onNotification: _scrolled,
+                                  child: TextField(
+                                    key: TypingPage.fieldKey,
+                                    controller: _text,
+                                    scrollController: _scroll,
+                                    minLines: 1,
+                                    maxLines: null,
+                                    keyboardType: TextInputType.multiline,
+                                    textCapitalization: TextCapitalization.sentences,
+                                    style: TypeRoles.voiceDreamer.style(p.fieldText),
+                                    cursorColor: p.fieldText,
+                                    decoration: InputDecoration(
+                                      hintText: Lines.MP_12.text(appLanguage),
+                                      hintStyle: TypeRoles.button.style(p.placeholder),
+                                      filled: true,
+                                      fillColor: p.field,
+                                      contentPadding: StandIns.fieldPadding,
+                                      border: edge,
+                                      enabledBorder: edge,
+                                      focusedBorder: edge,
+                                      suffixIcon: widget.recording == null
+                                          ? null
+                                          : IconButton(
+                                              key: TypingPage.micKey,
+                                              // The stop control's own name while it
+                                              // records (D93; MP·64 replaces MP·11).
+                                              tooltip: live
+                                                  ? PendingLines.MP_64.text(appLanguage)
+                                                  : Lines.MP_11.text(appLanguage),
+                                              isSelected: live,
+                                              onPressed: _toggleMic,
+                                              icon: Icon(Icons.mic_none, color: p.placeholder),
+                                              selectedIcon: Icon(Icons.stop_rounded, color: p.fieldText),
+                                            ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),

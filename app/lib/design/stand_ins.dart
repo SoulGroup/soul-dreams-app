@@ -36,6 +36,10 @@ abstract final class StandIns {
   static const double backSize = 41;
   static const backChevron = Size(9, 16);
 
+  /// The least a tap target measures, invisibly (Apple's 44; D102): the
+  /// look stays 41, anchored to the page's margin and the row's top.
+  static const double hitMin = 44;
+
   /// The night's "⋯" menu: a bordered pill as tall as the back control
   /// (head's message 20, item 10).
   static const double menuWidth = 55;
