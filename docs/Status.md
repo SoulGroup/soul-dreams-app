@@ -167,10 +167,10 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 398 tests, and 251 mutation checks (A1 to A220; A55, A73, A80 to A83, A86 to A88, A94, A99,
-  A128 to A130, A142 and A213 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 402 tests, and 261 mutation checks (A1 to A232; A55, A73, A80 to A83, A86 to A88, A94, A99,
+  A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 251 run, 251 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 261 run, 261 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -606,11 +606,20 @@ Banked in recording:
        19.2 MB.
      - After a Soniox budget refusal (402) each recording of the run still opens a stream that is refused; stopping
        the run on 402 is not built.
-112. Open question for the owner (raised in the re-review of D96's fixes; asked at the plan's Task 10): a Save that
-     cannot land is a failed Save (D96 Q3), and Back, the system back and the edge swipe go through the same Save, so
-     when a typing screen's night is gone the dreamer cannot leave it (every try shows MP·62). It needs a night to go
-     while the screen is open: a retry finishing the night's only recording as silence, in the moment after the
-     screen opened. The lean: in that case the Save goes into a new night.
+112. Open question for the owner (from phone checks 2 and 3 of `offline-recording`): the stream sends neither
+     endpoint detection nor Soniox's `finalize` message, and Soniox's documentation names only those two as
+     triggers of final tokens, so during continuous speech the words may all stay provisional until the stream
+     ends. That would explain both a cut live recording losing all its words (check 2) and a retry cut at Home
+     keeping no progress (check 3: no final milliseconds to keep). It is unproved: the new lines `recordingSettled
+     <final ms> <recorded ms>` and `retryCut <bytes now in words> <final ms>` show it (0 final ms means so). The
+     fix is a change to what is sent to Soniox: either `enable_endpoint_detection` in the settings (finals at
+     pauses; the documented cost is slightly lower accuracy), or `{"type":"finalize"}` every few seconds (the docs
+     advise about 200 ms of silence before it, and not too often). Not built; asked.
+113. Banked from the re-review of the phone-check fixes: `ChannelConnection` makes the bindings itself, but
+     `main_dev.dart` could also call `WidgetsFlutterBinding.ensureInitialized()` first, removing a dependency on two
+     calls being deferred; `JournalAudio.logCounts` still reads the nights after each retry in a release build
+     (nothing is printed); no vanished-night test for leaving the app, nor for an edit with a recording waiting.
+     Checks 2 and 3 are not fixed; phone check 6 (a cut live recording) and 7 (progress kept) wait on item 112.
 
 ## Before Cohort 1
 
@@ -855,6 +864,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   (MP·62; the screen, words and recordings kept). Q4: a failed retry goes to the back of the queue, never deleted.
   The four fixes of the reviews (the keep's writes in order and awaited, the night page leaving by its own route, no
   retry offline, an edit finding its dream by where it was) approved.
+- D97 (owner, 2026-11-18): a Save into a night that is gone goes into a new night. (Task 10's checks: 1 to 3, 5, 8,
+  9, 11, 12 and 13 passed; 4 failed on the connection watcher, built before the bindings existed, now fixed.)
+- D98 (owner, 2026-11-18): the VoiceOver checks wait for one full pass when the app is complete; container downloads
+  are dropped; SoulDreams Dev logs `journalAudio <files> <waiting>` (numbers only) at launch and after each retry.
 
 ## Documents as last imported
 
