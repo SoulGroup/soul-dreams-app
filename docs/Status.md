@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-18, in branch `offline-recording` (the plan's Tasks 1 to 9, the phone checks' fixes D97 to D99, and the final review's fixes; waiting for the owner's last by-eye checks and the merge), by Claude Code.
+Last updated: 2026-11-18, in branch `journal-design` (the plan's Tasks 1 to 6; waiting for the owner's by-eye review, Task 8, and the merge), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,16 +14,14 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`offline-recording`: offline recording in SoulDreams Dev only (D92 to D94): every recording's audio kept in the
-journal's folder until its words are final; no connection, or a failure, and the recording goes on and waits;
-retries through Soniox's real-time stream only while the app is open, progress kept; MP·15, MP·54, MP·63, MP·64 and
-AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow.md` (c)). Plan:
-`docs/plans/offline-recording.md`.
+`journal-design`: the journal design pass in SoulDreams Dev (head's message 20, Product message 19, items 1, 3 to 5, 7
+and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recording shows MP·54 at once). Plan:
+`docs/plans/journal-design.md`. The night's page's floating field comes with the readings (D101).
 
 ## Road ahead
 
-- The owner's rehearsal of the night file's version 2 passed (the plan's Task 3, 2026-11-18, on the phone, with
-  invented nights written by `main`). The owner runs the phone checks (Task 10), and merges `offline-recording`.
+- The owner's by-eye review of `journal-design` (the plan's Task 8, with the founder's verdict on the growing pill
+  and the spacings), and the merge. The night's page's floating field comes with the readings (D101).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
   URL (head's message 14; whether eu-north-1 has it is checked first).
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -142,6 +140,15 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
 - A night's page (D64): a failed delete or read logs `journalDeleteFailed` or `journalReadFailed`, keeps the page and
   shows nothing new; while a delete runs, the menu, Add dreams and the dreams ignore taps; each dream is announced as
   a button. SoulDreams Dev's list waits for the phone check before it opens the folder (D65).
+- The journal design pass (head's message 20, Product message 19; `journal-design`; TO TRY where marked): a row's
+  summary in the button type, `color.text.summary` (#767676 on white; the dark theme's text on the gradient), a thin
+  drawn chevron at its trailing edge (`Chevron`, no icon font); the month divider centred; the empty journal's line
+  in the button type, centred; the back control a thin chevron in a round bordered button of 41 (`color.button`); a
+  night's page with its header centred, the "⋯" menu a bordered pill opening `CupertinoMenuAnchor` (Flutter's
+  rendering of the phone's pull-down menu), the dreamer's bubbles 30 from the screen's left edge and 10 from its
+  right (`Spacing.bubbleDreamer`), and at its foot Add dreams (MP·29) left and Start Interpretation (EM·1) right,
+  inert (P3, as D71 Q3), the same `ButtonRow` as the typing screen's; the side margins 30 and the rows 12 apart
+  (TO TRY). Not built: the night's page's floating field, which comes with the readings (D101).
 - The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
   both 120, the radius half the height; large text shrinks its words, never the circle.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
@@ -149,7 +156,7 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
   target is fixed when it opens; an empty Save keeps nothing; an emptied dream disappears; a night with no dream left
   is deleted (D58 Q2, Q3; P9, P10).
 - Night/Day automatic (`app/lib/core/night_day.dart`): dark 21:00 to 08:00 by the phone's clock, a five-second
-  fade while the app is open, instant with Reduce Motion (read from the platform's own flag, which iOS does not put
+  ease-in-out fade while the app is open (head's message 20, item 13), instant with Reduce Motion (read from the platform's own flag, which iOS does not put
   in `MediaQuery`), at start and on returning (D57 Q15). The app's own lines appear a word every 60 ms, whole with
   Reduce Motion (`app/lib/core/app_line.dart`; D58 Q17). The palette (`app/lib/design/palette.dart`) fades with the
   theme. The app shows English only (D57 Q12; `app/lib/core/language.dart`).
@@ -167,10 +174,10 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 410 tests, and 270 mutation checks (A1 to A241; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 432 tests, and 294 mutation checks (A1 to A265; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 270 run, 270 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 294 run, 294 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -455,9 +462,10 @@ Banked in journal-screens:
 75. `JournalStore.newQueueForTests()`: the store's one queue (D54) is static, and a widget test's fake-async zone
     strands it for the next test; each widget test starts a new queue inside its own zone. App code never calls it.
 76. MP·39, the menu's spoken name, names naming, which is not built (D58 Q1): as written, Dev only, until naming.
-77. The stand-ins (`stand_ins.dart`) and these choices await the founder's look in Cohort 0 (P13): the summary's type
-    role (the dreamer's voice), Material's "hotel" icon for Save's sleeping person, the back arrow, the menu's form,
-    the linear fade curve, and the dark field's absent border drawn as a transparent one.
+77. The stand-ins (`stand_ins.dart`) and these choices await the founder's look in Cohort 0 (P13): Material's
+    "hotel" icon for Save's sleeping person and the dark field's absent border drawn as a transparent one. (The
+    summary's type role, the back control, the menu's form and the fade's curve were ruled by head's message 20 and
+    built in `journal-design`.)
 78. A named night's row is built (D57 Q6) but nothing in the app can name a night yet (P7).
 79. Word Animation, the setting, is not built (P8): only Reduce Motion stops word by word and the fade.
 80. The month names come from `intl`'s CLDR data, assumed to match iOS's own for English and Swedish (D56).
@@ -625,7 +633,8 @@ Banked in recording:
      for the night page's and the journal page's reload on words, `release()`, `copyTail`, `rename` and `_part`
      (their tests catch each); the D99 re-review's notes (a reply of markers alone leaves the shown
      words as they were; the first word after a pause is assumed to carry its own space).
-115. Open questions for the owner from the final review (the leans in brackets): (a) a connection that drops during a
+115. CLOSED: (a) by D100 (MP·54 at once, built in `journal-design`); (b) stays as built (head's message 20).
+     Open questions for the owner from the final review (the leans in brackets): (a) a connection that drops during a
      live recording is shown as MP·54 only at Stop, after the five-second wait, since the stream gives no sign
      (the lean: leave it; the phone's own connection state could show it at once, a change to what the dreamer
      sees); (b) D97's "new night" is built as wherever a new Save would go, which is the open night if there is
@@ -638,7 +647,9 @@ Banked in recording:
 2. Product gives exact values for Task 14's thirteen questions below (P13).
 
 Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
-(questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY):
+(questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY; questions 1, 3, 4, 5, 7, 9 to 13 by head's
+message 20 and built in `journal-design`, except the night's page's field in 10, which comes with the readings
+(D101); 6 waits for P8):
 
 1. The summary's type role: the screenshots show `TypeRoles.button` (Inter 14); switching needs the row's minimum
    height changed.
@@ -880,6 +891,19 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   are dropped; SoulDreams Dev logs `journalAudio <files> <waiting>` (numbers only) at launch and after each retry.
 - D99 (owner, 2026-11-18): Soniox's endpoint detection on, with Soniox's defaults for its delay, sensitivity and
   latency; `<end>` tokens never shown (as D73). From then on the owner's checks are by eye only, with no DevTools.
+
+## Rulings during journal-design
+
+- Head's message 20 (Product message 19): the journal design pass, items 1, 3 to 5, 7 and 9 to 13 (the "current
+  design" the founder's dark-theme screens of 2026-10-29 and their light versions, read with every ruling since); item
+  6 waits for P8; the spacings TO TRY.
+- D100 (founder): during a recording, when the phone reports it has lost its connection, MP·54 shows at once (the
+  words stop; the audio is kept, as built), not only at Stop; it stays until the next tap or the screen closes. The
+  offline-recording final review's Q2 (item 115 b) stays as built.
+- D101 (founder): the plan's Part 4. Q1: the night's page's floating field is not built in this branch; it comes with
+  the readings (the conversation needs the model's instructions and its own storage change). Q2 to Q6 as leaned:
+  MP·29 "Add dreams"; "Delete this" plain; the 30 pt margins left and right only; a named night's date centred under
+  the name; the bubbles' margins from the screen's edges.
 
 ## Documents as last imported
 
