@@ -35,6 +35,10 @@ abstract final class StandIns {
   static const double backSize = 41;
   static const backChevron = Size(9, 16);
 
+  /// The night's "⋯" menu: a bordered pill as tall as the back control
+  /// (head's message 20, item 10).
+  static const double menuWidth = 55;
+
   /// The record button.
   static const double recordHeight = 120;
   static const double recordWidth = 120;

@@ -1,15 +1,18 @@
-// A night's page (P1, P6, P7; D58 Q1, Q3, Q4, Q8): header, "Dreams",
-// the dreams; editing through the typing screen; Add dreams; the menu
-// holding only delete, spoken as MP·39; one confirmation, Cancel first,
-// Delete destructive; deleting leaves nothing.
+// A night's page (P1, P6, P7; D58 Q1, Q3, Q4, Q8; head's message 20,
+// items 10 to 12): header, "Dreams", the dreams; editing through the
+// typing screen; Add dreams and Start Interpretation at the foot; the menu,
+// a bordered pill opening the phone's menu, holding only delete, spoken as
+// MP·39; one confirmation, Cancel first, Delete destructive; deleting
+// leaves nothing.
 import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
+import 'package:souldreams/design/stand_ins.dart';
+import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
@@ -265,7 +268,9 @@ void main() {
     await open(tester);
     expect(find.byTooltip(Lines.MP_39.text(Lang.en)), findsOneWidget);
     await openMenu(tester);
-    expect(find.byType(PopupMenuItem<int>), findsOneWidget);
+    final items = tester.widgetList<CupertinoMenuItem>(find.byType(CupertinoMenuItem));
+    expect(items, hasLength(1));
+    expect(items.single.isDestructiveAction, isFalse);
     expect(find.text(Lines.EM_11.parts(Lang.en)[1]), findsOneWidget);
     expect(find.text(Lines.MP_28.text(Lang.en)), findsNothing);
   });
@@ -373,7 +378,7 @@ void main() {
     await confirmDelete(tester);
     await tester.tap(find.byKey(NightPage.menuKey), warnIfMissed: false);
     await tester.pumpAndSettle();
-    expect(find.byType(PopupMenuItem<int>), findsNothing);
+    expect(find.byType(CupertinoMenuItem), findsNothing);
     await tester.tap(find.byKey(NightPage.addKey));
     await tester.pumpAndSettle();
     await tester.tap(find.text(n.dreams[0]));
@@ -393,6 +398,66 @@ void main() {
       expect(tester.getSemantics(find.text(d)).flagsCollection.isButton, isTrue, reason: d);
     }
     handle.dispose();
+  });
+
+  // Head's message 20, item 10: the date or the name centred.
+  testWidgets('the header is centred, the date or the name and date', (tester) async {
+    await open(tester);
+    expect(tester.widget<Text>(find.text(dayDigits(n.date))).textAlign, TextAlign.center);
+    final width = tester.getSize(find.byType(NightPage)).width;
+    expect(tester.getCenter(find.text(dayDigits(n.date))).dx, closeTo(width / 2, 1));
+  });
+
+  testWidgets('a named night: the name and the date both centred', (tester) async {
+    await open(tester, name: 'Night by the harbour');
+    expect(tester.widget<Text>(find.text('Night by the harbour')).textAlign, TextAlign.center);
+    expect(tester.widget<Text>(find.text(dayDigits(n.date))).textAlign, TextAlign.center);
+  });
+
+  // Item 10: the menu a bordered pill top right, on the page's margin.
+  testWidgets('the menu: a bordered pill, top right', (tester) async {
+    await open(tester);
+    final menu = find.byKey(NightPage.menuKey);
+    expect(tester.getSize(menu), const Size(StandIns.menuWidth, StandIns.backSize));
+    final width = tester.getSize(find.byType(NightPage)).width;
+    expect(tester.getTopRight(menu).dx, closeTo(width - StandIns.pageSide, 1));
+    expect(tester.getCenter(menu).dy, closeTo(tester.getCenter(find.byKey(BackControl.buttonKey)).dy, 1));
+    expect(tester.getTopLeft(find.byKey(BackControl.buttonKey)).dx, closeTo(StandIns.pageSide, 1));
+    final look = tester.widget<DecoratedBox>(find.descendant(of: menu, matching: find.byType(DecoratedBox))).decoration
+        as BoxDecoration;
+    expect(look.border, Border.all(color: LightColours.button.border!));
+    expect(look.borderRadius, BorderRadius.circular(StandIns.backSize / 2));
+  });
+
+  // Item 11: the dreamer's bubbles 30 from the screen's left edge and 10
+  // from its right (design-system.md §5).
+  testWidgets("the bubbles: 30 from the left edge, 10 from the right", (tester) async {
+    await open(tester);
+    final width = tester.getSize(find.byType(NightPage)).width;
+    for (final d in n.dreams) {
+      final bubble = tester.getRect(find.ancestor(of: find.text(d), matching: find.byType(DecoratedBox)).first);
+      expect(bubble.right, closeTo(width - Spacing.bubbleDreamer.right, 1), reason: d);
+      expect(bubble.left, greaterThanOrEqualTo(Spacing.bubbleDreamer.left - 1), reason: d);
+    }
+  });
+
+  // Item 10: at the foot, Add dreams on the left and Start Interpretation on
+  // the right, which does nothing yet (P3, as D71 Q3).
+  testWidgets('Add dreams bottom left, Start Interpretation bottom right', (tester) async {
+    await open(tester);
+    final size = tester.getSize(find.byType(NightPage));
+    final add = tester.getRect(find.byKey(NightPage.addKey));
+    final start = tester.getRect(find.byKey(NightPage.startKey));
+    expect(find.text(Lines.EM_1.text(Lang.en)), findsOneWidget);
+    expect(add.left, closeTo(StandIns.pageSide, 1));
+    expect(start.right, closeTo(size.width - StandIns.pageSide, 1));
+    expect(add.center.dy, closeTo(start.center.dy, 1));
+    expect(add.bottom, closeTo(size.height - StandIns.gap, 1));
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(NightPage), findsOneWidget);
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.journal.night(n.id))!.dreams, n.dreams);
   });
 
   testWidgets('the date is heard as a heading', (tester) async {

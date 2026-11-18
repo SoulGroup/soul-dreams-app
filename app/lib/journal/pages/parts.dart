@@ -76,6 +76,27 @@ class PlainButton extends StatelessWidget {
   }
 }
 
+/// Two pills at the foot of a page, one at each side; at large text each
+/// shrinks its words to stay on one row, as the record button does (Task
+/// 15a): Save and Start Interpretation, or Add dreams and Start
+/// Interpretation (D70 8; head's message 20, item 10).
+class ButtonRow extends StatelessWidget {
+  const ButtonRow({super.key, required this.left, required this.right});
+
+  final Widget left;
+  final Widget right;
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: left)),
+      const SizedBox(width: StandIns.gap),
+      Flexible(child: FittedBox(fit: BoxFit.scaleDown, child: right)),
+    ],
+  );
+}
+
 /// The record button: the biggest thing on the journal's screen, the
 /// terracotta gradient, its words in white (main-path.md, The Journal).
 class RecordButton extends StatelessWidget {

@@ -642,32 +642,16 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                       ),
                     ),
                     const SizedBox(height: StandIns.gap),
-                    // At large text the two pills shrink their words to stay on
-                    // one row, as the record button does (Task 15a).
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: KeyedSubtree(
-                              key: TypingPage.saveKey,
-                              child: PlainButton(Lines.MP_13.text(appLanguage), icon: Icons.hotel, onPressed: _save),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: StandIns.gap),
-                        Flexible(
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: KeyedSubtree(
-                              key: TypingPage.startKey,
-                              // Nothing to start yet: the readings come later (D71 Q3).
-                              child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
-                            ),
-                          ),
-                        ),
-                      ],
+                    ButtonRow(
+                      left: KeyedSubtree(
+                        key: TypingPage.saveKey,
+                        child: PlainButton(Lines.MP_13.text(appLanguage), icon: Icons.hotel, onPressed: _save),
+                      ),
+                      right: KeyedSubtree(
+                        key: TypingPage.startKey,
+                        // Nothing to start yet: the readings come later (D71 Q3).
+                        child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
+                      ),
                     ),
                     const SizedBox(height: StandIns.gap),
                   ],

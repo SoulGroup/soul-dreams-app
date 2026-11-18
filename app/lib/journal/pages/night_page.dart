@@ -1,15 +1,19 @@
 // Inside a night, not yet read (main-path.md, The Journal, designs 2 and
-// 3; P1, P6, P7; D58 Q1, Q4, Q8): the header (the date, or the name and
-// the date); the "⋯" menu top right, spoken as MP·39, holding only
-// "delete this night" (EM·11's second part), plain; one confirmation, the
-// phone's standard dialog, Cancel first and Delete destructive (MP·61,
-// MP·60, pending lines); the dreams under "Dreams" (MP·38), each opening
-// the typing screen to edit it; "Add dreams" (MP·29). A recording that
+// 3; P1, P6, P7; D58 Q1, Q4, Q8; head's message 20, items 10 to 12): the
+// header centred (the date, or the name and the date); the "⋯" menu top
+// right, a bordered pill opening the phone's menu, spoken as MP·39,
+// holding only "delete this night" (EM·11's second part), plain; one
+// confirmation, the phone's standard dialog, Cancel first and Delete
+// destructive (MP·61, MP·60, pending lines); the dreams under "Dreams"
+// (MP·38), in bubbles 30 from the screen's left edge and 10 from its
+// right (Spacing.bubbleDreamer), each opening the typing screen to edit
+// it; at the foot, "Add dreams" (MP·29) left and Start Interpretation
+// (EM·1) right, which does nothing yet (P3, as D71 Q3). A recording that
 // waits to be turned into text shows nothing in its place and cannot be
 // tapped; while it is being turned into text, AI·6 shows in its place,
 // heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
-// When its words come, the page shows them. Not built: naming, Start
-// Interpretation, and the space below the dreams.
+// When its words come, the page shows them. Not built: naming, reading,
+// and the space below the dreams with its field.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -35,6 +39,7 @@ class NightPage extends StatefulWidget {
   static const menuKey = Key('night-menu');
   static const deleteKey = Key('night-delete');
   static const addKey = Key('night-add');
+  static const startKey = Key('night-start');
   static const transcribingKey = Key('night-transcribing');
 
   final Journal journal;
@@ -146,83 +151,131 @@ class _NightPageState extends State<NightPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
+  // The "⋯" menu: a bordered pill (color.button) opening the phone's menu;
+  // while a delete runs, a tap opens nothing (D64).
+  Widget _menu(Palette p) => CupertinoMenuAnchor(
+    menuChildren: [
+      CupertinoMenuItem(
+        key: NightPage.deleteKey,
+        onPressed: _delete,
+        child: Text(Lines.EM_11.parts(appLanguage)[1]),
+      ),
+    ],
+    builder: (context, controller, _) => Tooltip(
+      message: Lines.MP_39.text(appLanguage),
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          key: NightPage.menuKey,
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            if (_busy) return;
+            controller.isOpen ? controller.close() : controller.open();
+          },
+          child: SizedBox(
+            width: StandIns.menuWidth,
+            height: StandIns.backSize,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [p.buttonTop, p.buttonBottom],
+                ),
+                borderRadius: BorderRadius.circular(StandIns.backSize / 2),
+                border: Border.all(color: p.buttonBorder),
+              ),
+              child: Icon(Icons.more_horiz, color: p.buttonText),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     final n = _night;
+    const side = EdgeInsets.symmetric(horizontal: StandIns.pageSide);
     return Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
+              padding: side,
               child: Row(
-              children: [
-                BackControl(onPressed: () => Navigator.of(context).pop()),
-                const Spacer(),
-                PopupMenuButton<int>(
-                  key: NightPage.menuKey,
-                  enabled: !_busy,
-                  tooltip: Lines.MP_39.text(appLanguage),
-                  icon: Icon(Icons.more_horiz, color: p.text),
-                  onSelected: (_) => _delete(),
-                  itemBuilder: (context) => [
-                    PopupMenuItem<int>(
-                      key: NightPage.deleteKey,
-                      value: 0,
-                      child: Text(Lines.EM_11.parts(appLanguage)[1], style: TypeRoles.button.style(p.text)),
-                    ),
-                  ],
-                ),
-              ],
+                children: [
+                  BackControl(onPressed: () => Navigator.of(context).pop()),
+                  const Spacer(),
+                  _menu(p),
+                ],
+              ),
             ),
-            ),
-            if (n != null)
+            if (n != null) ...[
               Expanded(
+                // The bubbles keep their own margins from the screen's edges
+                // (design-system.md §5); everything else keeps the page's.
                 child: ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
                   children: [
                     Padding(
-                      padding: Spacing.nightHeader,
+                      padding: Spacing.nightHeader.add(side),
                       child: Semantics(
                         header: true,
                         child: n.name == null
-                            ? Text(dayDigits(n.date), style: TypeRoles.h2.style(p.text))
+                            ? Text(dayDigits(n.date), textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text))
                             : Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  Text(n.name!, style: TypeRoles.h2.style(p.text)),
-                                  Text(dayDigits(n.date), style: TypeRoles.button.style(p.text)),
+                                  Text(n.name!, textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text)),
+                                  Text(
+                                    dayDigits(n.date),
+                                    textAlign: TextAlign.center,
+                                    style: TypeRoles.button.style(p.text),
+                                  ),
                                 ],
                               ),
                       ),
                     ),
-                    Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
+                    Padding(
+                      padding: side,
+                      child: Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
+                    ),
                     const SizedBox(height: StandIns.gap),
                     for (final (i, d) in n.entries.indexed)
                       if (d case Told(:final text)) ...[
                         DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
                         const SizedBox(height: StandIns.bubbleGap),
                       ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
-                        Semantics(
-                          key: NightPage.transcribingKey,
-                          liveRegion: true,
-                          child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                        Padding(
+                          padding: side,
+                          child: Semantics(
+                            key: NightPage.transcribingKey,
+                            liveRegion: true,
+                            child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                          ),
                         ),
                         const SizedBox(height: StandIns.bubbleGap),
                       ],
-                    const SizedBox(height: StandIns.gap),
-                    Center(
-                      child: KeyedSubtree(
-                        key: NightPage.addKey,
-                        child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
-                      ),
-                    ),
-                    const SizedBox(height: StandIns.gap),
                   ],
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(StandIns.pageSide, StandIns.gap, StandIns.pageSide, StandIns.gap),
+                child: ButtonRow(
+                  left: KeyedSubtree(
+                    key: NightPage.addKey,
+                    child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
+                  ),
+                  right: KeyedSubtree(
+                    key: NightPage.startKey,
+                    // Nothing to start yet: the readings come later (P3, as D71 Q3).
+                    child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
