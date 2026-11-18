@@ -464,12 +464,24 @@ void main() {
     expect(find.byType(NightPage), findsNothing);
   });
 
+  // D102 (2): the menu opens where it did, 8 below the 41 look, its right
+  // edge on the pill's, not 3 lower with the tap box.
+  testWidgets('the menu opens 8 below the look, on its right edge', (tester) async {
+    await open(tester);
+    final look = tester.getRect(find.byKey(NightPage.menuKey));
+    await openMenu(tester);
+    final item = tester.getRect(find.byType(CupertinoMenuItem));
+    expect(item.top - look.bottom, closeTo(8, 0.5));
+    expect(look.right - item.right, closeTo(0, 0.5));
+  });
+
   testWidgets('the back control and the pill: nothing moved', (tester) async {
     await open(tester);
     final back = find.byKey(BackControl.buttonKey);
     expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
     expect(tester.getSize(find.byKey(NightPage.menuKey)).height, StandIns.backSize);
     final top = tester.getTopLeft(back).dy;
+    expect(tester.getTopLeft(find.byKey(NightPage.menuKey)).dy, top);
     expect(tester.getTopLeft(find.text(dayDigits(n.date))).dy, closeTo(top + StandIns.backSize + Spacing.nightHeader.top, 1));
     await tester.tapAt(tester.getTopLeft(back) + const Offset(20, StandIns.hitMin - 1));
     await tester.pumpAndSettle();

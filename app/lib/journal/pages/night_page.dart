@@ -171,7 +171,11 @@ class _NightPageState extends State<NightPage> {
           behavior: HitTestBehavior.opaque,
           onTap: () {
             if (_busy) return;
-            controller.isOpen ? controller.close() : controller.open();
+            // The menu hangs from the look, as before the tap box grew: its
+            // right edge on the pill's, the framework's 8 below its foot (D102).
+            controller.isOpen
+                ? controller.close()
+                : controller.open(position: const Offset(StandIns.menuWidth, StandIns.backSize + 8));
           },
           // A tap box of at least 44 around the look, anchored to the top
           // (D102).

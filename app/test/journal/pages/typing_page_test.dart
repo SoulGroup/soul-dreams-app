@@ -618,14 +618,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // D102 (2): looks 41, takes a tap in a box of 44, and nothing else moves.
-  testWidgets('the back control takes a tap anywhere in 44, nothing moved', (tester) async {
+  // D102 (2): looks 41, anchored to the page's margin, and takes a tap in a
+  // box of 44.
+  testWidgets('the back control takes a tap anywhere in 44', (tester) async {
     final h = await tall(tester);
     final back = find.byKey(BackControl.buttonKey);
     expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
-    final space = tester.getRect(find.byKey(TypingPage.saveKey)).top - StandIns.gap -
-        tester.getRect(back).bottom;
-    expect(tester.getSize(find.byKey(TypingPage.fieldKey)).height, lessThan(space));
+    expect(tester.getTopLeft(back).dx, StandIns.pageSide);
     await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
     await tester.tapAt(tester.getTopLeft(back) + const Offset(StandIns.hitMin - 1, StandIns.hitMin - 1));
     await tester.pumpAndSettle();

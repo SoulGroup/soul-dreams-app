@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A273, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A274, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 302 run, 302 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 303 run, 303 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1346,6 +1346,10 @@ ROWS = [
      'alignment: Alignment.topCenter,',
      'alignment: Alignment.center,',
      'test/journal/pages/night_page_test.dart', 'the menu: a bordered pill, top right'),
+    ('A274', 'lib/journal/pages/night_page.dart',
+     'Offset(StandIns.menuWidth, StandIns.backSize + 8)',
+     'Offset(StandIns.menuWidth, StandIns.hitMin + 8)',
+     'test/journal/pages/night_page_test.dart', 'the menu opens 8 below the look, on its right edge'),
 ]
 
 

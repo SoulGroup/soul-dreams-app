@@ -178,10 +178,10 @@ and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recordin
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 437 tests, and 302 mutation checks (A1 to A273; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 438 tests, and 303 mutation checks (A1 to A274; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 302 run, 302 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 303 run, 303 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -643,6 +643,13 @@ Banked in recording:
      (the lean: leave it; the phone's own connection state could show it at once, a change to what the dreamer
      sees); (b) D97's "new night" is built as wherever a new Save would go, which is the open night if there is
      one (the lean: keep it, the case is a night vanishing while its page opens).
+116. The reviews of `journal-design` (D91; none changes what the dreamer sees beyond the rulings): the tap box of 44 is
+     layout, since Flutter's hit-testing is bounded by every ancestor, so the top row is 3 pt taller and `BelowTapBox`
+     overlaps what stands below it by the same 3 pt; a touch in that 3 pt strip under the controls' boxes (and the
+     strip's overlap with a scrolled list) reaches nothing but the two boxes; the controls' long-press tooltips
+     appear about 1.5 pt off where they did, since each wraps the 44 box; the menu's growth origin sits on the pill's
+     right edge (it opens at the look's attachment point by `controller.open(position:)`), not at its middle; on a
+     very short body (keyboard up with the largest text) the typing page overflows 3 pt sooner than before.
 
 ## Before Cohort 1
 
