@@ -170,6 +170,54 @@ class DreamBubble extends StatelessWidget {
   }
 }
 
+/// A thin chevron, drawn as two strokes, pointing right, or left when
+/// [left] (head's message 20, items 4 and 9). Heard as nothing.
+class Chevron extends StatelessWidget {
+  const Chevron({super.key, required this.colour, this.size = StandIns.rowChevron, this.left = false});
+
+  final Color colour;
+  final Size size;
+  final bool left;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: SizedBox.fromSize(
+      size: size,
+      child: CustomPaint(painter: _ChevronLine(colour, left)),
+    ),
+  );
+}
+
+class _ChevronLine extends CustomPainter {
+  _ChevronLine(this.colour, this.left);
+
+  final Color colour;
+  final bool left;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inset = StandIns.chevronStroke / 2;
+    final back = left ? size.width - inset : inset;
+    final tip = left ? inset : size.width - inset;
+    final path = Path()
+      ..moveTo(back, inset)
+      ..lineTo(tip, size.height / 2)
+      ..lineTo(back, size.height - inset);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = colour
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = StandIns.chevronStroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ChevronLine old) => old.colour != colour || old.left != left;
+}
+
 /// The back control, top left: an arrow whose spoken name is MP·14.
 class BackControl extends StatelessWidget {
   const BackControl({super.key, required this.onPressed});

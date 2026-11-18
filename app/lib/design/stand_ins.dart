@@ -4,14 +4,18 @@
 // Cohort 0. Every one is listed in docs/plans/journal-screens.md.
 import 'package:flutter/painting.dart';
 
-import 'tokens.g.dart';
-
 abstract final class StandIns {
-  /// The page's side margin.
-  static const double pageSide = 18;
+  /// The page's side margin (about 30, TO TRY: head's message 20, item 12).
+  static const double pageSide = 30;
 
-  /// The space between two journal rows.
-  static const double rowGap = 10;
+  /// The space between two journal rows (about 12, TO TRY: item 12).
+  static const double rowGap = 12;
+
+  /// The chevron at a row's trailing edge (item 4): its size, its line, and
+  /// the space before it.
+  static const rowChevron = Size(10, 18);
+  static const double chevronStroke = 2;
+  static const double chevronGap = 16;
 
   /// Inside a journal row.
   static const rowPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 20);
@@ -51,7 +55,4 @@ abstract final class StandIns {
   /// frames it draws (main-path.md, Recording; D71 Q7).
   static const double levelHeight = 24;
   static const int levelFrames = 48;
-
-  /// A row's summary: the dreamer's words (type role unset).
-  static const summary = TypeRoles.voiceDreamer;
 }

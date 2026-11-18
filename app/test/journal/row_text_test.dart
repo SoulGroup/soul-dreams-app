@@ -78,6 +78,8 @@ void main() {
   test('the date is day/month/year, with no time', () {
     expect(dayDigits((year: 2026, month: 3, day: 5)), '05/03/2026');
     expect(dayDigits((year: 2026, month: 12, day: 31)), '31/12/2026');
+    // Always the four-digit year (head's message 20, item 5).
+    expect(dayDigits((year: 2009, month: 1, day: 2)), '02/01/2009');
   });
 
   test('a divider: the month alone this year, month and year before', () {

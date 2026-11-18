@@ -7,8 +7,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/app.dart';
+import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/design/stand_ins.dart';
+import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
@@ -63,6 +66,19 @@ void main() {
     expect(find.byType(TextField), findsNothing);
   });
 
+  // Head's message 20, item 7: the empty journal's line in the button type,
+  // centred.
+  testWidgets("the empty journal's line: the button type, centred", (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final line = tester.widget<AppLine>(find.byType(AppLine));
+    expect(line.style.fontFamily, TypeRoles.button.family);
+    expect(line.style.fontSize, TypeRoles.button.size);
+    expect(line.textAlign, TextAlign.center);
+    final at = tester.getCenter(find.byType(AppLine));
+    expect(at.dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+  });
+
   testWidgets('rows newest first: the date, then the trimmed opening', (tester) async {
     final h = await Harness.make();
     final older = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
@@ -88,6 +104,63 @@ void main() {
     expect(find.text(monthDivider(2025, 10, 2026, Lang.en)), findsOneWidget);
     expect(find.text(monthDivider(2026, 6, 2026, Lang.en)), findsNothing);
     expect(monthDivider(2025, 10, 2026, Lang.en), endsWith(' 2025'));
+  });
+
+  // Head's message 20, item 5: the divider centred.
+  testWidgets('the month divider is centred', (tester) async {
+    final h = await Harness.make();
+    await keep(h, 'two-dreams-en', stockholm(2026, 5, 4, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final divider = find.text(monthDivider(2026, 5, 2026, Lang.en));
+    expect(tester.widget<Text>(divider).textAlign, TextAlign.center);
+    expect(tester.getCenter(divider).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+  });
+
+  // Item 1: the summary in the button type, #767676 on the white row; in
+  // the dark theme, color.text on the bubble gradient (design-system.md §3).
+  testWidgets("the summary: the button type, the summary's colour", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final light = tester.widget<Text>(find.text(opening(n)));
+    expect(light.style!.fontFamily, TypeRoles.button.family);
+    expect(light.style!.fontSize, TypeRoles.button.size);
+    expect(light.style!.color, LightColours.textSummary.colour);
+    await tester.pumpWidget(
+      SoulDreamsApp(key: UniqueKey(), home: JournalPage(journal: h.journal), clock: () => DateTime(2026, 6, 10, 22)),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.widget<Text>(find.text(opening(n))).style!.color, DarkColours.text.colour);
+  });
+
+  // Item 4: a chevron at each row's trailing edge, in the text's colour,
+  // centred on the row's height, heard as nothing; item 12: rows 30 from
+  // the screen's sides, 12 apart (TO TRY).
+  testWidgets("a chevron at each row's trailing edge", (tester) async {
+    final h = await Harness.make();
+    final older = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final chevrons = find.byType(Chevron);
+    expect(chevrons, findsNWidgets(2));
+    final row = find.ancestor(of: find.text(dayDigits(older.date)), matching: find.byType(Container)).first;
+    final chevron = find.descendant(of: row, matching: find.byType(Chevron));
+    final rowBox = tester.getRect(row);
+    final mark = tester.getRect(chevron);
+    expect(rowBox.right - mark.right, closeTo(StandIns.rowPadding.right, 1));
+    expect(mark.center.dy, closeTo(rowBox.center.dy, 1));
+    expect(mark.left, greaterThan(tester.getRect(find.text(opening(older))).right));
+    expect(tester.widget<Chevron>(chevron).colour, LightColours.text.colour);
+    final width = tester.getSize(find.byType(JournalPage)).width;
+    expect(rowBox.left, closeTo(StandIns.pageSide, 1));
+    expect(rowBox.right, closeTo(width - StandIns.pageSide, 1));
+    final rows = tester.widgetList<Container>(find.ancestor(of: find.byType(Chevron), matching: find.byType(Container)));
+    expect(rows, hasLength(2));
+    final tops = [for (final c in chevrons.evaluate()) tester.getRect(find.ancestor(of: find.byWidget(c.widget), matching: find.byType(Container)).first)];
+    expect(tops[1].top - tops[0].bottom, closeTo(StandIns.rowGap, 1));
+    final handle = tester.ensureSemantics();
+    expect(find.descendant(of: chevron, matching: find.byType(ExcludeSemantics)), findsOneWidget);
+    handle.dispose();
   });
 
   testWidgets('a named night shows its name, then its date', (tester) async {

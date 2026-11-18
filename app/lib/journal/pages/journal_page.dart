@@ -110,7 +110,8 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
-                  child: AppLine(Lines.C4_P_5.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                  // In the button type, centred (head's message 20, item 7).
+                  child: AppLine(Lines.C4_P_5.text(appLanguage), style: TypeRoles.button.style(p.text)),
                 ),
               ),
             if (nights != null && nights.isNotEmpty)
@@ -146,6 +147,9 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   }
 }
 
+// Three empty lines: the summary's least height, as laid out.
+const _threeLines = '\n\n';
+
 class _Divider extends StatelessWidget {
   const _Divider(this.text);
 
@@ -154,13 +158,19 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(top: StandIns.dividerAbove, bottom: StandIns.dividerBelow),
-    child: Semantics(header: true, child: Text(text, style: TypeRoles.h4.style(Palette.of(context).text))),
+    // Centred (head's message 20, item 5).
+    child: Semantics(
+      header: true,
+      child: Text(text, textAlign: TextAlign.center, style: TypeRoles.h4.style(Palette.of(context).text)),
+    ),
   );
 }
 
 /// A night's row: an unnamed night's date (h3), or a named night's name
 /// (h5) with its date under it in the button style; then the opening,
-/// always three lines (C10-P; D58 Q7).
+/// always three lines, in the button type in color.text.summary (C10-P;
+/// D58 Q7; head's message 20, item 1); a chevron at its trailing edge
+/// (item 4).
 class _Row extends StatelessWidget {
   const _Row(this.night, {required this.onTap});
 
@@ -170,9 +180,16 @@ class _Row extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
-    final summary = StandIns.summary.style(p.summary);
+    final summary = TypeRoles.button.style(p.summary);
     final name = night.name;
-    final lines = MediaQuery.textScalerOf(context).scale(summary.fontSize!) * summary.height! * 3;
+    // Three lines as laid out, which rounds each line's height.
+    final three = TextPainter(
+      text: TextSpan(text: _threeLines, style: summary),
+      textDirection: TextDirection.ltr,
+      textScaler: MediaQuery.textScalerOf(context),
+    )..layout();
+    final lines = three.height;
+    three.dispose();
     return Padding(
       padding: const EdgeInsets.only(bottom: StandIns.rowGap),
       child: GestureDetector(
@@ -180,20 +197,28 @@ class _Row extends StatelessWidget {
         child: Container(
           decoration: surface(p),
           padding: StandIns.rowPadding,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              if (name == null)
-                Text(dayDigits(night.date), style: TypeRoles.h3.style(p.text))
-              else ...[
-                Text(name, style: TypeRoles.h5.style(p.text)),
-                Text(dayDigits(night.date), style: TypeRoles.button.style(p.text)),
-              ],
-              const SizedBox(height: 8),
-              ConstrainedBox(
-                constraints: BoxConstraints(minHeight: lines),
-                child: Text(opening(night), maxLines: 3, overflow: TextOverflow.ellipsis, style: summary),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (name == null)
+                      Text(dayDigits(night.date), style: TypeRoles.h3.style(p.text))
+                    else ...[
+                      Text(name, style: TypeRoles.h5.style(p.text)),
+                      Text(dayDigits(night.date), style: TypeRoles.button.style(p.text)),
+                    ],
+                    const SizedBox(height: 8),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: lines),
+                      child: Text(opening(night), maxLines: 3, overflow: TextOverflow.ellipsis, style: summary),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: StandIns.chevronGap),
+              Chevron(colour: p.text),
             ],
           ),
         ),
