@@ -19,6 +19,11 @@
 // is copied to a file with the later start, which then replaces it. At
 // open, audio no night names is deleted, and so is an older copy left by
 // a cut that did not finish.
+//
+// The dreamer's consent (D103) is kept here too, once given in onboarding:
+// one small file saying only that the dreamer agreed and is 18 or over,
+// never the age band (C146-I item 1). Deleting the journal takes it, and
+// so does a withdrawal, and either returns the app to its start.
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -49,6 +54,10 @@ final class JournalStore {
   /// Kept once the recording screen's first-use line has been met
   /// (MP·10, then MP·32); removed with the journal (D49 c, O6).
   static const firstUseFlag = 'first-use-seen';
+
+  /// Kept once the dreamer has agreed to the disclosure, as one 18 or over
+  /// (D103); removed with the journal, or by a withdrawal (D103 item 4).
+  static const consentFile = 'consent.json';
 
   // The one queue (D54): each operation starts when the one before it,
   // whether it succeeded or failed, has finished. No operation calls
@@ -148,10 +157,13 @@ final class JournalStore {
   /// fails, its temporary file is removed before the failure is passed on.
   Future<void> save(Night night) => _run(() => _save(night));
 
-  Future<void> _save(Night night) async {
-    final name = fileOf(night.id);
+  Future<void> _save(Night night) => _whole(fileOf(night.id), encodeNight(night));
+
+  // Writes [bytes] to a temporary file and renames it to [name], so the
+  // folder holds one whole version or the one before.
+  Future<void> _whole(String name, Uint8List bytes) async {
     try {
-      await _files.write(tempPrefix + name, encodeNight(night));
+      await _files.write(tempPrefix + name, bytes);
       await _files.rename(tempPrefix + name, name);
     } on Object {
       try {
@@ -270,4 +282,28 @@ final class JournalStore {
   Future<bool> firstUseSeen() => _run(() async => (await _files.list()).contains(firstUseFlag));
 
   Future<void> markFirstUseSeen() => _run(() => _files.write(firstUseFlag, Uint8List(0)));
+
+  /// Whether the dreamer has agreed, as one 18 or over: the file holds
+  /// exactly that, or it is no consent and onboarding asks again.
+  Future<bool> consented() => _run(() async {
+    final bytes = await _files.read(consentFile);
+    if (bytes == null) return false;
+    try {
+      final json = jsonDecode(utf8.decode(bytes));
+      return json is Map<String, dynamic> && json.length == 2 && json['version'] == 1 && json['over18'] == true;
+    } on FormatException {
+      return false;
+    }
+  });
+
+  /// Keeps the consent: that the dreamer agreed, and is 18 or over.
+  Future<void> keepConsent() =>
+      _run(() => _whole(consentFile, utf8.encode(jsonEncode(const {'version': 1, 'over18': true}))));
+
+  /// Removes the consent, and any temporary file of its keeping; the
+  /// nights stay (D103 item 4).
+  Future<void> withdrawConsent() => _run(() async {
+    await _files.delete(consentFile);
+    await _files.delete(tempPrefix + consentFile);
+  });
 }

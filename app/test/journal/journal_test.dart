@@ -34,6 +34,36 @@ void main() {
 
   tearDown(() => dir.deleteSync(recursive: true));
 
+  // D103 item 4: the consent kept, withdrawn or deleted with the journal;
+  // each going is told once, so the app returns to its start.
+  test('withdrawing the consent keeps every night, and is told', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    var told = 0;
+    journal.consentGone.addListener(() => told++);
+    expect(await journal.consented(), isFalse);
+    await journal.keepConsent();
+    expect(await journal.consented(), isTrue);
+    expect(told, 0);
+    await journal.withdrawConsent();
+    expect(await journal.consented(), isFalse);
+    expect(told, 1);
+    expect((await journal.newestFirst()).single.dreams, [a[0]]);
+  });
+
+  test('deleting the journal takes the consent and every night, told', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    await journal.keepConsent();
+    await journal.markFirstUseSeen();
+    var told = 0;
+    journal.consentGone.addListener(() => told++);
+    await journal.deleteAll();
+    expect(told, 1);
+    expect(await journal.consented(), isFalse);
+    expect(await journal.firstUseSeen(), isFalse);
+    expect(await journal.newestFirst(), isEmpty);
+    expect(files.everything(), isEmpty);
+  });
+
   // D93 Q2: a dream's index counts waiting recordings too, and a waiting
   // one is never edited; a night left with only one stays.
   test('an edit counts waiting dreams, and never replaces one', () async {

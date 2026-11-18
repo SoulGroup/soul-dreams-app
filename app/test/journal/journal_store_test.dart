@@ -421,6 +421,89 @@ void main() {
     expect(await store.firstUseSeen(), isFalse);
   });
 
+  // D103; docs/workflow.md (c): the consent sits beside the nights, holds
+  // only that the dreamer is 18 or over (C146-I item 1), changes no night,
+  // the first-use flag or any audio, and survives the sweep at open.
+  test('the consent is kept beside the nights, changing none of them', () async {
+    final store = await JournalStore.open(files);
+    final nights = nightsFromFixtures();
+    for (final n in nights) {
+      await store.save(n);
+    }
+    final x = '1' * 32;
+    await store.save(nights.first.withEntries([...nights.first.entries, Waiting(x)]));
+    await store.appendAudio(x, sound(64));
+    await store.markFirstUseSeen();
+    final before = files.everything();
+    expect(await store.consented(), isFalse);
+    await store.keepConsent();
+    expect(await store.consented(), isTrue);
+    final reopened = await JournalStore.open(files);
+    expect(await reopened.consented(), isTrue);
+    final after = files.everything();
+    expect(after.keys.toSet(), {...before.keys, JournalStore.consentFile});
+    before.forEach((name, bytes) => expect(listEquals(after[name], bytes), isTrue, reason: name));
+    expect(jsonDecode(utf8.decode(after[JournalStore.consentFile]!)), {'version': 1, 'over18': true});
+    expect((await reopened.nights()).length, nights.length);
+    expect(lines, isEmpty);
+  });
+
+  test('an unreadable consent file is no consent; agreeing replaces it', () async {
+    final store = await JournalStore.open(files);
+    for (final bad in [
+      '',
+      'x',
+      '[]',
+      '{}',
+      '{"version":1}',
+      '{"over18":true}',
+      '{"version":1,"over18":false}',
+      '{"version":2,"over18":true}',
+      '{"version":1,"over18":true,"x":1}',
+    ]) {
+      await files.write(JournalStore.consentFile, utf8.encode(bad));
+      expect(await store.consented(), isFalse, reason: bad);
+    }
+    await files.write(JournalStore.consentFile, Uint8List.fromList([0xff, 0xfe]));
+    expect(await store.consented(), isFalse);
+    await store.keepConsent();
+    expect(await store.consented(), isTrue);
+  });
+
+  test('a consent cut short leaves no consent and no temporary file', () async {
+    final store = await JournalStore.open(BrokenRename(files.dir));
+    await expectLater(store.keepConsent(), throwsA(isA<FileSystemException>()));
+    expect(files.everything(), isEmpty);
+    expect(await store.consented(), isFalse);
+  });
+
+  // D103 item 4: withdrawing removes the consent alone; deleting the journal
+  // takes it with everything else.
+  test('withdrawing the consent removes it alone', () async {
+    final store = await JournalStore.open(files);
+    for (final n in nightsFromFixtures()) {
+      await store.save(n);
+    }
+    await store.markFirstUseSeen();
+    final before = files.everything();
+    await store.keepConsent();
+    await files.write('${JournalStore.tempPrefix}${JournalStore.consentFile}', utf8.encode('x'));
+    await store.withdrawConsent();
+    expect(await store.consented(), isFalse);
+    final after = files.everything();
+    expect(after.keys.toSet(), before.keys.toSet());
+    before.forEach((name, bytes) => expect(listEquals(after[name], bytes), isTrue, reason: name));
+  });
+
+  test('deleting the journal takes the consent', () async {
+    final store = await JournalStore.open(files);
+    await store.save(nightsFromFixtures().first);
+    await store.keepConsent();
+    await store.deleteAll();
+    expect(await store.consented(), isFalse);
+    expect(files.everything(), isEmpty);
+  });
+
   test('a malformed id is refused before any file is named', () {
     expect(() => JournalStore.fileOf('../x'), throwsArgumentError);
     expect(() => IoJournalFiles(dir).read('../x'), throwsArgumentError);

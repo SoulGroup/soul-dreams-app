@@ -6,13 +6,16 @@
 // - An edit replaces a dream's text. An emptied dream disappears and the
 //   night's other dreams remain (D58 Q3); a night left with no dream is
 //   deleted, as a deletion deletes it (P10).
+// - The consent (D103) is kept, read and withdrawn here; when it goes,
+//   withdrawn or deleted with the journal, `consentGone` tells the app,
+//   which returns to its start (D103 item 4).
 // - A dream is told in words or waits as a recording (D93 Q2); a dream's
 //   index counts both, and a waiting one is never edited. A Save puts the
 //   recordings its screen left waiting after its words, in order; a Save
 //   with nothing typed but a recording waiting keeps it (D93 Q7).
 import 'dart:math';
 
-import 'package:flutter/foundation.dart' show listEquals;
+import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier, listEquals;
 
 import '../words/lines.g.dart' show Lang;
 import 'journal_store.dart';
@@ -117,4 +120,29 @@ final class Journal {
   Future<bool> firstUseSeen() => _store.firstUseSeen();
 
   Future<void> markFirstUseSeen() => _store.markFirstUseSeen();
+
+  /// Whether the dreamer has agreed to the disclosure, as one 18 or over.
+  Future<bool> consented() => _store.consented();
+
+  /// Keeps the consent given in onboarding (D103).
+  Future<void> keepConsent() => _store.keepConsent();
+
+  /// Moves on each time the consent goes, withdrawn or deleted with the
+  /// journal: the app returns to its start (D103 item 4).
+  ValueListenable<int> get consentGone => _consentGone;
+  final _consentGone = ValueNotifier<int>(0);
+
+  /// Withdraws the consent; the nights stay. Then the app returns to its
+  /// start (D103 item 4).
+  Future<void> withdrawConsent() async {
+    await _store.withdrawConsent();
+    _consentGone.value++;
+  }
+
+  /// Deletes the whole journal, the consent and the first-use flag with it
+  /// (X11; D54). Then the app returns to its start (D103 item 4).
+  Future<void> deleteAll() async {
+    await _store.deleteAll();
+    _consentGone.value++;
+  }
 }
