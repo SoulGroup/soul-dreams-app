@@ -1,7 +1,8 @@
 // Night/Day mode, Automatic (design-system.md §6; main-path.md, Settings;
 // P14; D56): dark from 21:00, light from 08:00, by the phone's local time
-// now. A change found while the app is open fades over five seconds; with
-// the phone's Reduce Motion on, or animations disabled, it is instant. A
+// now. A change found while the app is open fades over five seconds,
+// easing in and out (head's message 20, item 13); with the phone's Reduce
+// Motion on, or animations disabled, it is instant. A
 // change found at start or on returning to the app is instant (D57 Q15).
 // On iOS, Reduce Motion is its own flag, which MediaQuery does not carry,
 // so it is read from the platform's accessibility features. There is no

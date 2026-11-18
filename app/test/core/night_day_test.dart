@@ -50,6 +50,20 @@ void main() {
     expect(pageOf(tester), light);
   });
 
+  // Head's message 20, item 13: the fade eases in and out.
+  testWidgets('the fade eases in and out', (tester) async {
+    var now = DateTime(2026, 6, 10, 20, 59, 30);
+    await tester.pumpWidget(SoulDreamsApp(clock: () => now));
+    now = DateTime(2026, 6, 10, 21, 0, 30);
+    await tester.pump(NightDay.tick);
+    await tester.pump(const Duration(seconds: 1));
+    expect(pageOf(tester), Color.lerp(light, dark, Curves.easeInOut.transform(0.2)));
+    await tester.pump(const Duration(seconds: 3));
+    expect(pageOf(tester), Color.lerp(light, dark, Curves.easeInOut.transform(0.8)));
+    await tester.pump(const Duration(seconds: 2));
+    expect(pageOf(tester), dark);
+  });
+
   testWidgets('with Reduce Motion the change is instant', (tester) async {
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(reduceMotion: true);
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);

@@ -29,7 +29,9 @@ class SoulDreamsApp extends StatelessWidget {
         darkTheme: themeFor(Brightness.dark),
         themeMode: mode,
         themeAnimationDuration: fade,
-        themeAnimationCurve: Curves.linear,
+        // A gentle ease-in-out over the five seconds (head's message 20,
+        // item 13).
+        themeAnimationCurve: Curves.easeInOut,
         locale: Locale(appLanguage.name),
         supportedLocales: const [Locale('en'), Locale('sv')],
         localizationsDelegates: GlobalMaterialLocalizations.delegates,
