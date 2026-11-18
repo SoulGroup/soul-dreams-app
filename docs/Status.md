@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-18, in branch `journal-design` (the plan's Tasks 1 to 7, the review fixes and D102; the owner's by-eye review passed; waiting for the merge), by Claude Code.
+Last updated: 2026-11-19, in branch `onboarding` (the plan's Tasks 1 to 6; the owner's by-eye review, Task 7, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,15 +14,16 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`journal-design`: the journal design pass in SoulDreams Dev (head's message 20, Product message 19, items 1, 3 to 5, 7
-and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recording shows MP·54 at once). Plan:
-`docs/plans/journal-design.md`. The night's page's floating field comes with the readings (D101).
+`onboarding`: onboarding in SoulDreams Dev (D103): the welcome, the founder's note, the age question, the disclosure's
+first layer with one consent, the disclosure and privacy page, and the first empty journal; the consent kept on the
+phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.md`.
 
 ## Road ahead
 
-- The merge of `journal-design`. The owner's by-eye review (the plan's Task 8) passed; his verdicts for Product: the
-  growing pill field is good as built, and so are the spacings (30, 20, 12). The night's page's floating field comes
-  with the readings (D101).
+- The owner's by-eye review of `onboarding` (the plan's Task 7), then its merge. Product's answers to the plan's Part 4
+  come back through the head.
+- Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1), once the pending lines are filed
+  (and, for the founder app, with his export).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
   URL (head's message 14; whether eu-north-1 has it is checked first).
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -153,6 +154,22 @@ and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recordin
   the menu's pill look 41 and take a tap in a box of 44 (`StandIns.hitMin`, D102), their looks anchored to the row's top
   and the page's margin; what stands below starts where the looks end (`BelowTapBox`), so nothing moved. A tap outside
   the open menu only closes it (D102).
+- Onboarding (D103; `app/lib/onboarding/`, SoulDreams Dev only): `JournalHome` opens the folder, reads the consent,
+  and shows onboarding until it is given, holding the whole app in the light theme, the cover included
+  (`core/always_light.dart`). The steps: MP·2 into the wordmark (h1) and MP·3; MP·4 and MP·5; C4-P·2 with MP·6's seven
+  bands in a dropdown (MP·50), Next inert until one is chosen; under 18, EM·5 and MP·31 on one card, which stays
+  (MP·31 changes nothing) and nothing is kept; the disclosure's first page (W27·1, W27·2, W27·5, W27·13, then MP·30)
+  and its consent page (W27·14, W27·15, W27·17, MP·57, MP·58, MP·59, then EM·6 left and MP·8 right); EM·6 back to
+  the first page; MP·58 opens the disclosure and privacy page (every part, W27·1 to W27·17, in order), whose back
+  control returns to the consent. "I agree" keeps `consent.json` in the journal's folder (`{"version":1,"over18":true}`,
+  written whole and renamed; never the band), then the journal opens: the first time, its empty state adds MP·9 and a
+  drawn arrow to the record button, once. The recording and its retries start only then. A consent that cannot be
+  read or kept logs `consentReadFailed` or `consentKeepFailed`; onboarding asks again at the next opening. When the
+  consent goes (`Journal.withdrawConsent`, or `Journal.deleteAll`, which takes it with every file), every page closes
+  and onboarding starts again; no control calls either yet (Settings, P8; the plan's question 3). Parts to rewrite
+  show their handles: `[W27·2]` and `[W27·17]` in onboarding, also `[W27·3]`, `[W27·6]` and `[W27·10]` on the page.
+  The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
+  `arrowGap`); no logo and no drawn signature (none filed).
 - The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
   both 120, the radius half the height; large text shrinks its words, never the circle.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
@@ -178,10 +195,10 @@ and 9 to 13; the spacings TO TRY), and D100 (a connection lost during a recordin
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 438 tests, and 303 mutation checks (A1 to A274; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 469 tests, and 331 mutation checks (A1 to A302; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 303 run, 303 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 331 run, 331 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -651,6 +668,18 @@ Banked in recording:
      right edge (it opens at the look's attachment point by `controller.open(position:)`), not at its middle; on a
      very short body (keyboard up with the largest text) the typing page overflows 3 pt sooner than before.
 
+Banked in onboarding (the plan's decisions; none changes what the dreamer sees beyond D103):
+
+117. The consent is not asked again when the disclosure changes (the W27 rewrites before Cohort 1): the plan's question
+     7. The file's format may change freely until it reaches the founder app (D49 O5).
+118. Nothing on screen withdraws the consent or deletes the journal yet: both wait for Settings (P8) and, for the
+     withdrawal, a place from Product (the plan's question 3). Their effect is built and tested.
+119. The founder's logo (onboarding's first step and the first empty journal) and his drawn signature and smiley
+     (the note) are not built: no file is filed (the handover §11). The note's signature is MP·5's words.
+120. MP·6's seven labels are parted at "; ", a separator the handover §4 does not name; MP·2's Swedish has no
+     paragraph break, so in Swedish it shows whole with no wordmark; MP·4's Swedish is shorter than its English (the
+     plan's question 9). English only is shown (D57 Q12).
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -692,8 +721,9 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   owner in Task 9b.
 - MP·63 (the microphone refused) and MP·64 (the stop control's spoken name), head's message 21 (Product message 20),
   founder-approved; built in `offline-recording`.
-- W27·5's privacy-page text (head's message 16) waits for the disclosure and privacy page, under Settings; it is not
-  in the pending file.
+- W27·5's privacy-page text (head's message 16) shares the filed handle W27·5, so it cannot be a pending line under
+  it: Product files it, or gives it a new handle (D103 item 3; the plan's question 1). Until then the page shows
+  W27·5 as filed at C16-P.
 
 ## Rulings during branch 2
 
@@ -919,6 +949,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   control keep their look at 41 pt and each get an invisible tap box of at least 44 pt (Apple's minimum). The owner's
   by-eye review of the branch passed, and matches his design; his verdicts for Product: the growing pill field and the
   spacings (30 / 20 / 12) are good as built.
+
+## Rulings during onboarding
+
+- D103 (owner, the brainstorm): (1) SoulDreams Dev only; the founder and tester apps a later, separate ruling;
+  (2) the age band kept on the phone only and never sent, under 18 refused with EM·5; (3) the disclosure as filed at
+  C16-P, W27·5's rewrite to Product; (4) the consent kept on the phone; withdrawing it, or deleting the journal,
+  returns to the start.
 
 ## Documents as last imported
 
