@@ -218,6 +218,33 @@ void main() {
     expect(frames(links.last).first, sound(3200, 6400));
   });
 
+  // The connection going in the middle of a retry cuts it, as leaving does:
+  // no pacing of audio into a dead socket, AI·6 gone, progress kept; its
+  // return starts the retry again from the cut.
+  test('the connection going in a retry cuts it, keeps progress, resumes', () async {
+    await waits(first, [Waiting(x)], {x: 32000});
+    audio
+      ..open = 4
+      ..gate = Completer<void>();
+    final r = retries();
+    r.kick();
+    await pumpEventQueue();
+    links.single.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 300));
+    await pumpEventQueue();
+    connection.set(false);
+    audio.gate!.complete();
+    await pumpEventQueue();
+    expect(links.single.closed, isTrue);
+    expect(r.transcribing, isNull);
+    expect(await entries(first), [Told(tokens[0].trimLeft()), Waiting(x, 9600)]);
+    expect(lines, ['retryStarted', 'retryCut 9600 300']);
+    audio.open = 1 << 30;
+    connection.set(true);
+    await pumpEventQueue();
+    expect(links, hasLength(2));
+    expect(frames(links.last).first, sound(3200, 9600));
+  });
+
   test('no key: nothing changes, a code; the next chance tries again', () async {
     await waits(first, [Waiting(x)], {x: 3200});
     key = () async => throw const KeyFailure(502);

@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A238, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A241, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 267 run, 267 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 270 run, 270 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -987,8 +987,8 @@ ROWS = [
      'final due = Duration.zero - clock.elapsed;',
      'test/recording/retries_test.dart', 'the audio goes at real-time pace'),
     ('A185', 'lib/recording/retries.dart',
-     '      if (online) kick();',
-     '      if (online) {}',
+     '      if (online) {\n        kick();\n',
+     '      if (online) {\n',
      'test/recording/retries_test.dart', 'a broken stream keeps the progress, and waits for a chance'),
     ('A186', 'lib/recording/retries.dart',
      '    _away = true;\n    _cut();',
@@ -1122,7 +1122,7 @@ ROWS = [
     ('A219', 'lib/recording/retries.dart',
      '        if (!(_recording.connection?.online ?? true)) break;\n',
      '',
-     'test/recording/retries_test.dart', 'connection going in a run: no key asked for the rest'),
+     'test/recording/retries_test.dart', 'offline, no retry and no AI·6; the connection returning starts it'),
     ('A220', 'lib/recording/recording.dart',
      '      _handOn(last: true);\n      await _written;\n      if (!_keepFailed) {',
      '      _handOn(last: true);\n      if (!_keepFailed) {',
@@ -1202,6 +1202,20 @@ ROWS = [
      "const _markers = {'<fin>', '<end>'};",
      "const _markers = {'<fin>'};",
      'test/recording/soniox_test.dart', 'the <end> token is dropped, final or not, among the words'),
+    # The final review (A239 to A241): the connection going cuts a retry; a night that does not
+    # read keeps its audio, a night truly gone loses it.
+    ('A239', 'lib/recording/retries.dart',
+     '        kick();\n      } else {\n        _cut();\n      }',
+     '        kick();\n      }',
+     'test/recording/retries_test.dart', 'the connection going in a retry cuts it, keeps progress, resumes'),
+    ('A240', 'lib/journal/journal_audio.dart',
+     'if (landed || !await _store.hasNightFile(pending.night)) await',
+     'if (true) await',
+     'test/journal/journal_audio_test.dart', 'unreadable night keeps its audio; a gone night loses it'),
+    ('A241', 'lib/journal/journal_audio.dart',
+     'if (landed || !await _store.hasNightFile(pending.night)) await',
+     'if (landed) await',
+     'test/journal/journal_audio_test.dart', 'unreadable night keeps its audio; a gone night loses it'),
 ]
 
 

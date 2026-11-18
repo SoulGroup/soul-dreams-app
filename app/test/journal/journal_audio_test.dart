@@ -52,6 +52,24 @@ void main() {
     expect(files.everything().keys, [JournalStore.fileOf(night.id)]);
   });
 
+  // D49 c, decision 3: audio a night still names is not deleted because that
+  // night's file stopped reading; a night truly gone loses its audio.
+  test('unreadable night keeps its audio; a gone night loses it', () async {
+    final store = await JournalStore.open(files);
+    final keep = JournalAudio(store);
+    final night = nightsFromFixtures().first;
+    final x = '1' * 32;
+    await store.save(night.withEntries([Waiting(x)]));
+    await keep.add(x, Uint8List(6400), last: true);
+    final name = JournalStore.fileOf(night.id);
+    await files.write(name, Uint8List.fromList([1, 2, 3]));
+    await keep.heard((night: night.id, audio: x, from: 0), 'words', 3200, done: false);
+    expect(files.everything().keys, containsAll([name, JournalStore.audioOf(x, 0)]));
+    await files.delete(name);
+    await keep.heard((night: night.id, audio: x, from: 0), 'words', 3200, done: false);
+    expect(files.everything(), isEmpty);
+  });
+
   // D98: a line for DevTools, numbers only (R3): the audio files in the
   // folder, then the recordings its nights name as waiting.
   test('the counts line: audio files, then waiting recordings', () async {

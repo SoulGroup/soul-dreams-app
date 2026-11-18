@@ -62,7 +62,7 @@ final class JournalAudio implements AudioKeep, WaitingAudio {
   Future<void> heard(Pending pending, String words, int to, {required bool done}) async {
     final text = words.trimLeft();
     var found = false;
-    await _store.update(pending.night, (n) {
+    final landed = await _store.update(pending.night, (n) {
       final i = n.entries.indexWhere((e) => e is Waiting && e.audio == pending.audio);
       if (i < 0) return n;
       found = true;
@@ -71,7 +71,9 @@ final class JournalAudio implements AudioKeep, WaitingAudio {
       return entries.isEmpty ? null : n.withEntries(entries);
     });
     if (done || !found) {
-      await _store.discardAudio(pending.audio);
+      // A night that is there but does not read keeps the audio it names; a
+      // damaged night is never touched (D49 c).
+      if (landed || !await _store.hasNightFile(pending.night)) await _store.discardAudio(pending.audio);
     } else {
       await _store.cutAudio(pending.audio, to);
     }

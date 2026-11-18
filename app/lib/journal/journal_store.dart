@@ -217,6 +217,9 @@ final class JournalStore {
     return (files: _audio(names).length, waiting: waiting);
   });
 
+  /// Whether night [id]'s file is in the folder, however it reads.
+  Future<bool> hasNightFile(String id) => _run(() async => await _files.size(fileOf(id)) != null);
+
   /// What is left of recording [id], or null when nothing is.
   Future<AudioPart?> audioPart(String id) => _run(() => _part(id));
 

@@ -52,7 +52,13 @@ const retryFrame = bytesPerSecond ~/ 10;
 final class Retries extends ChangeNotifier {
   Retries(this._recording, this._audio, {this.pace = 1, this.wait = const Duration(seconds: 10)}) {
     _changes = _recording.connection?.changes.listen((online) {
-      if (online) kick();
+      // The connection going cuts a retry as leaving does, its progress kept;
+      // it would only pace audio into a dead socket, with AI·6 untrue.
+      if (online) {
+        kick();
+      } else {
+        _cut();
+      }
     });
   }
 

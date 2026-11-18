@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-18, in branch `offline-recording` (its plan's Task 9), by Claude Code.
+Last updated: 2026-11-18, in branch `offline-recording` (the plan's Tasks 1 to 9, the phone checks' fixes D97 to D99, and the final review's fixes; waiting for the owner's last by-eye checks and the merge), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -167,10 +167,10 @@ AI·6; the night's file at version 2 (an on-phone storage change, `docs/workflow
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 408 tests, and 267 mutation checks (A1 to A238; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 410 tests, and 270 mutation checks (A1 to A241; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 267 run, 267 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 270 run, 270 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -616,6 +616,20 @@ Banked in recording:
      (nothing is printed); no vanished-night test for leaving the app, nor for an edit with a recording waiting.
      Phone check 6's missing MP·54 is fixed (a stop that waits in vain for the last words says so, with the audio
      kept, and it stays until the next tap).
+114. The final review of `offline-recording` (D91): fixed, a retry now stops when the connection goes (it kept pacing
+     audio into a dead socket, with AI·6 shown), and the audio of a night whose file stopped reading is no longer
+     deleted by a retry's words (only a night truly gone loses it). Banked: an edit finds its moved dream by its
+     words and then the nearest equal one, but cannot tell two dreams with identical words apart when a cut put
+     words before them (the screen would have to pass the dream's place among its equals); a failed cut leaves its
+     `.tmp-audio-` copy until the next open's sweep (up to 19.2 MB; a deletion still removes it); no mutation rows
+     for the night page's and the journal page's reload on words, `release()`, `copyTail`, `rename` and `_part`
+     (their tests catch each); the D99 re-review's notes (a reply of markers alone leaves the shown
+     words as they were; the first word after a pause is assumed to carry its own space).
+115. Open questions for the owner from the final review (the leans in brackets): (a) a connection that drops during a
+     live recording is shown as MP·54 only at Stop, after the five-second wait, since the stream gives no sign
+     (the lean: leave it; the phone's own connection state could show it at once, a change to what the dreamer
+     sees); (b) D97's "new night" is built as wherever a new Save would go, which is the open night if there is
+     one (the lean: keep it, the case is a night vanishing while its page opens).
 
 ## Before Cohort 1
 
@@ -862,10 +876,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   retry offline, an edit finding its dream by where it was) approved.
 - D97 (owner, 2026-11-18): a Save into a night that is gone goes into a new night. (Task 10's checks: 1 to 3, 5, 8,
   9, 11, 12 and 13 passed; 4 failed on the connection watcher, built before the bindings existed, now fixed.)
-- D99 (owner, 2026-11-18): Soniox's endpoint detection on, with Soniox's defaults for its delay, sensitivity and
-  latency; `<end>` tokens never shown (as D73). From then on the owner's checks are by eye only, with no DevTools.
 - D98 (owner, 2026-11-18): the VoiceOver checks wait for one full pass when the app is complete; container downloads
   are dropped; SoulDreams Dev logs `journalAudio <files> <waiting>` (numbers only) at launch and after each retry.
+- D99 (owner, 2026-11-18): Soniox's endpoint detection on, with Soniox's defaults for its delay, sensitivity and
+  latency; `<end>` tokens never shown (as D73). From then on the owner's checks are by eye only, with no DevTools.
 
 ## Documents as last imported
 
