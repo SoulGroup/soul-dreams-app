@@ -195,10 +195,10 @@ phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 469 tests, and 331 mutation checks (A1 to A302; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 471 tests, and 333 mutation checks (A1 to A304; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 331 run, 331 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 333 run, 333 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -679,6 +679,21 @@ Banked in onboarding (the plan's decisions; none changes what the dreamer sees b
 120. MP·6's seven labels are parted at "; ", a separator the handover §4 does not name; MP·2's Swedish has no
      paragraph break, so in Swedish it shows whole with no wordmark; MP·4's Swedish is shorter than its English (the
      plan's question 9). English only is shown (D57 Q12).
+121. The Opus review of Tasks 1 to 4 (D91). Fixed in their own commits: a second "I agree" landing before onboarding
+     left the tree opened the journal twice and left a retry engine nobody stopped (`_agreeing` stays set once
+     agreed, and `_onboard` resets it; rows A303 and A304); `main_dev.dart`'s header. Banked (constructed sequences or
+     unreachable today): `JournalHome` removed while onboarding shows leaves the app held light (it is the permanent
+     home); the consent's reader also accepts `"version":1.0`, another key order or whitespace (only our own writer
+     makes the file); `consentGone` ticks only when a withdrawal or delete-all finishes, so a delete-all that throws
+     partway can leave the journal running until the next opening (no control calls it yet); a Save in flight while
+     the consent goes could pop the first route or write its night back into the deleted folder (neither reachable
+     before Settings); the onboarding test "I agree is told once" taps once, the guard being `JournalHome`'s (A297,
+     A303). The re-review of the fix found no defect; its notes: the consent going while a keep is in flight would reset
+     the guard (nothing a dreamer can do reaches it), and the second-tap test checks the streams two pumps after the
+     tap (A303 is caught as written).
+122. OPEN, for the owner: at night the page shown while the folder opens and the consent is read (a blank `Scaffold`)
+     is in Night/Day's dark theme, so a dreamer sees a dark blank, then the light onboarding. Whether it should be
+     held light, as onboarding is, changes what is seen, so it is asked and not built.
 
 ## Before Cohort 1
 
@@ -956,6 +971,9 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   (2) the age band kept on the phone only and never sent, under 18 refused with EM·5; (3) the disclosure as filed at
   C16-P, W27·5's rewrite to Product; (4) the consent kept on the phone; withdrawing it, or deleting the journal,
   returns to the start.
+- D104 (founder, 2026-11-19): all fifteen of the plan's questions take their leans (Product's 1 to 11 as founder
+  rulings; the Build chat tells the head). D91 and D95 apply; the Opus review on the consent store, the start-over path
+  and the retry gating found one defect, fixed (banked item 121).
 
 ## Documents as last imported
 
