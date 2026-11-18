@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A220, A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A232, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 251 run, 251 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 261 run, 261 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -925,8 +925,8 @@ ROWS = [
      '',
      'test/recording/recording_test.dart', 'every frame is kept in order; all final, deleted at once'),
     ('A170', 'lib/recording/recording.dart',
-     "        _left = (audio: audio, from: from);\n        onHeard('', '');",
-     '        _left = (audio: audio, from: from);',
+     "        onHeard('', '');\n        return;",
+     '        return;',
      'test/recording/recording_test.dart', 'a cancel mid-stream: the rest waits; unsettled words leave'),
     ('A171', 'lib/recording/recording.dart',
      '      _handOn(last: true);\n      await _written;\n',
@@ -1077,13 +1077,11 @@ ROWS = [
      'final words = leaving && isEmptyText(text) ? e.text : text;',
      'final words = isEmptyText(text) ? e.text : text;',
      'test/journal/pages/typing_page_test.dart', 'Save with emptied edit and recording removes the dream'),
-    ('A207', 'lib/journal/pages/typing_page.dart',
-     '      if (!landed) throw const _NotLanded();\n',
-     '',
-     'test/journal/pages/typing_page_test.dart', 'Save into a vanished night fails: MP·62, words stay'),
+    # A207 was dropped (D97), as A223: the throw after the fallback save is reached
+    # only when the new night's target vanishes between two reads (D17).
     ('A208', 'lib/journal/pages/typing_page.dart',
-     '|| !something;',
-     '|| false;',
+     '      if (!landed && something) {',
+     '      if (!landed) {',
      'test/journal/pages/typing_page_test.dart', 'empty Save into a vanished night keeps nothing, closes'),
     ('A209', 'lib/journal/pages/typing_page.dart',
      '    if (mounted && _trouble != null) setState(() => _trouble = null);\n',
@@ -1129,6 +1127,55 @@ ROWS = [
      '      _handOn(last: true);\n      await _written;\n      if (!_keepFailed) {',
      '      _handOn(last: true);\n      if (!_keepFailed) {',
      'test/journal/pages/typing_page_test.dart', 'Save waits for a slow last write, then keeps the recording'),
+    # D97, D98 and the phone checks (A221 to A232): the watcher's bindings, a Save into a
+    # night that is gone, the counts line, the retry hook, the numbers of a cut.
+    ('A221', 'lib/recording/connection.dart',
+     '    if (channel == null) WidgetsFlutterBinding.ensureInitialized();\n',
+     '',
+     'test/recording/connection_binding_test.dart', 'the watcher made before runApp raises no error, has bindings'),
+    ('A222', 'lib/journal/pages/typing_page.dart',
+     '      if (!landed && something) {',
+     '      if (false) {',
+     'test/journal/pages/typing_page_test.dart', 'Save into a vanished night goes into a new night'),
+    # A223 was dropped (D97): the throw after the fallback save is reached only
+    # when the new night's target vanishes between two reads (a constructed race,
+    # D17); the failed write itself reaches MP·62 through the exception.
+    ('A224', 'lib/journal/journal_audio.dart',
+     '[c.files, c.waiting]',
+     '[c.waiting, c.files]',
+     'test/journal/journal_audio_test.dart', 'the counts line: audio files, then waiting recordings'),
+    ('A225', 'lib/journal/journal_store.dart',
+     'waiting += night.entries.whereType<Waiting>().length;',
+     'waiting += 0;',
+     'test/journal/journal_audio_test.dart', 'the counts line: audio files, then waiting recordings'),
+    ('A226', 'lib/journal/pages/journal_home.dart',
+     '      unawaited(audio.logCounts());\n',
+     '',
+     'test/journal/pages/journal_home_test.dart', 'it opens the folder, then shows the journal'),
+    ('A227', 'lib/journal/pages/journal_home.dart',
+     '      _recording?.retries?.afterRetry = audio.logCounts;\n',
+     '',
+     'test/journal/pages/journal_home_test.dart', 'the journal opening retries; leaving cuts it; back resumes'),
+    ('A228', 'lib/recording/retries.dart',
+     '          await afterRetry?.call();\n',
+     '',
+     'test/recording/retries_test.dart', 'a hook is called after each recording, done or failed'),
+    ('A229', 'lib/recording/retries.dart',
+     '[to > at ? to - at : 0, heardMs]',
+     '[0, heardMs]',
+     'test/recording/retries_test.dart', 'leaving keeps the progress; back, it resumes at the cut'),
+    ('A230', 'lib/recording/retries.dart',
+     '[to > at ? to - at : 0, heardMs]',
+     '[to > at ? to - at : 0, 0]',
+     'test/recording/retries_test.dart', 'leaving keeps the progress; back, it resumes at the cut'),
+    ('A231', 'lib/recording/recording.dart',
+     '        SafeLog.event(LogEvent.recordingSettled, [_covered * 1000 ~/ bytesPerSecond, _recorded * 1000 ~/ bytesPerSecond]);\n',
+     '',
+     'test/recording/recording_test.dart', 'no connection at the tap: no key, MP·15, it all waits'),
+    ('A232', 'lib/recording/recording.dart',
+     '[_covered * 1000 ~/ bytesPerSecond, _recorded * 1000 ~/ bytesPerSecond]',
+     '[_recorded * 1000 ~/ bytesPerSecond, _covered * 1000 ~/ bytesPerSecond]',
+     'test/recording/recording_test.dart', "a break: final words stay; the rest waits from Soniox's count"),
 ]
 
 
