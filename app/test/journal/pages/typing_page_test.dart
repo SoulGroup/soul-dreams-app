@@ -733,16 +733,62 @@ void main() {
     expect(find.byKey(TypingPage.levelKey), findsNothing);
   });
 
-  testWidgets('a refused microphone shows nothing new, logs a code', (tester) async {
+  // D93 Q4: a refused microphone shows MP·63 where MP·62 shows, in place of
+  // nothing, until the next tap of the microphone.
+  testWidgets('a refused microphone shows MP·63, logs a code', (tester) async {
     final lines = await logged();
     final v = voice();
     v.mic.allow = false;
     await tall(tester, recording: v.recording);
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
     await record(tester);
     await tester.pumpAndSettle();
     expect(find.byKey(TypingPage.levelKey), findsNothing);
     expect(tester.takeAnnouncements(), isEmpty);
     expect(lines, ['recordingRefused']);
+    final shown = find.bySemanticsLabel(PendingLines.MP_63.text(Lang.en));
+    expect(shown, findsOneWidget);
+    final live = find.byWidgetPredicate((w) => w is Semantics && w.properties.liveRegion == true);
+    expect(find.descendant(of: find.byKey(TypingPage.noticeKey), matching: live), findsOneWidget);
+    final line = tester.widget<AppLine>(
+      find.descendant(of: find.byKey(TypingPage.noticeKey), matching: find.byType(AppLine)),
+    );
+    expect(line.style.fontSize, TypeRoles.button.size);
+  });
+
+  testWidgets('MP·63 goes at the next tap, and returns on a refusal', (tester) async {
+    final v = voice();
+    v.mic.allow = false;
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.noticeKey), findsOneWidget);
+    v.mic.allow = true;
+    await record(tester);
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    v.mic.allow = false;
+    await record(tester);
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.noticeKey), findsOneWidget);
+  });
+
+  testWidgets('the microphone is named MP·11, and MP·64 while it records', (tester) async {
+    final v = voice();
+    await tall(tester, recording: v.recording);
+    String name() => tester.widget<IconButton>(find.byKey(TypingPage.micKey)).tooltip!;
+    expect(name(), Lines.MP_11.text(Lang.en));
+    await record(tester);
+    expect(name(), PendingLines.MP_64.text(Lang.en));
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pump();
+    expect(name(), PendingLines.MP_64.text(Lang.en));
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect(name(), Lines.MP_11.text(Lang.en));
   });
 
   // Task 16f-1: after a start that fails, the field is the dreamer's again

@@ -84,6 +84,12 @@ final _betaShape = RegExp(r'^[A-Za-z0-9]{48}$');
 /// How long a stop waits for Soniox's last words.
 const lastWords = Duration(seconds: 5);
 
+/// What went wrong, for the typing screen to say (D93 Q4): the microphone
+/// refused (MP·63).
+enum Trouble { refused }
+
+void _noTrouble(Trouble _) {}
+
 /// One recording, from the microphone's tap to its end.
 final class RecordingSession {
   RecordingSession(
@@ -92,6 +98,7 @@ final class RecordingSession {
     required this.onLevel,
     required this.onStopping,
     required this.onEnded,
+    this.onTrouble = _noTrouble,
     this.wait = lastWords,
   });
 
@@ -112,6 +119,9 @@ final class RecordingSession {
 
   /// The recording ended, by a stop or by itself.
   final void Function() onEnded;
+
+  /// Something the dreamer is told (D93 Q4).
+  final void Function(Trouble trouble) onTrouble;
 
   SonioxLink? _link;
   // The audio heard before the stream opened, in memory only (D88).
@@ -142,9 +152,9 @@ final class RecordingSession {
     try {
       allowed = await _recording.microphone.allowed();
     } on Object {
-      return _fail(LogEvent.recordingRefused);
+      return _refused();
     }
-    if (!allowed) return _fail(LogEvent.recordingRefused);
+    if (!allowed) return _refused();
     if (_cancelled || _ended) return false;
     final Stream<Uint8List> frames;
     try {
@@ -217,6 +227,11 @@ final class RecordingSession {
     if (_ended) return;
     SafeLog.event(code, [number]);
     unawaited(_shut());
+  }
+
+  bool _refused() {
+    onTrouble(Trouble.refused);
+    return _fail(LogEvent.recordingRefused);
   }
 
   bool _fail(LogEvent code, [List<num> numbers = const []]) {

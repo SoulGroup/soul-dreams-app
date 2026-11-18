@@ -17,7 +17,10 @@
 // edit attempt only stops it (D90); while it runs, a level line and a
 // timer show and a screen reader is told
 // MP·33; a stop, Save or Back waits for the last words; leaving the app
-// ends it at once. A failure to start or a break shows nothing new.
+// ends it at once. A refused microphone shows MP·63 where MP·62 shows,
+// until the next tap of the microphone (D93 Q4); while it records, the
+// microphone's spoken name is MP·64. Another failure to start or a break
+// shows nothing new.
 import 'dart:async';
 import 'dart:math';
 
@@ -49,6 +52,7 @@ class TypingPage extends StatefulWidget {
   static const startKey = Key('typing-start');
   static const micKey = Key('typing-mic');
   static const levelKey = Key('typing-level');
+  static const noticeKey = Key('typing-notice');
 
   final Journal journal;
 
@@ -110,6 +114,9 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   ({int caret, int shownLength})? _caret;
   final _levels = <double>[];
   int _seconds = 0;
+  // What the dreamer is told about the recording, until the next tap of the
+  // microphone or the screen closes (D93 Q4).
+  Trouble? _trouble;
   Timer? _ticker;
 
   @override
@@ -209,6 +216,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     if (_saving) return;
     switch (_mic) {
       case _Mic.idle:
+        if (_trouble != null) setState(() => _trouble = null);
         _startRecording();
       case _Mic.recording:
         setState(() => _mic = _Mic.stopping);
@@ -239,6 +247,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       onLevel: _level,
       onStopping: _stopClock,
       onEnded: _ended,
+      onTrouble: _troubled,
     );
     _session = session;
     final started = await session.start();
@@ -367,6 +376,15 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     });
   }
 
+  void _troubled(Trouble trouble) {
+    if (mounted) setState(() => _trouble = trouble);
+  }
+
+  // What the dreamer is told, by the trouble.
+  String _troubleText(Trouble trouble) => switch (trouble) {
+    Trouble.refused => PendingLines.MP_63.text(appLanguage),
+  };
+
   // A stop began, the dreamer's or a call's: the clock stops at once, while
   // the last words may still come (D83).
   void _stopClock() {
@@ -440,6 +458,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       borderSide: BorderSide(color: p.fieldBorder),
     );
     final live = _live;
+    final trouble = _trouble;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
@@ -474,6 +493,18 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                                         AppLine(
                                           (first ? Lines.MP_10 : Lines.MP_32).text(appLanguage),
                                           style: TypeRoles.button.style(p.text),
+                                        ),
+                                      if (trouble != null)
+                                        Padding(
+                                          key: TypingPage.noticeKey,
+                                          padding: const EdgeInsets.only(top: StandIns.gap),
+                                          child: Semantics(
+                                            liveRegion: true,
+                                            child: AppLine(
+                                              _troubleText(trouble),
+                                              style: TypeRoles.button.style(p.text),
+                                            ),
+                                          ),
                                         ),
                                       if (_failed)
                                         Padding(
@@ -539,7 +570,11 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                                         ? null
                                         : IconButton(
                                             key: TypingPage.micKey,
-                                            tooltip: Lines.MP_11.text(appLanguage),
+                                            // The stop control's own name while it
+                                            // records (D93; MP·64 replaces MP·11).
+                                            tooltip: live
+                                                ? PendingLines.MP_64.text(appLanguage)
+                                                : Lines.MP_11.text(appLanguage),
                                             isSelected: live,
                                             onPressed: _toggleMic,
                                             icon: Icon(Icons.mic_none, color: p.placeholder),
