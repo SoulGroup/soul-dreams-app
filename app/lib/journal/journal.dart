@@ -75,13 +75,14 @@ final class Journal {
   /// that dream is gone). The index counts every dream, told or waiting; a
   /// waiting one is never replaced. With [was], the dream's words when its
   /// screen opened: if words that came for a recording moved it meanwhile
-  /// (D94), it is found by them.
-  Future<void> editDream(String id, int index, String text, {List<Waiting> waiting = const [], String? was}) async {
-    await _store.update(id, (n) {
+  /// (D94), it is found by them. Returns whether the night was there to
+  /// change (D96 Q3).
+  Future<bool> editDream(String id, int index, String text, {List<Waiting> waiting = const [], String? was}) {
+    return _store.update(id, (n) {
       final entries = [...n.entries];
       var at = entries.length;
       if (was != null && !(index >= 0 && index < entries.length && entries[index] == Told(was))) {
-        index = entries.indexOf(Told(was));
+        index = _nearest(entries, Told(was), index);
       }
       if (index >= 0 && index < entries.length && entries[index] is Told) {
         if (isEmptyText(text)) {
@@ -96,6 +97,18 @@ final class Journal {
       if (entries.isEmpty) return null;
       return listEquals(entries, n.entries) ? n : n.withEntries(entries);
     });
+  }
+
+  // The place of [dream] in [entries] nearest [near], the lower when two are
+  // as near; -1 when it is not there. Equal words in two dreams must not send
+  // an edit to the wrong one (D96).
+  static int _nearest(List<Dream> entries, Dream dream, int near) {
+    var best = -1;
+    for (var i = 0; i < entries.length; i++) {
+      if (entries[i] != dream) continue;
+      if (best < 0 || (i - near).abs() < (best - near).abs()) best = i;
+    }
+    return best;
   }
 
   /// Deletes the night, and everything of it (X11).

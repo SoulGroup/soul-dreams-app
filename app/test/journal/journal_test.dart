@@ -173,6 +173,42 @@ void main() {
     expect(files.everything(), isEmpty);
   });
 
+  // D94, D96: words that came for a recording moved the dream being edited;
+  // it is found by its words, the one nearest where it was when two share
+  // them.
+  test('an edit finds its moved dream by where it was', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final n = (await journal.newestFirst()).single;
+    final w = Waiting('d' * 32);
+    final same = Told(a[0]);
+    final moved = Told(b[0]);
+    // The screen opened on dream 2 ("a[0]" again, after the recording);
+    // a retry then put one dream before the recording.
+    await (await JournalStore.open(files)).save(n.withEntries([same, moved, w, same]));
+    await journal.editDream(n.id, 2, b[0], was: a[0]);
+    expect((await journal.night(n.id))!.entries, [same, moved, w, Told(b[0])]);
+    // And on dream 0 (it did not move): it stays the one edited.
+    await (await JournalStore.open(files)).save(n.withEntries([same, moved, w, same]));
+    await journal.editDream(n.id, 0, a[1], was: a[0]);
+    expect((await journal.night(n.id))!.entries, [Told(a[1]), moved, w, same]);
+    // Two as near as each other: the lower.
+    await (await JournalStore.open(files)).save(n.withEntries([same, w, same]));
+    await journal.editDream(n.id, 1, b[0], was: a[0]);
+    expect((await journal.night(n.id))!.entries, [Told(b[0]), w, same]);
+  });
+
+  // D96 Q3: an edit says whether its night was there, as a Save does.
+  test('an edit says whether its night was there', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final id = (await journal.newestFirst()).single.id;
+    expect(await journal.editDream(id, 0, b[0]), isTrue);
+    expect(await journal.editDream(id, 7, b[0]), isTrue);
+    await journal.delete(id);
+    expect(await journal.editDream(id, 0, b[0]), isFalse);
+    expect(await journal.editDream(id, 0, b[0], waiting: [Waiting('1' * 32)]), isFalse);
+    expect(files.everything(), isEmpty);
+  });
+
   // D61 (the review of Task 5): a read and the write that follows it are
   // one turn of the store's queue, so nothing falls between them.
   test('a delete queued behind a Save keeps the night deleted', () async {

@@ -77,6 +77,11 @@ class TypingPage extends StatefulWidget {
 
 enum _Mic { idle, starting, recording, stopping }
 
+// A Save whose night was not there: a failed Save (D96 Q3). Carries no text.
+final class _NotLanded implements Exception {
+  const _NotLanded();
+}
+
 class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   late final _text = TextEditingController(text: widget.edit?.text);
   // The field's own scrolling: while recording it follows the insertion
@@ -207,11 +212,19 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     try {
       final e = widget.edit;
       final waiting = List.of(_waiting);
+      final text = _text.text;
+      final bool landed;
       if (e == null) {
-        await widget.journal.addDream(widget.target, _text.text, appLanguage, waiting: waiting);
+        // Nothing to keep is not a failure; a Save that cannot land is (D96 Q3).
+        final something = !isEmptyText(text) || waiting.isNotEmpty;
+        landed = await widget.journal.addDream(widget.target, text, appLanguage, waiting: waiting) || !something;
       } else {
-        await widget.journal.editDream(e.id, e.index, _text.text, waiting: waiting, was: e.text);
+        // Leaving never removes a dream: an emptied field keeps the old
+        // words, and only a Save removes it (D96 Q2).
+        final words = leaving && isEmptyText(text) ? e.text : text;
+        landed = await widget.journal.editDream(e.id, e.index, words, waiting: waiting, was: e.text);
       }
+      if (!landed) throw const _NotLanded();
       _waiting.clear();
     } on Object {
       SafeLog.event(LogEvent.journalSaveFailed);
@@ -263,6 +276,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       onStopping: _stopClock,
       onEnded: _ended,
       onTrouble: _troubled,
+      onTroubleOver: _troubleOver,
     );
     _session = session;
     final started = await session.start();
@@ -396,6 +410,12 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
 
   void _troubled(Trouble trouble) {
     if (mounted) setState(() => _trouble = trouble);
+  }
+
+  // The recording can no longer wait on the phone: what it told no longer
+  // holds (D96 Q1).
+  void _troubleOver() {
+    if (mounted && _trouble != null) setState(() => _trouble = null);
   }
 
   // What the dreamer is told, by the trouble.

@@ -1799,7 +1799,7 @@ void main() {
   // D94: no retry while a typing screen is open; its closing starts one.
   testWidgets('the typing screen holds the retries while it is open', (tester) async {
     final none = NoneWaiting();
-    final recording = offline().recording.keeping(MemoryKeep(), waiting: none);
+    final recording = offline(online: true).recording.keeping(MemoryKeep(), waiting: none);
     await tall(tester, recording: recording);
     recording.retries!.kick();
     await tester.pump();
@@ -1822,6 +1822,121 @@ void main() {
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
     expect((await h.nights()).single.entries, [Waiting(v.keep.audio.keys.single)]);
+  });
+
+  // D96 Q1: a keep that fails once the recording is cut stops it, and the
+  // notice that the audio stays on the phone goes.
+  testWidgets('keep fails offline: recording stops, the notice goes', (tester) async {
+    final lines = await logged();
+    final v = offline();
+    v.keep.fails = true;
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    expect(find.bySemanticsLabel(Lines.MP_15.text(Lang.en)), findsOneWidget);
+    await frames(tester, v.mic, 11);
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(v.mic.running, isFalse);
+    expect(lines, ['recordingStarted', 'recordingOffline', 'audioKeepFailed', 'recordingEnded']);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(await h.nights(), isEmpty);
+  });
+
+  Future<({Harness h, Night n})> editingWith(WidgetTester tester, Recording? recording) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 8));
+    await h.pump(
+      tester,
+      Opener(
+        () async => TypingPage(
+          journal: h.journal,
+          target: IntoNight(n.id),
+          edit: (id: n.id, index: 0, text: n.dreams[0]),
+          recording: recording,
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    return (h: h, n: n);
+  }
+
+  // D96 Q2: leaving the app never removes a dream; only a Save does.
+  testWidgets('leaving with emptied edit and recording keeps old words', (tester) async {
+    final v = offline();
+    final e = await editingWith(tester, v.recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), '');
+    await record(tester);
+    await frames(tester, v.mic, 1);
+    await leave(tester, AppLifecycleState.hidden);
+    expect(find.byType(TypingPage), findsNothing);
+    final id = v.keep.audio.keys.single;
+    expect((await e.h.journal.night(e.n.id))!.entries, [Told(e.n.dreams[0]), Waiting(id), Told(e.n.dreams[1])]);
+  });
+
+  testWidgets('Save with emptied edit and recording removes the dream', (tester) async {
+    final v = offline();
+    final e = await editingWith(tester, v.recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), '');
+    await record(tester);
+    await frames(tester, v.mic, 1);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    final id = v.keep.audio.keys.single;
+    expect((await e.h.journal.night(e.n.id))!.entries, [Waiting(id), Told(e.n.dreams[1])]);
+  });
+
+  // D96 Q3: a Save that cannot land is a failed Save: MP·62, the screen, the
+  // words and the recordings kept.
+  testWidgets('Save into a vanished night fails: MP·62, words stay', (tester) async {
+    final lines = await logged();
+    final e = await editingWith(tester, null);
+    await e.h.journal.delete(e.n.id);
+    final other = invented('one-dream-sv').dreams[0];
+    await tester.enterText(find.byKey(TypingPage.fieldKey), other);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    expect(find.text(other), findsOneWidget);
+    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(lines, ['journalSaveFailed']);
+  });
+
+  testWidgets('Save into a vanished night keeps the recording, MP·62', (tester) async {
+    final lines = await logged();
+    final v = offline();
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 8));
+    await h.pump(
+      tester,
+      Opener(() async => TypingPage(journal: h.journal, target: IntoNight(n.id), recording: v.recording)),
+    );
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    await record(tester);
+    await frames(tester, v.mic, 1);
+    await h.journal.delete(n.id);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingEnded', 'journalSaveFailed']);
+  });
+
+  testWidgets('empty Save into a vanished night keeps nothing, closes', (tester) async {
+    final lines = await logged();
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 8));
+    await h.pump(tester, Opener(() async => TypingPage(journal: h.journal, target: IntoNight(n.id))));
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    await h.journal.delete(n.id);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    expect(lines, isEmpty);
   });
 }
 
