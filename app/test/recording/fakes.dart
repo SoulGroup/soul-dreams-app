@@ -6,6 +6,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:souldreams/recording/audio_keep.dart';
+import 'package:souldreams/recording/connection.dart';
 import 'package:souldreams/recording/microphone.dart';
 import 'package:souldreams/recording/soniox.dart';
 
@@ -21,12 +23,17 @@ List<String> tokensOf(String dream) {
 /// The first invented dream's tokens.
 List<String> inventedTokens() => tokensOf(invented('two-dreams-en').dreams[0]);
 
-String reply({List<String> done = const [], List<String> shown = const [], bool finished = false}) => jsonEncode({
+String reply({
+  List<String> done = const [],
+  List<String> shown = const [],
+  bool finished = false,
+  int finalMs = 0,
+}) => jsonEncode({
   'tokens': [
     for (final t in done) {'text': t, 'is_final': true},
     for (final t in shown) {'text': t, 'is_final': false},
   ],
-  'final_audio_proc_ms': 0,
+  'final_audio_proc_ms': finalMs,
   'total_audio_proc_ms': 0,
   if (finished) 'finished': true,
 });
@@ -165,6 +172,50 @@ final class SilentMicrophone implements Microphone {
     final frames = _frames;
     _frames = null;
     unawaited(frames?.close());
+  }
+}
+
+/// A keep held in memory (D92): each recording's bytes in order, which
+/// were ended, and which discarded.
+final class MemoryKeep implements AudioKeep {
+  int _next = 0;
+  final audio = <String, List<int>>{};
+  final ended = <String>[];
+  final discarded = <String>[];
+
+  /// Every add from now on fails, as a full disk would.
+  bool fails = false;
+
+  @override
+  String newId() => (++_next).toRadixString(16).padLeft(32, '0');
+
+  @override
+  Future<void> add(String id, Uint8List bytes, {bool last = false}) async {
+    if (fails) throw StateError('keep');
+    (audio[id] ??= []).addAll(bytes);
+    if (last) ended.add(id);
+  }
+
+  @override
+  Future<void> discard(String id) async {
+    discarded.add(id);
+    audio.remove(id);
+  }
+}
+
+/// A connection the test switches.
+final class FakeConnection implements Connection {
+  final _changes = StreamController<bool>.broadcast();
+
+  @override
+  bool online = true;
+
+  @override
+  Stream<bool> get changes => _changes.stream;
+
+  void set(bool value) {
+    online = value;
+    _changes.add(value);
   }
 }
 

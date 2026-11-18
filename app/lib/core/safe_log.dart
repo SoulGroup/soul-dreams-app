@@ -53,6 +53,13 @@ enum LogEvent {
   recordingInterrupted,
   recordingEnded,
   recordingReleaseFailed,
+
+  /// A recording begun with no connection, its audio kept to wait (D93
+  /// Q4); one stopped by itself at ten minutes (D93 Q6); its audio that
+  /// could not be kept on the phone (D92).
+  recordingOffline,
+  recordingCapped,
+  audioKeepFailed,
 }
 
 abstract final class SafeLog {

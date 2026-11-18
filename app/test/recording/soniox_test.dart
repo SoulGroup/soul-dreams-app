@@ -41,6 +41,15 @@ void main() {
     expect((readReply(reply(finished: true)) as Heard).finished, isTrue);
   });
 
+  // D94: how much of the audio is in final words, Soniox's own count.
+  test('final_audio_proc_ms is read; missing or odd, it is 0', () {
+    expect((readReply(reply(done: [tokens[0]], finalMs: 4800)) as Heard).finalMs, 4800);
+    expect((readReply(jsonEncode({'tokens': <Object?>[]})) as Heard).finalMs, 0);
+    for (final odd in [-5, 1.5, '4800', null]) {
+      expect((readReply(jsonEncode({'tokens': <Object?>[], 'final_audio_proc_ms': odd})) as Heard).finalMs, 0);
+    }
+  });
+
   test("Soniox's error is its code; an unreadable reply is -1", () {
     expect((readReply(jsonEncode({'error_code': 402, 'error_message': 'x'})) as Refused).code, 402);
     expect((readReply('not json') as Refused).code, -1);

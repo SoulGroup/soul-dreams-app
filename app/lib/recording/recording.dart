@@ -1,17 +1,28 @@
 // Recording by voice, in SoulDreams Dev (D69, as D71 corrects it): the
 // words appear as the dreamer speaks, and the audio goes from the
-// microphone to Soniox and nowhere else; nothing of it is written on the
-// phone. A recording starts the instant the microphone is tapped (D88): the
-// microphone first, its audio held in memory until the stream opens and
-// then sent first, in order; a key may be fetched in advance. This slice
-// needs a connection: a key or a stream that fails stops the recording as a
-// broken stream does, holding nothing, keeping the words shown. Each logs a
-// code and shows nothing new (D71). Offline recording is the next slice.
+// microphone to Soniox and nowhere else off the phone. A recording starts
+// the instant the microphone is tapped (D88): the microphone first, its
+// audio held in memory until the stream opens and then sent first, in
+// order; a key may be fetched in advance.
+//
+// Offline recording (D92 to D94): with a keep, every recording's audio is
+// also kept on the phone from its first frame. When all its words are
+// final, the audio is deleted at once. With no connection at the tap
+// (MP·15), or a key, a stream or Soniox's budget that fails (MP·54), the
+// recording goes on into the keep alone; what is not yet in final words
+// waits, from Soniox's `final_audio_proc_ms` on, and the words not yet
+// final leave the field, since they come back with the rest (D93 Q4, Q5).
+// Every recording stops itself at ten minutes, as Stop does (D93 Q6).
+// Without a keep, or once it fails, a key or a stream that fails stops the
+// recording as a broken stream does, keeping the words shown (D71).
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import '../core/hosts.dart';
 import '../core/safe_log.dart';
+import 'audio_keep.dart';
+import 'connection.dart';
 import 'key_client.dart';
 import 'microphone.dart';
 import 'soniox.dart';
@@ -23,25 +34,55 @@ final class Recording {
     required this.microphone,
     required this.key,
     required this.connect,
+    this.keep,
+    this.connection,
+    this.cap = recordingCap,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   /// SoulDreams Dev's own: our server for the key, Soniox's EU endpoint for
   /// the words. Off while the server's address is empty, or the build's
   /// beta key is not 48 characters of A-Z, a-z and 0-9 (D18; D71 Q17).
-  factory Recording.live({required Microphone microphone, required String betaKey, String server = Hosts.server}) =>
-      Recording(
-        on: server.isNotEmpty && _betaShape.hasMatch(betaKey),
-        microphone: microphone,
-        key: () => fetchKey(Uri.parse(server), betaKey),
-        connect: (key) => SocketLink.open(Hosts.soniox, key),
-      );
+  factory Recording.live({
+    required Microphone microphone,
+    required String betaKey,
+    String server = Hosts.server,
+    Connection? connection,
+  }) => Recording(
+    on: server.isNotEmpty && _betaShape.hasMatch(betaKey),
+    microphone: microphone,
+    key: () => fetchKey(Uri.parse(server), betaKey),
+    connect: (key) => SocketLink.open(Hosts.soniox, key),
+    connection: connection,
+  );
 
   final bool on;
   final Microphone microphone;
   final Future<String> Function() key;
   final Future<SonioxLink> Function(String key) connect;
+
+  /// Where the audio waits on the phone (D92), or null: nothing kept, and a
+  /// recording needs a connection (D71).
+  final AudioKeep? keep;
+
+  /// Whether the phone has a connection; null: taken as online.
+  final Connection? connection;
+
+  /// The bytes of audio at which a recording stops itself (D93 Q6).
+  final int cap;
   final DateTime Function() _now;
+
+  /// The same recording, keeping its audio in [keep].
+  Recording keeping(AudioKeep keep) => Recording(
+    on: on,
+    microphone: microphone,
+    key: key,
+    connect: connect,
+    keep: keep,
+    connection: connection,
+    cap: cap,
+    now: _now,
+  );
 
   // A key fetched in advance (D88): single use, and used only while fresh.
   Future<String>? _ahead;
@@ -84,9 +125,20 @@ final _betaShape = RegExp(r'^[A-Za-z0-9]{48}$');
 /// How long a stop waits for Soniox's last words.
 const lastWords = Duration(seconds: 5);
 
+/// A second of audio: 16 kHz, sixteen bits, one channel.
+const bytesPerSecond = sampleRate * 2;
+
+/// Every recording stops itself at ten minutes (D93 Q6).
+const recordingCap = 10 * 60 * bytesPerSecond;
+
+/// What a recording leaves to wait (D94): its audio's id, and how many of
+/// its bytes are already in final words.
+typedef Left = ({String audio, int from});
+
 /// What went wrong, for the typing screen to say (D93 Q4): the microphone
-/// refused (MP·63).
-enum Trouble { refused }
+/// refused (MP·63); no connection at the tap (MP·15); a key, a stream or
+/// Soniox's budget that failed with one, the audio kept to wait (MP·54).
+enum Trouble { refused, offline, broke }
 
 void _noTrouble(Trouble _) {}
 
@@ -132,9 +184,32 @@ final class RecordingSession {
   StreamSubscription<String>? _replies;
   StreamSubscription<Uint8List>? _frames;
   StreamSubscription<void>? _interruptions;
+  // Done when the wait for the last words can end: Soniox finished, the
+  // stream went while a stop waits, or the session ended.
   final _finished = Completer<void>();
   bool _cancelled = false;
   bool _ended = false;
+
+  // The audio kept on the phone (D92): its id, what is not yet handed on,
+  // whether the keep failed; the bytes recorded, and those in final words.
+  String? _audio;
+  final _unkept = BytesBuilder(copy: false);
+  bool _keepFailed = false;
+  int _recorded = 0;
+  int _covered = 0;
+  // Every word final: Soniox finished after the end frame.
+  bool _allFinal = false;
+  // No stream any more, or none at all: the audio goes to the keep only.
+  bool _cut = false;
+  bool _capped = false;
+
+  /// What waits once the session has ended, or null: nothing kept, or every
+  /// word final (D94).
+  Left? get left => _left;
+  Left? _left;
+
+  // The audio is kept and the keep has not failed.
+  bool get _keeping => _audio != null && !_keepFailed;
 
   // The microphone has been started and not yet stopped, whether or not its
   // frames are listened to yet.
@@ -163,6 +238,7 @@ final class RecordingSession {
       return _fail(LogEvent.recordingMicFailed);
     }
     _micStarted = true;
+    _audio = _recording.keep?.newId();
     final stopping = _stopping;
     if (_cancelled || _ended || stopping != null) {
       // The session ended, or a stop came, while the microphone started: it
@@ -172,13 +248,22 @@ final class RecordingSession {
       return false;
     }
     _frames = frames.listen((frame) {
+      _keep(frame);
       final link = _link;
-      if (link != null) {
+      if (_cut) {
+        // The keep has it all.
+      } else if (link != null) {
         link.add(frame);
       } else {
         _held.add(frame);
       }
       onLevel(level(frame));
+      _recorded += frame.length;
+      if (_recorded >= _recording.cap && !_capped) {
+        _capped = true;
+        SafeLog.event(LogEvent.recordingCapped);
+        unawaited(stop());
+      }
     });
     // A call or Siri stops the recording as Stop does: the words heard
     // stay (D79 b).
@@ -187,8 +272,46 @@ final class RecordingSession {
       unawaited(stop());
     });
     SafeLog.event(LogEvent.recordingStarted);
-    _opening = _open();
+    if (_keeping && !(_recording.connection?.online ?? true)) {
+      // No connection at the tap: no key is asked for; the audio waits
+      // (D93 Q4, MP·15).
+      _cut = true;
+      SafeLog.event(LogEvent.recordingOffline);
+      onTrouble(Trouble.offline);
+    } else {
+      _opening = _open();
+    }
     return true;
+  }
+
+  // A frame into the keep, handed on about once a second (D92).
+  void _keep(Uint8List frame) {
+    if (!_keeping) return;
+    _unkept.add(frame);
+    if (_unkept.length >= bytesPerSecond) _handOn();
+  }
+
+  void _handOn({bool last = false}) {
+    final audio = _audio;
+    if (audio == null || _keepFailed) return;
+    final bytes = _unkept.takeBytes();
+    if (bytes.isEmpty && !last) return;
+    _recording.keep!.add(audio, bytes, last: last).catchError((Object _) {
+      if (_keepFailed) return;
+      _keepFailed = true;
+      SafeLog.event(LogEvent.audioKeepFailed);
+    });
+  }
+
+  // The stream is gone or never came, with the audio kept: the recording
+  // goes on into the keep alone (D92); the words not yet final leave the
+  // field, since they come back with the rest (D93 Q5); MP·54 shows.
+  void _goOn() {
+    _cut = true;
+    _held.clear();
+    onHeard('', '');
+    onTrouble(Trouble.broke);
+    if (_stopping != null && !_finished.isCompleted) _finished.complete();
   }
 
   // The key and the stream, while the microphone already streams (D88).
@@ -222,11 +345,16 @@ final class RecordingSession {
     _held.clear();
   }
 
-  // No key or no stream: as a break, holding nothing (D88).
+  // No key or no stream: as a break, holding nothing (D88); with the audio
+  // kept, the recording goes on (D92).
   void _brokeOff(LogEvent code, int number) {
     if (_ended) return;
     SafeLog.event(code, [number]);
-    unawaited(_shut());
+    if (_keeping) {
+      _goOn();
+    } else {
+      unawaited(_shut());
+    }
   }
 
   bool _refused() {
@@ -242,19 +370,31 @@ final class RecordingSession {
   void _reply(String text) {
     if (_ended) return;
     switch (readReply(text)) {
-      case Heard(:final finalText, :final provisional, :final finished):
+      case Heard(:final finalText, :final provisional, :final finished, :final finalMs):
+        _covered = math.max(_covered, finalMs * bytesPerSecond ~/ 1000);
         if (finalText.isNotEmpty || provisional.isNotEmpty || finished) onHeard(finalText, provisional);
+        if (finished) _allFinal = true;
         if (finished && !_finished.isCompleted) _finished.complete();
       case Refused(:final code):
         _broke(code);
     }
   }
 
-  // The stream broke off before its end: the words shown stay.
+  // The stream broke off before its end: the words shown stay; with the
+  // audio kept, the recording goes on and the rest waits (D92, D93 Q5).
   void _broke(int code) {
-    if (_ended || _finished.isCompleted) return;
+    if (_ended || _finished.isCompleted || _cut) return;
     SafeLog.event(LogEvent.recordingStreamFailed, [code]);
-    unawaited(_shut());
+    if (!_keeping) {
+      unawaited(_shut());
+      return;
+    }
+    final link = _link;
+    _link = null;
+    unawaited(_replies?.cancel());
+    _replies = null;
+    if (link != null) _closeQuietly(link);
+    _goOn();
   }
 
   /// Stops: the microphone off, then Soniox's last words, waited for up to
@@ -325,8 +465,25 @@ final class RecordingSession {
     final link = _link;
     _link = null;
     unawaited(replies?.cancel());
+    _settleAudio();
     SafeLog.event(LogEvent.recordingEnded);
     onEnded();
     if (link != null) _closeQuietly(link);
+  }
+
+  // The audio, once the recording is over: deleted at once when every word
+  // is final, or nothing was recorded past the final words; else it waits
+  // from there, and the words not yet final leave the field (D93 Q5, D94).
+  void _settleAudio() {
+    final audio = _audio;
+    if (audio == null) return;
+    final from = math.min(_covered, _recorded) & ~1;
+    if (_keepFailed || _allFinal || _recorded <= from) {
+      _recording.keep!.discard(audio).catchError((Object _) {});
+      return;
+    }
+    _handOn(last: true);
+    _left = (audio: audio, from: from);
+    onHeard('', '');
   }
 }

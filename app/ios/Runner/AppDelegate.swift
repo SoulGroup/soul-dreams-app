@@ -1,11 +1,14 @@
 import AVFoundation
 import Flutter
+import Network
 import UIKit
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
   private var journalChannel: FlutterMethodChannel?
   private var audioChannel: FlutterMethodChannel?
+  private var networkChannel: FlutterEventChannel?
+  private let networkWatch = NetworkWatch()
 
   override func application(
     _ application: UIApplication,
@@ -32,6 +35,38 @@ import UIKit
     if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "AudioSession") {
       audioChannel = AudioSession.channel(messenger: registrar.messenger())
     }
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "NetworkWatch") {
+      let channel = FlutterEventChannel(name: NetworkWatch.channelName, binaryMessenger: registrar.messenger())
+      channel.setStreamHandler(networkWatch)
+      networkChannel = channel
+    }
+  }
+}
+
+// Whether the phone has a connection, as the phone knows it (D92 item 3;
+// D93 Q4): Apple's path monitor, one true or false at each change, on the
+// main thread. It sends nothing anywhere (R10). Reached from SoulDreams Dev
+// only (lib/recording/connection.dart).
+final class NetworkWatch: NSObject, FlutterStreamHandler {
+  static let channelName = "souldreams/network"
+  private var monitor: NWPathMonitor?
+
+  func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+    monitor?.cancel()
+    let next = NWPathMonitor()
+    next.pathUpdateHandler = { path in
+      let online = path.status == .satisfied
+      DispatchQueue.main.async { events(online) }
+    }
+    next.start(queue: DispatchQueue(label: "souldreams.network"))
+    monitor = next
+    return nil
+  }
+
+  func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    monitor?.cancel()
+    monitor = nil
+    return nil
   }
 }
 

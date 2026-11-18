@@ -30,10 +30,14 @@ sealed class SonioxReply {
 /// Words heard: the newly final ones, and the provisional ones now shown
 /// in place of the last.
 final class Heard extends SonioxReply {
-  const Heard(this.finalText, this.provisional, {required this.finished});
+  const Heard(this.finalText, this.provisional, {required this.finished, this.finalMs = 0});
 
   final String finalText;
   final String provisional;
+
+  /// How much of the audio, in milliseconds from the stream's start, is in
+  /// final words: Soniox's `final_audio_proc_ms` (D94).
+  final int finalMs;
 
   /// Soniox has sent everything and will close.
   final bool finished;
@@ -71,7 +75,13 @@ SonioxReply readReply(String text) {
     if (_markers.contains(word.trim())) continue;
     (t['is_final'] == true ? done : shown).write(word);
   }
-  return Heard(done.toString(), shown.toString(), finished: parsed['finished'] == true);
+  final ms = parsed['final_audio_proc_ms'];
+  return Heard(
+    done.toString(),
+    shown.toString(),
+    finished: parsed['finished'] == true,
+    finalMs: ms is int && ms > 0 ? ms : 0,
+  );
 }
 
 /// A stream to Soniox.

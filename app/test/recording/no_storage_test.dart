@@ -1,7 +1,8 @@
-// The audio is never kept on the phone (D69, as D71 corrects it, for this
-// slice): nothing in lib/recording/ can write a file, and only the
-// microphone's own file reaches the `record` package. A floor, read from
-// the source; the owner's phone check looks in the app's container.
+// Nothing in lib/recording/ can write a file, and only the microphone's
+// own file reaches the `record` package. The audio kept on the phone (D92)
+// goes only through the keep, which lib/journal/ implements over the
+// journal's folder. A floor, read from the source; the owner's phone check
+// looks in the app's container.
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,8 @@ void main() {
 
   test('the recording files are these', () {
     expect(files.map((f) => f.uri.pathSegments.last).toSet(), {
+      'audio_keep.dart',
+      'connection.dart',
       'heard_text.dart',
       'key_client.dart',
       'microphone.dart',

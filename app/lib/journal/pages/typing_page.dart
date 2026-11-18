@@ -383,6 +383,8 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   // What the dreamer is told, by the trouble.
   String _troubleText(Trouble trouble) => switch (trouble) {
     Trouble.refused => PendingLines.MP_63.text(appLanguage),
+    Trouble.offline => Lines.MP_15.text(appLanguage),
+    Trouble.broke => Lines.MP_54.text(appLanguage),
   };
 
   // A stop began, the dreamer's or a call's: the clock stops at once, while

@@ -611,4 +611,244 @@ void main() {
     await pumpEventQueue();
     expect(fetches, hasLength(1));
   });
+
+  // Offline recording (D92 to D94): every recording's audio is kept from its
+  // first frame; all final, it is deleted at once; else it waits from the
+  // last final word.
+  ({RecordingSession session, List<(String, String)> heard, List<Trouble> troubles, List<int> ended}) kept(
+    SilentMicrophone mic,
+    MemoryKeep keep, {
+    MemoryLink? link,
+    FakeConnection? connection,
+    Future<String> Function()? key,
+    int cap = recordingCap,
+  }) {
+    final heard = <(String, String)>[];
+    final troubles = <Trouble>[];
+    final ended = <int>[];
+    final recording = Recording(
+      on: true,
+      microphone: mic,
+      key: key ?? () async => 'k',
+      connect: (_) async => link ?? MemoryLink(),
+      keep: keep,
+      connection: connection,
+      cap: cap,
+    );
+    final session = RecordingSession(
+      recording,
+      onHeard: (f, p) => heard.add((f, p)),
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () => ended.add(1),
+      onTrouble: troubles.add,
+      wait: const Duration(milliseconds: 200),
+    );
+    return (session: session, heard: heard, troubles: troubles, ended: ended);
+  }
+
+  // [n] frames of a tenth of a second, each its own value.
+  Future<void> frames(SilentMicrophone mic, int n, [int first = 1]) async {
+    for (var i = 0; i < n; i++) {
+      mic.frame(first + i);
+    }
+    await pumpEventQueue();
+  }
+
+  int firstSample(List<int> bytes, int at) =>
+      ByteData.sublistView(Uint8List.fromList(bytes)).getInt16(at, Endian.little);
+
+  test('every frame is kept in order; all final, deleted at once', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 12);
+    final id = keep.audio.keys.single;
+    expect(keep.audio[id], hasLength(32000));
+    expect(firstSample(keep.audio[id]!, 0), 1);
+    expect(firstSample(keep.audio[id]!, 31998), 10);
+    final stopped = r.session.stop();
+    await pumpEventQueue();
+    // Finished means every word is final, whatever the count says.
+    link.reply(reply(done: [tokens[0]], finalMs: 1000, finished: true));
+    await stopped;
+    expect(keep.discarded, [id]);
+    expect(r.session.left, isNull);
+    expect(r.troubles, isEmpty);
+  });
+
+  test('no connection at the tap: no key, MP·15, it all waits', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    var asked = 0;
+    final r = kept(mic, keep, connection: FakeConnection()..online = false, key: () async => '${asked++}');
+    expect(await r.session.start(), isTrue);
+    expect(r.troubles, [Trouble.offline]);
+    await frames(mic, 5);
+    await r.session.stop();
+    await pumpEventQueue();
+    expect(asked, 0);
+    final id = keep.audio.keys.single;
+    expect(keep.audio[id], hasLength(16000));
+    expect(keep.ended, [id]);
+    expect(r.session.left, (audio: id, from: 0));
+    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingEnded']);
+  });
+
+  test('a key that fails: it goes on, MP·54, it all waits', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final r = kept(mic, keep, key: () async => throw const KeyFailure(502));
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 3);
+    expect(mic.running, isTrue);
+    expect(r.troubles, [Trouble.broke]);
+    expect(r.ended, isEmpty);
+    await frames(mic, 3, 4);
+    await r.session.stop();
+    await pumpEventQueue();
+    final id = keep.audio.keys.single;
+    expect(keep.audio[id], hasLength(19200));
+    expect(r.session.left, (audio: id, from: 0));
+    expect(lines, ['recordingStarted', 'recordingKeyFailed 502', 'recordingEnded']);
+  });
+
+  test('a break: final words stay; the rest waits from Soniox\'s count', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 4);
+    link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 200));
+    await pumpEventQueue();
+    await link.drop(1011);
+    await pumpEventQueue();
+    expect(mic.running, isTrue);
+    expect(r.troubles, [Trouble.broke]);
+    expect(r.heard, [(tokens[0], tokens[1]), ('', '')]);
+    final sent = link.sent.length;
+    await frames(mic, 2, 5);
+    expect(link.sent, hasLength(sent));
+    await r.session.stop();
+    await pumpEventQueue();
+    final id = keep.audio.keys.single;
+    expect(keep.audio[id], hasLength(19200));
+    expect(r.session.left, (audio: id, from: 6400));
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingEnded']);
+  });
+
+  test('a stop whose last words never all come: the rest waits', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 4);
+    link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 100));
+    await r.session.stop();
+    final id = keep.audio.keys.single;
+    expect(r.session.left, (audio: id, from: 3200));
+    expect(r.heard.last, ('', ''));
+    expect(keep.discarded, isEmpty);
+  });
+
+  test('a cancel mid-stream: the rest waits; unsettled words leave', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 4);
+    link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 300));
+    await pumpEventQueue();
+    await r.session.cancel();
+    final id = keep.audio.keys.single;
+    expect(r.session.left, (audio: id, from: 9600));
+    expect(r.heard.last, ('', ''));
+    expect(keep.ended, [id]);
+  });
+
+  test('nothing past the final words: deleted, nothing waits', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 2);
+    link.reply(reply(done: [tokens[0]], finalMs: 900));
+    await pumpEventQueue();
+    await link.drop(1011);
+    await pumpEventQueue();
+    await r.session.stop();
+    expect(r.session.left, isNull);
+    expect(keep.discarded, hasLength(1));
+  });
+
+  test('at the cap it stops itself as Stop does, a code', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final r = kept(mic, keep, connection: FakeConnection()..online = false, cap: 9600);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 2);
+    expect(mic.running, isTrue);
+    await frames(mic, 1, 3);
+    await pumpEventQueue();
+    expect(mic.running, isFalse);
+    expect(r.ended, [1]);
+    expect(r.session.left, (audio: keep.audio.keys.single, from: 0));
+    expect(lines, ['recordingStarted', 'recordingOffline', 'recordingCapped', 'recordingEnded']);
+  });
+
+  test('every recording stops at ten minutes (D93 Q6)', () {
+    expect(recordingCap, 10 * 60 * 16000 * 2);
+    expect(Recording(on: true, microphone: SilentMicrophone(), key: () async => 'k', connect: (_) async => MemoryLink())
+        .cap, recordingCap);
+  });
+
+  test('a keep that fails: a code; a break stops it', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep()..fails = true;
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 11);
+    await link.drop(1011);
+    await pumpEventQueue();
+    expect(mic.running, isFalse);
+    expect(r.troubles, isEmpty);
+    expect(r.session.left, isNull);
+    expect(lines, ['recordingStarted', 'audioKeepFailed', 'recordingStreamFailed 1011', 'recordingEnded']);
+  });
+
+  test('refused or off: no audio, no id', () async {
+    final keep = MemoryKeep();
+    final refused = kept(SilentMicrophone()..allow = false, keep);
+    expect(await refused.session.start(), isFalse);
+    expect(refused.troubles, [Trouble.refused]);
+    expect(keep.audio, isEmpty);
+    expect(keep.newId(), '1'.padLeft(32, '0'));
+  });
+
+  test('keeping makes the same recording, with the keep', () {
+    final mic = SilentMicrophone();
+    final connection = FakeConnection();
+    final keep = MemoryKeep();
+    final plain = Recording(
+      on: true,
+      microphone: mic,
+      key: () async => 'k',
+      connect: (_) async => MemoryLink(),
+      connection: connection,
+      cap: 64,
+    );
+    final kept = plain.keeping(keep);
+    expect(kept.keep, same(keep));
+    expect(plain.keep, isNull);
+    expect([kept.on, kept.microphone, kept.connection, kept.cap], [true, mic, connection, 64]);
+    expect(kept.key, same(plain.key));
+    expect(kept.connect, same(plain.connect));
+  });
 }
