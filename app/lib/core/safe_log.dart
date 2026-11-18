@@ -64,6 +64,10 @@ enum LogEvent {
   /// could not be kept on the phone (D92).
   recordingOffline,
   recordingCapped,
+
+  /// The phone reported its connection gone during a recording whose
+  /// stream was open or opening (D100).
+  recordingConnectionLost,
   audioKeepFailed,
 
   /// A recording that leaves audio waiting, as it ends (D98's diagnostic),

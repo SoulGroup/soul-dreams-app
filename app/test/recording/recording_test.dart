@@ -797,6 +797,226 @@ void main() {
     expect(lines, ['recordingStarted', 'recordingEnded']);
   });
 
+  // D100: the phone reporting its connection gone is a break at once, not
+  // only at Stop: MP·54 now, the words not yet final leave, the recording
+  // goes on into the keep, the stream is closed and sent nothing more.
+  test('the connection lost mid-stream: MP·54 at once, it goes on', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final link = MemoryLink();
+    final connection = FakeConnection();
+    final r = kept(mic, keep, link: link, connection: connection);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 4);
+    link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 200));
+    await pumpEventQueue();
+    connection.set(false);
+    await pumpEventQueue();
+    expect(r.troubles, [Trouble.broke]);
+    expect(r.heard, [(tokens[0], tokens[1]), ('', '')]);
+    expect(mic.running, isTrue);
+    expect(r.ended, isEmpty);
+    expect(link.closed, isTrue);
+    final sent = link.sent.length;
+    await frames(mic, 2, 5);
+    expect(link.sent, hasLength(sent));
+    // The connection coming back changes nothing in this recording.
+    connection.set(true);
+    connection.set(false);
+    await pumpEventQueue();
+    expect(r.troubles, [Trouble.broke]);
+    await r.session.stop();
+    final id = keep.audio.keys.single;
+    expect(keep.audio[id], hasLength(19200));
+    expect(r.session.left, (audio: id, from: 6400));
+    expect(lines, ['recordingStarted', 'recordingConnectionLost', 'recordingSettled 200 600', 'recordingEnded']);
+  });
+
+  test('the connection lost while the stream opens: it never opens', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final key = Completer<String>();
+    final link = MemoryLink();
+    final troubles = <Trouble>[];
+    var connects = 0;
+    final session = RecordingSession(
+      Recording(
+        on: true,
+        microphone: mic,
+        key: () => key.future,
+        connect: (_) async {
+          connects++;
+          return link;
+        },
+        keep: keep,
+        connection: connection,
+      ),
+      onHeard: (_, _) {},
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () {},
+      onTrouble: troubles.add,
+      wait: const Duration(milliseconds: 200),
+    );
+    expect(await session.start(), isTrue);
+    await frames(mic, 3);
+    connection.set(false);
+    await pumpEventQueue();
+    expect(troubles, [Trouble.broke]);
+    // The key comes after the cut: no stream is opened, nothing is sent.
+    key.complete('k');
+    await pumpEventQueue();
+    expect(connects, 0);
+    expect(link.sent, isEmpty);
+    await frames(mic, 2, 4);
+    await session.stop();
+    expect(troubles, [Trouble.broke]);
+    expect(session.left, (audio: keep.audio.keys.single, from: 0));
+    expect(lines, ['recordingStarted', 'recordingConnectionLost', 'recordingSettled 0 500', 'recordingEnded']);
+  });
+
+  test('the connection lost while opening: a stream that comes is closed', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final opened = Completer<SonioxLink>();
+    final link = MemoryLink();
+    final troubles = <Trouble>[];
+    final session = RecordingSession(
+      Recording(
+        on: true,
+        microphone: mic,
+        key: () async => 'k',
+        connect: (_) => opened.future,
+        keep: keep,
+        connection: connection,
+      ),
+      onHeard: (_, _) {},
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () {},
+      onTrouble: troubles.add,
+      wait: const Duration(milliseconds: 200),
+    );
+    expect(await session.start(), isTrue);
+    await frames(mic, 2);
+    connection.set(false);
+    await pumpEventQueue();
+    opened.complete(link);
+    await pumpEventQueue();
+    expect(link.closed, isTrue);
+    expect(link.sent, isEmpty);
+    expect(troubles, [Trouble.broke]);
+    await session.stop();
+  });
+
+  test('the connection lost after the key failed: told once', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final r = kept(mic, keep, connection: connection, key: () async => throw const KeyFailure(502));
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 2);
+    connection.set(false);
+    await pumpEventQueue();
+    expect(r.troubles, [Trouble.broke]);
+    await r.session.stop();
+    expect(lines, ['recordingStarted', 'recordingKeyFailed 502', 'recordingSettled 0 200', 'recordingEnded']);
+  });
+
+  test('the connection lost during a stop: it ends at once, MP·54', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final troubles = <Trouble>[];
+    final session = RecordingSession(
+      Recording(
+        on: true,
+        microphone: mic,
+        key: () async => 'k',
+        connect: (_) async => MemoryLink(),
+        keep: keep,
+        connection: connection,
+      ),
+      onHeard: (_, _) {},
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () {},
+      onTrouble: troubles.add,
+      wait: const Duration(seconds: 30),
+    );
+    expect(await session.start(), isTrue);
+    await frames(mic, 3);
+    var done = false;
+    unawaited(session.stop().then((_) => done = true));
+    await pumpEventQueue();
+    expect(done, isFalse);
+    connection.set(false);
+    await pumpEventQueue();
+    expect(done, isTrue);
+    expect(troubles, [Trouble.broke]);
+    expect(session.left, (audio: keep.audio.keys.single, from: 0));
+  });
+
+  test('offline at the tap: a later loss changes nothing', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection()..online = false;
+    final r = kept(mic, keep, connection: connection);
+    expect(await r.session.start(), isTrue);
+    connection.set(true);
+    connection.set(false);
+    await pumpEventQueue();
+    expect(r.troubles, [Trouble.offline]);
+    await r.session.stop();
+    expect(lines, isNot(contains('recordingConnectionLost')));
+  });
+
+  // With no audio kept (D71), a lost connection stops it as a break does.
+  test('no keep: the connection lost stops it, the words kept', () async {
+    final mic = SilentMicrophone();
+    final connection = FakeConnection();
+    final ended = <int>[];
+    final heard = <(String, String)>[];
+    final link = MemoryLink();
+    final session = RecordingSession(
+      Recording(on: true, microphone: mic, key: () async => 'k', connect: (_) async => link, connection: connection),
+      onHeard: (f, p) => heard.add((f, p)),
+      onLevel: (_) {},
+      onStopping: () {},
+      onEnded: () => ended.add(1),
+    );
+    expect(await session.start(), isTrue);
+    await pumpEventQueue();
+    link.reply(reply(done: [tokens[0]]));
+    await pumpEventQueue();
+    connection.set(false);
+    await pumpEventQueue();
+    expect(ended, [1]);
+    expect(mic.running, isFalse);
+    expect(heard, [(tokens[0], '')]);
+    expect(lines, ['recordingStarted', 'recordingConnectionLost', 'recordingEnded']);
+  });
+
+  test('a recording that has ended stops watching the connection', () async {
+    final mic = SilentMicrophone();
+    final keep = MemoryKeep();
+    final connection = FakeConnection();
+    final link = MemoryLink();
+    final r = kept(mic, keep, link: link, connection: connection);
+    expect(await r.session.start(), isTrue);
+    await frames(mic, 2);
+    final stopped = r.session.stop();
+    await pumpEventQueue();
+    link.reply(reply(done: [tokens[0]], finalMs: 200, finished: true));
+    await stopped;
+    connection.set(false);
+    await pumpEventQueue();
+    expect(r.troubles, isEmpty);
+    expect(lines, isNot(contains('recordingConnectionLost')));
+  });
+
   test('stop while still opening, in vain: MP·54, all waits', () async {
     final mic = SilentMicrophone();
     final keep = MemoryKeep();

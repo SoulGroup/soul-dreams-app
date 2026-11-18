@@ -1870,6 +1870,58 @@ void main() {
     expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft()), Waiting(id, 3200)]);
   });
 
+  // D100: the phone reporting its connection gone shows MP·54 at once, not
+  // only at Stop; the words not yet final leave, the recording goes on, and
+  // MP·54 stays until the next tap.
+  testWidgets('the connection lost: MP·54 at once, until the next tap', (tester) async {
+    final v = offline(online: true);
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 3);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 100));
+    await tester.pump();
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
+    v.connection.set(false);
+    await tester.pump();
+    await tester.pump();
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+    expect(v.mic.running, isTrue);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    expect(field.controller!.text, tokens[0].trimLeft());
+    await frames(tester, v.mic, 2);
+    // Stop: it ends at once, and MP·54 stays.
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.levelKey), findsNothing);
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    await tester.pump(const Duration(seconds: 30));
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    final id = v.keep.audio.keys.single;
+    expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft()), Waiting(id, 3200)]);
+  });
+
+  testWidgets('MP·54 from a lost connection goes at the next tap', (tester) async {
+    final v = offline(online: true);
+    await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 2);
+    v.connection.set(false);
+    await tester.pump();
+    await tester.pump();
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    // The next tap: still offline, so MP·15 now, and MP·54 is gone.
+    await record(tester);
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsNothing);
+    expect(find.bySemanticsLabel(Lines.MP_15.text(Lang.en)), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+  });
+
   // D96 Q1: a keep that fails once the recording is cut stops it, and the
   // notice that the audio stays on the phone goes.
   testWidgets('keep fails offline: recording stops, the notice goes', (tester) async {

@@ -13,6 +13,8 @@
 // waits, from Soniox's `final_audio_proc_ms` on, and the words not yet
 // final leave the field, since they come back with the rest (D93 Q4, Q5).
 // Every recording stops itself at ten minutes, as Stop does (D93 Q6).
+// When the phone reports its connection gone while the stream is open or
+// opening, that is a break at once, not only at Stop (D100).
 // Without a keep, or once it fails, a key or a stream that fails stops the
 // recording as a broken stream does, keeping the words shown (D71).
 import 'dart:async';
@@ -200,6 +202,9 @@ final class RecordingSession {
   StreamSubscription<String>? _replies;
   StreamSubscription<Uint8List>? _frames;
   StreamSubscription<void>? _interruptions;
+  // The phone's connection, watched while the stream is open or opening
+  // (D100).
+  StreamSubscription<bool>? _connection;
   // Done when the wait for the last words can end: Soniox finished, the
   // stream went while a stop waits, or the session ended.
   final _finished = Completer<void>();
@@ -298,6 +303,10 @@ final class RecordingSession {
       SafeLog.event(LogEvent.recordingOffline);
       onTrouble(Trouble.offline);
     } else {
+      // The phone says its connection went: a break, now (D100).
+      _connection = _recording.connection?.changes.listen((online) {
+        if (!online) _lost();
+      });
       _opening = _open();
     }
     return true;
@@ -365,15 +374,17 @@ final class RecordingSession {
     } on Object {
       return _brokeOff(LogEvent.recordingKeyFailed, 0);
     }
-    if (_ended) return;
+    // Ended, or cut while the key came (D100): no stream is opened.
+    if (_ended || _cut) return;
     final SonioxLink link;
     try {
       link = await _recording.connect(key);
     } on Object {
       return _brokeOff(LogEvent.recordingStreamFailed, 0);
     }
-    if (_ended) {
-      // The session ended while the stream opened: close it, wait for nothing.
+    if (_ended || _cut) {
+      // The session ended, or was cut (D100), while the stream opened:
+      // close it, wait for nothing.
       _closeQuietly(link);
       return;
     }
@@ -389,7 +400,8 @@ final class RecordingSession {
   // No key or no stream: as a break, holding nothing (D88); with the audio
   // kept, the recording goes on (D92).
   void _brokeOff(LogEvent code, int number) {
-    if (_ended) return;
+    // Already cut (D100): the dreamer was told; nothing more.
+    if (_ended || _cut) return;
     SafeLog.event(code, [number]);
     if (_keeping) {
       _goOn();
@@ -421,11 +433,25 @@ final class RecordingSession {
     }
   }
 
-  // The stream broke off before its end: the words shown stay; with the
-  // audio kept, the recording goes on and the rest waits (D92, D93 Q5).
+  // The stream broke off before its end.
   void _broke(int code) {
     if (_ended || _finished.isCompleted || _cut) return;
     SafeLog.event(LogEvent.recordingStreamFailed, [code]);
+    _cutOff();
+  }
+
+  // The phone reports no connection while the stream is open or opening
+  // (D100): the same as a break, at once.
+  void _lost() {
+    if (_ended || _finished.isCompleted || _cut) return;
+    SafeLog.event(LogEvent.recordingConnectionLost);
+    _cutOff();
+  }
+
+  // The stream is gone: the words shown stay; with the audio kept, the
+  // recording goes on and the rest waits (D92, D93 Q5); without, it stops
+  // as a broken stream does (D71).
+  void _cutOff() {
     if (!_keeping) {
       unawaited(_shut());
       return;
@@ -510,6 +536,9 @@ final class RecordingSession {
     _ended = true;
     if (!_finished.isCompleted) _finished.complete();
     _held.clear();
+    // Watched until the end, the wait for the last words included (D100).
+    unawaited(_connection?.cancel());
+    _connection = null;
     await _micOff();
     final replies = _replies;
     _replies = null;
