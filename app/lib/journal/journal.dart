@@ -7,8 +7,12 @@
 //   night's other dreams remain (D58 Q3); a night left with no dream is
 //   deleted, as a deletion deletes it (P10).
 // - A dream is told in words or waits as a recording (D93 Q2); a dream's
-//   index counts both, and a waiting one is never edited.
+//   index counts both, and a waiting one is never edited. A Save puts the
+//   recordings its screen left waiting after its words, in order; a Save
+//   with nothing typed but a recording waiting keeps it (D93 Q7).
 import 'dart:math';
+
+import 'package:flutter/foundation.dart' show listEquals;
 
 import '../words/lines.g.dart' show Lang;
 import 'journal_store.dart';
@@ -43,10 +47,11 @@ final class Journal {
   /// Where a typing screen opened now from the journal saves.
   Future<Target> targetNow() async => targetAt(await _store.nights(), _now());
 
-  /// Saves [text] as a new dream at [target]. Returns whether anything
-  /// was kept.
-  Future<bool> addDream(Target target, String text, Lang lang) async {
-    if (isEmptyText(text)) return false;
+  /// Saves [text] as a new dream at [target], and after it the recordings
+  /// [waiting] for their words. Returns whether anything was kept.
+  Future<bool> addDream(Target target, String text, Lang lang, {List<Waiting> waiting = const []}) async {
+    final added = <Dream>[if (!isEmptyText(text)) Told(text), ...waiting];
+    if (added.isEmpty) return false;
     switch (target) {
       case NewNight(:final begun):
         await _store.save(Night(
@@ -55,28 +60,36 @@ final class Journal {
           date: dateOf(begun, zone),
           closes: closesAfter(begun, zone),
           lang: lang,
-          dreams: [text],
+          entries: added,
         ));
         return true;
       case IntoNight(:final id):
         // One turn of the store's queue: a delete cannot fall between
         // the read and the write, nor another Save lose this one (D61).
-        return _store.update(id, (n) => n.withEntries([...n.entries, Told(text)]));
+        return _store.update(id, (n) => n.withEntries([...n.entries, ...added]));
     }
   }
 
-  /// Replaces dream [index] of night [id] with [text]. The index counts
-  /// every dream, told or waiting; a waiting one is never replaced.
-  Future<void> editDream(String id, int index, String text) async {
+  /// Replaces dream [index] of night [id] with [text], and puts the
+  /// recordings [waiting] for their words after it (at the night's end if
+  /// that dream is gone). The index counts every dream, told or waiting; a
+  /// waiting one is never replaced.
+  Future<void> editDream(String id, int index, String text, {List<Waiting> waiting = const []}) async {
     await _store.update(id, (n) {
-      if (index < 0 || index >= n.entries.length || n.entries[index] is! Told) return n;
       final entries = [...n.entries];
-      if (isEmptyText(text)) {
-        entries.removeAt(index);
-      } else {
-        entries[index] = Told(text);
+      var at = entries.length;
+      if (index >= 0 && index < entries.length && entries[index] is Told) {
+        if (isEmptyText(text)) {
+          entries.removeAt(index);
+          at = index;
+        } else {
+          entries[index] = Told(text);
+          at = index + 1;
+        }
       }
-      return entries.isEmpty ? null : n.withEntries(entries);
+      entries.insertAll(at, waiting);
+      if (entries.isEmpty) return null;
+      return listEquals(entries, n.entries) ? n : n.withEntries(entries);
     });
   }
 

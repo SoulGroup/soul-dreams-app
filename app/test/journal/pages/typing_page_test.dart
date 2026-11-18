@@ -13,6 +13,7 @@ import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
+import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/recording/heard_text.dart';
@@ -1616,6 +1617,177 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel(Lines.MP_10.text(Lang.en)), findsOneWidget);
     expect(lines, ['firstUseReadFailed']);
+  });
+  // Offline recording (D92 to D94; D93 Q2, Q4, Q5, Q7), on a keep in memory.
+  ({SilentMicrophone mic, MemoryLink link, MemoryKeep keep, FakeConnection connection, Recording recording}) offline({
+    bool online = false,
+  }) {
+    final mic = SilentMicrophone();
+    final link = MemoryLink();
+    final keep = MemoryKeep();
+    final connection = FakeConnection()..online = online;
+    return (
+      mic: mic,
+      link: link,
+      keep: keep,
+      connection: connection,
+      recording: Recording(
+        on: true,
+        microphone: mic,
+        key: () async => 'k',
+        connect: (_) async => link,
+        keep: keep,
+        connection: connection,
+      ),
+    );
+  }
+
+  Future<void> frames(WidgetTester tester, SilentMicrophone mic, int n) async {
+    for (var i = 0; i < n; i++) {
+      mic.frame(i + 1);
+    }
+    await tester.pump();
+  }
+
+  testWidgets('no connection: MP·15, no MP·33, and Save keeps it waiting', (tester) async {
+    final v = offline();
+    final h = await tall(tester, recording: v.recording);
+    tester.takeAnnouncements();
+    await record(tester);
+    expect(tester.takeAnnouncements(), isEmpty);
+    expect(find.byKey(TypingPage.levelKey), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_15.text(Lang.en)), findsOneWidget);
+    await frames(tester, v.mic, 4);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsNothing);
+    final id = v.keep.audio.keys.single;
+    expect((await h.nights()).single.entries, [Waiting(id)]);
+    expect(v.keep.audio[id], hasLength(12800));
+  });
+
+  testWidgets('a break shows MP·54; final words stay, the rest waits after', (tester) async {
+    final lines = await logged();
+    final v = offline(online: true);
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 3);
+    v.link.reply(reply(done: [tokens[0]], shown: [tokens[1]], finalMs: 100));
+    await tester.pump();
+    expect(find.text(tokens[0] + tokens[1]), findsOneWidget);
+    await v.link.drop(1011);
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel(Lines.MP_54.text(Lang.en)), findsOneWidget);
+    expect(v.mic.running, isTrue);
+    final field = tester.widget<TextField>(find.byKey(TypingPage.fieldKey));
+    expect(field.controller!.text, tokens[0].trimLeft());
+    await frames(tester, v.mic, 2);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    final id = v.keep.audio.keys.single;
+    expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft()), Waiting(id, 3200)]);
+    expect(lines, ['recordingStarted', 'recordingStreamFailed 1011', 'recordingEnded']);
+  });
+
+  testWidgets('MP·54 goes at the next tap of the microphone', (tester) async {
+    final links = <MemoryLink>[];
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () async => 'k',
+      connect: (_) async => MemoryLink().._keep(links),
+      keep: MemoryKeep(),
+    );
+    await tall(tester, recording: recording);
+    await record(tester);
+    await links.single.drop(1011);
+    await tester.pumpAndSettle();
+    expect(find.byKey(TypingPage.noticeKey), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pumpAndSettle();
+    await record(tester);
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
+  });
+
+  testWidgets('leaving with only a recording waiting keeps the night', (tester) async {
+    final v = offline();
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 2);
+    await leave(tester, AppLifecycleState.hidden);
+    expect(find.byType(TypingPage), findsNothing);
+    expect((await h.nights()).single.entries, [Waiting(v.keep.audio.keys.single)]);
+  });
+
+  testWidgets('two recordings waiting go after the words, in order', (tester) async {
+    final v = offline();
+    final h = await tall(tester, recording: v.recording);
+    await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
+    for (var i = 0; i < 2; i++) {
+      await record(tester);
+      await frames(tester, v.mic, 1);
+      await tester.tap(find.byKey(TypingPage.micKey));
+      await tester.pumpAndSettle();
+    }
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    final [a, b] = v.keep.audio.keys.toList();
+    expect((await h.nights()).single.entries, [Told(dreams[0]), Waiting(a), Waiting(b)]);
+  });
+
+  testWidgets('an edit with a recording waiting puts it after the dream', (tester) async {
+    final v = offline();
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 8));
+    await h.pump(
+      tester,
+      Opener(
+        () async => TypingPage(
+          journal: h.journal,
+          target: IntoNight(n.id),
+          edit: (id: n.id, index: 0, text: n.dreams[0]),
+          recording: v.recording,
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    await record(tester);
+    await frames(tester, v.mic, 1);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    final id = v.keep.audio.keys.single;
+    expect((await h.journal.night(n.id))!.entries, [Told(n.dreams[0]), Waiting(id), Told(n.dreams[1])]);
+  });
+
+  testWidgets('every word final: nothing waits, the audio is deleted', (tester) async {
+    final v = offline(online: true);
+    final h = await tall(tester, recording: v.recording);
+    await record(tester);
+    await frames(tester, v.mic, 2);
+    v.link.reply(reply(done: [tokens[0]], finalMs: 200));
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pump();
+    v.link.reply(reply(finished: true));
+    await tester.pumpAndSettle();
+    expect((await h.nights()).single.entries, [Told(tokens[0].trimLeft())]);
+    expect(v.keep.discarded, hasLength(1));
+    expect(find.byKey(TypingPage.noticeKey), findsNothing);
+  });
+
+  testWidgets('a failed Save keeps the waiting recording for the next', (tester) async {
+    final v = offline();
+    final files = FlakyFiles();
+    final h = await tall(tester, recording: v.recording, files: files);
+    await record(tester);
+    await frames(tester, v.mic, 1);
+    files.failures = 1;
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect((await h.nights()).single.entries, [Waiting(v.keep.audio.keys.single)]);
   });
 }
 

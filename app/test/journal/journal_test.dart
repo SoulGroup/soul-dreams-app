@@ -53,6 +53,31 @@ void main() {
     expect(await entries(), [w]);
   });
 
+  // D93 Q2, Q7: a Save keeps the recordings its screen left waiting, after
+  // its words; with nothing typed, the recording alone keeps the night.
+  test('a Save keeps waiting recordings after its words', () async {
+    final (x, y) = (Waiting('1' * 32), Waiting('2' * 32, 64));
+    expect(await journal.addDream(await journal.targetNow(), ' ', Lang.en, waiting: [x]), isTrue);
+    final n = (await journal.newestFirst()).single;
+    expect(n.entries, [x]);
+    expect(await journal.addDream(IntoNight(n.id), a[0], Lang.en, waiting: [y]), isTrue);
+    expect((await journal.night(n.id))!.entries, [x, Told(a[0]), y]);
+  });
+
+  test('an edit puts waiting recordings after its dream, or instead', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final n = (await journal.newestFirst()).single;
+    await journal.addDream(IntoNight(n.id), a[1], Lang.en);
+    final (x, y, z) = (Waiting('1' * 32), Waiting('2' * 32), Waiting('3' * 32));
+    Future<List<Dream>> entries() async => (await journal.night(n.id))!.entries;
+    await journal.editDream(n.id, 0, b[0], waiting: [x]);
+    expect(await entries(), [Told(b[0]), x, Told(a[1])]);
+    await journal.editDream(n.id, 2, '', waiting: [y]);
+    expect(await entries(), [Told(b[0]), x, y]);
+    await journal.editDream(n.id, 9, b[0], waiting: [z]);
+    expect(await entries(), [Told(b[0]), x, y, z]);
+  });
+
   test('an empty Save keeps nothing', () async {
     for (final text in ['', '  \n ']) {
       expect(await journal.addDream(await journal.targetNow(), text, Lang.en), isFalse);

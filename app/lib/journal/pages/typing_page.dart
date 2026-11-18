@@ -19,8 +19,13 @@
 // MP·33; a stop, Save or Back waits for the last words; leaving the app
 // ends it at once. A refused microphone shows MP·63 where MP·62 shows,
 // until the next tap of the microphone (D93 Q4); while it records, the
-// microphone's spoken name is MP·64. Another failure to start or a break
-// shows nothing new.
+// microphone's spoken name is MP·64. Offline recording (D92 to D94): with
+// no connection at the tap, MP·15 shows in place of MP·33's announcement;
+// a key, a stream or Soniox's budget failing shows MP·54; either way the
+// recording goes on, and what was not turned into words waits on the phone.
+// The Save puts each waiting recording after the dream's words, and keeps
+// a night with nothing typed but a recording waiting (D93 Q2, Q7).
+// Without a keep, a failure to start or a break shows nothing new.
 import 'dart:async';
 import 'dart:math';
 
@@ -38,6 +43,7 @@ import '../../recording/recording.dart';
 import '../../words/lines.g.dart';
 import '../../words/pending.g.dart';
 import '../journal.dart';
+import '../night.dart';
 import '../night_rules.dart';
 import 'parts.dart';
 
@@ -117,6 +123,9 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   // What the dreamer is told about the recording, until the next tap of the
   // microphone or the screen closes (D93 Q4).
   Trouble? _trouble;
+  // The recordings this screen left waiting for their words, in order; the
+  // Save keeps them (D93 Q2).
+  final _waiting = <Waiting>[];
   Timer? _ticker;
 
   @override
@@ -186,18 +195,21 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
       await (leaving ? session.cancel() : session.stop());
       _saving = false;
     }
-    // Leaving with nothing typed keeps nothing and stays, so an emptied
-    // edit never deletes a dream behind the dreamer's back.
-    if (leaving && isEmptyText(_text.text)) return;
+    // Leaving with nothing typed and nothing waiting keeps nothing and
+    // stays, so an emptied edit never deletes a dream behind the dreamer's
+    // back (D93 Q7: a recording waiting is something).
+    if (leaving && isEmptyText(_text.text) && _waiting.isEmpty) return;
     _saving = true;
     if (_failed && mounted) setState(() => _failed = false);
     try {
       final e = widget.edit;
+      final waiting = List.of(_waiting);
       if (e == null) {
-        await widget.journal.addDream(widget.target, _text.text, appLanguage);
+        await widget.journal.addDream(widget.target, _text.text, appLanguage, waiting: waiting);
       } else {
-        await widget.journal.editDream(e.id, e.index, _text.text);
+        await widget.journal.editDream(e.id, e.index, _text.text, waiting: waiting);
       }
+      _waiting.clear();
     } on Object {
       SafeLog.event(LogEvent.journalSaveFailed);
       _saving = false;
@@ -273,7 +285,10 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
       if (mounted) setState(() => _seconds++);
     });
-    SemanticsService.sendAnnouncement(View.of(context), Lines.MP_33.text(appLanguage), TextDirection.ltr);
+    // With no connection, MP·15 is what a screen reader hears (D93 Q4).
+    if (_trouble != Trouble.offline) {
+      SemanticsService.sendAnnouncement(View.of(context), Lines.MP_33.text(appLanguage), TextDirection.ltr);
+    }
   }
 
   // Heard words go in at the insertion point (D87 1).
@@ -394,10 +409,13 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     _ticker = null;
   }
 
-  // The recording ended, by a stop or by itself: the words shown stay.
+  // The recording ended, by a stop or by itself: the words shown stay, and
+  // what it left waiting is noted for the Save.
   void _ended() {
     _ticker?.cancel();
     _ticker = null;
+    final left = _session?.left;
+    if (left != null) _waiting.add(Waiting(left.audio, left.from));
     _session = null;
     if (!mounted) return;
     // The next key, fetched in advance (D88).

@@ -6,10 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
 import 'package:souldreams/core/safe_log.dart';
+import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
+import 'package:souldreams/recording/recording.dart';
 
+import '../../recording/fakes.dart';
 import '../memory_journal_files.dart';
 
 /// A folder that says whether it was opened.
@@ -38,6 +41,22 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
     expect(lines, isEmpty);
+  });
+
+  // D92: the recording the pages get keeps its audio in the journal's folder.
+  testWidgets('the recording handed on keeps its audio in the journal', (tester) async {
+    JournalStore.newQueueForTests();
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () async => 'k',
+      connect: (_) async => MemoryLink(),
+    );
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: MemoryJournalFiles(), recording: recording)));
+    await tester.pumpAndSettle();
+    final handed = tester.widget<JournalPage>(find.byType(JournalPage)).recording!;
+    expect(handed.keep, isA<JournalAudio>());
+    expect(handed.microphone, same(recording.microphone));
   });
 
   // D65: with the phone check, its probe never shows as a row, because the

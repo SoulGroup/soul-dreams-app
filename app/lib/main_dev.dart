@@ -11,6 +11,7 @@ import 'core/safe_log.dart';
 import 'journal/channel_journal_files.dart';
 import 'journal/pages/journal_home.dart';
 import 'journal/self_check.dart';
+import 'recording/connection.dart';
 import 'recording/record_microphone.dart';
 import 'recording/recording.dart';
 
@@ -24,7 +25,12 @@ void main() {
   final check = const bool.fromEnvironment('JOURNAL_SELF_CHECK') ? journalSelfCheck(files, files) : null;
   // Recording by voice (D69, D71): the beta key comes from the owner's
   // file through --dart-define-from-file (R5); with none, recording is off.
-  final recording = Recording.live(microphone: RecordMicrophone(), betaKey: const String.fromEnvironment('BETA_KEY'));
+  // The phone's own connection status decides MP·15 at the tap (D93 Q4).
+  final recording = Recording.live(
+    microphone: RecordMicrophone(),
+    betaKey: const String.fromEnvironment('BETA_KEY'),
+    connection: ChannelConnection(),
+  );
   // The keyboard check (D50 1): only in a build made with
   // --dart-define=KEYBOARD_CHECK=true.
   runApp(
