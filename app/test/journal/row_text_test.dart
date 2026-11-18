@@ -29,6 +29,13 @@ void main() {
   final rest = invented('two-dreams-en').dreams.first;
   final restSv = invented('one-dream-sv').dreams.first;
 
+  // D93 Q3: a night whose dreams all wait shows its date alone.
+  test('the opening is the first told dream; none when all wait', () {
+    final n = told(rest);
+    expect(opening(n.withEntries([Waiting('e' * 32), Told(restSv)])), restSv);
+    expect(opening(n.withEntries([Waiting('e' * 32)])), '');
+  });
+
   test('each framing is trimmed from the very start, ignoring case', () {
     for (final f in ListWords.tech1En) {
       expect(opening(told('$f $rest')), rest, reason: f);

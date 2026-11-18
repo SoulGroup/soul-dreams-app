@@ -1,4 +1,5 @@
-// A night and its file format, version 1 (D49 b).
+// A night and its file format: version 2 written, version 1 still read
+// (D49 b; D92, D93 Q2; docs/workflow.md (c)).
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
@@ -13,6 +14,14 @@ Map<String, Object?> fields(Night n) =>
 
 Uint8List bytesOf(Map<String, Object?> json) => utf8.encode(jsonEncode(json));
 
+/// The night as a version-1 file held it: the same fields, version 1, the
+/// dreams as words only.
+Uint8List versionOne(Night n) => bytesOf({...fields(n), 'version': 1});
+
+/// Two waiting recordings' ids, made up for the tests.
+final audioA = 'a' * 32;
+final audioB = '0123456789abcdef' * 2;
+
 void main() {
   test('every invented night survives encoding and decoding', () {
     for (final n in nightsFromFixtures()) {
@@ -20,12 +29,12 @@ void main() {
     }
   });
 
-  test('the file holds exactly the version-1 fields', () {
+  test('the file holds exactly the version-2 fields', () {
     final n = nightsFromFixtures().first;
     final json = fields(n);
     expect(json.keys.toSet(),
         {'version', 'id', 'firstRecorded', 'date', 'closes', 'lang', 'name', 'dreams'});
-    expect(json['version'], 1);
+    expect(json['version'], 2);
     expect(json['id'], n.id);
     expect(json['firstRecorded'], '2026-10-12T06:40:00.000Z');
     expect(json['date'], '2026-10-12');
@@ -34,7 +43,85 @@ void main() {
     expect(json['dreams'], n.dreams);
   });
 
-  test('anything not a version-1 night decodes to null', () {
+  // docs/workflow.md (c): the old format loads, and the new one loses
+  // nothing; every night, dream and field counted before and after.
+  test('every version-1 night reads whole and saves as version 2', () {
+    final nights = nightsFromFixtures();
+    var dreams = 0;
+    for (final n in nights) {
+      final old = jsonDecode(utf8.decode(versionOne(n))) as Map<String, Object?>;
+      final read = decodeNight(versionOne(n));
+      expect(read, n);
+      final saved = fields(read!);
+      expect(saved['version'], 2);
+      expect(saved.keys.toSet(), old.keys.toSet());
+      for (final key in old.keys.where((k) => k != 'version')) {
+        expect(saved[key], old[key], reason: '${n.id} $key');
+      }
+      expect(read.entries, [for (final d in old['dreams'] as List<Object?>) Told(d as String)]);
+      dreams += read.dreams.length;
+    }
+    expect(nights.length, inventedNights().length);
+    expect(dreams, inventedNights().fold<int>(0, (sum, n) => sum + n.dreams.length));
+  });
+
+  test('a waiting recording keeps its place among the told dreams', () {
+    final n = nightsFromFixtures().first;
+    final night = n.withEntries([Told(n.dreams.first), Waiting(audioA, 64000), Told('x'), Waiting(audioB)]);
+    expect(fields(night)['dreams'], [
+      n.dreams.first,
+      {'waiting': audioA, 'from': 64000},
+      'x',
+      {'waiting': audioB, 'from': 0},
+    ]);
+    expect(decodeNight(encodeNight(night)), night);
+    expect(night.dreams, [n.dreams.first, 'x']);
+    expect(decodeNight(encodeNight(n.withEntries([Waiting(audioA)])))!.dreams, isEmpty);
+  });
+
+  test('a waiting recording is refused in a version-1 file', () {
+    final n = nightsFromFixtures().first.withEntries([Waiting(audioA)]);
+    expect(decodeNight(bytesOf({...fields(n), 'version': 1})), isNull);
+  });
+
+  test('a misshapen waiting recording, or one twice, decodes to null', () {
+    final good = fields(nightsFromFixtures().first);
+    for (final (i, dreams) in [
+      [{'waiting': audioA}],
+      [{'waiting': audioA, 'from': 0, 'extra': 1}],
+      [{'waiting': 'A' * 32, 'from': 0}],
+      [{'waiting': audioA, 'from': -2}],
+      [{'waiting': audioA, 'from': 3}],
+      [{'waiting': audioA, 'from': 2.0}],
+      [{'waiting': audioA, 'from': '0'}],
+      [{'waiting': audioA, 'from': 0}, {'waiting': audioA, 'from': 2}],
+      [<Object?>[]],
+    ].indexed) {
+      expect(decodeNight(bytesOf({...good, 'dreams': dreams})), isNull, reason: 'case $i');
+    }
+  });
+
+  test('a waiting recording with a bad id or from is refused', () {
+    expect(() => Waiting('x'), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'audio')));
+    expect(() => Waiting(audioA, -2), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'from')));
+    expect(() => Waiting(audioA, 1), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'from')));
+    final n = nightsFromFixtures().first;
+    expect(() => n.withEntries([Waiting(audioA), Waiting(audioA, 2)]), throwsArgumentError);
+    expect(
+      () => Night(
+        id: n.id,
+        firstRecorded: n.firstRecorded,
+        date: n.date,
+        closes: n.closes,
+        lang: n.lang,
+        dreams: n.dreams,
+        entries: [Waiting(audioA)],
+      ),
+      throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'dreams')),
+    );
+  });
+
+  test('anything not a version-1 or version-2 night decodes to null', () {
     final good = fields(nightsFromFixtures().first);
     Map<String, Object?> without(String key) => {...good}..remove(key);
     Map<String, Object?> with_(String key, Object? value) => {...good, key: value};
@@ -44,7 +131,9 @@ void main() {
       utf8.encode('[]'),
       bytesOf(without('dreams')),
       bytesOf(with_('extra', 1)),
-      bytesOf(with_('version', 2)),
+      bytesOf(with_('version', 0)),
+      bytesOf(with_('version', 3)),
+      bytesOf(with_('version', '2')),
       bytesOf(with_('id', 'ABC')),
       bytesOf(with_('firstRecorded', '2026-10-12T06:40:00.000')),
       bytesOf(with_('firstRecorded', 'tomorrow')),
@@ -118,6 +207,7 @@ void main() {
   test("a night's dreams cannot be changed in place", () {
     final n = nightsFromFixtures().first;
     expect(() => n.dreams.add('x'), throwsUnsupportedError);
+    expect(() => n.entries.add(const Told('x')), throwsUnsupportedError);
   });
 
   test('a closing instant over 26 hours on is refused as damaged', () {

@@ -15,9 +15,12 @@ import 'night.dart';
 
 final _wordChar = RegExp(r'[\p{L}\p{N}]', unicode: true);
 
-/// The first dream's opening, with its framing trimmed.
+/// The first told dream's opening, with its framing trimmed; nothing for
+/// a night whose dreams all wait (D93 Q3: the row shows its date alone).
 String opening(Night night) {
-  final dream = night.dreams.first;
+  final told = night.dreams;
+  if (told.isEmpty) return '';
+  final dream = told.first;
   final framings = [...(night.lang == Lang.en ? ListWords.tech1En : ListWords.tech1Sv)]
     ..sort((a, b) => b.length.compareTo(a.length));
   for (final f in framings) {

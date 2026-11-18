@@ -6,6 +6,8 @@
 // - An edit replaces a dream's text. An emptied dream disappears and the
 //   night's other dreams remain (D58 Q3); a night left with no dream is
 //   deleted, as a deletion deletes it (P10).
+// - A dream is told in words or waits as a recording (D93 Q2); a dream's
+//   index counts both, and a waiting one is never edited.
 import 'dart:math';
 
 import '../words/lines.g.dart' show Lang;
@@ -59,21 +61,22 @@ final class Journal {
       case IntoNight(:final id):
         // One turn of the store's queue: a delete cannot fall between
         // the read and the write, nor another Save lose this one (D61).
-        return _store.update(id, (n) => n.withDreams([...n.dreams, text]));
+        return _store.update(id, (n) => n.withEntries([...n.entries, Told(text)]));
     }
   }
 
-  /// Replaces dream [index] of night [id] with [text].
+  /// Replaces dream [index] of night [id] with [text]. The index counts
+  /// every dream, told or waiting; a waiting one is never replaced.
   Future<void> editDream(String id, int index, String text) async {
     await _store.update(id, (n) {
-      if (index < 0 || index >= n.dreams.length) return n;
-      final dreams = [...n.dreams];
+      if (index < 0 || index >= n.entries.length || n.entries[index] is! Told) return n;
+      final entries = [...n.entries];
       if (isEmptyText(text)) {
-        dreams.removeAt(index);
+        entries.removeAt(index);
       } else {
-        dreams[index] = text;
+        entries[index] = Told(text);
       }
-      return dreams.isEmpty ? null : n.withDreams(dreams);
+      return entries.isEmpty ? null : n.withEntries(entries);
     });
   }
 

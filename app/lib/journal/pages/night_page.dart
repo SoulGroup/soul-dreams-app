@@ -4,8 +4,10 @@
 // "delete this night" (EM·11's second part), plain; one confirmation, the
 // phone's standard dialog, Cancel first and Delete destructive (MP·61,
 // MP·60, pending lines); the dreams under "Dreams" (MP·38), each opening
-// the typing screen to edit it; "Add dreams" (MP·29). Not built: naming,
-// Start Interpretation, and the space below the dreams.
+// the typing screen to edit it; "Add dreams" (MP·29). A recording that
+// waits to be turned into text shows nothing in its place and cannot be
+// tapped (D93 Q3). Not built: naming, Start Interpretation, and the space
+// below the dreams.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -164,10 +166,11 @@ class _NightPageState extends State<NightPage> {
                     ),
                     Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
                     const SizedBox(height: StandIns.gap),
-                    for (final (i, d) in n.dreams.indexed) ...[
-                      DreamBubble(d, onTap: () => _type((id: n.id, index: i, text: d))),
-                      const SizedBox(height: StandIns.bubbleGap),
-                    ],
+                    for (final (i, d) in n.entries.indexed)
+                      if (d case Told(:final text)) ...[
+                        DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
+                        const SizedBox(height: StandIns.bubbleGap),
+                      ],
                     const SizedBox(height: StandIns.gap),
                     Center(
                       child: KeyedSubtree(

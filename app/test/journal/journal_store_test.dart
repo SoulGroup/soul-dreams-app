@@ -113,6 +113,38 @@ void main() {
     expect(lines, isEmpty);
   });
 
+  // docs/workflow.md (c): a journal written in version 1 reads whole; a save
+  // rewrites only its own night, as version 2, and loses nothing.
+  test('a version-1 journal reads whole; a save rewrites one night', () async {
+    final nights = nightsFromFixtures();
+    await files.open();
+    for (final n in nights) {
+      await files.write(
+        JournalStore.fileOf(n.id),
+        utf8.encode(jsonEncode({...jsonDecode(utf8.decode(encodeNight(n))) as Map<String, Object?>, 'version': 1})),
+      );
+    }
+    final before = files.everything();
+    final store = await JournalStore.open(files);
+    final read = await store.nights();
+    expect(read, nights);
+    expect(read.fold<int>(0, (sum, n) => sum + n.dreams.length), nights.fold<int>(0, (s, n) => s + n.dreams.length));
+    final changed = nights[1].withDreams([...nights[1].dreams, 'x']);
+    await store.save(changed);
+    final after = files.everything();
+    expect(after.keys.toSet(), before.keys.toSet());
+    for (final n in nights) {
+      final name = JournalStore.fileOf(n.id);
+      if (n == nights[1]) {
+        expect(jsonDecode(utf8.decode(after[name]!))['version'], 2);
+      } else {
+        expect(listEquals(after[name], before[name]), isTrue, reason: name);
+      }
+    }
+    expect(await store.nights(), [for (final n in nights) n == nights[1] ? changed : n]);
+    expect(lines, isEmpty);
+  });
+
   test('deleting a night leaves nothing of it anywhere', () async {
     final store = await JournalStore.open(files);
     final nights = nightsFromFixtures();
@@ -246,7 +278,7 @@ void main() {
       'night-${'a' * 32}.json': utf8.encode('not json'),
       'night-${'b' * 32}.json': Uint8List.fromList([0xff, 0xfe, 0x00]),
       'night-${'c' * 32}.json': wrongId,
-      'night-${'d' * 32}.json': utf8.encode(utf8.decode(encodeNight(good)).replaceFirst('"version":1', '"version":2')),
+      'night-${'d' * 32}.json': utf8.encode(utf8.decode(encodeNight(good)).replaceFirst('"version":2', '"version":3')),
     };
     for (final MapEntry(:key, :value) in bad.entries) {
       await files.write(key, value);

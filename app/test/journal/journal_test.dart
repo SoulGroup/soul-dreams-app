@@ -8,6 +8,7 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/journal/journal.dart';
 import 'package:souldreams/journal/journal_store.dart';
+import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/words/lines.g.dart' show Lang;
 
@@ -32,6 +33,25 @@ void main() {
   });
 
   tearDown(() => dir.deleteSync(recursive: true));
+
+  // D93 Q2: a dream's index counts waiting recordings too, and a waiting
+  // one is never edited; a night left with only one stays.
+  test('an edit counts waiting dreams, and never replaces one', () async {
+    await journal.addDream(await journal.targetNow(), a[0], Lang.en);
+    final n = (await journal.newestFirst()).single;
+    final w = Waiting('c' * 32);
+    await (await JournalStore.open(files)).save(n.withEntries([w, ...n.entries]));
+    Future<List<Dream>> entries() async => (await journal.night(n.id))!.entries;
+    await journal.editDream(n.id, 0, b[0]);
+    expect(await entries(), [w, Told(a[0])]);
+    await journal.editDream(n.id, 1, b[0]);
+    expect(await entries(), [w, Told(b[0])]);
+    await journal.addDream(IntoNight(n.id), a[1], Lang.en);
+    expect(await entries(), [w, Told(b[0]), Told(a[1])]);
+    await journal.editDream(n.id, 1, ' ');
+    await journal.editDream(n.id, 1, '');
+    expect(await entries(), [w]);
+  });
 
   test('an empty Save keeps nothing', () async {
     for (final text in ['', '  \n ']) {

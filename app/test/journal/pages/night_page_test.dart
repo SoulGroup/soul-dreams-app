@@ -109,6 +109,28 @@ void main() {
     expect((await h.journal.night(n.id))!.dreams, [n.dreams[0], other]);
   });
 
+  // D93 Q3: a waiting recording shows nothing and cannot be tapped; the
+  // told dreams around it keep their places.
+  testWidgets('a waiting recording shows nothing; edits keep the order', (tester) async {
+    await open(tester);
+    final w1 = Waiting('1' * 32);
+    final w2 = Waiting('2' * 32);
+    await h.store.save(n.withEntries([w1, Told(n.dreams[0]), w2, Told(n.dreams[1])]));
+    await tester.tap(find.byType(BackControl));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(Opener.openKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(DreamBubble), findsNWidgets(2));
+    expect(tester.getTopLeft(find.text(n.dreams[0])).dy, lessThan(tester.getTopLeft(find.text(n.dreams[1])).dy));
+    await tester.tap(find.text(n.dreams[1]));
+    await tester.pumpAndSettle();
+    final other = invented('one-dream-sv').dreams.single;
+    await tester.enterText(find.byKey(TypingPage.fieldKey), other);
+    await tester.tap(find.byKey(TypingPage.saveKey));
+    await tester.pumpAndSettle();
+    expect((await h.journal.night(n.id))!.entries, [w1, Told(n.dreams[0]), w2, Told(other)]);
+  });
+
   testWidgets('an emptied dream disappears; the others remain', (tester) async {
     await open(tester);
     await tester.tap(find.text(n.dreams[0]));
