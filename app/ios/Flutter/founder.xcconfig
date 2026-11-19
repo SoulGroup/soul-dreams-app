@@ -8,3 +8,5 @@ PRODUCT_BUNDLE_IDENTIFIER = app.souldreams.founder
 APP_DISPLAY_NAME = $(WORDS_APP_NAME)
 FLUTTER_TARGET = lib/main_founder.dart
 FLAVOR = founder
+// The founder's export, compiled in (D108; R8): dev and founder only.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) SOULDREAMS_EXPORT

@@ -9,11 +9,18 @@ import UIKit
   private var audioChannel: FlutterMethodChannel?
   private var networkChannel: FlutterEventChannel?
   private let networkWatch = NetworkWatch()
+  #if SOULDREAMS_EXPORT
+    private var exportChannel: FlutterMethodChannel?
+  #endif
 
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    #if SOULDREAMS_EXPORT
+      // A file left by a share the app did not see close (D108).
+      FounderExport.sweep()
+    #endif
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
@@ -40,8 +47,130 @@ import UIKit
       channel.setStreamHandler(networkWatch)
       networkChannel = channel
     }
+    #if SOULDREAMS_EXPORT
+      if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "FounderExport") {
+        exportChannel = FounderExport.channel(messenger: registrar.messenger())
+      }
+    #endif
   }
 }
+
+#if SOULDREAMS_EXPORT
+  // The founder's export (C142-I item 3; D107; D108), compiled only where
+  // SOULDREAMS_EXPORT is set: dev.xcconfig and founder.xcconfig, never
+  // tester.xcconfig (R8; native_test.dart). One night's file, written to
+  // tmp/Export with complete protection, handed to the phone's share with
+  // every type Apple names excluded but AirDrop, and the people row too on
+  // iOS 18 and later. Other targets cannot be removed, so the file is given
+  // to AirDrop alone: any other target receives nothing (OnlyAirDrop). The
+  // file is deleted when the share closes, sent or not, and the folder is
+  // emptied before each share and at launch. tmp is never backed up (R11).
+  // A failure answers with a code only (R3).
+  enum FounderExport {
+    static let channelName = "souldreams/founder_export"
+    private static var sharing = false
+
+    enum Failure: Error { case arguments, busy, presenter }
+
+    // Every activity type Apple names, but AirDrop (UIActivity.h), each
+    // from the iOS that has it.
+    static var excluded: [UIActivity.ActivityType] {
+      var types: [UIActivity.ActivityType] = [
+        .postToFacebook, .postToTwitter, .postToWeibo, .message, .mail, .print, .copyToPasteboard,
+        .assignToContact, .saveToCameraRoll, .addToReadingList, .postToFlickr, .postToVimeo,
+        .postToTencentWeibo, .openInIBooks, .markupAsPDF,
+      ]
+      if #available(iOS 15.4, *) { types.append(.sharePlay) }
+      if #available(iOS 16.0, *) { types += [.collaborationInviteWithLink, .collaborationCopyLink] }
+      if #available(iOS 16.4, *) { types.append(.addToHomeScreen) }
+      return types
+    }
+
+    static func folder() -> URL {
+      return FileManager.default.temporaryDirectory.appendingPathComponent("Export", isDirectory: true)
+    }
+
+    static func sweep() {
+      try? FileManager.default.removeItem(at: folder())
+    }
+
+    static func channel(messenger: FlutterBinaryMessenger) -> FlutterMethodChannel {
+      let channel = FlutterMethodChannel(name: channelName, binaryMessenger: messenger)
+      channel.setMethodCallHandler { call, result in
+        guard call.method == "share" else {
+          result(FlutterMethodNotImplemented)
+          return
+        }
+        do {
+          try share(call, result)
+        } catch {
+          if !sharing { sweep() }
+          result(FlutterError(code: "export", message: nil, details: nil))
+        }
+      }
+      return channel
+    }
+
+    // The file's name is the night's date in digits (export_text.dart).
+    static func valid(_ name: String) -> Bool {
+      return name.range(of: "^[0-9]{4}-[0-9]{2}-[0-9]{2}[.]txt$", options: .regularExpression) != nil
+    }
+
+    static func presenter() -> UIViewController? {
+      let windows = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }.flatMap { $0.windows }
+      var top = windows.first { $0.isKeyWindow }?.rootViewController
+      while let next = top?.presentedViewController { top = next }
+      return top
+    }
+
+    static func share(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) throws {
+      guard !sharing else { throw Failure.busy }
+      guard let a = call.arguments as? [String: Any], let name = a["name"] as? String, valid(name),
+        let bytes = a["bytes"] as? FlutterStandardTypedData
+      else { throw Failure.arguments }
+      guard let top = presenter() else { throw Failure.presenter }
+      sweep()
+      let fm = FileManager.default
+      let complete: [FileAttributeKey: Any] = [.protectionKey: FileProtectionType.complete]
+      try fm.createDirectory(at: folder(), withIntermediateDirectories: true, attributes: complete)
+      let url = folder().appendingPathComponent(name, isDirectory: false)
+      try bytes.data.write(to: url, options: [.completeFileProtection])
+      let sheet = UIActivityViewController(activityItems: [OnlyAirDrop(url)], applicationActivities: nil)
+      sheet.excludedActivityTypes = excluded
+      if #available(iOS 18.0, *) { sheet.excludedActivitySectionTypes = .peopleSuggestions }
+      sharing = true
+      sheet.completionWithItemsHandler = { _, _, _, _ in
+        guard sharing else { return }
+        sharing = false
+        sweep()
+        result(nil)
+      }
+      top.present(sheet, animated: true)
+    }
+  }
+
+  // The file, given to AirDrop alone: for any other activity the share
+  // asks for the item and gets nothing ("you can return nil",
+  // UIActivityItemProvider.h).
+  final class OnlyAirDrop: NSObject, UIActivityItemSource {
+    let url: URL
+
+    init(_ url: URL) {
+      self.url = url
+    }
+
+    func activityViewControllerPlaceholderItem(_ activityViewController: UIActivityViewController) -> Any {
+      return url
+    }
+
+    func activityViewController(
+      _ activityViewController: UIActivityViewController,
+      itemForActivityType activityType: UIActivity.ActivityType?
+    ) -> Any? {
+      return activityType == .airDrop ? url : nil
+    }
+  }
+#endif
 
 // Whether the phone has a connection, as the phone knows it (D92 item 3;
 // D93 Q4): Apple's path monitor, one true or false at each change, on the

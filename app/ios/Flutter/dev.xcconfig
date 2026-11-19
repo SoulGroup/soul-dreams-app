@@ -10,6 +10,8 @@ PRODUCT_BUNDLE_IDENTIFIER = app.souldreams.dev
 APP_DISPLAY_NAME = SoulDreams Dev
 FLUTTER_TARGET = lib/main_dev.dart
 FLAVOR = dev
+// The founder's export, compiled in (D108; R8): dev and founder only.
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) SOULDREAMS_EXPORT
 // The owner's Team ID, in an untracked file (D20 Q9a). Only this flavour
 // is ever signed under the Personal Team (D20 Q10).
 #include? "Signing.xcconfig"
