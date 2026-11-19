@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-19, in branch `founder-export` (the plan written and proven, D107 and D108; nothing implemented yet). `onboarding` is merged into `main` (`ae23e94`). By Claude Code.
+Last updated: 2026-11-19, in branch `founder-export` (the plan's Tasks 1 to 8; the owner's checks, Task 9, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -19,7 +19,7 @@ text file handed to AirDrop alone and deleted once the share closes. Plan: `docs
 
 ## Road ahead
 
-- `founder-export`: the plan's Tasks 1 to 8, then the owner's checks (Task 9) and the merge.
+- `founder-export`: the owner's checks (the plan's Task 9), then the merge.
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1), once the pending lines are filed
   (and, for the founder app, with his export).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
@@ -170,6 +170,17 @@ text file handed to AirDrop alone and deleted once the share closes. Plan: `docs
   filed. Every step's box is centred between the top and the foot, and scrolls from the top when taller (D106 1), and
   its words appear whole (D106 2). The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
   `arrowGap`); no logo and no drawn signature (none filed).
+- The founder's export (D107, D108; C142-I item 3; `app/lib/founder/`, SoulDreams Dev only in this branch; the founder
+  app gains it with its journal, by a later ruling): each night's "⋯" menu holds MP·65 (a pending line) above delete,
+  given by `main_dev.dart` through `JournalHome`, `JournalPage` and `NightPage` as a `NightAction` (`lib/journal/`
+  holds only the hook, and reaches nothing in `lib/founder/`, a test). The file: plain UTF-8 text, the night's name if
+  it has one, its date as its page shows it, then each dream told in words, in order, a blank line between; a
+  recording still waiting is left out; named `YYYY-MM-DD.txt`. Our Swift channel `souldreams/founder_export` in
+  `AppDelegate.swift`, compiled only under `SOULDREAMS_EXPORT`, which `dev.xcconfig` and `founder.xcconfig` set and
+  `tester.xcconfig` never does: it writes the file to `tmp/Export` with complete protection, opens the phone's share
+  with every type Apple names excluded but AirDrop (and the people row on iOS 18 and later), gives the file to AirDrop
+  alone (any other target receives nothing), and deletes it when the share closes; the folder is also emptied before
+  each share and at launch. A failure shows nothing and logs `exportFailed`. No package.
 - The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
   both 120, the radius half the height; large text shrinks its words, never the circle.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
@@ -196,10 +207,10 @@ text file handed to AirDrop alone and deleted once the share closes. Plan: `docs
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 480 tests, and 348 mutation checks (A1 to A319; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 502 tests, and 372 mutation checks (A1 to A343; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 348 run, 348 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 372 run, 372 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -705,6 +716,17 @@ Banked in onboarding (the plan's decisions; none changes what the dreamer sees b
      is in Night/Day's dark theme, so a dreamer sees a dark blank, then the light onboarding. Whether it should be
      held light, as onboarding is, changes what is seen, so it is asked and not built.
 
+Banked in founder-export (none changes what the dreamer sees beyond D107 and D108):
+
+124. The phone's side of the export is proven from its source (`test/founder/native_test.dart`, which reads
+     `AppDelegate.swift` and the xcconfigs) and by the owner's checks: `flutter test` runs no Swift. Both forms of
+     `AppDelegate.swift` were type-checked with the iOS SDK while the plan was proven.
+125. A share the app never sees close (the app ended while the share shows) leaves its file in `tmp/Export` until the
+     next export or the next launch, which empty the folder, or until iOS clears `tmp`.
+126. The menu item ignores a tap while a delete runs (D64), unreachable: the menu does not open then; no test.
+127. AirDrop cannot be limited to the founder's Mac, nor the share to AirDrop: the other targets stay in the share and
+     receive nothing (D108). That each one opens empty, Apple's own included, is the owner's check (Task 9).
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -749,6 +771,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   owner in Task 9b.
 - MP·63 (the microphone refused) and MP·64 (the stop control's spoken name), head's message 21 (Product message 20),
   founder-approved; built in `offline-recording`.
+- MP·65 (the founder's export, in a night's menu), the founder's (D108); the handle proposed to Product, renamed if
+  it registers another.
 - W27·5's privacy-page text (head's message 16) shares the filed handle W27·5, so it cannot be a pending line under
   it: Product files it, or gives it a new handle (D103 item 3; the plan's question 1). Until then the page shows
   W27·5 as filed at C16-P.
@@ -994,6 +1018,18 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   everywhere (the app's own lines appear whole; the setting itself comes with Settings); (3) a disclosure part with no
   line shows nothing in its place, not its handle, in Dev; a guard on the pre-Cohort-1 list and a test: no tester or
   founder build while any disclosure part shown lacks a line.
+
+## Rulings during founder-export
+
+- D107 (owner, the brainstorm): (1) one night at a time, from the night's "⋯" menu; (2) the format the documents
+  rule, and as they rule none, plain text with the night's date and each dream in order; (3) AirDrop only, as far as
+  iOS allows, every other target that can be excluded excluded; (4) the file exists only for the share and is deleted
+  at once after (R11); nothing through any server.
+- D108 (founder): AirDrop alone is handed the night, every other target receiving no file (the owner's check); no
+  undocumented hiding by internal identifiers; the owner turns off AirDrop's "Use Cellular Data" and keeps the Mac
+  close. MP·65, "Export night", a pending line, the founder's. A waiting recording is left out; a failed export shows
+  nothing and logs a code; MP·39 unchanged; SoulDreams Dev only in this branch; our own Swift channel, compiled only
+  into the dev and founder apps (the xcconfig change approved).
 
 ## Documents as last imported
 
