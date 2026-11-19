@@ -207,10 +207,10 @@ text file handed to AirDrop alone and deleted once the share closes. Plan: `docs
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 502 tests, and 372 mutation checks (A1 to A343; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 509 tests, and 383 mutation checks (A1 to A354; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 372 run, 372 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 383 run, 383 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -726,6 +726,24 @@ Banked in founder-export (none changes what the dreamer sees beyond D107 and D10
 126. The menu item ignores a tap while a delete runs (D64), unreachable: the menu does not open then; no test.
 127. AirDrop cannot be limited to the founder's Mac, nor the share to AirDrop: the other targets stay in the share and
      receive nothing (D108). That each one opens empty, Apple's own included, is the owner's check (Task 9).
+128. The reviews of the export (Opus, D91; Tasks 4, 5 and 6): no defect. Fixed as test gaps, with rows A344 to A354:
+     `native_test.dart` now also refuses an `#else` branch, any other Swift or header file under `ios/Runner` that
+     names the export, any Runner configuration in `project.pbxproj` that sets or drops the condition, and pins the
+     method and its two keys, the file name against Swift's own pattern, the share's end (`sharing = false`,
+     `result(nil)`) and the error's code-only answer; `exportFailed`'s comment now lists its causes.
+129. Banked, a constructed sequence (D17): if `present` does nothing (the presenting controller is being dismissed),
+     the completion never runs, so the Dart call waits and `sharing` stays on: every later export is refused as busy
+     until the app restarts, and the file stays in `tmp/Export` until then. A fix (check the presenter's window and
+     `isBeingDismissed`, or give `present` a completion) is Swift that no test on the Mac runs.
+130. Banked, platform behaviour not testable here: iOS can call `completionWithItemsHandler` when a share extension
+     the person picked is cancelled, while the sheet stays open; the file is then swept and AirDrop, chosen next,
+     is handed a deleted file and sends nothing. Privacy holds. The owner's Task 9 adds a look (step 3's extra).
+131. Banked: Swift's `valid` pattern ends in `$`, which in ICU also matches before a final newline (`\z` would not);
+     harmless, as the name is made from digits by `exportFileName`.
+132. Banked: the label's test cannot tell English from Swedish under `flutter test` (`appFlavor` is null, so both
+     give the handle); `appLanguage` is a constant English. Row A342 is caught by the journal assertion in
+     `dev_only_test.dart` as well as by the founder one, as every founder file reaches `lib/journal/`; the founder
+     assertion alone is not isolated by a row.
 
 ## Before Cohort 1
 

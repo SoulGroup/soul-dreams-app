@@ -9,10 +9,14 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/founder/export_text.dart';
 import 'package:souldreams/founder/founder_export.dart';
+
+import '../fixtures.dart';
 
 const _swift = 'ios/Runner/AppDelegate.swift';
 const _condition = 'SOULDREAMS_EXPORT';
+const _marks = ['FounderExport', 'founder_export', 'OnlyAirDrop', 'exportChannel', 'UIActivity', 'airDrop'];
 const _setting = 'SWIFT_ACTIVE_COMPILATION_CONDITIONS = \$(inherited) $_condition';
 
 String _read(String path) => File(path).readAsStringSync();
@@ -30,7 +34,6 @@ void main() {
   final swift = _read(_swift);
 
   test('every line of the export is inside #if $_condition', () {
-    const marks = ['FounderExport', 'founder_export', 'OnlyAirDrop', 'exportChannel', 'UIActivity', 'airDrop'];
     var inside = false;
     var blocks = 0;
     final outside = <int>[];
@@ -44,13 +47,45 @@ void main() {
         blocks++;
       } else if (t == '#endif') {
         inside = false;
-      } else if (!inside && marks.any(lines[i].contains)) {
+      } else if (!inside && _marks.any(lines[i].contains)) {
         outside.add(i + 1);
       }
     }
     expect(inside, isFalse);
     expect(outside, isEmpty);
     expect(blocks, 4);
+  });
+
+  // A branch of the condition other than the one that holds the export
+  // would compile into the tester app (#else, #elseif).
+  test('the export has no #else or #elseif branch', () {
+    final branches = [
+      for (final (i, l) in swift.split('\n').indexed)
+        if (l.trim().startsWith('#else')) i + 1,
+    ];
+    expect(branches, isEmpty);
+  });
+
+  test('no other file under ios/Runner knows of the export', () {
+    final others = [
+      for (final f in Directory('ios/Runner').listSync(recursive: true))
+        if (f is File &&
+            RegExp(r'[.](swift|h|m|mm)$').hasMatch(f.path) &&
+            !f.path.endsWith('AppDelegate.swift') &&
+            _marks.any(f.readAsStringSync().contains))
+          f.path,
+    ];
+    expect(others, isEmpty);
+  });
+
+  // The flavours' xcconfigs are the Runner target's base configurations, so
+  // a value set in the project's own settings would add to or replace theirs.
+  test('no Runner build configuration sets or drops the condition', () {
+    final pbx = _read('ios/Runner.xcodeproj/project.pbxproj');
+    expect(pbx, isNot(contains(_condition)));
+    final sets = RegExp(r'SWIFT_ACTIVE_COMPILATION_CONDITIONS = ([^;]*);').allMatches(pbx).map((m) => m[1]).toList();
+    // Only the unit-test target's four, DEBUG alone.
+    expect(sets, ['DEBUG', 'DEBUG', 'DEBUG', 'DEBUG']);
   });
 
   test('the condition: dev and founder set it, tester never', () {
@@ -64,6 +99,31 @@ void main() {
 
   test("the channel's name is the same on both sides", () {
     expect(swift, contains('static let channelName = "${FounderExport.channelName}"'));
+  });
+
+  test("the method and its two keys are the Dart side's", () {
+    expect(swift, contains('guard call.method == "share" else {'));
+    final share = _between(swift, 'static func share(', 'let sheet');
+    expect(share, contains('let name = a["name"] as? String'));
+    expect(share, contains('let bytes = a["bytes"] as? FlutterStandardTypedData'));
+  });
+
+  test("the file's name passes the phone's own check", () {
+    final check = _between(swift, 'static func valid(', 'static func presenter');
+    final pattern = RegExp(r'range\(of: "([^"]+)"').firstMatch(check)![1]!;
+    expect(RegExp(pattern).hasMatch(exportFileName(nightsFromFixtures().first)), isTrue);
+    expect(RegExp(pattern).hasMatch('../2026-06-02.txt'), isFalse);
+  });
+
+  test('the share closing gives the phone back and answers once', () {
+    final closed = _between(swift, 'sheet.completionWithItemsHandler', 'top.present');
+    expect(closed, contains('guard sharing else { return }'));
+    expect(closed, contains('sharing = false'));
+    expect(closed, contains('result(nil)'));
+  });
+
+  test('a failure answers with a code only', () {
+    expect(swift, contains('result(FlutterError(code: "export", message: nil, details: nil))'));
   });
 
   test('the file is given to AirDrop alone', () {

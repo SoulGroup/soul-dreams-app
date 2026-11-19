@@ -81,8 +81,9 @@ enum LogEvent {
   /// milliseconds recorded.
   recordingSettled,
 
-  /// The founder's export (D108): the phone could not write the file or
-  /// open the share; nothing is shown.
+  /// The founder's export (D108): the file could not be made or the share
+  /// opened (the phone refused, a share was already open, or no channel);
+  /// nothing is shown.
   exportFailed,
 
   /// A waiting recording replayed to Soniox (D94): begun; all of it in

@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A343, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A354, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 372 run, 372 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 383 run, 383 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1639,6 +1639,61 @@ ROWS = [
      "import 'night.dart';\n",
      "import 'night.dart';\nimport '../founder/export_text.dart';\n",
      'test/dev_only_test.dart', 'nothing in lib/journal/ reaches lib/founder/'),
+    # The review of the founder's export (D91): the phone's side, pinned harder.
+    ('A344', 'ios/Runner/AppDelegate.swift',
+     '      FounderExport.sweep()\n    #endif\n',
+     '      FounderExport.sweep()\n    #else\n      FounderExport.sweep()\n    #endif\n',
+     'test/founder/native_test.dart', 'the export has no #else or #elseif branch'),
+    ('A345', 'ios/Runner/SceneDelegate.swift',
+     'class SceneDelegate: FlutterSceneDelegate {\n',
+     'class SceneDelegate: FlutterSceneDelegate {\n  let x = FounderExport.channelName\n',
+     'test/founder/native_test.dart', 'no other file under ios/Runner knows of the export'),
+    ('A346', 'ios/Runner.xcodeproj/project.pbxproj',
+     '\t\tCD1A84DF6DB1559EB23AB5DC /* Debug-tester */ = {\n\t\t\tisa = XCBuildConfiguration;\n'
+     '\t\t\tbaseConfigurationReference = 91DDC64F3ED06CD9840DFD84 /* tester.xcconfig */;\n'
+     '\t\t\tbuildSettings = {\n\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME',
+     '\t\tCD1A84DF6DB1559EB23AB5DC /* Debug-tester */ = {\n\t\t\tisa = XCBuildConfiguration;\n'
+     '\t\t\tbaseConfigurationReference = 91DDC64F3ED06CD9840DFD84 /* tester.xcconfig */;\n'
+     '\t\t\tbuildSettings = {\n\t\t\t\tSWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) SOULDREAMS_EXPORT";\n'
+     '\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME',
+     'test/founder/native_test.dart', 'no Runner build configuration sets or drops the condition'),
+    ('A347', 'ios/Runner.xcodeproj/project.pbxproj',
+     '\t\tCD1A84DF6DB1559EB23AB5DC /* Debug-tester */ = {\n\t\t\tisa = XCBuildConfiguration;\n'
+     '\t\t\tbaseConfigurationReference = 91DDC64F3ED06CD9840DFD84 /* tester.xcconfig */;\n'
+     '\t\t\tbuildSettings = {\n\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME',
+     '\t\tCD1A84DF6DB1559EB23AB5DC /* Debug-tester */ = {\n\t\t\tisa = XCBuildConfiguration;\n'
+     '\t\t\tbaseConfigurationReference = 91DDC64F3ED06CD9840DFD84 /* tester.xcconfig */;\n'
+     '\t\t\tbuildSettings = {\n\t\t\t\tSWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;\n'
+     '\t\t\t\tASSETCATALOG_COMPILER_APPICON_NAME',
+     'test/founder/native_test.dart', 'no Runner build configuration sets or drops the condition'),
+    ('A348', 'ios/Runner/AppDelegate.swift',
+     '        sharing = false\n',
+     '',
+     'test/founder/native_test.dart', 'the share closing gives the phone back and answers once'),
+    ('A349', 'ios/Runner/AppDelegate.swift',
+     '        result(nil)\n      }\n      top.present',
+     '      }\n      top.present',
+     'test/founder/native_test.dart', 'the share closing gives the phone back and answers once'),
+    ('A350', 'ios/Runner/AppDelegate.swift',
+     'FlutterError(code: "export", message: nil, details: nil)',
+     'FlutterError(code: "export", message: "\\(error)", details: nil)',
+     'test/founder/native_test.dart', 'a failure answers with a code only'),
+    ('A351', 'ios/Runner/AppDelegate.swift',
+     'guard call.method == "share" else {',
+     'guard call.method == "send" else {',
+     'test/founder/native_test.dart', "the method and its two keys are the Dart side's"),
+    ('A352', 'ios/Runner/AppDelegate.swift',
+     'let name = a["name"] as? String, valid(name),',
+     'let name = a["file"] as? String, valid(name),',
+     'test/founder/native_test.dart', "the method and its two keys are the Dart side's"),
+    ('A353', 'ios/Runner/AppDelegate.swift',
+     'valid(name),\n        let bytes = a["bytes"] as?',
+     'valid(name),\n        let bytes = a["data"] as?',
+     'test/founder/native_test.dart', "the method and its two keys are the Dart side's"),
+    ('A354', 'ios/Runner/AppDelegate.swift',
+     '[.]txt$"',
+     '[.]md$"',
+     'test/founder/native_test.dart', "the file's name passes the phone's own check"),
 ]
 
 
