@@ -25,7 +25,7 @@ void main() {
     addTearDown(() => messenger.setMockMethodCallHandler(channel, null));
   });
 
-  test('its label is MP·65, a pending line', () {
+  test('its label is MP·65, a filed line', () {
     expect(const FounderExport().action.label, Lines.MP_65.text(Lang.en));
   });
 

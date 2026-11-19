@@ -21,7 +21,10 @@ List<Line> written(List<Line> lines) => [for (final line in lines) if (line.writ
 List<Line> lacking(List<Line> lines) => [for (final line in lines) if (!line.written) line];
 
 class DisclosurePage extends StatelessWidget {
-  const DisclosurePage({super.key});
+  const DisclosurePage({super.key, this.shown = DisclosurePage.parts});
+
+  /// The parts shown: [parts], unless a test hands in others (D106 3).
+  final List<Line> shown;
 
   /// Every part, in the register's order.
   static const parts = [
@@ -60,7 +63,7 @@ class DisclosurePage extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
                   children: [
-                    for (final line in written(parts))
+                    for (final line in written(shown))
                       Padding(
                         padding: const EdgeInsets.only(bottom: StandIns.gap),
                         child: Text(

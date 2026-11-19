@@ -37,10 +37,22 @@ import 'disclosure_page.dart';
 enum _Step { welcome, note, age, underAge, disclosure, consent }
 
 class Onboarding extends StatefulWidget {
-  const Onboarding({super.key, required this.onAgreed});
+  const Onboarding({
+    super.key,
+    required this.onAgreed,
+    this.first = Onboarding.firstPage,
+    this.second = Onboarding.secondPage,
+    this.full = DisclosurePage.parts,
+  });
 
   /// "I agree" (MP·8).
   final VoidCallback onAgreed;
+
+  /// The parts each page shows: [firstPage], [secondPage] and the full
+  /// page's, unless a test hands in others (D106 3).
+  final List<Line> first;
+  final List<Line> second;
+  final List<Line> full;
 
   static const ageKey = Key('age');
 
@@ -166,15 +178,15 @@ class _OnboardingState extends State<Onboarding> {
           _one(PlainButton(Lines.MP_31.text(appLanguage), onPressed: () {})),
         ];
       case _Step.disclosure:
-        return [for (final line in written(Onboarding.firstPage)) reads(line)];
+        return [for (final line in written(widget.first)) reads(line)];
       case _Step.consent:
         return [
-          for (final line in written(Onboarding.secondPage)) reads(line),
+          for (final line in written(widget.second)) reads(line),
           _one(
             PlainButton(
               Lines.MP_58.text(appLanguage),
-              onPressed: () =>
-                  Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DisclosurePage())),
+              onPressed: () => Navigator.of(context)
+                  .push(MaterialPageRoute<void>(builder: (_) => DisclosurePage(shown: widget.full))),
             ),
           ),
           reads(Lines.MP_59),

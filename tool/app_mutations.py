@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A354, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A358, A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 383 run, 383 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 386 run, 386 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -233,7 +233,7 @@ ROWS = [
      'child: SingleChildScrollView(physics: const NeverScrollableScrollPhysics(),',
      'test/journal/pages/typing_page_test.dart', 'with the keyboard up, MP·10 scrolls away and the field stays'),
     ('A24s', 'lib/journal/pages/typing_page.dart',
-     'PendingLines.MP_62.text(appLanguage)',
+     'Lines.MP_62.text(appLanguage)',
      "''",
      'test/journal/pages/typing_page_test.dart', 'a failed Save stays on the screen; Save again keeps it'),
     ('A24t', 'lib/journal/pages/typing_page.dart',
@@ -819,7 +819,7 @@ ROWS = [
     # Offline recording (D92 to D94; branch offline-recording). Each row
     # breaks one ruling; the named test must fail.
     ('A144', 'lib/journal/pages/typing_page.dart',
-     'Trouble.refused => PendingLines.MP_63.text(appLanguage),',
+     'Trouble.refused => Lines.MP_63.text(appLanguage),',
      'Trouble.refused => Lines.MP_11.text(appLanguage),',
      'test/journal/pages/typing_page_test.dart', 'a refused microphone shows MP·63, logs a code'),
     ('A145', 'lib/journal/pages/typing_page.dart',
@@ -1484,17 +1484,17 @@ ROWS = [
      'bool wordAnimation = true;',
      'test/onboarding/onboarding_test.dart', 'the words appear all at once, not word by word'),
     ('A308', 'lib/onboarding/onboarding.dart',
-     'for (final line in written(Onboarding.firstPage)) reads(line)',
-     'for (final line in Onboarding.firstPage) reads(line)',
-     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on either page'),
+     'for (final line in written(widget.first)) reads(line)',
+     'for (final line in widget.first) reads(line)',
+     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on any page'),
     ('A309', 'lib/onboarding/onboarding.dart',
-     'for (final line in written(Onboarding.secondPage)) reads(line),',
-     'for (final line in Onboarding.secondPage) reads(line),',
-     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on either page'),
+     'for (final line in written(widget.second)) reads(line),',
+     'for (final line in widget.second) reads(line),',
+     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on any page'),
     ('A310', 'lib/onboarding/disclosure_page.dart',
-     'for (final line in written(parts))',
-     'for (final line in parts)',
-     'test/onboarding/onboarding_test.dart', 'Read everything opens every part; back returns to the consent'),
+     'for (final line in written(shown))',
+     'for (final line in shown)',
+     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on any page'),
     ('A311', 'lib/onboarding/disclosure_page.dart',
      'if (line.written) line',
      'if (!line.written) line',
@@ -1503,10 +1503,6 @@ ROWS = [
      'if (!line.written) line',
      'if (line.written) line',
      'test/onboarding/onboarding_test.dart', 'parts with no line are told apart from the written ones'),
-    ('A313', 'lib/onboarding/onboarding.dart',
-     'static List<Line> get missing => lacking(shown);',
-     'static List<Line> get missing => const [];',
-     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on either page'),
     ('A314', 'lib/onboarding/onboarding.dart',
      'minHeight: max(0.0, room.maxHeight - 2 * StandIns.gap)',
      'minHeight: 0',
@@ -1523,14 +1519,16 @@ ROWS = [
      'BoxConstraints(minHeight: max(0.0, room.maxHeight - 2 * StandIns.gap))',
      'BoxConstraints(minHeight: room.maxHeight - 2 * StandIns.gap)',
      'test/onboarding/onboarding_test.dart', 'a room too short for its margins does not break'),
+    # D106 3's own test is empty while no part lacks a line (c17p-import):
+    # D103 item 1 still keeps onboarding out of both apps.
     ('A316', 'lib/main.dart',
      "import 'core/safe_log.dart';\n",
      "import 'core/safe_log.dart';\nimport 'onboarding/age.dart';\n",
-     'test/dev_only_test.dart', 'no tester or founder build while a part lacks a line'),
+     'test/dev_only_test.dart', 'lib/main.dart reaches no journal, onboarding or recording code, no pending line'),
     ('A317', 'lib/main_founder.dart',
      "import 'core/safe_log.dart';\n",
      "import 'core/safe_log.dart';\nimport 'onboarding/age.dart';\n",
-     'test/dev_only_test.dart', 'no tester or founder build while a part lacks a line'),
+     'test/dev_only_test.dart', 'lib/main_founder.dart reaches no journal, onboarding or recording code, no pending line'),
     # The founder's export (D107; D108).
     ('A320', 'lib/journal/pages/night_page.dart',
      '      if (widget.action case final action?)\n'
@@ -1574,9 +1572,9 @@ ROWS = [
      'latin1.encode(exportText(night))',
      'test/founder/export_text_test.dart', 'the bytes are the text in UTF-8, Swedish letters whole'),
     ('A329', 'lib/founder/founder_export.dart',
-     'PendingLines.MP_65',
-     'PendingLines.MP_64',
-     'test/founder/founder_export_test.dart', 'its label is MP·65, a pending line'),
+     'Lines.MP_65',
+     'Lines.MP_64',
+     'test/founder/founder_export_test.dart', 'its label is MP·65, a filed line'),
     ('A330', 'lib/founder/founder_export.dart',
      "{'name': exportFileName(night), 'bytes'",
      "{'bytes'",
@@ -1694,6 +1692,24 @@ ROWS = [
      '[.]txt$"',
      '[.]md$"',
      'test/founder/native_test.dart', "the file's name passes the phone's own check"),
+    # c17p-import (D91): every real part is filed, so D106 3 is proved on
+    # parts handed in; the hand-in and its defaults.
+    ('A355', 'lib/onboarding/onboarding.dart',
+     'DisclosurePage(shown: widget.full)',
+     'const DisclosurePage()',
+     'test/onboarding/onboarding_test.dart', 'a part with no line shows nothing, on any page'),
+    ('A356', 'lib/onboarding/onboarding.dart',
+     'this.first = Onboarding.firstPage,',
+     'this.first = const [],',
+     'test/onboarding/onboarding_test.dart', 'the pages default to their parts'),
+    ('A357', 'lib/onboarding/onboarding.dart',
+     'this.full = DisclosurePage.parts,',
+     'this.full = const [],',
+     'test/onboarding/onboarding_test.dart', 'the pages default to their parts'),
+    ('A358', 'lib/onboarding/disclosure_page.dart',
+     'this.shown = DisclosurePage.parts',
+     'this.shown = const []',
+     'test/onboarding/onboarding_test.dart', 'the pages default to their parts'),
 ]
 
 

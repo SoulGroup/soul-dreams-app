@@ -157,6 +157,42 @@ void main() {
     }
   });
 
+  // D106 3, kept proved now that every real part is filed: a part with no
+  // line, handed in here, shows nothing on either page or on the full page.
+  testWidgets('a part with no line shows nothing, on any page', (tester) async {
+    const none = Line('X·1', null, null);
+    agreed = 0;
+    await tester.pumpWidget(SoulDreamsApp(
+      clock: () => DateTime(2026, 6, 10, 12),
+      home: Onboarding(
+        onAgreed: () => agreed++,
+        first: const [Lines.W27_1, none],
+        second: const [none, Lines.W27_14],
+        full: const [none, Lines.W27_3],
+      ),
+    ));
+    await tester.pumpAndSettle();
+    await toDisclosure(tester);
+    expect(find.textContaining('[X·1]'), findsNothing);
+    expect(said(Lines.W27_1), findsOneWidget);
+    await tap(tester, Lines.MP_30);
+    expect(find.textContaining('[X·1]'), findsNothing);
+    expect(said(Lines.W27_14), findsOneWidget);
+    await tap(tester, Lines.MP_58);
+    expect(find.byType(DisclosurePage), findsOneWidget);
+    expect(find.textContaining('[X·1]'), findsNothing);
+    expect(said(Lines.W27_3), findsOneWidget);
+    expect(said(Lines.W27_1), findsNothing);
+  });
+
+  test('the pages default to their parts', () {
+    final o = Onboarding(onAgreed: () {});
+    expect(o.first, Onboarding.firstPage);
+    expect(o.second, Onboarding.secondPage);
+    expect(o.full, DisclosurePage.parts);
+    expect(const DisclosurePage().shown, DisclosurePage.parts);
+  });
+
   // The plan's question 2: a part with no line keeps its place.
   test('the two pages hold these parts, in order', () {
     expect(Onboarding.firstPage.map((l) => l.handle), ['W27·1', 'W27·2', 'W27·5', 'W27·13']);
