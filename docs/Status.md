@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-19, in branch `onboarding` (the plan's Tasks 1 to 6, the owner's by-eye review passed, and D106's three changes; waiting for the merge), by Claude Code.
+Last updated: 2026-11-19, in branch `founder-export` (the plan written and proven, D107 and D108; nothing implemented yet). `onboarding` is merged into `main` (`ae23e94`). By Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,14 +14,12 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`onboarding`: onboarding in SoulDreams Dev (D103): the welcome, the founder's note, the age question, the disclosure's
-first layer with one consent, the disclosure and privacy page, and the first empty journal; the consent kept on the
-phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.md`.
+`founder-export`: the founder's export in SoulDreams Dev (D107, D108): one night at a time, from its "⋯" menu, a plain
+text file handed to AirDrop alone and deleted once the share closes. Plan: `docs/plans/founder-export.md`.
 
 ## Road ahead
 
-- The owner's by-eye review of `onboarding` (the plan's Task 7), then its merge. Product's answers to the plan's Part 4
-  come back through the head.
+- `founder-export`: the plan's Tasks 1 to 8, then the owner's checks (Task 9) and the merge.
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1), once the pending lines are filed
   (and, for the founder app, with his export).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
