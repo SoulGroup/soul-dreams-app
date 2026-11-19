@@ -13,12 +13,14 @@ import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/night.dart';
+import 'package:souldreams/journal/night_action.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../memory_journal_files.dart';
@@ -259,6 +261,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(NightPage), findsOneWidget);
     expect(find.text(n.dreams[1]), findsOneWidget);
+  });
+
+  testWidgets("a row hands its night's page the menu's item", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    final action = NightAction(label: PendingLines.MP_65.text(Lang.en), run: (_) async {});
+    await h.pump(tester, JournalPage(journal: h.journal, nightAction: action));
+    await tester.tap(find.text(dayDigits(n.date)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<NightPage>(find.byType(NightPage)).action, same(action));
   });
 
   testWidgets('text at twice the size does not overflow', (tester) async {

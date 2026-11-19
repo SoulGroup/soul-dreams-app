@@ -12,12 +12,14 @@ import 'package:souldreams/journal/journal.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/night.dart';
+import 'package:souldreams/journal/night_action.dart';
 import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/onboarding/onboarding.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../../recording/fakes.dart';
@@ -108,6 +110,14 @@ void main() {
     final handed = tester.widget<JournalPage>(find.byType(JournalPage)).recording!;
     expect(handed.keep, isA<JournalAudio>());
     expect(handed.microphone, same(recording.microphone));
+  });
+
+  testWidgets("the night's menu item is handed to the journal", (tester) async {
+    JournalStore.newQueueForTests();
+    final action = NightAction(label: PendingLines.MP_65.text(Lang.en), run: (_) async {});
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), nightAction: action)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).nightAction, same(action));
   });
 
   // D92 item 3: a recording waiting is retried only while the app is open:

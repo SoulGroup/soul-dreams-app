@@ -1,8 +1,8 @@
 // A night's page (P1, P6, P7; D58 Q1, Q3, Q4, Q8; head's message 20,
 // items 10 to 12): header, "Dreams", the dreams; editing through the
 // typing screen; Add dreams and Start Interpretation at the foot; the menu,
-// a bordered pill opening the phone's menu, holding only delete, spoken as
-// MP·39; one confirmation, Cancel first, Delete destructive; deleting
+// a bordered pill opening the phone's menu, holding delete, spoken as
+// MP·39, and above it the item an entry point gives (D107 item 1); one confirmation, Cancel first, Delete destructive; deleting
 // leaves nothing.
 import 'dart:async';
 import 'dart:typed_data';
@@ -15,6 +15,7 @@ import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/night.dart';
+import 'package:souldreams/journal/night_action.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
@@ -60,7 +61,7 @@ void main() {
   late Harness h;
   late Night n;
 
-  Future<void> open(WidgetTester tester, {UnsteadyFiles? files, String? name}) async {
+  Future<void> open(WidgetTester tester, {UnsteadyFiles? files, String? name, NightAction? action}) async {
     h = await Harness.make(files: files);
     n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     if (name != null) {
@@ -76,7 +77,7 @@ void main() {
       );
       await h.store.save(n);
     }
-    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id)));
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action)));
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
   }
@@ -278,6 +279,30 @@ void main() {
     expect(find.text(Lines.EM_11.parts(Lang.en)[1]), findsOneWidget);
     expect(find.text(Lines.MP_28.text(Lang.en)), findsNothing);
     handle.dispose();
+  });
+
+  // D107 item 1: the entry point's item, above delete, plain, its words given.
+  NightAction given(List<Night> ran) =>
+      NightAction(label: PendingLines.MP_65.text(Lang.en), run: (night) async => ran.add(night));
+
+  testWidgets('a given item shows above delete, plain', (tester) async {
+    await open(tester, action: given([]));
+    await openMenu(tester);
+    final items = tester.widgetList<CupertinoMenuItem>(find.byType(CupertinoMenuItem)).toList();
+    expect([for (final i in items) i.key], [NightPage.actionKey, NightPage.deleteKey]);
+    expect(items.first.isDestructiveAction, isFalse);
+    expect(find.text(PendingLines.MP_65.text(Lang.en)), findsOneWidget);
+  });
+
+  testWidgets('a given item runs once, with the night shown', (tester) async {
+    final ran = <Night>[];
+    await open(tester, action: given(ran));
+    await openMenu(tester);
+    await tester.tap(find.byKey(NightPage.actionKey));
+    await tester.pumpAndSettle();
+    expect(ran, [n]);
+    expect(find.byType(NightPage), findsOneWidget);
+    expect(await h.nights(), [n]);
   });
 
   testWidgets('one confirmation: Cancel first keeps the night', (tester) async {

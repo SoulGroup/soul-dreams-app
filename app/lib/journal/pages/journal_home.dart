@@ -25,10 +25,11 @@ import '../journal.dart';
 import '../journal_audio.dart';
 import '../journal_files.dart';
 import '../journal_store.dart';
+import '../night_action.dart';
 import 'journal_page.dart';
 
 class JournalHome extends StatefulWidget {
-  const JournalHome({super.key, required this.files, this.after, this.recording});
+  const JournalHome({super.key, required this.files, this.after, this.recording, this.nightAction});
 
   final JournalFiles files;
 
@@ -38,6 +39,9 @@ class JournalHome extends StatefulWidget {
 
   /// How to record by voice, or null (D69).
   final Recording? recording;
+
+  /// The item each night's menu gains, or null (D107 item 1).
+  final NightAction? nightAction;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -159,7 +163,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     return switch (_agreed) {
       null => const Scaffold(),
       false => Onboarding(onAgreed: _agree),
-      true => JournalPage(journal: _journal!, recording: _recording, firstTime: _first),
+      true => JournalPage(journal: _journal!, recording: _recording, firstTime: _first, nightAction: widget.nightAction),
     };
   }
 }

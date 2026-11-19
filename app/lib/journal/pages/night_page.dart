@@ -2,7 +2,9 @@
 // 3; P1, P6, P7; D58 Q1, Q4, Q8; head's message 20, items 10 to 12): the
 // header centred (the date, or the name and the date); the "⋯" menu top
 // right, a bordered pill opening the phone's menu, spoken as MP·39,
-// holding only "delete this night" (EM·11's second part), plain; one
+// holding "delete this night" (EM·11's second part), plain, and above it
+// the item the entry point gives, if any (D107 item 1: the founder's
+// export, in SoulDreams Dev; R8); one
 // confirmation, the phone's standard dialog, Cancel first and Delete
 // destructive (MP·61, MP·60, pending lines); the dreams under "Dreams"
 // (MP·38), in bubbles 30 from the screen's left edge and 10 from its
@@ -28,16 +30,18 @@ import '../../words/pending.g.dart';
 import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
+import '../night_action.dart';
 import '../night_rules.dart';
 import '../row_text.dart';
 import 'parts.dart';
 import 'typing_page.dart';
 
 class NightPage extends StatefulWidget {
-  const NightPage({super.key, required this.journal, required this.id, this.recording});
+  const NightPage({super.key, required this.journal, required this.id, this.recording, this.action});
 
   static const menuKey = Key('night-menu');
   static const deleteKey = Key('night-delete');
+  static const actionKey = Key('night-action');
   static const addKey = Key('night-add');
   static const startKey = Key('night-start');
   static const transcribingKey = Key('night-transcribing');
@@ -47,6 +51,9 @@ class NightPage extends StatefulWidget {
 
   /// How to record by voice in the typing screen, or null (D69).
   final Recording? recording;
+
+  /// The menu's item above delete, or null (D107 item 1).
+  final NightAction? action;
 
   @override
   State<NightPage> createState() => _NightPageState();
@@ -151,12 +158,25 @@ class _NightPageState extends State<NightPage> {
     if (mounted) Navigator.of(context).pop();
   }
 
+  // The entry point's item, with the night shown; not while a delete runs.
+  Future<void> _act() async {
+    final night = _night;
+    if (_busy || night == null) return;
+    await widget.action?.run(night);
+  }
+
   // The "⋯" menu: a bordered pill (color.button) opening the phone's menu;
   // while a delete runs, a tap opens nothing (D64).
   Widget _menu(Palette p) => CupertinoMenuAnchor(
     // A tap outside the open menu only closes it (D102).
     consumeOutsideTaps: true,
     menuChildren: [
+      if (widget.action case final action?)
+        CupertinoMenuItem(
+          key: NightPage.actionKey,
+          onPressed: _act,
+          child: Text(action.label),
+        ),
       CupertinoMenuItem(
         key: NightPage.deleteKey,
         onPressed: _delete,

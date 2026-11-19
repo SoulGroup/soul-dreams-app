@@ -18,6 +18,7 @@ import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
+import '../night_action.dart';
 import '../night_rules.dart';
 import '../row_text.dart';
 import 'night_page.dart';
@@ -25,7 +26,7 @@ import 'parts.dart';
 import 'typing_page.dart';
 
 class JournalPage extends StatefulWidget {
-  const JournalPage({super.key, required this.journal, this.recording, this.firstTime = false});
+  const JournalPage({super.key, required this.journal, this.recording, this.firstTime = false, this.nightAction});
 
   final Journal journal;
 
@@ -37,6 +38,9 @@ class JournalPage extends StatefulWidget {
 
   /// How to record by voice in the typing screen, or null (D69).
   final Recording? recording;
+
+  /// The item each night's menu gains, or null (D107 item 1).
+  final NightAction? nightAction;
 
   @override
   State<JournalPage> createState() => _JournalPageState();
@@ -144,7 +148,12 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
                       NightItem(:final night) => _Row(
                         night,
                         onTap: () =>
-                            _push(NightPage(journal: widget.journal, id: night.id, recording: widget.recording)),
+                            _push(NightPage(
+                              journal: widget.journal,
+                              id: night.id,
+                              recording: widget.recording,
+                              action: widget.nightAction,
+                            )),
                       ),
                     },
                 ],
