@@ -748,6 +748,19 @@ Banked in founder-export (none changes what the dreamer sees beyond D107 and D10
      `dev_only_test.dart` as well as by the founder one, as every founder file reaches `lib/journal/`; the founder
      assertion alone is not isolated by a row.
 
+Banked in c17p-import (D91; none changes what the dreamer sees beyond D109 and the filed lines and values):
+
+133. Every part onboarding shows is filed, so D106 3 ("a part with no line shows nothing") is proved on parts a test
+     hands in (`Onboarding`'s `first`, `second`, `full`; `DisclosurePage`'s `shown`; rows A355 to A358). Row A313
+     (`missing` emptied) is dropped: an empty `missing` is now the real one. It comes back when a part loses its line.
+     `dev_only_test.dart`'s D106 3 test is empty while no part lacks a line; rows A316 and A317 now name the test that
+     keeps onboarding out of the tester and founder apps (D103 item 1). The full app run: 386 rows, all caught.
+134. The Design System's §5 controls table (C17-P) is prose and not generated. The app's stand-ins agree with it:
+     the record button a 120 circle, the back control about 41, the row's chevron, the field capped at 0.7, the
+     month divider centred.
+135. §6 at C17-P (Word Animation off by default, about one word every 60 ms when on, the theme's fade ease-in-out
+     over five seconds) was already built as filed; no value moved.
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
