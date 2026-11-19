@@ -1,9 +1,9 @@
 // The disclosure and privacy page (MP·48; C14-P item 1): every part of the
 // disclosure, W27·1 to W27·17 (W27·7 is merged into W27·6, W27·16 retired),
 // in order, opened from onboarding's consent by MP·58 and closed by the
-// back control, back to the consent. No consent is asked here. A part to
-// rewrite shows its handle (R1). No title: none is given (the plan's
-// question 4).
+// back control, back to the consent. No consent is asked here. A part with
+// no line yet (to rewrite) shows nothing in its place (D106 3; R1). No
+// title: none is given (the plan's question 4).
 import 'package:flutter/material.dart';
 
 import '../core/language.dart';
@@ -12,6 +12,13 @@ import '../design/stand_ins.dart';
 import '../design/tokens.g.dart';
 import '../journal/pages/parts.dart';
 import '../words/lines.g.dart';
+
+/// Of [lines], those the register has written: a part with no line shows
+/// nothing in its place, not its handle (D106 3).
+List<Line> written(List<Line> lines) => [for (final line in lines) if (line.written) line];
+
+/// Of [lines], those with no line yet.
+List<Line> lacking(List<Line> lines) => [for (final line in lines) if (!line.written) line];
 
 class DisclosurePage extends StatelessWidget {
   const DisclosurePage({super.key});
@@ -53,7 +60,7 @@ class DisclosurePage extends StatelessWidget {
                 child: ListView(
                   padding: const EdgeInsets.fromLTRB(StandIns.pageSide, StandIns.gap, StandIns.pageSide, StandIns.gap),
                   children: [
-                    for (final line in parts)
+                    for (final line in written(parts))
                       Padding(
                         padding: const EdgeInsets.only(bottom: StandIns.gap),
                         child: Text(

@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-19, in branch `onboarding` (the plan's Tasks 1 to 6; the owner's by-eye review, Task 7, next), by Claude Code.
+Last updated: 2026-11-19, in branch `onboarding` (the plan's Tasks 1 to 6, the owner's by-eye review passed, and D106's three changes; waiting for the merge), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -166,9 +166,11 @@ phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.
   drawn arrow to the record button, once. The recording and its retries start only then. A consent that cannot be
   read or kept logs `consentReadFailed` or `consentKeepFailed`; onboarding asks again at the next opening. When the
   consent goes (`Journal.withdrawConsent`, or `Journal.deleteAll`, which takes it with every file), every page closes
-  and onboarding starts again; no control calls either yet (Settings, P8; the plan's question 3). Parts to rewrite
-  show their handles: `[W27·2]` and `[W27·17]` in onboarding, also `[W27·3]`, `[W27·6]` and `[W27·10]` on the page.
-  The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
+  and onboarding starts again; no control calls either yet (Settings, P8; the plan's question 3). Parts with no line
+  (to rewrite: W27·2 and W27·17 in onboarding, also W27·3, W27·6 and W27·10 on the page) show nothing in their place,
+  not their handle (D106 3); they keep their places (`Onboarding.firstPage`, `secondPage`) for when their lines are
+  filed. Every step's box is centred between the top and the foot, and scrolls from the top when taller (D106 1), and
+  its words appear whole (D106 2). The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
   `arrowGap`); no logo and no drawn signature (none filed).
 - The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
   both 120, the radius half the height; large text shrinks its words, never the circle.
@@ -178,8 +180,9 @@ phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.
   is deleted (D58 Q2, Q3; P9, P10).
 - Night/Day automatic (`app/lib/core/night_day.dart`): dark 21:00 to 08:00 by the phone's clock, a five-second
   ease-in-out fade while the app is open (head's message 20, item 13), instant with Reduce Motion (read from the platform's own flag, which iOS does not put
-  in `MediaQuery`), at start and on returning (D57 Q15). The app's own lines appear a word every 60 ms, whole with
-  Reduce Motion (`app/lib/core/app_line.dart`; D58 Q17). The palette (`app/lib/design/palette.dart`) fades with the
+  in `MediaQuery`), at start and on returning (D57 Q15). The app's own lines appear whole: Word Animation is off
+  everywhere by default (D106 2; `wordAnimation` in `app/lib/core/app_line.dart`, which a test alone turns on until
+  Settings; with it on, a word every 60 ms, D58 Q17, and whole with Reduce Motion). The palette (`app/lib/design/palette.dart`) fades with the
   theme. The app shows English only (D57 Q12; `app/lib/core/language.dart`).
 - Packages: `flutter_localizations` (SDK) and `intl` 0.20.3, the owner's pub add (D57 Q9): the month names, and
   Flutter's own framework words, which are not ours under R1. `record` 7.1.2, exactly, the owner's pub add (D71
@@ -195,10 +198,10 @@ phone, and the app back at its start when it goes. Plan: `docs/plans/onboarding.
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 471 tests, and 334 mutation checks (A1 to A305; A55, A73, A80 to A83, A86 to A88, A94, A99,
+- The app's analyzer baseline: `No issues found!`. The app has 480 tests, and 348 mutation checks (A1 to A319; A55, A73, A80 to A83, A86 to A88, A94, A99,
   A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 334 run, 334 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 348 run, 348 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -488,7 +491,8 @@ Banked in journal-screens:
     summary's type role, the back control, the menu's form and the fade's curve were ruled by head's message 20 and
     built in `journal-design`.)
 78. A named night's row is built (D57 Q6) but nothing in the app can name a night yet (P7).
-79. Word Animation, the setting, is not built (P8): only Reduce Motion stops word by word and the fade.
+79. Word Animation, the setting, is not built (P8): the default is off, so no line appears word by word (D106 2); only
+    the fade follows Reduce Motion.
 80. The month names come from `intl`'s CLDR data, assumed to match iOS's own for English and Swedish (D56).
 
 Banked by D68 (the reviewers' notes in journal-screens; the detail is in
@@ -693,7 +697,13 @@ Banked in onboarding (the plan's decisions; none changes what the dreamer sees b
      tap (A303 is caught as written). The full mutation run (D95) found three older rows (A24an, A39, A66) naming the
      dev-only test by its old name, which Task 4 renamed; they follow it (D67), and A305 pins the tester build's walk
      reaching no `lib/onboarding/`.
-122. OPEN, for the owner: at night the page shown while the folder opens and the consent is read (a blank `Scaffold`)
+123. The review of D106 (D91; none changes what the dreamer sees beyond D106). Fixed: the guard's `missing` covers
+     every part shown, MP·57 included (A318); a room under two margins high no longer trips the layout (A319); the
+     tall-box test checks it is taller than its room. Banked: the pre-Cohort-1 guard repeats, today, the older
+     assertion that neither entry point reaches `lib/onboarding/` (it matters when a later ruling lets them); if every
+     part of a page lacked a line, that step would show an empty box with only Next (Dev only; the guard blocks the
+     other builds).
+122. CLOSED by D105 (the loading page stays as built): at night the page shown while the folder opens and the consent is read (a blank `Scaffold`)
      is in Night/Day's dark theme, so a dreamer sees a dark blank, then the light onboarding. Whether it should be
      held light, as onboarding is, changes what is seen, so it is asked and not built.
 
@@ -702,6 +712,9 @@ Banked in onboarding (the plan's decisions; none changes what the dreamer sees b
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
    note 1; D68).
 2. Product gives exact values for Task 14's thirteen questions below (P13).
+3. No tester or founder build while any disclosure part shown in onboarding or on the full disclosure page lacks a
+   line: W27·2, W27·3, W27·6, W27·10 and W27·17 today (D106 3). `Onboarding.missing` lists them (every part shown, MP·57 included), and a test in
+   `dev_only_test.dart` fails if either entry point reaches `lib/onboarding/` while it is not empty.
 
 Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
 (questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY; questions 1, 3, 4, 5, 7, 9 to 13 by head's
@@ -976,6 +989,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D104 (founder, 2026-11-19): all fifteen of the plan's questions take their leans (Product's 1 to 11 as founder
   rulings; the Build chat tells the head). D91 and D95 apply; the Opus review on the consent store, the start-over path
   and the retry gating found one defect, fixed (banked item 121).
+- D105 (founder): the loading page stays as built (the dark blank while the folder opens; banked item 122 closed).
+  The age limit stays 18 or over in the build, for Cohorts 0 and 1.
+- D106 (founder, after the owner's by-eye review of Task 7, which passed otherwise): (1) every onboarding box is
+  centred; (2) no word-by-word motion: onboarding's text appears all at once, and Word Animation defaults to off
+  everywhere (the app's own lines appear whole; the setting itself comes with Settings); (3) a disclosure part with no
+  line shows nothing in its place, not its handle, in Dev; a guard on the pre-Cohort-1 list and a test: no tester or
+  founder build while any disclosure part shown lacks a line.
 
 ## Documents as last imported
 

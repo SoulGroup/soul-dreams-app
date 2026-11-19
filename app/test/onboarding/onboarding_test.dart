@@ -1,11 +1,14 @@
 // Onboarding (main-path.md, Onboarding; D103): the welcome, the note, the
 // age question, the under-18 card, and the disclosure's first layer on two
 // pages with one consent; MP·58 opens every part, and back returns to the
-// consent. Every word is the register's; a part to rewrite shows its handle.
+// consent. Every word is the register's; a part with no line shows nothing
+// in its place (D106 3).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
+import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/language.dart';
+import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/onboarding/age.dart';
 import 'package:souldreams/onboarding/disclosure_page.dart';
@@ -110,12 +113,12 @@ void main() {
   testWidgets('18 or over: the disclosure first page, then the consent', (tester) async {
     await start(tester);
     await toDisclosure(tester);
-    for (final line in [Lines.W27_1, Lines.W27_2, Lines.W27_5, Lines.W27_13]) {
+    for (final line in written(Onboarding.firstPage)) {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
     expect(said(Lines.MP_8), findsNothing);
     await tap(tester, Lines.MP_30);
-    for (final line in [Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57, Lines.MP_58, Lines.MP_59]) {
+    for (final line in written([Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57, Lines.MP_58, Lines.MP_59])) {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
     expect(said(Lines.W27_1), findsNothing);
@@ -136,12 +139,104 @@ void main() {
     }
   });
 
-  testWidgets('a part to rewrite shows its handle (R1)', (tester) async {
+  // D106 3: a part with no line shows nothing in its place, not its handle.
+  testWidgets('a part with no line shows nothing, on either page', (tester) async {
+    expect(Onboarding.missing, isNotEmpty);
     await start(tester);
     await toDisclosure(tester);
-    expect(find.text('[W27·2]'), findsOneWidget);
+    expect(find.textContaining('[W27'), findsNothing);
+    expect(said(Lines.W27_1), findsOneWidget);
     await tap(tester, Lines.MP_30);
-    expect(find.text('[W27·17]'), findsOneWidget);
+    expect(find.textContaining('[W27'), findsNothing);
+    expect(said(Lines.W27_14), findsOneWidget);
+  });
+
+  // The plan's question 2: a part with no line keeps its place.
+  test('the two pages hold these parts, in order', () {
+    expect(Onboarding.firstPage.map((l) => l.handle), ['W27·1', 'W27·2', 'W27·5', 'W27·13']);
+    expect(Onboarding.secondPage.map((l) => l.handle), ['W27·14', 'W27·15', 'W27·17', 'MP·57']);
+  });
+
+  // D106 3 (review): the guard looks at every part shown, on either page of
+  // onboarding and on the full page, MP·57 included.
+  test('every part shown is looked at for a missing line', () {
+    for (final line in [...Onboarding.firstPage, ...Onboarding.secondPage, ...DisclosurePage.parts]) {
+      expect(Onboarding.shown, contains(line), reason: line.handle);
+    }
+    expect(Onboarding.shown.toSet().length, Onboarding.shown.length);
+  });
+
+  test('parts with no line are told apart from the written ones', () {
+    const none = Line('X·1', null, null);
+    const some = Line('X·2', ['a'], ['b']);
+    expect(written([none, some, none, some]), [some, some]);
+    expect(lacking([none, some, none]), [none, none]);
+    expect(Onboarding.missing.map((l) => l.handle), unorderedEquals(['W27·2', 'W27·3', 'W27·6', 'W27·10', 'W27·17']));
+  });
+
+  // D106 2: onboarding's text appears all at once, whatever the time passed.
+  testWidgets('the words appear all at once, not word by word', (tester) async {
+    await tester.pumpWidget(SoulDreamsApp(
+      clock: () => DateTime(2026, 6, 10, 12),
+      home: Onboarding(onAgreed: () => agreed++),
+    ));
+    await tester.pump();
+    final rich = tester.widgetList<RichText>(find.descendant(of: find.byType(AppLine), matching: find.byType(RichText)));
+    expect(rich, isNotEmpty);
+    for (final r in rich) {
+      (r.text as TextSpan).visitChildren((span) {
+        expect(span is TextSpan && span.style?.color == const Color(0x00000000), isFalse);
+        return true;
+      });
+    }
+  });
+
+  // D106 1: every box is centred, between the top and the foot.
+  testWidgets('each step\'s box is centred between the top and the foot', (tester) async {
+    // A window tall enough that every step's box is shorter than its room.
+    tester.view.physicalSize = const Size(1000, 4000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await start(tester);
+    final area = find.byType(SingleChildScrollView);
+    void centred() {
+      final box = tester.getRect(find.byKey(Onboarding.boxKey));
+      final room = tester.getRect(area);
+      expect(box.center.dy, closeTo(room.center.dy, 1));
+      expect(box.center.dx, closeTo(room.center.dx, 1));
+    }
+    centred();
+    await tap(tester, Lines.MP_30);
+    centred();
+    await tap(tester, Lines.MP_30);
+    centred();
+    await pick(tester, 0);
+    await tap(tester, Lines.MP_30);
+    centred();
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('a tall box starts at the top and scrolls', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 3.1;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await start(tester);
+    await toDisclosure(tester);
+    final room = tester.getRect(find.byType(SingleChildScrollView));
+    final box = tester.getRect(find.byKey(Onboarding.boxKey));
+    expect(box.top, closeTo(room.top + StandIns.gap, 1));
+    // Taller than its room, so it scrolls rather than centring.
+    expect(box.height, greaterThan(room.height));
+    expect(tester.takeException(), isNull);
+  });
+
+  // A room under 2 gaps high must not trip the layout (review of D106).
+  testWidgets('a room too short for its margins does not break', (tester) async {
+    tester.view.physicalSize = const Size(400, 100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await start(tester);
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(Onboarding.boxKey), findsOneWidget);
   });
 
   testWidgets("I don't agree returns to the first page; nothing agreed", (tester) async {
@@ -168,10 +263,11 @@ void main() {
     await tap(tester, Lines.MP_30);
     await tap(tester, Lines.MP_58);
     expect(find.byType(DisclosurePage), findsOneWidget);
-    for (final line in DisclosurePage.parts) {
+    for (final line in written(DisclosurePage.parts)) {
       await tester.scrollUntilVisible(said(line), 200);
       expect(said(line), findsOneWidget, reason: line.handle);
     }
+    expect(find.textContaining('[W27'), findsNothing);
     expect(DisclosurePage.parts.map((l) => l.handle), [
       for (final n in [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 17]) 'W27·$n',
     ]);

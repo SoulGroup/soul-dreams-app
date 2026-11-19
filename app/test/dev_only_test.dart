@@ -11,6 +11,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/onboarding/onboarding.dart';
 
 final _blockComment = RegExp(r'/\*.*?\*/', dotAll: true);
 // A directive's start: import, export, part or part of, then an address.
@@ -76,6 +77,16 @@ void main() {
     expect(files, contains(pending));
     expect(files, contains('lib/recording/record_microphone.dart'));
     expect(files, containsAll(['lib/onboarding/onboarding.dart', 'lib/onboarding/disclosure_page.dart']));
+  });
+
+  // D106 3: no tester or founder build shows onboarding or the full disclosure
+  // while any part it shows has no line. (They show neither today; this holds
+  // when a later ruling lets them.)
+  test('no tester or founder build while a part lacks a line', () {
+    for (final entry in ['lib/main.dart', 'lib/main_founder.dart']) {
+      if (Onboarding.missing.isEmpty) continue;
+      expect(reached(entry).where((f) => f.startsWith('lib/onboarding/')), isEmpty, reason: entry);
+    }
   });
 
   test('the walk follows relative and package imports', () {

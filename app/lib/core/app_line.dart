@@ -1,15 +1,20 @@
-// A line in the app's own voice, appearing word by word (How the AI
-// Appears §4): one word about every 60 ms, the founder's pace to judge in
-// Cohort 0 (D58 Q17). With the phone's Reduce Motion on, or animations
-// disabled, the line stands whole. A screen reader always gets the line
-// whole (§8). Words not yet shown keep their place, so the line never
-// reflows as it appears.
+// A line in the app's own voice (How the AI Appears §4). Word Animation is
+// off everywhere by default (D106 2), so a line stands whole. With it on,
+// the line appears word by word, one word about every 60 ms, the founder's
+// pace to judge in Cohort 0 (D58 Q17); with the phone's Reduce Motion on, or
+// animations disabled, it stands whole all the same. A screen reader always
+// gets the line whole (§8). Words not yet shown keep their place, so the
+// line never reflows as it appears.
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
 /// The pace of the app's own words (D58 Q17).
 const wordPace = Duration(milliseconds: 60);
+
+/// Word Animation: off everywhere (D106 2). The setting itself comes with
+/// Settings (P8); until then only a test turns it on.
+bool wordAnimation = false;
 
 class AppLine extends StatefulWidget {
   const AppLine(this.text, {super.key, required this.style, this.textAlign = TextAlign.center});
@@ -52,7 +57,7 @@ class _AppLineState extends State<AppLine> {
     // Each word with the space after it, so the parts join to the line.
     _words = widget.text.split(_afterSpace);
     final f = WidgetsBinding.instance.platformDispatcher.accessibilityFeatures;
-    if (f.reduceMotion || f.disableAnimations) {
+    if (!wordAnimation || f.reduceMotion || f.disableAnimations) {
       _shown = _words.length;
       return;
     }

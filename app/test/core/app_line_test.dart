@@ -1,5 +1,6 @@
-// The app's own words, word by word at about 60 ms a word (D58 Q17);
-// whole with Reduce Motion; always whole to a screen reader.
+// The app's own words: whole by default, Word Animation being off everywhere
+// (D106 2); with it on, word by word at about 60 ms a word (D58 Q17), whole
+// with Reduce Motion; always whole to a screen reader.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
@@ -25,7 +26,21 @@ void main() {
   Future<void> pump(WidgetTester tester) => tester.pumpWidget(
       Directionality(textDirection: TextDirection.ltr, child: Center(child: AppLine(line, style: style))));
 
-  testWidgets('one word, then one more every 60 ms', (tester) async {
+  // The setting itself comes with Settings (P8); until then only a test turns
+  // it on.
+  void animate(WidgetTester tester) {
+    wordAnimation = true;
+    addTearDown(() => wordAnimation = false);
+  }
+
+  testWidgets('with Word Animation off, the default, the line stands whole', (tester) async {
+    expect(wordAnimation, isFalse);
+    await pump(tester);
+    expect(shown(tester), words);
+  });
+
+  testWidgets('with it on: one word, then one more every 60 ms', (tester) async {
+    animate(tester);
     await pump(tester);
     expect(shown(tester), 1);
     await tester.pump(wordPace);
@@ -36,7 +51,8 @@ void main() {
     expect(shown(tester), words);
   });
 
-  testWidgets('with Reduce Motion the line stands whole', (tester) async {
+  testWidgets('with it on, Reduce Motion still stands whole', (tester) async {
+    animate(tester);
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(reduceMotion: true);
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
     await pump(tester);

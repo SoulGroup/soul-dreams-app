@@ -3,7 +3,9 @@
 // first layer on two pages with one consent (C14-P item 1; the plan's
 // question 2 for which part stands on which page). The page that shows it
 // holds the app light (AlwaysLight). Every word is the register's; a part
-// to rewrite shows its handle (R1). Nothing is kept here: "I agree" is
+// with no line yet shows nothing in its place (D106 3; R1). Every box is
+// centred between the top and the foot (D106 1), and the words appear whole
+// (D106 2). Nothing is kept here: "I agree" is
 // told to the page that shows this, which keeps only that the dreamer
 // agreed and is 18 or over (D103 items 2 and 4). Under 18: EM·5 and
 // "I understand", which changes nothing; the card stays until the app
@@ -11,6 +13,8 @@
 // nothing was kept (C127-I I6). "I don't agree" goes back to the
 // disclosure's first page and asks nothing (C127-I I7). There is no back
 // control: each step goes forward only (the plan's question 8).
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import '../core/app_line.dart';
@@ -39,6 +43,23 @@ class Onboarding extends StatefulWidget {
   final VoidCallback onAgreed;
 
   static const ageKey = Key('age');
+
+  /// The white box holding a step's words.
+  static const boxKey = Key('onboarding-box');
+
+  /// The disclosure's first page, then its consent page, by part (the
+  /// plan's question 2). A part with no line shows nothing yet, but keeps
+  /// its place here for when its line is filed.
+  static const firstPage = [Lines.W27_1, Lines.W27_2, Lines.W27_5, Lines.W27_13];
+  static const secondPage = [Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57];
+
+  /// Every part shown, on either page here or on the full page, once each.
+  static List<Line> get shown => {...firstPage, ...secondPage, ...DisclosurePage.parts}.toList();
+
+  /// The parts shown that have no line yet. No tester or founder build while
+  /// any is missing (D106 3; Status, "Before Cohort 1"; the guard in
+  /// `dev_only_test.dart`).
+  static List<Line> get missing => lacking(shown);
 
   @override
   State<Onboarding> createState() => _OnboardingState();
@@ -78,22 +99,34 @@ class _OnboardingState extends State<Onboarding> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                // Each step starts at its top.
-                key: ValueKey(_step),
-                padding: const EdgeInsets.fromLTRB(StandIns.pageSide, StandIns.gap, StandIns.pageSide, StandIns.gap),
-                child: DecoratedBox(
-                  decoration: surface(p),
-                  child: Padding(
-                    padding: Spacing.onboardingBox,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        for (final (i, part) in _words(p).indexed) ...[
-                          if (i > 0) const SizedBox(height: StandIns.gap),
-                          part,
-                        ],
-                      ],
+              // The box sits in the middle of the room between the top and
+              // the foot; one taller than the room starts at the top and
+              // scrolls (D106 1).
+              child: LayoutBuilder(
+                builder: (context, room) => SingleChildScrollView(
+                  // Each step starts at its top.
+                  key: ValueKey(_step),
+                  padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide, vertical: StandIns.gap),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: max(0.0, room.maxHeight - 2 * StandIns.gap)),
+                    child: Center(
+                      child: DecoratedBox(
+                        key: Onboarding.boxKey,
+                        decoration: surface(p),
+                        child: Padding(
+                          padding: Spacing.onboardingBox,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              for (final (i, part) in _words(p).indexed) ...[
+                                if (i > 0) const SizedBox(height: StandIns.gap),
+                                part,
+                              ],
+                            ],
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -133,10 +166,10 @@ class _OnboardingState extends State<Onboarding> {
           _one(PlainButton(Lines.MP_31.text(appLanguage), onPressed: () {})),
         ];
       case _Step.disclosure:
-        return [for (final line in [Lines.W27_1, Lines.W27_2, Lines.W27_5, Lines.W27_13]) reads(line)];
+        return [for (final line in written(Onboarding.firstPage)) reads(line)];
       case _Step.consent:
         return [
-          for (final line in [Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57]) reads(line),
+          for (final line in written(Onboarding.secondPage)) reads(line),
           _one(
             PlainButton(
               Lines.MP_58.text(appLanguage),
