@@ -33,7 +33,9 @@ LINE = {'written': False, 'written, in its parts': False,
 IN_PARTS = 'written, in its parts'
 # Known statuses with no line. Waiting places show their handle; the
 # others have no constant at all (D32 Q6, Q7).
-WAITING = ('to rewrite', 'to write', 'composed, no stand-in')
+# D109: "English written, Swedish to write" waits until both are filed.
+WAITING = ('to rewrite', 'to write', 'composed, no stand-in',
+           'English written, Swedish to write')
 WAITING_PREFIXES = ('paused:', 'blocked:')
 NO_LINE = ('retired', 'no line: by decision', 'no line: prohibition')
 MERGED = 'merged into '

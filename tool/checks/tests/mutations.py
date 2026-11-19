@@ -217,6 +217,10 @@ MUTATIONS = [
      ['test_g1_g2.G2.test_screens_unlisted_changed_or_unprinted_refuse']),
     ('g0_kinds.py', ", PENDING_FINGERPRINT, SCREEN_PRINTS)", ", PENDING_FINGERPRINT)",
      ['test_g0.G0.test_screen_fingerprints_known_by_path_only']),
+    # c17p-import (D109): the status that waits for its Swedish.
+    ('wordsgen.py', "'composed, no stand-in',\n           'English written, Swedish to write')",
+     "'composed, no stand-in')",
+     ['test_wordsgen.Generator.test_waiting_statuses_make_placeholders']),
 ]
 
 

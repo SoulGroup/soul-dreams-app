@@ -158,7 +158,9 @@ class Generator(unittest.TestCase):
         self.assertIn("static const A_3 = Line('A·3', ['e'], ['f'], standIn: true);", out)
 
     def test_waiting_statuses_make_placeholders(self):
+        # D109: "English written, Swedish to write" waits, as "to write" does.
         for n, status in enumerate(('to rewrite', 'to write', 'composed, no stand-in',
+                                    'English written, Swedish to write',
                                     'paused: some reason', 'blocked: other reason'), 1):
             out = lines(row('W' + DOT + str(n), status, 'draft', 'draft'))
             self.assertIn("static const W_%d = Line('W·%d', null, null);" % (n, n), out)
