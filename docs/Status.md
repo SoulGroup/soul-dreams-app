@@ -802,8 +802,6 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - None. MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`), and
   `pending-lines.csv` emptied to its header.
-- W27·5's privacy-page text (head's message 16): the page shows W27·5 as filed at C17-P, which changed its text;
-  whether that is the text of head's message 16 is the owner's to confirm.
 
 ## Rulings during branch 2
 
