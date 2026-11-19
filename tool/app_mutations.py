@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A319, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A343, A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 348 run, 348 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 372 run, 372 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -328,8 +328,8 @@ ROWS = [
      '',
      'test/journal/pages/journal_home_test.dart', 'the list waits for the phone check, then shows'),
     ('A24ap', 'lib/main_dev.dart',
-     'JournalHome(files: files, after: check, recording: recording)',
-     'JournalHome(files: files, recording: recording)',
+     'JournalHome(files: files, after: check, recording: recording, nightAction',
+     'JournalHome(files: files, recording: recording, nightAction',
      'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
     ('A24aq', 'lib/journal/pages/journal_home.dart',
      '      await widget.after;\n    } on Object {',
@@ -1531,6 +1531,114 @@ ROWS = [
      "import 'core/safe_log.dart';\n",
      "import 'core/safe_log.dart';\nimport 'onboarding/age.dart';\n",
      'test/dev_only_test.dart', 'no tester or founder build while a part lacks a line'),
+    # The founder's export (D107; D108).
+    ('A320', 'lib/journal/pages/night_page.dart',
+     '      if (widget.action case final action?)\n'
+     '        CupertinoMenuItem(\n'
+     '          key: NightPage.actionKey,\n'
+     '          onPressed: _act,\n'
+     '          child: Text(action.label),\n'
+     '        ),\n',
+     '',
+     'test/journal/pages/night_page_test.dart', 'a given item shows above delete, plain'),
+    ('A321', 'lib/journal/pages/night_page.dart',
+     '    await widget.action?.run(night);\n',
+     '',
+     'test/journal/pages/night_page_test.dart', 'a given item runs once, with the night shown'),
+    ('A322', 'lib/journal/pages/journal_page.dart',
+     '                              action: widget.nightAction,\n',
+     '',
+     'test/journal/pages/journal_page_test.dart', "a row hands its night's page the menu's item"),
+    ('A323', 'lib/journal/pages/journal_home.dart',
+     ', nightAction: widget.nightAction)',
+     ')',
+     'test/journal/pages/journal_home_test.dart', "the night's menu item is handed to the journal"),
+    ('A324', 'lib/founder/export_text.dart',
+     '[?night.name, dayDigits(night.date)]',
+     '[dayDigits(night.date)]',
+     'test/founder/export_text_test.dart', 'a named night: the name above the date'),
+    ('A325', 'lib/founder/export_text.dart',
+     '.join(_line + _line)',
+     '.join(_line)',
+     'test/founder/export_text_test.dart', 'the date, then each dream in order, a blank line between'),
+    ('A326', 'lib/founder/export_text.dart',
+     '...night.dreams]',
+     "...night.entries.map((e) => e is Told ? e.text : '')]",
+     'test/founder/export_text_test.dart', 'a waiting recording is left out; the others keep their order'),
+    ('A327', 'lib/founder/export_text.dart',
+     '-${two(d.month)}-',
+     '-${d.month}-',
+     'test/founder/export_text_test.dart', "the file's name: the night's date in digits, padded"),
+    ('A328', 'lib/founder/export_text.dart',
+     'utf8.encode(exportText(night))',
+     'latin1.encode(exportText(night))',
+     'test/founder/export_text_test.dart', 'the bytes are the text in UTF-8, Swedish letters whole'),
+    ('A329', 'lib/founder/founder_export.dart',
+     'PendingLines.MP_65',
+     'PendingLines.MP_64',
+     'test/founder/founder_export_test.dart', 'its label is MP·65, a pending line'),
+    ('A330', 'lib/founder/founder_export.dart',
+     "{'name': exportFileName(night), 'bytes'",
+     "{'bytes'",
+     'test/founder/founder_export_test.dart', "one message: the file's name and bytes, nothing else"),
+    ('A331', 'lib/founder/founder_export.dart',
+     "invokeMethod<void>('share'",
+     "invokeMethod<void>('send'",
+     'test/founder/founder_export_test.dart', "one message: the file's name and bytes, nothing else"),
+    ('A332', 'lib/founder/founder_export.dart',
+     '      SafeLog.event(LogEvent.exportFailed);\n',
+     '',
+     'test/founder/founder_export_test.dart', 'a refused share logs a code and nothing else'),
+    ('A333', 'lib/founder/founder_export.dart',
+     'run: share)',
+     'run: (_) async {})',
+     'test/founder/founder_export_test.dart', 'the action shares the night it is given'),
+    ('A334', 'ios/Runner/AppDelegate.swift',
+     'return activityType == .airDrop ? url : nil',
+     'return url',
+     'test/founder/native_test.dart', 'the file is given to AirDrop alone'),
+    ('A335', 'ios/Runner/AppDelegate.swift',
+     ' .copyToPasteboard,',
+     '',
+     'test/founder/native_test.dart', 'every type Apple names is excluded, but AirDrop'),
+    ('A336', 'ios/Runner/AppDelegate.swift',
+     '        sweep()\n        result(nil)\n',
+     '        result(nil)\n',
+     'test/founder/native_test.dart', 'the file goes when the share closes, and at launch'),
+    ('A337', 'ios/Runner/AppDelegate.swift',
+     '    #if SOULDREAMS_EXPORT\n'
+     '      if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "FounderExport") {\n'
+     '        exportChannel = FounderExport.channel(messenger: registrar.messenger())\n'
+     '      }\n'
+     '    #endif\n',
+     '    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "FounderExport") {\n'
+     '      exportChannel = FounderExport.channel(messenger: registrar.messenger())\n'
+     '    }\n',
+     'test/founder/native_test.dart', 'every line of the export is inside #if SOULDREAMS_EXPORT'),
+    ('A338', 'ios/Flutter/tester.xcconfig',
+     'FLAVOR = tester\n',
+     'FLAVOR = tester\nSWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) SOULDREAMS_EXPORT\n',
+     'test/founder/native_test.dart', 'the condition: dev and founder set it, tester never'),
+    ('A339', 'ios/Flutter/founder.xcconfig',
+     'SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) SOULDREAMS_EXPORT\n',
+     '',
+     'test/founder/native_test.dart', 'the condition: dev and founder set it, tester never'),
+    ('A340', 'ios/Runner/AppDelegate.swift',
+     'try bytes.data.write(to: url, options: [.completeFileProtection])\n      let sheet',
+     'try bytes.data.write(to: url, options: [])\n      let sheet',
+     'test/founder/native_test.dart', 'the file is written with complete protection, in tmp'),
+    ('A341', 'lib/main_dev.dart',
+     ', nightAction: const FounderExport().action)',
+     ')',
+     'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
+    ('A342', 'lib/main.dart',
+     "import 'core/safe_log.dart';\n",
+     "import 'core/safe_log.dart';\nimport 'founder/founder_export.dart';\n",
+     'test/dev_only_test.dart', 'lib/main.dart reaches no journal, onboarding or recording code, no pending line'),
+    ('A343', 'lib/journal/night_action.dart',
+     "import 'night.dart';\n",
+     "import 'night.dart';\nimport '../founder/export_text.dart';\n",
+     'test/dev_only_test.dart', 'nothing in lib/journal/ reaches lib/founder/'),
 ]
 
 
