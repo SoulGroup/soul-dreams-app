@@ -60,9 +60,12 @@ void main() {
   const pending = 'lib/words/pending.g.dart';
 
   for (final entry in ['lib/main.dart', 'lib/main_founder.dart']) {
+    // Nor the founder's export (R8): the founder's app gains it with its
+    // journal, by a later ruling (D108); the testers' app never.
     test('$entry reaches no journal, onboarding or recording code, no pending line', () {
       final files = reached(entry);
       expect(files, contains('lib/app.dart'));
+      expect(files.where((f) => f.startsWith('lib/founder/')), isEmpty);
       expect(files.where((f) => f.startsWith('lib/journal/')), isEmpty);
       expect(files.where((f) => f.startsWith('lib/recording/')), isEmpty);
       expect(files.where((f) => f.startsWith('lib/onboarding/')), isEmpty);
@@ -77,6 +80,20 @@ void main() {
     expect(files, contains(pending));
     expect(files, contains('lib/recording/record_microphone.dart'));
     expect(files, containsAll(['lib/onboarding/onboarding.dart', 'lib/onboarding/disclosure_page.dart']));
+    expect(files, containsAll(['lib/founder/founder_export.dart', 'lib/founder/export_text.dart']));
+  });
+
+  // R8, D108: the journal's pages, which testers will get, carry only the
+  // hook; nothing in lib/journal/ reaches the export.
+  test('nothing in lib/journal/ reaches lib/founder/', () {
+    final journal = [
+      for (final f in Directory('lib/journal').listSync(recursive: true))
+        if (f is File && f.path.endsWith('.dart')) f.path,
+    ];
+    expect(journal, contains('lib/journal/pages/night_page.dart'));
+    for (final f in journal) {
+      expect(reached(f).where((r) => r.startsWith('lib/founder/')), isEmpty, reason: f);
+    }
   });
 
   // D106 3: no tester or founder build shows onboarding or the full disclosure

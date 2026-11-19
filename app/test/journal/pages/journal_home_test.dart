@@ -201,7 +201,11 @@ void main() {
 
   test('SoulDreams Dev hands its phone check and recording to the list', () {
     final text = File('lib/main_dev.dart').readAsStringSync();
-    expect(text, contains('JournalHome(files: files, after: check, recording: recording)'));
+    // With each night's export (D108).
+    expect(
+      text,
+      contains('JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action)'),
+    );
     expect(text, contains("betaKey: const String.fromEnvironment('BETA_KEY')"));
   });
 

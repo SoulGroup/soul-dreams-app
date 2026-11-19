@@ -1,6 +1,7 @@
 // SoulDreams Dev (app.souldreams.dev): the owner's test app, invented
 // nights only. It opens on onboarding until the dreamer agrees, then on the
-// journal (D49 O1; D56; D103).
+// journal (D49 O1; D56; D103). Each night's menu holds the founder's export
+// (D107; D108; R8 lets this file and main_founder.dart import it).
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -9,6 +10,7 @@ import 'app.dart';
 import 'core/flavour.dart';
 import 'core/keyboard_check.dart';
 import 'core/safe_log.dart';
+import 'founder/founder_export.dart';
 import 'journal/channel_journal_files.dart';
 import 'journal/pages/journal_home.dart';
 import 'journal/self_check.dart';
@@ -38,7 +40,7 @@ void main() {
     SoulDreamsApp(
       home: const bool.fromEnvironment('KEYBOARD_CHECK')
           ? const KeyboardCheck()
-          : JournalHome(files: files, after: check, recording: recording),
+          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action),
     ),
   );
   if (check != null) unawaited(check);
