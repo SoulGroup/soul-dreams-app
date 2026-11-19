@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-19, in branch `founder-export` (the plan's Tasks 1 to 8; the owner's checks, Task 9, next), by Claude Code.
+Last updated: 2026-11-19, in branch `c17p-import` (the import and its follow-through; the owner's checks, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,14 +14,14 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`founder-export`: the founder's export in SoulDreams Dev (D107, D108): one night at a time, from its "⋯" menu, a plain
-text file handed to AirDrop alone and deleted once the share closes. Plan: `docs/plans/founder-export.md`.
+`c17p-import`: Product's C17-P filing and Interpretation's record at C158-I (head's message 23), imported; the words,
+the pending lines (now none) and the design values follow it (D109). No plan: the head's task list.
 
 ## Road ahead
 
-- `founder-export`: the owner's checks (the plan's Task 9), then the merge.
-- Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1), once the pending lines are filed
-  (and, for the founder app, with his export).
+- `c17p-import`: the owner's checks, then the merge.
+- Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
+  C17-P (and, for the founder app, with his export).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
   URL (head's message 14; whether eu-north-1 has it is checked first).
 - A later branch, by the Head of Technology's direction (with D32): the import gains a kind for lens sections 3, 4, 5,
@@ -164,14 +164,12 @@ text file handed to AirDrop alone and deleted once the share closes. Plan: `docs
   drawn arrow to the record button, once. The recording and its retries start only then. A consent that cannot be
   read or kept logs `consentReadFailed` or `consentKeepFailed`; onboarding asks again at the next opening. When the
   consent goes (`Journal.withdrawConsent`, or `Journal.deleteAll`, which takes it with every file), every page closes
-  and onboarding starts again; no control calls either yet (Settings, P8; the plan's question 3). Parts with no line
-  (to rewrite: W27·2 and W27·17 in onboarding, also W27·3, W27·6 and W27·10 on the page) show nothing in their place,
-  not their handle (D106 3); they keep their places (`Onboarding.firstPage`, `secondPage`) for when their lines are
-  filed. Every step's box is centred between the top and the foot, and scrolls from the top when taller (D106 1), and
+  and onboarding starts again; no control calls either yet (Settings, P8; the plan's question 3). A part with no line
+  would show nothing in its place, not its handle (D106 3); since C17-P every part shown has its line. Every step's box is centred between the top and the foot, and scrolls from the top when taller (D106 1), and
   its words appear whole (D106 2). The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
   `arrowGap`); no logo and no drawn signature (none filed).
 - The founder's export (D107, D108; C142-I item 3; `app/lib/founder/`, SoulDreams Dev only in this branch; the founder
-  app gains it with its journal, by a later ruling): each night's "⋯" menu holds MP·65 (a pending line) above delete,
+  app gains it with its journal, by a later ruling): each night's "⋯" menu holds MP·65 (filed at C17-P) above delete,
   given by `main_dev.dart` through `JournalHome`, `JournalPage` and `NightPage` as a `NightAction` (`lib/journal/`
   holds only the hook, and reaches nothing in `lib/founder/`, a test). The file: plain UTF-8 text, the night's name if
   it has one, its date as its page shows it, then each dream told in words, in order, a blank line between; a
@@ -203,7 +201,12 @@ text file handed to AirDrop alone and deleted once the share closes. Plan: `docs
 - The pending lines (D57 Q11; D58 Q11): `app/assets/words/pending-lines.csv` and its fingerprint, the owner's;
   `wordsgen.py` makes `app/lib/words/pending.g.dart`, whose `PendingLine` is not a `Line` and shows its words in
   SoulDreams Dev only (any other flavour gets its handle), and G1 proves both. A row whose handle the register holds
-  stops the generator (`pending-filed`).
+  stops the generator (`pending-filed`). Since C17-P none is pending: the file holds its header only, and nothing in
+  `lib/` imports `pending.g.dart` (a test in `test/words/` keeps the Dev-only rule proved on a line built there).
+- Waiting statuses (D109): "English written, Swedish to write" (W12, W13) has no line, as "to write"; the readings
+  branch revisits them.
+- Design values: `Spacing.pageSide` (30) and `Spacing.journalRow` (12) are filed at C17-P and replace the stand-ins
+  `StandIns.pageSide` and `rowGap` (the same values). §5's second table, the controls, is prose and not generated.
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
@@ -751,7 +754,7 @@ Banked in founder-export (none changes what the dreamer sees beyond D107 and D10
    note 1; D68).
 2. Product gives exact values for Task 14's thirteen questions below (P13).
 3. No tester or founder build while any disclosure part shown in onboarding or on the full disclosure page lacks a
-   line: W27·2, W27·3, W27·6, W27·10 and W27·17 today (D106 3). `Onboarding.missing` lists them (every part shown, MP·57 included), and a test in
+   line: none since C17-P (D106 3). `Onboarding.missing` lists them (every part shown, MP·57 included), and a test in
    `dev_only_test.dart` fails if either entry point reaches `lib/onboarding/` while it is not empty.
 
 Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
@@ -784,16 +787,10 @@ message 20 and built in `journal-design`, except the night's page's field in 10,
 
 Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
 
-- MP·60 (the confirmation's Delete) and MP·61 (its Cancel), head's message 16, founder-approved.
-- MP·62 (the typing screen's failed save), D63 (head's message 19, Product message 18), founder-ruled; added by the
-  owner in Task 9b.
-- MP·63 (the microphone refused) and MP·64 (the stop control's spoken name), head's message 21 (Product message 20),
-  founder-approved; built in `offline-recording`.
-- MP·65 (the founder's export, in a night's menu), the founder's (D108); the handle proposed to Product, renamed if
-  it registers another.
-- W27·5's privacy-page text (head's message 16) shares the filed handle W27·5, so it cannot be a pending line under
-  it: Product files it, or gives it a new handle (D103 item 3; the plan's question 1). Until then the page shows
-  W27·5 as filed at C16-P.
+- None. MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`), and
+  `pending-lines.csv` emptied to its header.
+- W27·5's privacy-page text (head's message 16): the page shows W27·5 as filed at C17-P, which changed its text;
+  whether that is the text of head's message 16 is the owner's to confirm.
 
 ## Rulings during branch 2
 
@@ -1049,20 +1046,26 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   nothing and logs a code; MP·39 unchanged; SoulDreams Dev only in this branch; our own Swift channel, compiled only
   into the dev and founder apps (the xcconfig change approved).
 
+## Rulings during c17p-import
+
+- D109 (owner): "English written, Swedish to write" is a waiting status with no line, as "to write" (W12, W13); the
+  readings branch revisits them (Cohort 0 is English only). C125-I·3 to rewrite: noted, unused, nothing to do.
+
 ## Documents as last imported
 
-Imported by the owner at the documents repository's C16-P state (`ff3b229`), in commit `ca29414` (Task 6). The ordinal
+Imported by the owner at the documents repository's C17-P state (`d8d71c3`), in branch `c17p-import`; the nine
+unchanged since C16-P's import (`ff3b229`, commit `ca29414`). The ordinal
 is the owning department's filing. Each line: path, ordinal, first 12 hex digits of the sha256, as in
 `docs/source/SOURCES`.
 
 - `app/assets/words/founder-lists-for-technology.md`, C13-P, `4326cfcc5cb8`
-- `app/assets/words/places-register.csv`, C16-P, `b2bd53188762`
-- `docs/source/design-system.md`, C16-P, `fcf8e8140d2b`
+- `app/assets/words/places-register.csv`, C17-P, `656051d0ae4d`
+- `docs/source/design-system.md`, C17-P, `ff2f7c905b60`
 - `docs/source/experience-map.md`, C16-P, `3c8878f6f03b`
-- `docs/source/how-the-ai-appears.md`, C16-P, `a7279784886b`
-- `docs/source/interpretation-change-record.md`, C154-I, `486d480f1b2f`
+- `docs/source/how-the-ai-appears.md`, C17-P, `80618ad95378`
+- `docs/source/interpretation-change-record.md`, C158-I, `cdb3dfa5445a`
 - `docs/source/main-path.md`, C16-P, `6d503665ef9e`
-- `docs/source/product-change-record.md`, C16-P, `b9cb48191346`
+- `docs/source/product-change-record.md`, C17-P, `7ce7e0b4e35b`
 - `docs/source/product-principles.md`, C16-P, `1f8992a7ec51`
 - `docs/source/requirements-list.md`, C11-P, `22f742c740ab`
 - `docs/source/technical-answers.md`, C5-T, `c6b1d05a56a0`
