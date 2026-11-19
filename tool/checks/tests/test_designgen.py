@@ -48,6 +48,8 @@ SPACING_ROWS = [
     r('space.turn', '20px more space after the last reply, before each new turn'),
     r('space.label', '20px after "A" label, before the next line'),
     r('space.night.header', '20px above the header, 10px below, in both themes'),
+    r('space.page.side', '30px outer margins, left and right only'),
+    r('space.journal.row', '12px between journal rows'),
     r('space.end', 'Space below the list: [to set in Framer]'),
     r('Everything else', '[to set in Framer]'),
 ]
@@ -122,6 +124,19 @@ class Generate(unittest.TestCase):
         self.assertIn('static const bubble = EdgeInsets.only(left: 30, right: 10);', t)
         self.assertIn('static const double turn = 20;', t)
         self.assertIn('static const nightHeader = EdgeInsets.only(top: 20, bottom: 10);', t)
+        # C17-P: the page's sides and the space between two rows.
+        self.assertIn('static const double pageSide = 30;', t)
+        self.assertIn('static const double journalRow = 12;', t)
+
+    def test_the_controls_table_under_section_5_is_not_read(self):
+        # C17-P: §5's second table, the controls, is shapes in prose, not
+        # values; only the first table under the heading is read.
+        controls = '\n' + '\n'.join([r('Control', 'Shape and size'), r('---', '---'),
+                                     r('control.zebra', 'A 120px circle')]) + '\n'
+        self.assertEqual(designgen.summary(doc(extra=controls)), designgen.summary(doc()))
+        t = text(doc(extra=controls))
+        self.assertNotIn('zebra', t)
+        self.assertNotIn('120', t)
 
     def test_an_unset_value_has_no_constant(self):
         t = text(doc())
@@ -149,6 +164,9 @@ class Generate(unittest.TestCase):
         self.refused(doc(light=[r('color.page', '#F5F5EC'), r('color.page', '#FFFFFF')]), 'role-repeated')
         self.refused(doc(dark=[r('color.other', 'as in the light theme')]), 'as-unknown')
         self.refused(doc(spacing=[r('space.x', 'about 20px')]), 'spacing-form')
+        self.refused(doc(spacing=[r('space.x', '12px between rows, 20px at the end')]), 'spacing-form')
+        self.refused(doc(spacing=[r('space.x', '12px between 2 rows')]), 'spacing-form')
+        self.refused(doc(spacing=[r('space.x', '30px outer margins')]), 'spacing-form')
         self.refused(doc(spacing=[r('Everything else', '10px')]), 'spacing-form')
         self.refused(doc(light=[r('Page colour', '#F5F5EC')]), 'role-form')
 

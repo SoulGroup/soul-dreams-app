@@ -1,6 +1,7 @@
 // The generated words (D32): read by handle only, never quoted (R1).
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 void main() {
   test('the home-screen name is one line, the same in both languages', () {
@@ -33,5 +34,21 @@ void main() {
   test('handles are unique', () {
     final handles = Lines.all.map((l) => l.handle).toList();
     expect(handles.toSet(), hasLength(handles.length));
+  });
+
+  // D57 Q11: a pending line's words show in SoulDreams Dev only. Pinned on
+  // a line built here, so the rule stays proved while none is pending.
+  test('a pending line: its handle outside Dev, words in Dev', () {
+    const line = PendingLine('X·1', ['en'], ['sv']);
+    expect(line.text(Lang.en, flavor: null), '[X·1]');
+    expect(line.text(Lang.en, flavor: 'tester'), '[X·1]');
+    expect(line.text(Lang.en, flavor: 'founder'), '[X·1]');
+    expect(line.text(Lang.en, flavor: 'dev'), 'en');
+    expect(line.text(Lang.sv, flavor: 'dev'), 'sv');
+  });
+
+  test('no line is pending and filed at once', () {
+    final filed = Lines.all.map((l) => l.handle).toSet();
+    expect(PendingLines.all.where((p) => filed.contains(p.handle)), isEmpty);
   });
 }

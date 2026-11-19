@@ -139,16 +139,22 @@ void main() {
     }
   });
 
-  // D106 3: a part with no line shows nothing in its place, not its handle.
-  testWidgets('a part with no line shows nothing, on either page', (tester) async {
-    expect(Onboarding.missing, isNotEmpty);
+  // D106 3: a part with no line would show nothing in its place (proved on
+  // `written` and `lacking` below). C17-P filed every part: each page shows
+  // each of its parts' words, and no handle.
+  testWidgets('every part shows its words, on either page', (tester) async {
+    expect(Onboarding.missing, isEmpty);
     await start(tester);
     await toDisclosure(tester);
     expect(find.textContaining('[W27'), findsNothing);
-    expect(said(Lines.W27_1), findsOneWidget);
+    for (final line in Onboarding.firstPage) {
+      expect(said(line), findsOneWidget, reason: line.handle);
+    }
     await tap(tester, Lines.MP_30);
     expect(find.textContaining('[W27'), findsNothing);
-    expect(said(Lines.W27_14), findsOneWidget);
+    for (final line in Onboarding.secondPage) {
+      expect(said(line), findsOneWidget, reason: line.handle);
+    }
   });
 
   // The plan's question 2: a part with no line keeps its place.
@@ -171,7 +177,8 @@ void main() {
     const some = Line('X·2', ['a'], ['b']);
     expect(written([none, some, none, some]), [some, some]);
     expect(lacking([none, some, none]), [none, none]);
-    expect(Onboarding.missing.map((l) => l.handle), unorderedEquals(['W27·2', 'W27·3', 'W27·6', 'W27·10', 'W27·17']));
+    // C17-P filed W27·2, W27·3, W27·6, W27·10 and W27·17.
+    expect(Onboarding.missing, isEmpty);
   });
 
   // D106 2: onboarding's text appears all at once, whatever the time passed.

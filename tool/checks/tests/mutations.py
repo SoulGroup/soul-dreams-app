@@ -221,6 +221,19 @@ MUTATIONS = [
     ('wordsgen.py', "'composed, no stand-in',\n           'English written, Swedish to write')",
      "'composed, no stand-in')",
      ['test_wordsgen.Generator.test_waiting_statuses_make_placeholders']),
+    # c17p-import: §5's new value forms (C17-P).
+    ('designgen.py', "                         (OUTER, 'scalar'), (BETWEEN, 'scalar')):",
+     "                         (BETWEEN, 'scalar')):",
+     ['test_designgen.Generate.test_spacing_forms']),
+    ('designgen.py', "                         (OUTER, 'scalar'), (BETWEEN, 'scalar')):",
+     "                         (OUTER, 'scalar')):",
+     ['test_designgen.Generate.test_spacing_forms']),
+    ('designgen.py', "BETWEEN = re.compile(r'^(\\d+)px between [^\\d,]+$')",
+     "BETWEEN = re.compile(r'^(\\d+)px between .+$')",
+     ['test_designgen.Generate.test_refusals']),
+    ('designgen.py', "OUTER = re.compile(r'^(\\d+)px outer margins, left and right only$')",
+     "OUTER = re.compile(r'^(\\d+)px outer margins.*$')",
+     ['test_designgen.Generate.test_refusals']),
 ]
 
 

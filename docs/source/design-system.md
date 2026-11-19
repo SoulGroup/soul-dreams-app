@@ -11,7 +11,8 @@ in Framer, and the old text is archived verbatim. Whether it is filed is stated 
 never here. Kit item 7. Pillars: visual design, UI design, systems design, accessibility.
 
 **Whose it is.** The founder's. He set every value here in Framer [RELAYED, Head of Product & Design, its messages 1
-and 2 to the Design Update chat, and its message 3 to it, carried at C11-P]. Framer holds design in progress; this document records the values when they are
+and 2 to the Design Update chat, and its message 3 to it, carried at C11-P; Product messages 17 to 19 and Technology
+Message 22 item 3, carried at C17-P]. Framer holds design in progress; this document records the values when they are
 filed. Where Framer and this document differ, Framer is the work in progress and this is the record until the next
 pass.
 
@@ -21,6 +22,8 @@ A value not given is marked [to set in Framer], never guessed.
 
 **Roles.** Every value is named by the role it plays, never by where it was first used. Framer's variables carry these
 names, and they become Technology's design tokens.
+
+**Units.** Sizes are in px, as Framer gives them. iOS points and Framer px are the same unit at 1x.
 
 ---
 
@@ -40,7 +43,7 @@ of the size; letter spacing is in em.
 | type.voice.app | Sorts Mill Goudy | Regular | 18px | 1.5 | −0.02em | The app's lines; onboarding's text; the mirror until confirmed |
 | type.voice.dreamer | Nunito | Regular | 16px | 1.5 | 0 | The dreamer's words |
 | type.voice.readings | Habibi | Regular | 15px | 1.5 | 0 | The readings, the arc, the series question |
-| type.button | Inter | Regular | 14px | 1.4 | −0.02em | Buttons, placeholders, instructions, section labels, the line above the input field, the date under a name |
+| type.button | Inter | Regular | 14px | 1.4 | −0.02em | Buttons, placeholders, instructions, section labels, the line above the input field, the date under a name, a row's summary |
 | type.button.small | Inter | Regular | 12px | 1.4 | −0.01em | Tradition labels, dream tags |
 
 **The italic.** Used only for the dreamer's own words quoted inside a reading or a reflection (How the AI Appears
@@ -113,11 +116,13 @@ page [READ, the same computation].
 
 ---
 
-## 5. Spacing and radius
+## 5. Spacing, radius and controls
 
 | Role | Value |
 |---|---|
 | radius | 30, in both themes |
+| space.page.side | 30px outer margins, left and right only |
+| space.journal.row | 12px between journal rows |
 | space.onboarding.box | 50px above and below, 30px left and right |
 | space.mirror.box | 30px above and below, 20px left and right |
 | size.field.search | 50px tall |
@@ -129,17 +134,27 @@ page [READ, the same computation].
 | space.journal.end | Space below the last row, so the list scrolls clear of the record button: [to set in Framer] |
 | Everything else | [to set in Framer] |
 
+| Control | Shape and size |
+|---|---|
+| control.record | A 120px circle, MP·11 in white inside it |
+| control.back | A thin chevron in a round bordered button of about 41px |
+| control.row.chevron | A chevron at each journal row's trailing edge |
+| control.field.type | The typing field: a pill with the microphone inside it, growing as the dreamer types, capped at about 0.7 of the space above the buttons; never focused by itself |
+| divider.month | The month divider, centred |
+
 ---
 
 ## 6. The settings, where they are visual
 
 - **Night/Day mode.** Automatic, or Manual: Day or Night. Automatic turns to the dark theme at 21:00 and the light
   theme at 08:00, by the phone's local time. If the change happens while the app is open, the colours fade over five
-  seconds; with Word Animation off or the phone's "Reduce motion" on, they change at once. The quick toggle at the top
+  seconds, ease-in-out; with Word Animation off or the phone's "Reduce motion" on, they change at once. The quick toggle at the top
   centre of the Settings page switches the theme; tapped while Automatic is set, it switches the mode to Manual.
 - **Onboarding** is always in the light theme.
-- **Word Animation.** On or Off. Off stops the app's own words appearing word by word, and the waiting shimmer (How the
-  AI Appears §4 and §5). The phone's "Reduce motion" does the same.
+- **Word Animation.** On or Off; Off by default, everywhere (founder-ruled, Technology Message 22 item 3, dated
+  2026-11-20 [RELAYED, Head of Product & Design]). Off stops the app's own words appearing word by word, and the waiting
+  shimmer (How the AI Appears §4 and §5). The phone's "Reduce motion" does the same. When on, about one word every 60 ms.
+  Word by word, the founder's Cohort 0 trial, is seen only with the setting turned on, and so is the theme's fade.
 - **The shimmer.** A highlight sweeping across a waiting label's text for five seconds at most; then the label stands
   still (How the AI Appears §5). Its speed, direction and curve: [to set in Framer].
 
@@ -147,7 +162,8 @@ page [READ, the same computation].
 
 ## 7. Still to set in Framer
 
-The space below the journal's last row; the shimmer's speed, direction and curve; every motion curve; and
+The space below the journal's last row; the shimmer's speed, direction and curve; every motion curve but the theme's
+fade; and
 any value not named above. Each is added here at the next pass.
 
 *No matter where you are on your journey, the steps you take are equally important.*

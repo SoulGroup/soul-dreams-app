@@ -41,7 +41,6 @@ import '../../design/tokens.g.dart';
 import '../../recording/heard_text.dart';
 import '../../recording/recording.dart';
 import '../../words/lines.g.dart';
-import '../../words/pending.g.dart';
 import '../journal.dart';
 import '../night.dart';
 import '../night_rules.dart';
@@ -430,7 +429,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
 
   // What the dreamer is told, by the trouble.
   String _troubleText(Trouble trouble) => switch (trouble) {
-    Trouble.refused => PendingLines.MP_63.text(appLanguage),
+    Trouble.refused => Lines.MP_63.text(appLanguage),
     Trouble.offline => Lines.MP_15.text(appLanguage),
     Trouble.broke => Lines.MP_54.text(appLanguage),
   };
@@ -522,7 +521,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
           Scaffold(
             body: SafeArea(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
+                padding: const EdgeInsets.symmetric(horizontal: Spacing.pageSide),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -568,7 +567,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                                             child: Semantics(
                                               liveRegion: true,
                                               child: AppLine(
-                                                PendingLines.MP_62.text(appLanguage),
+                                                Lines.MP_62.text(appLanguage),
                                                 style: TypeRoles.button.style(p.text),
                                               ),
                                             ),
@@ -628,7 +627,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                                               // The stop control's own name while it
                                               // records (D93; MP·64 replaces MP·11).
                                               tooltip: live
-                                                  ? PendingLines.MP_64.text(appLanguage)
+                                                  ? Lines.MP_64.text(appLanguage)
                                                   : Lines.MP_11.text(appLanguage),
                                               isSelected: live,
                                               onPressed: _toggleMic,

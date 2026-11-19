@@ -412,11 +412,12 @@ The waiting labels are AI·1 to AI·8 (§5). These are the rest, numbered on fro
 | AI·9 | The fixed line saying plainly that the app is an AI, when the dreamer asks what it is: founder copy | §1 |
 | AI·10 | The composed line, at most once a night, that the sense is the dreamer's own: composed, with a stand-in | §1 |
 | AI·11 | The series question's section label, saying the tradition asks | §3 |
-| AI·12 | The reflection's closed-set phrase for the dreamer's words, tonight | §3 |
+| AI·12 | The reflection's closed-set phrase for the dreamer's words, with no time (C156-I §5 item 8) | §3 |
 | AI·13 | The reflection's closed-set phrase for the dream | §3 |
 | AI·14 | The reflection's closed-set phrase for a reading | §3 |
 | AI·15 | The reflection's closed-set phrase for the arc | §3 |
 | AI·16 | The reflection's closed-set phrase for the series question | §3 |
 | AI·17 | The reflection's closed-set phrase for a marked sentence, retired at C16-P (The Close Draft 5, H8) | §3 |
+| AI·18 | The reflection's closed-set phrase for a late telling, saying the dream was added later (C156-I §3 item 24) | §3 |
 
 *No matter where you are on your journey, the steps you take are equally important.*

@@ -45,7 +45,7 @@ class DisclosurePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
-    const side = EdgeInsets.symmetric(horizontal: StandIns.pageSide);
+    const side = EdgeInsets.symmetric(horizontal: Spacing.pageSide);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -58,7 +58,7 @@ class DisclosurePage extends StatelessWidget {
             Expanded(
               child: BelowTapBox(
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(StandIns.pageSide, StandIns.gap, StandIns.pageSide, StandIns.gap),
+                  padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
                   children: [
                     for (final line in written(parts))
                       Padding(

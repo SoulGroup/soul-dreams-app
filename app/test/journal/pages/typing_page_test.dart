@@ -20,7 +20,6 @@ import 'package:souldreams/recording/heard_text.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/recording/retries.dart';
 import 'package:souldreams/words/lines.g.dart';
-import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../memory_journal_files.dart';
@@ -221,14 +220,14 @@ void main() {
     final h = await open(tester, files: files);
     files.failures = 1;
     await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
-    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsNothing);
+    expect(find.bySemanticsLabel(Lines.MP_62.text(Lang.en)), findsNothing);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
     expect(find.text(dreams[0]), findsOneWidget);
     expect(await h.nights(), isEmpty);
     expect(lines, ['journalSaveFailed']);
-    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_62.text(Lang.en)), findsOneWidget);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsNothing);
@@ -521,7 +520,7 @@ void main() {
     expect(lines, ['journalSaveFailed']);
     expect(find.byType(TypingPage), findsOneWidget);
     expect(find.text(dreams[0]), findsOneWidget);
-    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_62.text(Lang.en)), findsOneWidget);
     expect(await h.nights(), isEmpty);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
@@ -554,7 +553,7 @@ void main() {
     final area = tester.getRect(find.byType(SingleChildScrollView));
     // Scrolled to its top (its padding first), the instruction above it out of sight.
     expect(tester.getRect(find.byType(AppLine).last).top, closeTo(area.top + StandIns.gap, 1));
-    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_62.text(Lang.en)), findsOneWidget);
     expect(find.byKey(TypingPage.fieldKey).hitTestable(), findsOneWidget);
     expect(find.byKey(TypingPage.saveKey).hitTestable(), findsOneWidget);
   });
@@ -562,7 +561,7 @@ void main() {
   testWidgets('MP·62 goes during a retry and stays if it fails', (tester) async {
     final files = FlakyFiles();
     final h = await open(tester, files: files);
-    final shown = find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en));
+    final shown = find.bySemanticsLabel(Lines.MP_62.text(Lang.en));
     files.failures = 2;
     await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
     await tester.tap(find.byKey(TypingPage.saveKey));
@@ -624,7 +623,7 @@ void main() {
     final h = await tall(tester);
     final back = find.byKey(BackControl.buttonKey);
     expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
-    expect(tester.getTopLeft(back).dx, StandIns.pageSide);
+    expect(tester.getTopLeft(back).dx, Spacing.pageSide);
     await tester.enterText(find.byKey(TypingPage.fieldKey), dreams[0]);
     await tester.tapAt(tester.getTopLeft(back) + const Offset(StandIns.hitMin - 1, StandIns.hitMin - 1));
     await tester.pumpAndSettle();
@@ -638,7 +637,7 @@ void main() {
     await tall(tester);
     final back = find.byKey(BackControl.buttonKey);
     expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
-    expect(tester.getTopLeft(back).dx, closeTo(StandIns.pageSide, 1));
+    expect(tester.getTopLeft(back).dx, closeTo(Spacing.pageSide, 1));
     final box = tester.widget<DecoratedBox>(find.descendant(of: back, matching: find.byType(DecoratedBox)));
     final look = box.decoration as BoxDecoration;
     expect(look.shape, BoxShape.circle);
@@ -666,8 +665,8 @@ void main() {
     final save = tester.getRect(find.byKey(TypingPage.saveKey));
     final start = tester.getRect(find.byKey(TypingPage.startKey));
     expect(find.text(Lines.EM_1.text(Lang.en)), findsOneWidget);
-    expect(save.left, closeTo(StandIns.pageSide, 1));
-    expect(start.right, closeTo(393 - StandIns.pageSide, 1));
+    expect(save.left, closeTo(Spacing.pageSide, 1));
+    expect(start.right, closeTo(393 - Spacing.pageSide, 1));
     expect(save.center.dy, closeTo(start.center.dy, 1));
   });
 
@@ -803,7 +802,7 @@ void main() {
     expect(find.byKey(TypingPage.levelKey), findsNothing);
     expect(tester.takeAnnouncements(), isEmpty);
     expect(lines, ['recordingRefused']);
-    final shown = find.bySemanticsLabel(PendingLines.MP_63.text(Lang.en));
+    final shown = find.bySemanticsLabel(Lines.MP_63.text(Lang.en));
     expect(shown, findsOneWidget);
     final live = find.byWidgetPredicate((w) => w is Semantics && w.properties.liveRegion == true);
     expect(find.descendant(of: find.byKey(TypingPage.noticeKey), matching: live), findsOneWidget);
@@ -839,10 +838,10 @@ void main() {
     String name() => tester.widget<IconButton>(find.byKey(TypingPage.micKey)).tooltip!;
     expect(name(), Lines.MP_11.text(Lang.en));
     await record(tester);
-    expect(name(), PendingLines.MP_64.text(Lang.en));
+    expect(name(), Lines.MP_64.text(Lang.en));
     await tester.tap(find.byKey(TypingPage.micKey));
     await tester.pump();
-    expect(name(), PendingLines.MP_64.text(Lang.en));
+    expect(name(), Lines.MP_64.text(Lang.en));
     v.link.reply(reply(finished: true));
     await tester.pumpAndSettle();
     expect(name(), Lines.MP_11.text(Lang.en));
@@ -2076,7 +2075,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
     expect(find.text(dreams[0]), findsOneWidget);
-    expect(find.bySemanticsLabel(PendingLines.MP_62.text(Lang.en)), findsOneWidget);
+    expect(find.bySemanticsLabel(Lines.MP_62.text(Lang.en)), findsOneWidget);
     expect(lines, ['journalSaveFailed']);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();

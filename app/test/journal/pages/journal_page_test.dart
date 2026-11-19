@@ -20,7 +20,6 @@ import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/words/lines.g.dart';
-import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../memory_journal_files.dart';
@@ -193,12 +192,12 @@ void main() {
     expect(mark.left, greaterThan(tester.getRect(find.text(opening(older))).right));
     expect(tester.widget<Chevron>(chevron).colour, LightColours.text.colour);
     final width = tester.getSize(find.byType(JournalPage)).width;
-    expect(rowBox.left, closeTo(StandIns.pageSide, 1));
-    expect(rowBox.right, closeTo(width - StandIns.pageSide, 1));
+    expect(rowBox.left, closeTo(Spacing.pageSide, 1));
+    expect(rowBox.right, closeTo(width - Spacing.pageSide, 1));
     final rows = tester.widgetList<Container>(find.ancestor(of: find.byType(Chevron), matching: find.byType(Container)));
     expect(rows, hasLength(2));
     final tops = [for (final c in chevrons.evaluate()) tester.getRect(find.ancestor(of: find.byWidget(c.widget), matching: find.byType(Container)).first)];
-    expect(tops[1].top - tops[0].bottom, closeTo(StandIns.rowGap, 1));
+    expect(tops[1].top - tops[0].bottom, closeTo(Spacing.journalRow, 1));
     final handle = tester.ensureSemantics();
     expect(find.descendant(of: chevron, matching: find.byType(ExcludeSemantics)), findsOneWidget);
     handle.dispose();
@@ -266,7 +265,7 @@ void main() {
   testWidgets("a row hands its night's page the menu's item", (tester) async {
     final h = await Harness.make();
     final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
-    final action = NightAction(label: PendingLines.MP_65.text(Lang.en), run: (_) async {});
+    final action = NightAction(label: Lines.MP_65.text(Lang.en), run: (_) async {});
     await h.pump(tester, JournalPage(journal: h.journal, nightAction: action));
     await tester.tap(find.text(dayDigits(n.date)));
     await tester.pumpAndSettle();

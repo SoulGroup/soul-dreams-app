@@ -2350,3 +2350,192 @@ is not run on main-path.md, the register or the map, as at every earlier filing.
   and product-change-record.md are replaced by these versions.
 
 ---
+
+## C17-P — The disclosure written; the founder's lines of 2026-11-10 onward; seven new places and W12's and W13's English; the mirror's line to rewrite; the Design System's values and Word Animation off by default; AI·18 in How the AI Appears; the Shared Core pass; the files as filed before archived; the hash C16-P could not state
+
+**Filed 2026-11-19, by this machine.** *Drafted by Product & Design's C17-P Filing chat, briefed by Head of Product & Design (its brief, and its message 2 answering the chat's message 1) [RELAYED, Head of Product & Design]. Technology Message 22 item 1 was BLOCKING: no founder or tester build until the disclosure's rewritten lines are filed. This filing is the register and the Design System, and one row of How the AI Appears, nothing more. The filing script refused unless every file it reads was at the hash the chat read, and every check printed nothing on a test copy of the repository built from the project mirror.*
+
+**1. THE METHOD.** The founder's lean check, as C16-P item 1 records it. **What this filing read** [READ]: Interpretation's
+record through C158-I, at `cdb3dfa5445a3a8a62d039bdfa5a948d20c79ff251f021d6f6d8452a6e49ff8d`, and in it C143-I Q4, C155-I, C156-I, C157-I item 5 and C158-I; the
+Requirements List at its C16-P hash; every Product file at its C16-P hash. Technology Messages 21 and 22 and Product
+messages 17 to 19 were not read here; what this filing takes from them is [RELAYED, Head of Product & Design].
+
+**2. THE LINES AND THE WORDS RULE.** Every line this filing writes was drafted in Product's head chat under the words
+rule (C155-I item 7: drafted in a chat, checked against its place's must and never, approved by the founder before it
+shows, each language drafted on its own), and approved by the founder between 2026-11-10 and the day of filing
+[RELAYED, Head of Product & Design]. Each is copied verbatim into the register and named there in its flag; this record
+does not restate them. They are: W27·2, W27·3, W27·5, W27·6, W27·10 and W27·17; W1's stand-in; AI·12; AI·18; MP·21's
+stand-in; W21's and W23's unread-night forms; MP·56; W12 and W13 in English; MP·60 to MP·65. The register's "Whose it
+is" now says the words rule, where it said no line is ever drafted in a chat. Where a ruling's source gives its date,
+that date is recorded, [RELAYED]; Technology Message 22 dates its rulings 2026-11-20.
+
+**3. THE DISCLOSURE.** Every part is written or retired, and none is to rewrite. W27·2, W27·3, W27·6, W27·10 and
+W27·17 are written; W27·5 has its next text. Three musts follow their lines: W27·3's names the one exception; W27·6's
+names everything else that leaves, where it said the counts were the only thing; W27·10's says what reaches the founder
+and how long Apple keeps each.
+- **The onboarding exception, founder-ruled 2026-11-09** [RELAYED, Head of Product & Design]. W27·2 no longer promises
+  "keeps nothing", so the exception to keeping nothing is said only on the privacy page, in W27·3. C146-I item 3
+  placed it in W27·2: this departs from it, and Interpretation's record owes the departure. W27·17, "No one at Soul
+  Dreams reads your dreams", is true beside the exception, whose review is the reading service's.
+- **Onboarding's two pages, founder-ruled** (Technology Message 22 item 4, dated 2026-11-20 [RELAYED]). Page one:
+  W27·1, W27·2, W27·5 and W27·13. Page two: W27·14, W27·15 and W27·17, MP·57 to MP·59, and the two consent buttons
+  (MP·8, EM·6). Stated once, in W27's flag.
+- **W27·5, checked against page one.** It says plainly where the journal is and what a lost phone costs, and neither
+  reassures nor softens. Found: its must, from C140-I item 2, says the journal is not in the phone's backups, where the
+  line says the app asks the phone to leave it out. The line stands; the must's words are Interpretation's (its flag).
+- **Apple's TestFlight description** shows MP·56, then W27·10, then W27·11, in that order (Head of Product & Design,
+  its message 2, item 7). MP·56 is written.
+
+**4. THE OTHER LINES.**
+- **W1's stand-in** is written: it says "one thing", no longer "images".
+- **AI·12** is written with no time, and serves the close's writes and an unread night's alike (C156-I §5 item 8).
+  The register's title loses "tonight". The phrase C156-I §5 item 8 asks for an unread night is AI·12 itself.
+- **AI·18, new**, the late-telling phrase (C156-I §3 item 24). AI·17 stays retired; its number is never reused.
+- **MP·21's stand-in** drops "from the readings" (C156-I §3 item 27). Its Swedish says "stack ut", as W1's does
+  (founder-approved, Head of Product & Design, its message 2, item 5): "stå ut" means to put up with.
+- **W21 and W23, the unread night's forms** (C156-I annex C P-2). The forms first drafted said "no more reflections",
+  which reads as something used up, what both places' never forbids (C6). The founder replaced them [RELAYED, Head of
+  Product & Design, its message 2, item 4]: both now open "The app's part is done", as the read night's form does.
+  W23 stays one sentence in each form. Each is placed by the register's " / " convention, its flag saying where each
+  shows.
+- **MP·29** already read "Add dreams" / "Lägg till drömmar". Unchanged.
+- **W12 and W13** move from blocked to "English written, Swedish to write". W12 is "Looking at:" (C155-I item 5);
+  its must now says what C155-I item 5 rules, and its length is a short line. W13 is the founder's twelve labels,
+  verbatim from C155-I item 2, one line per tradition. W13's block is lifted: C155-I item 6 serves the living traditions
+  now, the founder asking their people before public release, and Q6's Daoism label is Zhuangzi–Liezi. Both Swedish
+  lines are owed before Cohort 1; Cohort 0 reads in English only (C155-I item 4).
+- **Seven new places.** AI·18, and MP·60 to MP·65: the confirmation's destructive choice and its way back, both in
+  C4-P·4's confirmation; the save failure line; the microphone refused line; the stop control's spoken name; the
+  founder's export, in his own build only, never a tester build. Their must, never and length are Product's, written
+  for this filing from the brief's description of each; their lines are the founder's.
+- **The mirror's line (C125-I·3)**, checked against the founder's two-jobs ruling of 2026-11-06 (C143-I Q4). It fails:
+  it asks what the mirror got wrong and does not invite the dreamer, in general, to add anything missed. It is to
+  rewrite, its reason in its flag, and no line is written. Its must now states both jobs, from C143-I Q4.
+
+**5. THE PLACES REGISTER,** at product/places-register.md and .csv. Changed: W27's flag; W27·2, W27·3, W27·5, W27·6,
+W27·10, W27·17; W1, AI·12, MP·21, W21, W23, MP·56; W12, W13; C125-I·3; MP·39's and C4-P·4's flags, which now point at
+MP·65 and at MP·60 and MP·61. New: AI·18 and MP·60 to MP·65. The header: "Whose it is" (item 2), and the composed
+places' closed-set form, which now names AI·18. Nothing else changed.
+- **The check,** product/check-places-register.sh, taught MP·60 to MP·65 and AI·18, and W13's draft, checked against
+  C155-I item 2's twelve labels in their order. Nothing else. It was
+  `2c6d1e38e22a3d6b1a1c5a63a4964d7f0b20e745a0f8b7fdbd938835bcad8b04` and is `b58d51f41f7c7ae2e2f78e6cf438833a281877021f7444b2ef9ca1184d269709`. Run on the new register
+  without its amendment, it names exactly the seven new places and W13's draft [READ, the C17-P Filing chat's test on a
+  copy of the repository].
+- **The counts** [READ, `bash product/check-places-register.sh --count`]:
+
+    places 171
+    screen Every Screen 2
+    screen Onboarding 38
+    screen Recording 17
+    screen The Mirror 9
+    screen The Opening 11
+    screen The Readings & Close 34
+    screen The Journal 14
+    screen Settings 10
+    screen Not on a screen yet 36
+    status retired 36
+    status written 112
+    status written, in its parts 1
+    status merged into W27·6 1
+    status paused 2
+    status to rewrite 1
+    status composed (stand-in written) 10
+    status English written, Swedish to write 2
+    status no line: prohibition 1
+    status composed, no stand-in 3
+    status no line: by decision 2
+
+**6. product/how-the-ai-appears.md, ONE ROW** (Head of Product & Design, its message 2, item 3). Its table of places
+gains AI·18, and AI·12's title loses "tonight". Nothing else in the document changed. Owed at its next pass: §4 and §5,
+for Word Animation off by default (item 7); the closed-set form's "AI·12 to AI·16", which does not name AI·18; and
+the dreamer's words "tonight" where its §2 places a marked sentence.
+
+**7. product/design-system.md** (the founder's values and verdicts, Product messages 17 to 19 and Technology Message 22
+item 3 [RELAYED, Head of Product & Design]).
+- **Units.** Sizes stay in px, with one line saying iOS points and Framer px are the same unit at 1x.
+- **Added:** a row's summary uses type.button (Inter 14); the outer margins, 30px, left and right only; 12px between
+  journal rows; the record button, a 120px circle with MP·11 in white inside it; the back control, a thin chevron in a
+  round bordered button of about 41px; a chevron at each journal row's trailing edge; the month divider centred; the
+  typing field, a pill with the microphone inside it, growing as the dreamer types, capped at about 0.7 of the space
+  above the buttons, never focused by itself; the theme's fade, ease-in-out over five seconds. §5 is renamed
+  "Spacing, radius and controls"; no section is renumbered, so the handover's §1 and §7 still resolve.
+- **Already filed, unchanged:** 20px before each new turn of the app's and after the readings' section label; #767676
+  only on white, for a row's summary; white text in the record button. type.h6 already says "None": done at C16-P,
+  and nothing changed.
+- **Word Animation: Off by default, everywhere** (founder-ruled, Technology Message 22 item 3, dated 2026-11-20
+  [RELAYED]). An addition, not a replacement: no filed document stated a default [READ, design-system.md, main-path.md,
+  technology-handover.md and how-the-ai-appears.md at their C16-P hashes]. When on, about one word every 60 ms. Word by
+  word, the founder's Cohort 0 trial, is seen only with the setting turned on, and so is the theme's fade.
+
+**8. THE SHARED CORE PASS, RECORDED HERE AS THE SHARED CORE REQUIRES** (C157-I item 5 [READ]). SHARED-CORE.md: before,
+dbaeed30; after, 32038fbb [RELAYED, C157-I item 5; SHARED-CORE.md not read by this filing]. It carries the words rule
+in its final form (C155-I item 7) and the lean line. This project's instructions carry it [READ, this chat's instructions].
+
+**9. FOUR FILES ARCHIVED WHOLE,** each in an archive note. The new versions take their paths.
+
+| File | sha256 |
+|---|---|
+| Original, product/places-register.md | `c1019ce0f0f79de9a03abe9f58e0dc89e7f76ac6ea9b8289e6f20d0fcd85b026` |
+| Archived, archive/places-register-superseded-2026-11-19-at-C17-P.md, note included | `882b3c7e63f5cf0aa2d2c75f1ec27f7f56674ca7936c7b5cc18ce98dd9bfb8f9` |
+| Original, product/places-register.csv | `b2bd53188762db71e58078c2634d6e455dcff3561010d78cb8f4d46ad85e59df` |
+| Archived, archive/places-register-superseded-2026-11-19-at-C17-P.csv, note included | `9671deabfefa71dc1f69b0f4d4dfea59045f0fac0c8a2c66366ea98bbd97fb46` |
+| Original, product/how-the-ai-appears.md | `a7279784886b17364d84fd7f99b7dc5e15a4ee11f9a8e732a2a746fe84c324db` |
+| Archived, archive/how-the-ai-appears-superseded-2026-11-19-at-C17-P.md, note included | `0b8b53ad9a5f0313603fd3166adb7eca7904ee0ce087d9870baae6a57299b10e` |
+| Original, product/design-system.md | `fcf8e8140d2b743ae58ad0431d15e43e099fbc60db8dcb2109f76040143748fe` |
+| Archived, archive/design-system-superseded-2026-11-19-at-C17-P.md, note included | `07e0d2d052a41ca411e3ceb58ef2b5b26bdd5d1d69664ac5385c3417c7cd17b2` |
+
+Each of these prints its original's hash, and printed it at filing [READ, by the filing script]:
+
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/places-register-superseded-2026-11-19-at-C17-P.md | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/places-register-superseded-2026-11-19-at-C17-P.csv | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/how-the-ai-appears-superseded-2026-11-19-at-C17-P.md | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/design-system-superseded-2026-11-19-at-C17-P.md | shasum -a 256
+
+**10. THE FILES NOW.** Their hashes at filing [READ, by the filing script]:
+
+| File | sha256 |
+|---|---|
+| product/places-register.md | `6b5fa3260493263c641e68dac51e6e9c403a7d506cb92f7a354f5daa90a764c5` |
+| product/places-register.csv | `656051d0ae4d056d9d41703c9637fc6fc73fb5a71163e80e5ee1fdb9be3d9741` |
+| product/how-the-ai-appears.md | `80618ad953784bc5747596d6a5d508aae9eae00f9bdfb2029ff92e4fffe1e4f7` |
+| product/design-system.md | `ff2f7c905b6021eb2eabbc3d0dfcf5e88d2c7994f93d1b5d15c9b227448c56e5` |
+| product/check-places-register.sh | `b58d51f41f7c7ae2e2f78e6cf438833a281877021f7444b2ef9ca1184d269709` |
+
+**11. THE HASH C16-P COULD NOT STATE.** At ff3b229 this record was `b9cb48191346c8f5cf8935f2ecc848b0f601c4de44f3452e80a120209b1bb170` [READ, by the filing script: the
+file at that commit hashes so, and ff3b229 is the commit that last changed it before this one]. This record still
+cannot state its own current hash; the filing script prints it, and the next Product filing records it.
+
+**12. CHECKED BEFORE FILING** [READ, by the filing script]: the tree clean; the new paths absent; Interpretation's record
+as read, through C158-I at `cdb3dfa5445a3a8a62d039bdfa5a948d20c79ff251f021d6f6d8452a6e49ff8d`, the exact start of the record at filing; the Requirements List and every
+Product file at its C16-P hash. Product's heading check, the map's check, the register's check as amended,
+product/check-principles.sh on How the AI Appears and the Design System, and each archive note's original hash all
+printed nothing or matched. The word check is not run on the register, as at every earlier filing.
+
+**WHAT DEPENDED ON THIS.**
+
+- **Technology.** One message from Head of Product & Design after the push: Technology Message 22 item 1 is answered,
+  the disclosure's lines filed; onboarding's two pages; W27·5's request to leave the journal out of backups;
+  Apple's description in its order; AI·12 and AI·18 in the closed-set form; W21's and W23's unread-night forms; MP·60
+  to MP·65, MP·65 in the founder's build only; the Design System's values; Word Animation off by default.
+- **Interpretation.** In Product's next weekly batch: the onboarding exception, founder-ruled, which departs from C146-I
+  item 3, for its record; W27·5's must, from C140-I item 2, and the line that asks the phone; C156-I §5 item 8 answered
+  (AI·12 with no time, also the unread night's phrase; AI·18; W21's and W23's forms); C143-I Q4 carried into the
+  mirror's must; W12 and W13 in English, their Swedish owed.
+- **Counsel.** W27·2, W27·3, W27·6 and W27·10, before Cohort 1.
+- **The founder.** The mirror's line, to rewrite. W12's and W13's Swedish, before Cohort 1. Technology Message 22 item
+  5's Swedish points.
+- **The next Product filing, before Cohort 1.** main-path.md's pass: the recording rulings of Technology Messages 21
+  and 22; the button order; P1, P2, P10 and P12; editing; the confirmation (MP·60, MP·61); the onboarding pages; Word
+  Animation's default; the night page's field and menu; where MP·62 shows beyond Recording; how the stop control is
+  drawn. The handover's pass. How the AI Appears' pass (item 6). W12's and W13's Swedish. The withdrawal-of-consent
+  place. Technology Message 22 item 5's Swedish points.
+- **Interpretation's entries filed after this filing was drafted.** Not read for it. At filing, the record read,
+  through C158-I, was the exact start of the record [READ, by the filing script]. Each is read at the next Product
+  filing:
+
+- None.
+
+- **The project mirrors.** places-register.md and .csv, how-the-ai-appears.md, design-system.md and
+  product-change-record.md are replaced by these versions; change-record.md by the record as read.
+
+---

@@ -73,11 +73,12 @@ void main() {
     });
   }
 
-  test('SoulDreams Dev reaches the journal pages and the pending lines', () {
+  // C17-P filed every pending line, so nothing reaches pending.g.dart
+  // until the owner gives the next one.
+  test('SoulDreams Dev reaches the journal pages', () {
     final files = reached('lib/main_dev.dart');
     expect(files, contains('lib/journal/pages/journal_page.dart'));
     expect(files, contains('lib/journal/pages/night_page.dart'));
-    expect(files, contains(pending));
     expect(files, contains('lib/recording/record_microphone.dart'));
     expect(files, containsAll(['lib/onboarding/onboarding.dart', 'lib/onboarding/disclosure_page.dart']));
     expect(files, containsAll(['lib/founder/founder_export.dart', 'lib/founder/export_text.dart']));
@@ -108,7 +109,7 @@ void main() {
 
   test('the walk follows relative and package imports', () {
     final files = reached('lib/journal/pages/night_page.dart');
-    expect(files, containsAll(['lib/words/pending.g.dart', 'lib/journal/night.dart', 'lib/design/tokens.g.dart']));
+    expect(files, containsAll(['lib/words/lines.g.dart', 'lib/journal/night.dart', 'lib/design/tokens.g.dart']));
   });
 
   // D65 (the review of Task 12): the walk is proved on synthetic trees, one

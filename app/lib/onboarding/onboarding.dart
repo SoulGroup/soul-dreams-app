@@ -106,7 +106,7 @@ class _OnboardingState extends State<Onboarding> {
                 builder: (context, room) => SingleChildScrollView(
                   // Each step starts at its top.
                   key: ValueKey(_step),
-                  padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide, vertical: StandIns.gap),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.pageSide, vertical: StandIns.gap),
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minHeight: max(0.0, room.maxHeight - 2 * StandIns.gap)),
                     child: Center(
@@ -134,7 +134,7 @@ class _OnboardingState extends State<Onboarding> {
             ),
             if (_foot() case final foot?)
               Padding(
-                padding: const EdgeInsets.fromLTRB(StandIns.pageSide, 0, StandIns.pageSide, StandIns.gap),
+                padding: const EdgeInsets.fromLTRB(Spacing.pageSide, 0, Spacing.pageSide, StandIns.gap),
                 child: foot,
               ),
           ],

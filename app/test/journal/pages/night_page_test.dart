@@ -22,7 +22,6 @@ import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
-import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../../recording/fakes.dart';
@@ -283,7 +282,7 @@ void main() {
 
   // D107 item 1: the entry point's item, above delete, plain, its words given.
   NightAction given(List<Night> ran) =>
-      NightAction(label: PendingLines.MP_65.text(Lang.en), run: (night) async => ran.add(night));
+      NightAction(label: Lines.MP_65.text(Lang.en), run: (night) async => ran.add(night));
 
   testWidgets('a given item shows above delete, plain', (tester) async {
     await open(tester, action: given([]));
@@ -291,7 +290,7 @@ void main() {
     final items = tester.widgetList<CupertinoMenuItem>(find.byType(CupertinoMenuItem)).toList();
     expect([for (final i in items) i.key], [NightPage.actionKey, NightPage.deleteKey]);
     expect(items.first.isDestructiveAction, isFalse);
-    expect(find.text(PendingLines.MP_65.text(Lang.en)), findsOneWidget);
+    expect(find.text(Lines.MP_65.text(Lang.en)), findsOneWidget);
   });
 
   testWidgets('a given item runs once, with the night shown', (tester) async {
@@ -315,8 +314,8 @@ void main() {
     expect(actions, hasLength(2));
     expect(actions[0].isDestructiveAction, isFalse);
     expect(actions[1].isDestructiveAction, isTrue);
-    expect((actions[0].child as Text).data, PendingLines.MP_61.text(Lang.en));
-    expect((actions[1].child as Text).data, PendingLines.MP_60.text(Lang.en));
+    expect((actions[0].child as Text).data, Lines.MP_61.text(Lang.en));
+    expect((actions[1].child as Text).data, Lines.MP_60.text(Lang.en));
     await tester.tap(find.byWidget(actions[0]));
     await tester.pumpAndSettle();
     expect(find.byType(NightPage), findsOneWidget);
@@ -336,12 +335,13 @@ void main() {
     expect(h.files.files.keys.where((k) => k.contains(n.id)), isEmpty);
   });
 
-  testWidgets('pending lines are placeholders outside Dev, words in Dev', (tester) async {
-    expect(PendingLines.MP_60.text(Lang.en), '[MP·60]');
-    expect(PendingLines.MP_60.text(Lang.en, flavor: 'tester'), '[MP·60]');
-    expect(PendingLines.MP_60.text(Lang.en, flavor: 'founder'), '[MP·60]');
-    expect(PendingLines.MP_60.text(Lang.en, flavor: 'dev'), isNot('[MP·60]'));
-    expect(PendingLines.MP_61.text(Lang.sv, flavor: 'dev'), isNot(PendingLines.MP_61.text(Lang.en, flavor: 'dev')));
+  // C17-P filed MP·60 and MP·61: words in every build, no longer pending.
+  testWidgets('the confirmation\'s two choices are filed lines', (tester) async {
+    for (final line in [Lines.MP_60, Lines.MP_61]) {
+      expect(line.written, isTrue, reason: line.handle);
+      expect(line.text(Lang.en), isNot('[${line.handle}]'));
+      expect(line.text(Lang.sv), isNot(line.text(Lang.en)));
+    }
   });
 
   testWidgets('text at twice the size does not overflow', (tester) async {
@@ -450,9 +450,9 @@ void main() {
     final menu = find.byKey(NightPage.menuKey);
     expect(tester.getSize(menu), const Size(StandIns.menuWidth, StandIns.backSize));
     final width = tester.getSize(find.byType(NightPage)).width;
-    expect(tester.getTopRight(menu).dx, closeTo(width - StandIns.pageSide, 1));
+    expect(tester.getTopRight(menu).dx, closeTo(width - Spacing.pageSide, 1));
     expect(tester.getCenter(menu).dy, closeTo(tester.getCenter(find.byKey(BackControl.buttonKey)).dy, 1));
-    expect(tester.getTopLeft(find.byKey(BackControl.buttonKey)).dx, closeTo(StandIns.pageSide, 1));
+    expect(tester.getTopLeft(find.byKey(BackControl.buttonKey)).dx, closeTo(Spacing.pageSide, 1));
     final look = tester.widget<DecoratedBox>(find.descendant(of: menu, matching: find.byType(DecoratedBox))).decoration
         as BoxDecoration;
     expect(look.border, Border.all(color: LightColours.button.border!));
@@ -535,8 +535,8 @@ void main() {
     final add = tester.getRect(find.byKey(NightPage.addKey));
     final start = tester.getRect(find.byKey(NightPage.startKey));
     expect(find.text(Lines.EM_1.text(Lang.en)), findsOneWidget);
-    expect(add.left, closeTo(StandIns.pageSide, 1));
-    expect(start.right, closeTo(size.width - StandIns.pageSide, 1));
+    expect(add.left, closeTo(Spacing.pageSide, 1));
+    expect(start.right, closeTo(size.width - Spacing.pageSide, 1));
     expect(add.center.dy, closeTo(start.center.dy, 1));
     expect(add.bottom, closeTo(size.height - StandIns.gap, 1));
     await tester.tap(find.byKey(NightPage.startKey));

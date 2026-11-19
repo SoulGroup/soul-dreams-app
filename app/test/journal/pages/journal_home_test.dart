@@ -19,7 +19,6 @@ import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/onboarding/onboarding.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
-import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../../recording/fakes.dart';
@@ -114,7 +113,7 @@ void main() {
 
   testWidgets("the night's menu item is handed to the journal", (tester) async {
     JournalStore.newQueueForTests();
-    final action = NightAction(label: PendingLines.MP_65.text(Lang.en), run: (_) async {});
+    final action = NightAction(label: Lines.MP_65.text(Lang.en), run: (_) async {});
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), nightAction: action)));
     await tester.pumpAndSettle();
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).nightAction, same(action));

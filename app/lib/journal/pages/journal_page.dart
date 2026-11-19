@@ -128,7 +128,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
             if (nights != null && nights.isEmpty)
               Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: StandIns.pageSide),
+                  padding: const EdgeInsets.symmetric(horizontal: Spacing.pageSide),
                   // In the button type, centred (head's message 20, item 7).
                   child: AppLine(Lines.C4_P_5.text(appLanguage), style: TypeRoles.button.style(p.text)),
                 ),
@@ -136,9 +136,9 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
             if (nights != null && nights.isNotEmpty)
               ListView(
                 padding: const EdgeInsets.fromLTRB(
-                  StandIns.pageSide,
+                  Spacing.pageSide,
                   0,
-                  StandIns.pageSide,
+                  Spacing.pageSide,
                   StandIns.journalEnd + StandIns.recordHeight + StandIns.recordBelow,
                 ),
                 children: [
@@ -160,8 +160,8 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
               ),
             if (nights != null && nights.isEmpty && _first)
               Positioned(
-                left: StandIns.pageSide,
-                right: StandIns.pageSide,
+                left: Spacing.pageSide,
+                right: Spacing.pageSide,
                 bottom: StandIns.recordBelow + StandIns.recordHeight + StandIns.arrowGap,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -276,7 +276,7 @@ class _Row extends StatelessWidget {
     final lines = three.height;
     three.dispose();
     return Padding(
-      padding: const EdgeInsets.only(bottom: StandIns.rowGap),
+      padding: const EdgeInsets.only(bottom: Spacing.journalRow),
       child: GestureDetector(
         onTap: onTap,
         child: Container(

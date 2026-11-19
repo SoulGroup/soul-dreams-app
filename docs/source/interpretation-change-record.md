@@ -6344,3 +6344,502 @@ item 1). The tester disclosure specification's next draft.
 **WHAT DEPENDED ON THIS.** The Shared Core in all four projects (item 1). Product & Design: MP·24 and its condition, the
 all-declines night, the split at Start Interpretation. Technology: the blind comparison's measure; the split; the
 all-declines night. The next passes listed above.
+
+---
+
+## C155-I — Product's message 27 answered: twelve traditions admitted and their labels; criterion 6 replaced; English only for Cohort 0; "Looking at:"; the words rule in its final form; what the model is given from a lens file; the outgoing head's handover corrected
+
+**Filed 2026-11-11, by this machine. Items 1 to 6 founder-ruled 2026-11-09; item 7 founder-ruled 2026-11-09, its final words approved 2026-11-10.** *Items 8 to 11 are Head of Interpretation's, open to the founder. Product & Design, its message 27. Recorded from the head chat's decisions of 2026-11-09 and 2026-11-10, relayed to the filing worker.*
+
+**1. THE FOUNDATIONS §7, CRITERION 6, IS REPLACED** (founder-ruled 2026-11-09; signed by the founder alone, C130-I
+item 1). "Historical standing", the centuries of establishment, becomes "Standing as a tradition", in the words of the
+dated block filed at C157-I, which this entry does not restate. **Why:** "centuries" was already at odds with §7.1's
+anti-recency rule; the criterion's purpose, a tradition rather than a position, is kept. This answers the question
+C24-I item 2 left open: whether the criterion bars recent traditions for good.
+
+**2. TWELVE TRADITIONS ARE ADMITTED** (founder-ruled per file, 2026-11-09), each with the label its readings carry,
+from these files in interpretation/lens-register/: Jungian (lens-jungian.md) · Adlerian (lens-adlerian.md) ·
+Existential (lens-existential-phenomenological.md) · Artemidorus (lens-artemidorus.md) · Islamic taʿbīr
+(lens-islamic-tabir.md) · Sufi – Ibn ʿArabī (lens-sufi.md) · Talmudic (lens-talmudic.md) · Biblical
+(lens-biblical.md) · Asclepian (lens-asclepian.md) · Tibetan Dream Yoga (lens-tibetan-dream-yoga.md) · Advaita Vedanta
+(lens-advaita.md) · Zhuangzi–Liezi (lens-zhuangzi-liezi.md). Jungian, Adlerian and Existential are admitted under
+criterion 6 as replaced (item 1). **Not admitted:** Gestalt, which stays candidate permanently, its reason on record in
+its own §1 (its founder held that producing a reading is itself the error); Egyptian (insufficient material, C74-I
+item 1); Sámi and Aboriginal Australian (not candidates; standing); Freudian (retired, C134-I item 9). The twelve
+files' status lines are brought to this ruling at C157-I.
+
+**3. THE LABELS** (founder-approved 2026-11-09). As in item 2, verbatim, with their diacritics and dashes; never a
+file's §2, which holds candidate labels. "Sufi – Ibn ʿArabī" is the founder's own change, so that the word Sufi is in
+it: a spaced en dash, not a slash (which reads as two things stapled together) and not a middle dot (which the arc
+uses: "The Arc · Sufi – Ibn ʿArabī"). Five were already his: Biblical, Asclepian and Tibetan Dream Yoga (C73-I item
+3), Advaita Vedanta (C74-I item 1), Zhuangzi–Liezi (C75-I item 3). Seven are new.
+
+**4. COHORT 0 READS IN ENGLISH ONLY** (founder-ruled 2026-11-09). Swedish follows and blocks nothing now. Before a
+Swedish reading ships: Swedish distinctive, shared and collided lists for each file (Lens Practice Draft 11 does not
+yet say so, a gap this department closes); the Swedish labels; Swedish passages from named translations before a
+Swedish reading quotes; the Swedish review of the model's instructions (C156-I).
+
+**5. THE WHY-LINE PREFIX (W12) IS "Looking at:"** (founder-approved 2026-11-09). It sits over a reading and over a
+decline alike, and says nothing about order or rank (Lens Practice §7.2 and §15 item 2).
+
+**6. THE LIVING TRADITIONS ARE SERVED NOW** (founder-ruled 2026-11-09). Tibetan Dream Yoga, Islamic taʿbīr, Sufi –
+Ibn ʿArabī and Talmudic: the founder asks their people before public release. For Tibetan this is C118-I item 3's
+condition, kept.
+
+**7. THE RULE ON DREAMER-FACING WORDS, IN ITS FINAL FORM** (founder-ruled 2026-11-09; these words approved by the
+founder 2026-11-10). The Shared Core's line now reads: "Dreamer-facing words, fixed lines and stand-ins alike, may be
+drafted in a chat, checked against what their place must do and how it fails, and approved by the founder before they
+show. Each language is drafted on its own, never translated from another, never machine-translated. The app's composed
+lines are practice turns: written each night under the practice's rules, each language on its own, and checked before
+they show." It replaces the line C154-I item 1 recorded ("written by a person ... never model-drafted", with its
+sentence that a person writes every stand-in). It also supersedes the shorter words first relayed for this ruling
+("Fixed dreamer-facing words may be drafted ..."), which covered fixed lines only and left out "never
+machine-translated"; those reached Product & Design in the answer to message 27 and are overtaken by these. The line
+lives in the Shared Core alone: The Foundations does not contain it, by search, so no Foundations block carries it.
+SHARED-CORE.md carries it from C157-I.
+
+**8. WHAT THE MODEL IS GIVEN FROM EACH LENS FILE.** Sections 3, 4, 5, 6 and 11: the account of a dream in the
+tradition's voice; the vocabulary, with its distinctive, shared and collided terms; the characteristic question and
+the account condition; the tradition's own test and whether it is available; its honest limits. With the label from
+item 2. **Never section 7:** several name a missing premise, which no reading may do (Lens Practice Draft 11; C134-I
+item 2); the lens register pass removes them. **No passages:** no file yet holds them in the form Lens Practice §11
+item 12 requires, so Cohort 0 readings do not quote, and a reading needs none. The answer to message 27 first named
+sections 3, 4 and 5 only; Head of Interpretation corrected it the same day (item 9), because sections 6 and 11 are
+what keep a reading or a decline from claiming more than the tradition can do here. The correction governs.
+
+**9. THE MESSAGES, SENT.** The answer to message 27, sent by the founder on 2026-11-09, carried items 2 to 6, the
+words rule in its shorter form, and item 8 in its first form (Product's message 28 confirms message 27 was answered,
+and its item 4 lists what the answer carried). Head of Interpretation's "On message 28", sent as written on
+2026-11-09, carried item 8's correction; that the review had begun, in two worker chats, English only; and agreement
+with message 28 item 3: an anchor call given only tonight's capture layer keeps Recurrence & the Series §3.1 by what it
+holds, so the Lens Practice draft's call R is obsolete. Neither message is copied here.
+
+**10. CHECKS RUN BY THE FOUNDER, READ BY HEAD OF INTERPRETATION** [RELAYED]. At the start of this work: HEAD aa1d7a3,
+283 files, a clean tree, the record ending at C154-I. Every lens file's status line said "candidate", except Egyptian's,
+"insufficient material" (seen again at this filing [READ, the founder's listing, 2026-11-11]). Sections 3, 4, 5, 6 and
+11 of the twelve, searched for "journal", the founder-material pass's markers, "restricted", month names and 2026 dates: 17 lines in 10 files,
+of which 7 are counts against the journal, 5 structural facts about it, 1 refers to the app itself and 4 are Tibetan's
+restricted-methods notes. No dream content. The head first reported these as 9 files and 12 + 3 + 5; corrected, the
+error caught by the review (C156-I, section 6). The recurring-image pass document, 0489f0c7: DECLARES rows for
+Asclepian, Talmudic and Zhuangzi–Liezi (and the retired Freudian); no DECLARES row matches the founder-material
+pattern.
+
+**11. THE OUTGOING HEAD'S HANDOVER OF 2026-11-09, CORRECTED FOR THE RECORD.**
+- It cited C153-I item 4 for "the four reviews arrive as one batch". C153-I item 4 said one at a time. C154-I item 6
+  changed that by recording Product's notice as "received, no answer needed", so a founder ruling was changed without
+  a ruling. Product's message 28 (2026-11-09) carried the four reviews together as the founder's ruling, and the
+  founder proceeded on it.
+- It cited C153-I as overtaking C146-I item 2. It was C147-I.
+- It did not mark the tester disclosure specification as the owed item nearest a deadline: counsel reads it before
+  Cohort 1 (C157-I item 1).
+
+**WHAT DEPENDED ON THIS.**
+- **Product & Design.** W13, the twelve labels; W12, "Looking at:"; English only for Cohort 0; the Places Register,
+  whose founder places may now be drafted in a chat and brought to the founder (item 7).
+- **Technology.** The reading call: the twelve files and their labels; sections 3, 4, 5, 6 and 11, never 7; no
+  passages; English only.
+- **Organisation.** Core Commitments' clause that the founders write the tester disclosure, which item 7 reaches;
+  counsel still reads the disclosure before Cohort 1. The founder's asking of the four living traditions' people
+  before public release (item 6).
+- **Interpretation.** The Foundations' dated block and the twelve status lines (C157-I). At the passes after Cohort
+  0 (C157-I item 1): Lens Practice (§15's preamble and §11 item 2 under item 7; "Looking at:"; the Swedish lists;
+  §5.1's admitted status); The Opening's and The Close's founder-copy sections (item 7); the lens register pass (each
+  file's §7 premises; §2's candidate labels; the lens files' "Founder-authored" notes under item 7; Swedish lists and
+  passages); the Requirements List's Draft 2.
+- **The founder.** The Shared Core in all four projects (C157-I).
+
+---
+
+## C156-I — Product's message 28: the review of the model's instructions, in English, and Interpretation's rulings on it; quotations across languages; the reflection's limits; every check list approved here
+
+**Filed 2026-11-11, by this machine. Three founder rulings are carried, below.** *The rest is Head of Interpretation's answer of 2026-11-10, open to the founder. Product & Design, its message 28.*
+
+**THE FOUNDER'S RULINGS THIS ENTRY CARRIES.**
+- **Quotations across languages** (founder-ruled; relayed by Product & Design, message 28, 2026-11-09). "A reading in
+  any language may quote a source translated into that language, naming the source, without saying it is translated."
+  The founder: "Even the english source and language will be translated from somewhere ... If a rule is blocking this,
+  we change the rule." It changes C140-I item 4. How this department holds it is item 32 below.
+- **The reflection** (founder-ruled; relayed by the same message): at most 120 words and five quotations, in every
+  language. Section 5 item 9 below.
+- **Every check list is approved by Head of Interpretation** (founder-ruled 2026-11-10), new lists and lists that act
+  on the dreamer's own words included. It extends C142-I item 0, which named TECH·3 to TECH·5. Item 31 below applies
+  it.
+
+**THE REVIEW'S EVIDENCE, FILED AS RECORDS BESIDE THIS ENTRY**, in interpretation/model-work-review-2026-11-10/, each
+the review worker's report verbatim, annex B with the one change below:
+- annex-A-lens-practice-and-recurrence.md (Scope A worker, 2026-11-10), sha256
+  1f9fe7061ea7ce1805e1eda029248e6c5decbd632fe1830c694c45a4408d930e
+- annex-B-opening.md (Scope B worker, 2026-11-10), sha256 as filed
+  45311038c573f2e76bffe4ca2ca0ccca6ed2f6bb1506075c28ae2ba092d82b6e; as written
+  ac94441e4460e6ccb195d2daf9c1463e7b1f5693e568be776dbea2ef69dddff9. Filed with one phrase on its line 96 reworded, as its first line says: a six-word overlap of the
+  practice's own method vocabulary with a restricted transcript-pass record, not dream material; reworded because a
+  NOT CLEAN verdict is never filed over (Head of Interpretation, 2026-11-11). This is the precedent for a coincidental
+  match: reword, record, rerun.
+- annex-C-close.md (Scope B fresh worker, 2026-11-10), sha256
+  b3d64aff87793b5e979586aef88a9446b04388fe9a779aafd347a78e16ef5fb5
+
+**HOW THE ANSWER IS CARRIED.** What follows is Head of Interpretation's answer to message 28, sent to Product &
+Design on 2026-11-10, word for word, with these changes only: its title and its FROM, TO and DATE lines are this
+entry's heading and Filed line; its paragraph saying it was not yet filed is dropped; its list of attachments is
+replaced by the paths and hashes above, and "the annexes" in it means those three records; its rule after the opening
+paragraph and its closing north-star line are dropped; its twelve section headings are set in bold. Its provenance
+marks are the head's, as written.
+
+Drafts reviewed [READ, sha256 by each worker]: model-work-opening-draft-1.md aecfc2ee ·
+model-work-lens-practice-draft-1.md a23075af · model-work-close-draft-1.md 8e73cf1f ·
+model-work-recurrence-draft-1.md b591b5ff. Against: The Opening Draft 8 d2613ac8, Lens
+Practice Draft 11 6c77a323, The Close Draft 5 fa23d0e8, Recurrence & the Series Draft 4
+7dec55e9, privacy-ethics-safety.md 4f83555e, and C140-I to C154-I.
+
+**1. SCOPE**
+
+- **Reviewed:** every English instruction and check (sections 4.x, 4.x′), every call's
+  specification (section 2), what is a rule and never a model (section 3), and the tests
+  (section 6), of all four drafts.
+- **Not reviewed:** the Swedish sections (5.x). Cohort 0 reads in English only (founder,
+  2026-11-09). They get their own review before any Swedish reading ships. Nothing Swedish
+  is built to until then.
+- **Not ours:** costs, token estimates, model choice, architecture.
+
+**2. HOW TO READ THE ANNEXES**
+
+**Every finding in annexes A, B and C is accepted, with its proposed words, old then new,
+except where section 3 below says otherwise.** Where an annex marks a point "open, for
+you", section 3 rules it. Tags in the annexes: F1–F5 are the founder's rulings of
+2026-11-09; P2a–P2e are items of your message 28; N1–N6 (annex C) are the head's rulings
+of 2026-11-10.
+
+The finding found three times independently, once in each department's document, and the
+most important: **lines composed on earlier nights are sent back to the model** so it will
+not repeat them, and those lines carry earlier nights' dream words (annex A LP-5, REC-1;
+annex B O1; annex C CL-1). **No line composed on an earlier night ever leaves the phone.**
+Never-twice is checked on the phone, after composing.
+
+**3. RULINGS (Head of Interpretation unless marked; all open to the founder)**
+
+**Lens Practice (annex A)**
+1. **LP-2, the test evidence in lens files.** The exact floor is the word "journal" only.
+   The digit rule is refused: it would block "dream 2". The model check carries the rest,
+   with annex A's words.
+2. **LP-4, a dream told late.** It is not among tonight's read dreams and gets no
+   dream-state line, so W10 never shows for it. A reading may mention it, never ground in
+   it, never give it a paragraph.
+3. **LP-6, the mixed night.** The arc is spoken only by a tradition whose reading was
+   shown. The press presses only on readings shown, never on a decline (the reason is
+   C151-I's B5).
+4. **LP-8, what a decline may say.** It may say, in general terms, what its tradition
+   reads a dream against. It never frames that as something this dreamer left out, and
+   never invites it.
+5. **LP-9, the interpreter's-narrative guard.** No words now; it goes to Lens Practice's
+   next pass. The press is built without it for Cohort 0.
+6. **LP-10, the missing definition**, to be inserted as the press's third vector:
+   > **The ego-congenial check** — for when a reading is most welcome to the dreamer's
+   > picture of themselves: whether its welcome is doing work its grounding should. Being
+   > welcome is never evidence against it.
+7. **Q3, the second paragraph.** A seeded draw among the anchor group's blocks that hold a
+   paragraph in that dream, independent of display order, recorded. Never to whichever
+   block stands first.
+8. **Q6, no tradition has purchase at all.** Traditions are chosen by the night's seed as
+   on any night; each reads or declines in its own voice; if all decline, it is C154-I
+   item 3's night. The app never decides a dream had nothing in it. Test R2 is rewritten
+   to this.
+9. **Q8, the press.** It asks no question (the law document §2: friction is on readings,
+   never on the person). Four sentences stands as a guard.
+10. **Q9, a tradition whose only purchase is waking material.** As drafted for Cohort 0:
+    not offered. The gap between C84-I item 4 and §4.2 goes to Lens Practice's next pass.
+11. **Agreed with annex A's beliefs:** Q4, Q5, Q7 (TECH·7 applied as annex A says), Q10,
+    Q11, Q13. Q1, Q2, Q12 are answered by F1, F3 and P2c.
+
+**Recurrence & the Series (annex A)**
+12. **REC-2's open point.** An image unresolved by marker (d) anchors as an image. A word
+    that states a feeling never anchors, even inside the image's sentence.
+13. **Q6, a total of series questions.** None kept in Cohort 0. Across all dreamers from
+    Cohort 1 is a later ruling.
+14. **Agreed with annex A's beliefs:** Q3, Q5, Q7 (the account taken from the pass
+    document's DECLARES row, never quoted in the question), Q8. Q1 and Q2 answered by P2c.
+15. **Who may ask, checked** [READ, the founder's terminal, 2026-11-10]: the
+    recurring-image pass document is its filed version (0489f0c7). Three admitted
+    traditions have a DECLARES row: Asclepian, Talmudic, Zhuangzi–Liezi. So the series
+    question can run in Cohort 0, on nights one of their readings is shown. No DECLARES
+    row matches the founder-material search. Whether any other tradition is declared in
+    another layout [ASSUMED none] is confirmed at the lens register pass; Jungian having
+    no row is a sourcing question for that pass.
+
+**The Opening (annex B)**
+16. **O3, the bridge on a hard night.** When the bridge's image is harm done to the
+    dreamer, or a fresh loss, the bridge holds back. Recorded as held back, never why, as
+    the press already does (Lens Practice §9A; the head's ruling of 2026-11-07). These are
+    the law document §2's limits, which stay (C147-I; C152-I; C153-I item 1). This is not
+    a distress check: nothing classifies the night. The question call carries the same
+    limits, in annex B's words.
+17. **O4, the asking's second route.** Any answer turn counts, the stood-out answer
+    included. What is said at the mirror never does.
+18. **O6, a one-image night.** The questions end after the seam turn. Technology names
+    the stop value; it means only that the one-image sequence ended.
+19. **Q5.** The new value is "inventory unknown", never a count of zero.
+20. **Agreed with annex B's beliefs:** Q2 (an utterance that cannot be placed is never
+    applied; it stays the dreamer's, unplaced), Q3, Q4, Q6, Q9, Q12, Q14, Q15. Q7 is
+    C154-I item 5.
+
+**The Close (annex C)**
+21. **Q-H1.** The reflection is given only readings shown, never declines.
+22. **Q-H2.** With no passing quote from the response, the empty case (W22) shows,
+    recorded B9. A stand-in is never built from the night alone.
+23. **Q-H3.** A hand-over answered by W22 spends one of the three.
+24. **Q-H4.** A quotation from a late telling says, in its where-phrase, that it was added
+    later (C138-I item 2).
+25. **Q-H5.** Reflection 1 may start from any write of the response; each later one from
+    a write made since the reflection before it.
+26. **Q-H6.** No time words in the composed remainder at all.
+27. **CL-18.** The close's stood-out line asks whether anything stood out, without "from
+    the readings".
+28. **CL-20.** No cross-dreamer count of how nights end (B9, B10) in Cohort 0. The
+    per-night record stays.
+29. **Q4's optional word cap.** Not added. The adjacency rule stands as a floor.
+30. **Agreed with annex C's beliefs:** Q1 (fold T into D, on its conditions), Q2 (a fresh
+    seeded order of readings per call), Q3, Q6, Q7. Q5 is P2b.
+
+**Across all four**
+31. **Check lists** are approved by Head of Interpretation, every one, including those
+    acting on the dreamer's own words (founder-ruled 2026-11-10). On the workers' reading,
+    English, as floors beneath the model checks, **approved**: TECH·5's additions "is
+    right", "was right", "got it right", "the right reading" (LP-19); TECH·7 as annex A Q7
+    applies it; TECH·8 with REC-4's additions; the bridge words for the bridge's rule check
+    only (Opening Q10); the thanks words (Opening Q11b); the filler list, keeping "mm" where
+    unsure (Opening Q11a); the "none" and "nothing" lists (Opening Q13); "session,
+    sessions" (CL-12). Swedish lists wait for the Swedish review.
+32. **Quotations across languages (your 2a).** Agreed. The translation is held in the lens
+    file, fixed and checked once, with who translated recorded inside the file. Readings
+    never translate during a reading. Counsel's question on quoting modern translations is
+    not lifted. Cohort 0 does not quote.
+33. **The anchor as its own call (your item 3).** Agreed. Lens Practice draft's call R is
+    obsolete.
+
+**4. WHAT GOVERNS THE BUILD — read with your item 4**
+
+- **Lens-file sections the reading call gets:** 3, 4, 5, 6 and 11 (account; vocabulary;
+  characteristic question and condition; the tradition's own test; honest limits). Never
+  7. No passages. Your item 4 says "3, 4 and 5 only": the correction already sent governs.
+- **Labels:** the founder's twelve, verbatim with their diacritics and dashes, never the
+  lens files' section 2.
+- **The lens files' test evidence.** Sections 3–6 and 11 hold sentences reporting checks
+  against a journal (17 lines in 10 files [READ, the founder's terminal]). None is dream
+  content. The reading never mentions them (LP-2). The lens register pass moves them to
+  each file's §12.
+- **A composing preface** replaces the shared preface for every call whose words a
+  dreamer reads (LP-11; O7; CL-2). It never says the night was chosen to be read, since
+  the reflection runs on unread nights.
+- **Before Cohort 0, every model check is shown failing** at least once on a known-bad
+  output (LP-23).
+
+**5. AS BEHAVIOUR, FOR PRODUCT & DESIGN**
+
+1. No words from an earlier night reach a model. A line never repeats one the dreamer has
+   seen before; the phone checks.
+2. On a night where every tradition declines: no arc, no press, no series question. The
+   close's invitations, Waking Life, the reflections and Add to Journal come (C154-I
+   item 3).
+3. On a mixed night, the arc, the press and the reflection speak only of readings shown.
+4. A reading stands on the dream as told, never on what the dreamer said about it.
+5. A dreamer who tells of harm done to them, or of a fresh loss, is never asked for more
+   of it; the bridge holds back on such an image.
+6. At the mirror, words the app could not place stay the dreamer's own, unplaced, until
+   the dreamer puts them somewhere.
+7. A dreamer's waking words are never shown as dreamt (CL-22).
+8. Every where-phrase a dreamer reads is true. Owed as founder copy, draftable in a chat
+   under the new words rule and brought to him: a form of AI·12 with no time; a phrase for
+   what was written on an unread night; a late-telling phrase (Q-H4). On an unread night
+   after its three reflections, W21's states and W23 need a true form (annex C P-2).
+9. No reflection, the stand-in included, is longer than 120 words or holds more than five
+   quotations.
+10. A dream told late shows no dream-state line.
+
+**6. CORRECTIONS TO THIS DEPARTMENT'S OWN WORK**
+
+- The head's lens-file check first reported 17 hits as "9 files" and "12 + 3 + 5". The
+  true figures: 17 lines in 10 files; 7 are counts against the journal, 5 are structural
+  facts about it, 1 refers to the app itself, 4 are Tibetan's restricted-methods notes.
+  The verdict, no dream content, stands. (Caught by annex A.)
+- The answer to message 27 first left lens-file sections 6 and 11 out of what the model
+  is given. Corrected on 2026-11-09.
+
+**7. WHAT DEPENDED ON THIS**
+
+- **Technology:** Draft 2 of all four model works: payloads (no kept lines; sections 3, 4,
+  5, 6, 11 only; marker evidence verbatim from the account; sites per budget); the
+  composing preface; P, Q and the series question skipped on the all-declines night; the
+  bridge's hold; the checks and known-bad fixtures; the tests each annex adds; call R
+  retired.
+- **Product & Design:** section 5's behaviour; AI·12, place 10, W10, W21, W22, W23; the
+  all-declines night; the founder copy in section 5 item 8.
+- **Interpretation, next passes:** Lens Practice (late tellings; the §4.2 gap on waking
+  purchase; the narrative guard; the ego-congenial line; §5.1's admitted status; the
+  Swedish vocabulary gap; "Looking at:"); The Opening (the bridge's hold; the asking's
+  route; the one-image end); The Close (sections 3 items 21–28; the all-declines night);
+  Recurrence (REC-2); the lens register pass (status lines; §7's missing premises; test
+  evidence to §12; DECLARES coverage of the twelve; translations with translators).
+- **The founder:** the Shared Core pass, which now carries the new words rule; the copy
+  in section 5 item 8.
+
+**WHAT DEPENDED ON THIS.** Section 7 above, which is not repeated here; and, for the founder's rulings this entry
+carries: the lens register pass (each translation held in its lens file, fixed and checked once, with who translated
+recorded in the file; item 32); counsel, whose question on quoting modern translations stays open (item 32); Product &
+Design's W21 and W22 (section 5 item 9); every check list from now on (item 31).
+
+---
+
+## C157-I — The Foundations' dated block: criterion 6, and "tracked as an outcome" struck; the twelve status lines; the Shared Core pass; the passes frozen until between Cohort 0 and Cohort 1; the law document's draft follows
+
+**Filed 2026-11-11, by this machine. Items 1 and 2 founder-ruled 2026-11-10; the block at item 3 signed by the founder alone on 2026-11-11 (C130-I item 1); item 4 founder-ruled 2026-11-11; the text at item 5 founder-approved 2026-11-11.** *The cut at items 2 and 6 is Head of Interpretation's, open to the founder.*
+
+**1. THE PASSES ARE FROZEN UNTIL BETWEEN COHORT 0 AND COHORT 1** (founder-ruled 2026-11-10). **Not done before Cohort
+0:** the next passes of Lens Practice, The Opening, The Close and Recurrence & the Series; the lens register pass; the
+Requirements List's Draft 2; the Swedish review of the model's instructions, which still comes before any Swedish
+reading ships. **Done between Cohort 0 and Cohort 1:** the tester disclosure specification's next draft, which counsel
+reads before Cohort 1; then the frozen passes, in one consolidated pass informed by Cohort 0. Entries govern
+meanwhile, as always. The study chat for the founder's exported nights (C142-I) opens when Cohort 0 has nights. The
+law document is not among the frozen passes (item 6).
+
+**2. THIS FILING** (founder-ruled 2026-11-10): the rulings of 2026-11-09 and 2026-11-10, in C155-I, C156-I and
+this entry, with the law document's next draft. **The cut:** the law document's draft is its own filing, from the same
+worker chat (item 6), so that the rulings Product & Design and Technology are building to are filed now.
+
+**3. THE FOUNDATIONS: A DATED BLOCK OF TWO ITEMS**, appended, signed by the founder alone. Item 1 replaces §7's sixth
+criterion (C155-I item 1). Item 2 strikes §4.5's "and it is tracked as an outcome", which C123-I item 5
+(founder-ruled 2026-10-07) retired "in its next signed block"; C130-I named it as owed. A search of the record for
+anything else owed to the next Foundations block found nothing unpaid [READ, this filing: the record searched for
+"next Foundations block", "next signed block", "Foundations block" and "owed" or "owes" near "Foundations"; C56-I's
+sentence was paid by the 2026-09-30 block's Item 7, and C78-I's item by the 2026-10-07 block]. The Foundations, at
+interpretation/the-foundations-draft-2.md: before, cc32ecb4; after, 3db9dc4d.
+
+**4. THE TWELVE ADMITTED FILES' STATUS LINES** (founder-ruled 2026-11-11). The Foundations §7.2 says every lens
+file carries a status and a date, and that the app's active list is derived from the files; C155-I item 2 admitted
+twelve files whose status lines read "candidate". Handed-over lens files are never edited (C24-I convention 3, the Wave 2 Q7
+ruling), with one exception before this, for one reason (C87-I). **This is a second exception, of the same shape:** in
+each of the twelve files, the bold status at the head of §1 becomes "admitted, 2026-11-09", pointing at C155-I,
+with one dated sentence saying the line read "candidate" until then and that the rest of the paragraph is the file's
+view as handed over. Nothing else in any lens file changes; the findings in them stand. Gestalt, Egyptian, Sámi and
+Aboriginal Australian are not touched. Each file, before and after:
+- lens-jungian.md: before, 9338960a; after, b518fbf0
+- lens-adlerian.md: before, b3f3f8e8; after, 98e765db
+- lens-existential-phenomenological.md: before, c786ae54; after, 1848a693
+- lens-artemidorus.md: before, b114f4b7; after, 60c29191
+- lens-islamic-tabir.md: before, 86301904; after, b011e37b
+- lens-sufi.md: before, 8b4bec32; after, c8494e2b
+- lens-talmudic.md: before, b8b5e5c5; after, 5903c38c
+- lens-biblical.md: before, 4fc691e4; after, 5fcb9a45
+- lens-asclepian.md: before, 820f49b3; after, d915cd46
+- lens-advaita.md: before, 5893065c; after, b67d1fce
+- lens-zhuangzi-liezi.md: before, 103573d5; after, 8efb0e5c
+- lens-tibetan-dream-yoga.md: before, de8804f3; after, 34e48d8e
+
+**5. THE SHARED CORE PASS, RECORDED HERE AS THE SHARED CORE REQUIRES.** SHARED-CORE.md: before, dbaeed30; after,
+32038fbb. What changed: C154-I item 1's three changes, with the line on dreamer-facing words in its final
+form (C155-I item 7); the two lines that said "both founders", the opening's and the Commitments line under "Three
+kinds of document", now say the founder signs alone (C130-I item 1); the heading "What we never do, anywhere" drops "— inherited from The
+Foundations", since by search the words line and the "no one's dream material" line are not in it
+(founder-ruled 2026-11-11). "The founders" elsewhere is
+untouched: it is not about signing, and C130-I leaves open what changes when Eva returns. C154-I item 1's note that
+the repository's copy did not yet carry its three changes, and C130-I's that the opening still said "both founders",
+are paid. **Each other project's record owes its own line;** Head of Interpretation tells their heads in this week's
+batch. The founder pastes the same text into all four projects' instructions, this one's included.
+
+**6. THE LAW DOCUMENT'S NEXT DRAFT FOLLOWS** as its own filing, from this filing's worker chat, with a table of what
+is owed, each change to its entry. Until then interpretation/privacy-ethics-safety.md stays at 4f83555e, and the
+entries govern where it is behind them.
+
+**7. WHAT THIS FILING READ** [READ, the founder's listing, 2026-11-11, HEAD ff3b229, 291 files, a clean tree]. The
+change record up to C153-I is unchanged from the copy this filing read (the text before C154-I, by sha256,
+52209171); C154-I was read from the repository. The Foundations at cc32ecb4 and SHARED-CORE.md at dbaeed30.
+**Filed by others since aa1d7a3, not read by this filing, to be read at the next:** C16-P (commit ff3b229), which
+changed organisation/core-commitments.md (now f1e71c26), organisation/organisation-change-record.md and ten Product &
+Design files, and archived eight.
+
+**WHAT DEPENDED ON THIS.**
+- **Product & Design, Technology and Organisation.** Each records the Shared Core pass in its own change record (item
+  5). The frozen passes: what each is owed from them waits for the consolidated pass between Cohort 0 and Cohort 1,
+  and the entries govern meanwhile (item 1). Organisation: the tester disclosure specification's next draft and
+  counsel, before Cohort 1.
+- **Interpretation.** The law document's next draft (item 6). The consolidated pass between Cohort 0 and Cohort 1
+  (item 1). The lens register pass: the twelve status lines no longer owed by it; the rest of each §1 paragraph, which
+  still argues the old criterion, stays as handed over (item 4). Every document citing The Foundations at cc32ecb4,
+  which reads it at its new hash at its next pass (item 3). The study chat, when Cohort 0 has nights.
+- **The founder.** The Shared Core in all four projects' instructions (item 5).
+
+---
+
+## C158-I — The law document's next draft filed: the distress gate and the crisis-resources rule set aside; the limits reach every line the app composes, the holds silent; the data brought to the rulings; the old build's narration to the archive
+
+**Filed 2026-11-11, by this machine. Head of Interpretation's draft, to rulings already filed; the document is this department's.** *The rulings of 2026-11-11 named below are Head of Interpretation's, as the document's owner, open to the founder. Ordered by C157-I item 6.*
+
+**THE DOCUMENT.** interpretation/privacy-ethics-safety.md: before, 4f83555e (filed at C86-I); after, 208fd173. The
+whole of 4f83555e is archived verbatim, below a header, at archive/privacy-ethics-safety-superseded-2026-11-11.md
+(f76737e9), in C16-P's form. 236 lines become 101 (wc -l). Only what is ruled; no new rule. Every kept passage was
+taken from 4f83555e as an exact string; 22 lines of the draft are not verbatim from it, each to a row below.
+
+**WHAT CHANGED, EACH TO ITS ENTRY** (the owed-list table, ruled by Head of Interpretation on 2026-11-11, from a search of
+C120-I to C157-I for "law document", "privacy-ethics-safety" and "Privacy, Ethics": 32 lines in 15 entries).
+- **Top matter.** The mark paragraph goes; no marked rule remains (C147-I).
+- **§1, set aside without a date**, with Standing's rule that static crisis resources are reachable at all times
+  (C147-I; C153-I item 1). Its text is in the archive copy. A short paragraph stands as §1's body, so §2 to §6 keep the
+  numbers other documents cite: nothing classifies a night for distress; there is no Help page; The Foundations §6 holds
+  the apparatus deferred, not ruled out, and evidence of need goes to the founder for a new ruling (C153-I item 1). This
+  pays C124-I (the Tier 1 paragraph's pointer to the old build's read-only night goes with §1), makes C150-I's
+  holding-register pointer moot, and takes with it the dreamer lines that said "session".
+- **The governing principle.** Its first three sentences stay. The rest of its first paragraph, the declared holding, and
+  the gate's pipeline go; C147-I's sentence stands in their place: the rules that keep a reading from hurting anyone are how the readings
+  behave, not a monitoring system.
+- **Standing.** The crisis-resources paragraph goes. The tester disclosure is read in two layers (C144-I). The single-user
+  guard's withdrawal moves in from §1, word for word but for "(Standing, above)", which reads "(above)" (C64-I item 3).
+- **§2.** Its heading keeps its words, since The Opening Draft 8 points at it (C143-I). The limits reach every line the
+  app composes, the reflection included: Head of Interpretation's ruling as the document's owner, given to the Close
+  review as N3 and resting under C156-I (C83-I item 7; C147-I; C149-I; C156-I). The press never presses on an account of
+  harm or fresh grief, or toward the wound, and asks no question (C149-I; C156-I ruling 9). The bridge holds back on
+  harm done to the dreamer or a fresh loss, and the opening's questions carry the same limits (C156-I ruling 16). The
+  holds are silent: recorded as held back, never why, and the dreamer is not told. Not a distress check: nothing
+  classifies the night. Limit 1's note on its quotation goes to the archive (C124-I; C140-I item 10). Limit 3:
+  "Acute bereavement is never given the cost test", since holding is set aside. "Not therapy": onboarding carries only
+  the not-therapy line, never signals what not to bring, and says nothing about distress (C141-I item 8; C147-I; C152-I
+  item 1). C83-I item 7's sentence, named owed at C143-I, was already in 4f83555e: paid.
+- **§3.** Distress routing goes (C147-I; C153-I item 1). The referral-layer sentence stays: a condition on any future
+  layer, not a plan for one.
+- **§4.** Voice audio, to C140-I item 1 and C126-I item 5. The retention block and "(config-visible retention, default
+  0 after transcription)" go to the archive as the old build's (C124-I; C140-I item 10). What leaves the phone, new: C140-I
+  item 1, which replaces C126-I item 1, with its two conditions; crash and error reports (C126-I item 2); pointers to
+  C140-I item 2 and C141-I item 1. Head of Interpretation's fix of 2026-11-11: the spoken recording's path is stated once,
+  in the voice bullet, and the new bullet points to it. What the fix first lost is restored in the voice bullet ("at
+  recording, whether or not the night is ever read", C140-I item 1), so the path is stated once and whole. Deletion gains backup's wording (C140-I item 8). No training
+  gains one fact: the reading service's automated safety systems may flag content, which may then be kept and reviewed
+  (C153-I item 2). Gate firings go (C147-I; C153-I item 1), and with them the fluency and bridge bullets' two pointers
+  to that bullet. The close's space is no longer classified (C147-I). The feedback surface, new (C126-I item 4), its
+  distress clauses dropped. Access discipline gains a pointer to C142-I item 3. Data minimization gains no notifications
+  (C126-I item 3), the age gate and adults only (C123-I item 4; C146-I item 1; C124-I); its worked example goes to the
+  archive, its rule kept in one sentence. C140-I item 9 confirms the no per-person trend rule as it stood.
+- **§6.** Items 1, 2, 4 and 6 go with §1 (C147-I; C153-I item 1). Item 3, minors, is closed: the age gate, adults only
+  (C122-I item 1; C123-I item 4; C124-I; C146-I item 1). The founder's dual role stays, renumbered 1.
+- **Unchanged.** §5, the north star, and the closing line. Overtaken and adding nothing: C138-I's Help page, C141-I item
+  9, C146-I item 2. C155-I item 7 reached only text now set aside.
+
+**A RULING WITHDRAWN.** Head of Interpretation first ruled that §4's "nothing engages with it", on the close's space, had
+become untrue. Withdrawn: the sentence is scoped to an entered night, and The Close Draft 5, "Return", says the same
+(fa23d0e8). It stands.
+
+**"PHASE", NAMED, NOT CHANGED.** Four uses: the subtitle's "no phase annotations", §3's "in any phase", §4's "in Phase 1"
+and §5's "when Phase 1 is live". None says which cohort it means.
+
+**"SESSION" AND "NIGHT".** Nothing owed here: inside the company's documents "session" keeps its meaning, a night being
+read (C134-I item 5).
+
+**WHAT THIS FILING READ** [READ]. The change record through C157-I (30b72bb5), the law document at 4f83555e, The Close
+Draft 5 at fa23d0e8, all unchanged at filing. Filed by others and not read: C16-P (ff3b229), as at C157-I.
+
+**WHAT DEPENDED ON THIS.**
+- **Product & Design.** Anything pointing at the law document's §1, its Tier lines, or Standing's crisis rule now points at
+  set-aside text. §2's reach for its places: the opening's questions, the bridge's hold, the close's lines. Onboarding's
+  not-therapy line, and nothing about distress.
+- **Technology.** The press's and the bridge's holds, recorded as held back, never why; nothing classifies a night. §4's
+  rules on voice, what leaves the phone, crash reports, feedback and the age gate.
+- **Organisation.** The tester disclosure specification's next draft, between Cohort 0 and Cohort 1, reads §4 as filed
+  here; counsel, before Cohort 1.
+- **Interpretation.** Every document that read the law document at 4f83555e reads it at its new hash at the
+  consolidated pass after Cohort 0 (C157-I item 1). Their pointers to §2 and §4 by number still resolve.

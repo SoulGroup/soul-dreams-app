@@ -1,5 +1,6 @@
 # The design values generator (D49 a). From the Design System's tables
-# (docs/source/design-system.md: §1 type, §2 and §3 colour, §5 spacing)
+# (docs/source/design-system.md: §1 type, §2 and §3 colour, §5 spacing;
+# §5's second table, the controls, is prose and not read)
 # to app/lib/design/tokens.g.dart, every value named by its role. A pure
 # function of the file's bytes, so G1 can run it again and compare. It
 # knows each value form the tables use and stops on any other, with a
@@ -25,7 +26,7 @@ from wordsgen import read, write_atomic  # noqa: E402
 TYPE = '## 1. Type'
 LIGHT = '## 2. Colour: the light theme'
 DARK = '## 3. Colour: the dark theme'
-SPACING = '## 5. Spacing and radius'
+SPACING = '## 5. Spacing, radius and controls'
 TYPE_HEADER = ('Role', 'Face', 'Weight', 'Size', 'Line', 'Letter', 'Used for')
 VALUE_HEADER = ('Role', 'Value')
 # Each face the system names, and its font family in pubspec.yaml. A new
@@ -60,6 +61,9 @@ TALL = re.compile(r'^(\d+)px tall$')
 # D52: "N px after A, before B": A and B are prose the generator does not
 # use, and hold no digit or comma, so no second value or part is dropped.
 AFTER = re.compile(r'^(\d+)px (?:more space )?after [^\d,]+, before [^\d,]+$')
+# C17-P: the page's sides, and "N px between A", A prose as in AFTER.
+OUTER = re.compile(r'^(\d+)px outer margins, left and right only$')
+BETWEEN = re.compile(r'^(\d+)px between [^\d,]+$')
 
 
 class DesignError(Exception):
@@ -209,7 +213,8 @@ def read_spacing(lines):
             unset.append(role)
             continue
         for rx, kind in ((SCALAR, 'scalar'), (BOX, 'box'), (SIDES, 'sides'),
-                         (HEADER_GAP, 'gap'), (TALL, 'scalar'), (AFTER, 'scalar')):
+                         (HEADER_GAP, 'gap'), (TALL, 'scalar'), (AFTER, 'scalar'),
+                         (OUTER, 'scalar'), (BETWEEN, 'scalar')):
             m = rx.match(value)
             if m:
                 out.append((line, role, value, kind, m.groups()))

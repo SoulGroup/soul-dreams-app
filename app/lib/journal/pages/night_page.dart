@@ -26,7 +26,6 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
-import '../../words/pending.g.dart';
 import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
@@ -136,12 +135,12 @@ class _NightPageState extends State<NightPage> {
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(PendingLines.MP_61.text(appLanguage)),
+            child: Text(Lines.MP_61.text(appLanguage)),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(PendingLines.MP_60.text(appLanguage)),
+            child: Text(Lines.MP_60.text(appLanguage)),
           ),
         ],
       ),
@@ -232,7 +231,7 @@ class _NightPageState extends State<NightPage> {
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     final n = _night;
-    const side = EdgeInsets.symmetric(horizontal: StandIns.pageSide);
+    const side = EdgeInsets.symmetric(horizontal: Spacing.pageSide);
     return Scaffold(
       body: SafeArea(
         child: Column(
@@ -299,7 +298,7 @@ class _NightPageState extends State<NightPage> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(StandIns.pageSide, StandIns.gap, StandIns.pageSide, StandIns.gap),
+                padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
                 child: ButtonRow(
                   left: KeyedSubtree(
                     key: NightPage.addKey,

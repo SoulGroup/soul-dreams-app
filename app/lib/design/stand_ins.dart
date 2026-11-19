@@ -6,11 +6,8 @@
 import 'package:flutter/painting.dart';
 
 abstract final class StandIns {
-  /// The page's side margin (about 30, TO TRY: head's message 20, item 12).
-  static const double pageSide = 30;
-
-  /// The space between two journal rows (about 12, TO TRY: item 12).
-  static const double rowGap = 12;
+  // The page's side margin and the space between two journal rows, once
+  // here, are filed at C17-P: `Spacing.pageSide` and `Spacing.journalRow`.
 
   /// The chevron at a row's trailing edge (item 4): its size, its line, and
   /// the space before it.

@@ -12,7 +12,7 @@ import '../core/language.dart';
 import '../core/safe_log.dart';
 import '../journal/night.dart';
 import '../journal/night_action.dart';
-import '../words/pending.g.dart';
+import '../words/lines.g.dart' show Lines;
 import 'export_text.dart';
 
 final class FounderExport {
@@ -23,7 +23,7 @@ final class FounderExport {
   final MethodChannel channel;
 
   /// The night's menu item.
-  NightAction get action => NightAction(label: PendingLines.MP_65.text(appLanguage), run: share);
+  NightAction get action => NightAction(label: Lines.MP_65.text(appLanguage), run: share);
 
   /// Shares [night]'s file; answers when the share has closed.
   Future<void> share(Night night) async {

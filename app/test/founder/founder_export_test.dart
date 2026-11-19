@@ -6,8 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/founder/export_text.dart';
 import 'package:souldreams/founder/founder_export.dart';
-import 'package:souldreams/words/lines.g.dart' show Lang;
-import 'package:souldreams/words/pending.g.dart';
+import 'package:souldreams/words/lines.g.dart' show Lang, Lines;
 
 import '../fixtures.dart';
 
@@ -27,7 +26,7 @@ void main() {
   });
 
   test('its label is MP·65, a pending line', () {
-    expect(const FounderExport().action.label, PendingLines.MP_65.text(Lang.en));
+    expect(const FounderExport().action.label, Lines.MP_65.text(Lang.en));
   });
 
   test('the action shares the night it is given', () async {
