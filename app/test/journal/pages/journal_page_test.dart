@@ -7,6 +7,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
@@ -304,8 +305,8 @@ void main() {
     final width = tester.getSize(find.byType(JournalPage)).width;
     final first = tester.getRect(find.byKey(JournalPage.rowKey(newer.id)));
     final second = tester.getRect(find.byKey(JournalPage.rowKey(older.id)));
-    expect(first.left, closeTo(Spacing.pageSide, 1));
-    expect(first.right, closeTo(width - Spacing.pageSide, 1));
+    expect(first.left, closeTo(48, 1));
+    expect(first.right, closeTo(width - 48, 1));
     expect(second.top - first.bottom, closeTo(Spacing.journalRow, 1));
     final handle = tester.ensureSemantics();
     expect(
@@ -314,6 +315,67 @@ void main() {
     );
     handle.dispose();
   });
+
+  // D115 (P13): rows 48 across from each side, 100 more above the greeting.
+  testWidgets('rows 48 from each side, 140 above the greeting', (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(StandIns.rowSide, 48);
+    expect(StandIns.greetingAbove, 140);
+    final width = tester.getSize(find.byType(JournalPage)).width;
+    final row = tester.getRect(find.byKey(JournalPage.rowKey(n.id)));
+    expect(row.left, closeTo(48, 1));
+    expect(row.right, closeTo(width - 48, 1));
+    // New Dream and the greeting keep the page's own margin and centre.
+    expect(tester.getCenter(find.byKey(JournalPage.newDreamKey)).dx, closeTo(width / 2, 1));
+    final top = tester.getRect(find.byType(ListView)).top;
+    expect(tester.getRect(find.byType(SkyMark)).top - top, closeTo(140, 1));
+  });
+
+  // D115: a thin grey border round every row, the gradient's too, in both
+  // themes: #9E9E9E in the light theme, #8A8A8A in the dark one. Proved on
+  // pixels: the row's own edge is the border, one point wide.
+  Future<ByteData> picture(WidgetTester tester, Finder boundary) async {
+    late ByteData data;
+    await tester.runAsync(() async {
+      final render = tester.renderObject<RenderRepaintBoundary>(boundary);
+      final image = await render.toImage(pixelRatio: 1);
+      data = (await image.toByteData())!;
+    });
+    return data;
+  }
+
+  int rgb(ByteData data, int width, int x, int y) => data.getUint32((y * width + x) * 4) >> 8;
+
+  for (final theme in [(hour: 12, grey: 0x9E9E9E), (hour: 22, grey: 0x8A8A8A)]) {
+    testWidgets('every row has a 1 pt grey border, hour ${theme.hour}', (tester) async {
+      final h = await Harness.make();
+      final unread = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+      final read = await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
+      await h.pump(tester, JournalPage(journal: h.journal, read: (n) => n.id == read.id), hour: theme.hour);
+      expect(StandIns.rowBorderWidth, 1);
+      for (final n in [unread, read]) {
+        final row = find.byKey(JournalPage.rowKey(n.id));
+        final box = find.ancestor(of: row, matching: find.byType(RepaintBoundary)).first;
+        final rect = tester.getRect(row);
+        final data = await picture(tester, box);
+        final width = tester.getSize(box).width.round();
+        final left = (rect.left - tester.getRect(box).left).round();
+        final top = (rect.top - tester.getRect(box).top).round();
+        final mid = top + (rect.height / 2).round();
+        final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
+        expect(art.look, n.id == read.id ? isA<Painting>() : const PaintedGradient());
+        // The edge, left and right, and the middle of the top: the grey.
+        expect(rgb(data, width, left, mid), theme.grey, reason: 'left edge');
+        expect(rgb(data, width, left + rect.width.round() - 1, mid), theme.grey, reason: 'right edge');
+        expect(rgb(data, width, left + rect.width ~/ 2, top), theme.grey, reason: 'top edge');
+        // One point wide: the next pixel in is the picture.
+        expect(rgb(data, width, left + 1, mid), isNot(theme.grey), reason: 'one wide');
+        expect(tester.getSize(row).height, StandIns.rowHeight);
+      }
+    });
+  }
 
   testWidgets("a read night's row shows its painting", (tester) async {
     final h = await Harness.make();

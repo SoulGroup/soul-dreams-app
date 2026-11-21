@@ -13,11 +13,20 @@ abstract final class StandIns {
   static const rowChevron = Size(10, 18);
   static const double chevronStroke = 2;
 
-  /// The journal (D110): above the greeting; between New Dream and the
-  /// first row or the empty journal's line; a row's least height.
-  static const double greetingAbove = 40;
+  /// The journal (D110, D115): above the sky mark and the greeting; between
+  /// New Dream and the first row or the empty journal's line; a row's least
+  /// height.
+  static const double greetingAbove = 140;
   static const double listAbove = 40;
   static const double rowHeight = 64;
+
+  /// A journal row (D115, P13): its distance from each side of the screen,
+  /// and the thin grey border round it, one grey for each theme, chosen to
+  /// read against a dark painting at night and a light one by day.
+  static const double rowSide = 48;
+  static const double rowBorderWidth = 1;
+  static const rowBorderLight = Color(0xFF9E9E9E);
+  static const rowBorderDark = Color(0xFF8A8A8A);
 
   /// The sky mark above the greeting (D112): its size, the space below it,
   /// and the colours of the sun and the moon, stand-ins drawn in code until

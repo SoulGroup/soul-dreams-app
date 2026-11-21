@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110, D112, D113, D114; the owner's by-eye review, then the merge, next), by Claude Code.
+Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110, D112 to D115; the owner's by-eye review, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -182,11 +182,12 @@ rulings given during each branch are listed in this file, one line each, under "
   with every type Apple names excluded but AirDrop (and the people row on iOS 18 and later), gives the file to AirDrop
   alone (any other target receives nothing), and deletes it when the share closes; the folder is also emptied before
   each share and at launch. A failure shows nothing and logs `exportFailed`. No package.
-- The redesign A (D110, D112, D113, D114; `redesign-a`; TO TRY where a stand-in): the journal opens on a sun (08:00 to
+- The redesign A (D110, D112 to D115; `redesign-a`; TO TRY where a stand-in): the journal opens on a sun (08:00 to
   21:00) or a moon (21:00 to 08:00, the Night/Day hours; `journal/sky.dart`, `pages/sky_mark.dart`, drawn in code,
   silent), then a greeting by the part of the day (05, 12, 17, 21 by the wall clock; `journal/greeting.dart`),
   centred in h2, then New Dream (a pill on a night sky drawn in code, `NightSky`) opening the typing screen as the record button did, which is gone; each night a rounded row of
-  at least 64 carrying only its date (h6, day/month/yy: `shownDate`; the founder's export keeps `dayDigits`'
+  at least 64, 48 from each side of the screen (`StandIns.rowSide`) and edged by a 1 pt grey border (`#9E9E9E` in the
+  light theme, `#8A8A8A` in the dark, stand-ins in `StandIns`, `Palette.rowBorder`; the gradient rows too, D115), carrying only its date (h6, day/month/yy: `shownDate`; the founder's export keeps `dayDigits`'
   four-digit year) over the night's picture, with a soft dark shade behind the date over a painting, none over the
   painted gradient (`DateShade`, D113; measured on real pixels: 7.2 to 1 at the lowest over the five paintings); month dividers and C4-P·5 as before; the first
   empty journal's MP·9 under New Dream, its arrow pointing up. A night's page: a header 240 below the status bar,
@@ -233,11 +234,11 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 572 tests, and 450 mutation checks (A1 to A431; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 577 tests, and 460 mutation checks (A1 to A441; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A313 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 450 run, 450 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 460 run, 460 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -1142,6 +1143,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   reads at 4.5 to 1 or better over any painting, the gradient rows unchanged.
 - D114 (founder, 2026-11-21): the status bar follows the app's own theme everywhere (light text over the dark theme,
   dark text over the light), with a night's header keeping D113's light text. (Answers banked item 142's question.)
+- D115 (founder's by-eye corrections, P13, 2026-11-21): the journal's rows 48 pt from each side (was 30); a thin 1 pt
+  grey border round every row, the gradient rows too, in both themes (the values were left to the build: `#9E9E9E` in
+  the light theme, `#8A8A8A` in the dark, TO TRY); 100 pt more empty space above the sky mark and the greeting (140,
+  was 40).
 
 ## Documents as last imported
 

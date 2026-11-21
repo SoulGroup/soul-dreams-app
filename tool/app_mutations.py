@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A431, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A441, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 450 run, 450 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 460 run, 460 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1977,6 +1977,47 @@ ROWS = [
      'theme == Brightness.dark ?',
      'theme == Brightness.light ?',
      'test/core/status_bar_test.dart', 'light text over the dark theme, dark text over the light'),
+    # D115: the rows 48 from each side, a thin grey border, 100 more above the greeting.
+    ('A432', 'lib/design/stand_ins.dart',
+     'static const double greetingAbove = 140;',
+     'static const double greetingAbove = 40;',
+     'test/journal/pages/journal_page_test.dart', 'rows 48 from each side, 140 above the greeting'),
+    ('A433', 'lib/design/stand_ins.dart',
+     'static const double rowSide = 48;',
+     'static const double rowSide = 30;',
+     'test/journal/pages/journal_page_test.dart', 'rows 48 from each side, 140 above the greeting'),
+    ('A434', 'lib/design/stand_ins.dart',
+     'static const rowBorderLight = Color(0xFF9E9E9E);',
+     'static const rowBorderLight = Color(0xFF8A8A8A);',
+     'test/journal/pages/journal_page_test.dart', 'every row has a 1 pt grey border, hour 12'),
+    ('A435', 'lib/design/stand_ins.dart',
+     'static const rowBorderDark = Color(0xFF8A8A8A);',
+     'static const rowBorderDark = Color(0xFF9E9E9E);',
+     'test/journal/pages/journal_page_test.dart', 'every row has a 1 pt grey border, hour 22'),
+    ('A436', 'lib/design/palette.dart',
+     '    rowBorder: StandIns.rowBorderDark,\n',
+     '    rowBorder: StandIns.rowBorderLight,\n',
+     'test/journal/pages/journal_page_test.dart', 'every row has a 1 pt grey border, hour 22'),
+    ('A437', 'lib/design/stand_ins.dart',
+     'static const double rowBorderWidth = 1;',
+     'static const double rowBorderWidth = 2;',
+     'test/journal/pages/journal_page_test.dart', 'every row has a 1 pt grey border, hour 12'),
+    ('A438', 'lib/journal/pages/journal_page.dart',
+     'position: DecorationPosition.foreground,',
+     'position: DecorationPosition.background,',
+     'test/journal/pages/journal_page_test.dart', 'every row has a 1 pt grey border, hour 12'),
+    ('A439', 'lib/journal/pages/journal_page.dart',
+     'border: Border.all(color: Palette.of(context).rowBorder,',
+     'border: Border.all(color: Palette.of(context).text,',
+     'test/journal/pages/journal_page_test.dart', 'every row has a 1 pt grey border, hour 12'),
+    ('A440', 'lib/journal/pages/journal_page.dart',
+     'StandIns.rowSide - Spacing.pageSide, 0, StandIns.rowSide - Spacing.pageSide, Spacing.journalRow',
+     'StandIns.rowSide - Spacing.pageSide, 0, 0, Spacing.journalRow',
+     'test/journal/pages/journal_page_test.dart', 'rows 48 from each side, 140 above the greeting'),
+    ('A441', 'lib/design/palette.dart',
+     '      rowBorder: c(rowBorder, other.rowBorder),\n',
+     '      rowBorder: rowBorder,\n',
+     'test/design/palette_test.dart', 'the row border fades with the theme'),
 ]
 
 

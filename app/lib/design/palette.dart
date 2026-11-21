@@ -1,9 +1,11 @@
 // The two themes' colours as one theme extension, built from the
 // generated design values (design-system.md §2, §3), so that every page
 // fades with the theme when Night/Day mode changes it (§6). No value is
-// typed here except the dark field's absent border ("no border", §3).
+// typed here except the dark field's absent border ("no border", §3); the
+// journal row's grey border is a stand-in from stand_ins.dart (D115).
 import 'package:flutter/material.dart';
 
+import 'stand_ins.dart';
 import 'tokens.g.dart';
 
 @immutable
@@ -29,6 +31,7 @@ final class Palette extends ThemeExtension<Palette> {
     required this.sectionTop,
     required this.sectionBottom,
     required this.sectionText,
+    required this.rowBorder,
   });
 
   final Color page;
@@ -51,6 +54,7 @@ final class Palette extends ThemeExtension<Palette> {
   final Color sectionTop;
   final Color sectionBottom;
   final Color sectionText;
+  final Color rowBorder;
 
   static final light = Palette(
     page: LightColours.page.colour!,
@@ -73,6 +77,7 @@ final class Palette extends ThemeExtension<Palette> {
     sectionTop: LightColours.labelSection.colour!,
     sectionBottom: LightColours.labelSection.colourEnd!,
     sectionText: LightColours.labelSection.text!,
+    rowBorder: StandIns.rowBorderLight,
   );
 
   static final dark = Palette(
@@ -96,6 +101,7 @@ final class Palette extends ThemeExtension<Palette> {
     sectionTop: DarkColours.labelSection.colour!,
     sectionBottom: DarkColours.labelSection.colourEnd!,
     sectionText: DarkColours.labelSection.text!,
+    rowBorder: StandIns.rowBorderDark,
   );
 
   static Palette of(BuildContext context) => Theme.of(context).extension<Palette>()!;
@@ -128,6 +134,7 @@ final class Palette extends ThemeExtension<Palette> {
       sectionTop: c(sectionTop, other.sectionTop),
       sectionBottom: c(sectionBottom, other.sectionBottom),
       sectionText: c(sectionText, other.sectionText),
+      rowBorder: c(rowBorder, other.rowBorder),
     );
   }
 }

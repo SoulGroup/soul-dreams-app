@@ -310,7 +310,8 @@ class _Divider extends StatelessWidget {
   );
 }
 
-/// A night's row (D110): a rounded row carrying only its date, centred in
+/// A night's row (D110, D115): a rounded row, 48 from each side of the
+/// screen and edged by a thin grey border, carrying only its date, centred in
 /// h6 over the night's picture; heard as a button named by its date. A name
 /// kept from before naming was removed is not shown.
 class _Row extends StatelessWidget {
@@ -322,7 +323,8 @@ class _Row extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: Spacing.journalRow),
+    // 48 from each side of the screen, the page's own margin included (D115).
+    padding: const EdgeInsets.fromLTRB(StandIns.rowSide - Spacing.pageSide, 0, StandIns.rowSide - Spacing.pageSide, Spacing.journalRow),
     child: Semantics(
       button: true,
       child: GestureDetector(
@@ -332,12 +334,20 @@ class _Row extends StatelessWidget {
           borderRadius: BorderRadius.circular(Spacing.radius),
           child: ConstrainedBox(
             constraints: const BoxConstraints(minHeight: StandIns.rowHeight),
-            child: NightArt(
-              look,
-              child: Center(
-                child: Padding(
-                  padding: StandIns.labelPadding,
-                  child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over))),
+            // A thin grey border over the picture, the gradient's too (D115).
+            child: DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(Spacing.radius),
+                border: Border.all(color: Palette.of(context).rowBorder, width: StandIns.rowBorderWidth),
+              ),
+              child: NightArt(
+                look,
+                child: Center(
+                  child: Padding(
+                    padding: StandIns.labelPadding,
+                    child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over))),
+                  ),
                 ),
               ),
             ),
