@@ -789,8 +789,8 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
      the rows' height and the greeting's places are stand-ins (`stand_ins.dart`), for the founder's look.
 139. A night's header does not scroll; on a short phone at large text the dreams have less room (the tests' phone,
      390 by 844, has room at twice the size).
-140. From redesign-a's Opus review (D91): fixed with rows A394 to A397 (the greeting on returning, the header's room
-     for the status bar, the jump's time). Banked, none a defect: on returning, the greeting follows the clock only
+140. From redesign-a's Opus review (D91): three test gaps closed, with rows A394 to A397 (the greeting on returning,
+     the header's room for the status bar, the jump's time); no code changed. Banked, none a defect: on returning, the greeting follows the clock only
      when the journal read succeeds (a failed read leaves it until the next minute); no test checks the first-empty
      arrow's direction; the picture's silence test reads the nearest ancestor's label, with A371 biting on its second
      half; the reflowed comment at `parts.dart:80` runs past the line width; a date in h2 cannot wrap at the largest
