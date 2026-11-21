@@ -2,7 +2,15 @@
 
 Branch `redesign-b`, from `main` at `e81f29c`. Investigation, spec and plan in one (docs/workflow.md steps 3, 5 and
 6), under D91 and D95. Written by Claude Code (Opus) on 2026-11-21. The investigation stopped once (D116 item 4: the
-register had no place for the count lines); D117 answered it. The owner's checks are by eye only.
+register had no place for the count lines); D117 answered it.
+
+**Amended to C18-P** (the owner's task of 2026-11-21, head's message 29). The import is committed (`3e95600`).
+Product filed search's lines: the count is MP·76 ("1 match", "{n} matches"; a slot), the empty result W25 ("No
+matches"). The handles MP·66 to MP·68 the first plan gave the pending lines are now C18-P's consents. So the first
+plan's Tasks 1 and 2 (a pending line with slots, and the owner's pending lines) are dropped, and no line is pending.
+D119 item 4 adds a first task: the filed lines for the handles still on screen (the greeting, New Dream, the jump
+buttons). The match is Inter Bold, now bundled (D118's import), where the first plan had SemiBold. Every block is
+rebuilt on the import's commit and proven again (Part 5). The owner's checks are by eye only.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -10,29 +18,34 @@ register had no place for the count lines); D117 answered it. The owner's checks
 
 ### In plain words
 
-The journal gets a search field at the top, as in the founder's screenshot. Once the dreamer has typed three
-characters, the journal shows only the nights whose dreams contain what they typed. Above those rows it shows a count
-("1 match", "{n} matches") or, when nothing is found, "No matches". Under each row is one line of context: a few words
-before the match, the match in bold, and what follows. Tapping a result opens the night with the match in bold in its
-dream. Back under three characters, the journal is as before.
+First, the journal and a night's page take the lines Product has now filed for the places that still showed
+handles: the greeting by the part of the day (MP·72 to MP·75, one of each part's four lines a day, in turn), New
+Dream (MP·11) and a read night's four jump buttons (MP·77).
+
+Then search. The journal gets a search field at the top, as in the founder's screenshot. Once the dreamer has typed
+three characters, the journal shows only the nights whose dreams contain what they typed. Above those rows it shows a
+count ("1 match", "{n} matches") or, when nothing is found, "No matches". Under each row is one line of context: a few
+words before the match, the match in bold, and what follows. Tapping a result opens the night with the match in bold
+in its dream. Back under three characters, the journal is as before.
 
 Matching ignores capital letters, keeps å, ä, ö and other letters with marks distinct, and finds the typed characters
 only at the start of a word. "hus" finds "huset" but never the "hus" inside a longer word. It searches the told dreams
-of every night, not names, readings or Life Context. Each night counts as one match, at its first place. The
-matcher is one function, which recurring images will reuse later.
-
-The three lines are the founder's words (D110), shown as pending lines until Product files them. A pending line could
-not take a slot such as `{n}`, so the first task (the owner's, D60) teaches the words generator to accept the
-register's slots in a pending line, under the register's own rules.
+of every night, not names, readings or Life Context. Each night counts as one match, at its first place. The matcher
+is one function, which recurring images will reuse later.
 
 ### What this branch builds
 
-1. **The generator** (`tool/checks/wordsgen.py`; the owner applies it, D60): a pending line may hold the register's
-   slots, the same ones in both languages; an unknown slot or slots that differ stop the generator
-   (`unknown-slot`, `slots-differ`, as for the register). A line with a slot is a private constant plus a function
-   of its handle's name (`PendingLines.MP_67(n: 3)`), as for a filed line. `PendingLine` gains the same `_fill`.
-2. **The owner's pending lines** (D117): MP·66, MP·67, MP·68 in `pending-lines.csv`, fingerprinted, generated.
-3. **The matcher** (`app/lib/journal/search.dart`, plain Dart):
+1. **The filed lines on screen** (D119 item 4; C18-P):
+   - **The greeting** (`greeting.dart`): the part of the day from 05:00, 11:00, 17:00 and 21:00, start-inclusive
+     (C18-P; the app had 12:00 where the filing has 11:00), each with its place (MP·72 morning, MP·73 day, MP·74
+     evening, MP·75 night). Each place holds four lines; one shows a day, the four in turn, by the calendar day
+     counted from 1970. A night after midnight keeps the line of the evening it began on, so the greeting never
+     changes inside a part (decided under D91, banked item 145). The page holds `(part, day)` and redraws when
+     either changes.
+   - **New Dream** shows MP·11. **The jump buttons** are a `Jump` enum, each showing MP·77's part at its place,
+     keyed by its name.
+   - `owed.dart` and its test go: no owed handle is left. Row A363 (owed.dart) is dropped.
+2. **The matcher** (`app/lib/journal/search.dart`, plain Dart):
    - `searchable(typed)`: the query trimmed, or null under three characters (code points, so one character
      outside the basic plane counts once).
    - `firstMatch(text, query)`: each character folded by itself with Dart's Unicode-aware `toLowerCase`, so a letter
@@ -42,29 +55,30 @@ register's slots in a pending line, under the register's own rules.
      entry. `search(nights, query)`: the nights with a match, in the order given.
    - `contextOf(text, span)`: up to three words before the match (`cut`, an ellipsis, before them when words were
      left off), the match, the rest; each run of spaces or breaks one space.
-4. **The journal** (`journal_page.dart`):
+3. **The journal** (`journal_page.dart`):
    - **The field:** first in the list, 20 down, 50 tall (`size.field.search`), as wide as a row (48 from each
      side), a pill in `color.field` with `color.field.border` (none in the dark theme). It has a magnifier drawn in
      code, which a screen reader does not hear, and EM·4 as its placeholder in `color.text.placeholder`. The typed
      words are in the button type, with no autocorrect and no suggestions; the keyboard's key is Search. There is no
      clear button. The space below it keeps the sky mark 140 down, where it was.
-   - **From three characters:** where the list starts, the count (MP·66 for one night, MP·67 for more, MP·68 for none)
-     in the button type, centred. Then only the matching nights' rows, newest first, under their month dividers,
-     each with its context line under it, 6 below the row. The line is as wide as the row, centred, one line cut
-     with an ellipsis, in the button type and `color.text.summary`, with the match in Inter SemiBold. MP·68 replaces
-     C4-P·5 while searching. Under three characters, the journal is as before.
+   - **From three characters:** where the list starts, the count (MP·76's first part for one night, its second,
+     filled, for more; W25 for none) in the button type, centred. Then only the matching nights' rows, newest first,
+     under their month dividers, each with its context line under it, 6 below the row. The line is as wide as the
+     row, centred, one line cut with an ellipsis, in the button type and `color.text.summary`, with the match in
+     Inter Bold. W25 replaces C4-P·5 while searching. Under three characters, the journal is as before.
    - **The query:** held only while the page lives, never kept or logged (R3), so there are no recent searches.
-5. **The opened night** (`night_page.dart`, `parts.dart`): `NightPage` takes the query a result was opened from.
-   Its first match shows in SemiBold in its dream's bubble, found again on each read, so an edit that removes the
-   word removes the bold. When the page goes, the bold goes. A row opened with no search hands no query.
+4. **The opened night** (`night_page.dart`, `parts.dart`): `NightPage` takes the query a result was opened from.
+   Its first match shows in Inter Bold in its dream's bubble (the dreamer's voice is Inter since C18-P, D118), found
+   again on each read, so an edit that removes the word removes the bold. When the page goes, the bold goes. A row
+   opened with no search hands no query.
 
 ### What it does not build
 
-- The settings gear (D116 item 5), Settings, the consent's controls, Life Context and "Made by AI".
+- The settings gear (D116 item 5), Settings, the consent's controls (with C18-P's three consents), Life Context,
+  "Made by AI" (MP·71) and the image controls (MP·78 to MP·82).
 - A list of each word's forms (C140-I item 6's plain forms): D117 Q4 chose the start-of-word rule for now.
 - Normalising text (NFC), which would need a package (banked item 146).
-- Any change to the store, the typing screen, recording, onboarding, the export, the guards other than the
-  generator, Swift or the server.
+- Any change to the store, the typing screen, recording, onboarding, the export, the guards, Swift or the server.
 
 ### The decisions, by number
 
@@ -72,53 +86,51 @@ register's slots in a pending line, under the register's own rules.
   row, the count lines and "No matches". Head's message 10: capital letters ignored. Head's message 8: recurring
   images later use search's matcher.
 - D116 (owner, the brainstorm), items 1 to 5. D117 (owner, on the stop): Q1 to Q8, each built as leaned in the stop's
-  report (`.scratch/for-build-chat/redesign-b-stop.md`).
-- D60: the generator's task and the words are the owner's to apply. D91, D95, D67 (a row whose code moved follows it).
+  report (`.scratch/for-build-chat/redesign-b-stop.md`); Q1 and Q2 are superseded by C18-P's filing (MP·76, W25).
+- D118 (founder): "Inter Display" is built in Inter. D119 (owner, on C18-P's import stop): item 4, the filed lines
+  for the handles on screen, as this branch's first task.
+- D91, D95, D67 (a row whose code moved follows it).
 
 ### Decided under D91 (how to build only)
 
-1. **The magnifier and the field's pill are drawn** (no icon font needed, as the chevrons). The field is a
+1. **The greeting's day:** the calendar day counted from 1970, so the four lines turn once a day; a night after
+   midnight counts from the evening it began on, so the greeting stays the same through the night part. Banked for
+   Product (item 145).
+2. **The jump buttons are an enum** (`Jump`), each its MP·77 part by its place; their keys are by name. MP·77's
+   "Dreams" is MP·38's word too, so the tests find a jump button by its key.
+3. **The magnifier and the field's pill are drawn** (no icon font needed, as the chevrons). The field is a
    `TextField` with a collapsed decoration inside our own pill, so its height is 50 at the usual size and grows at
    large text.
-2. **Dart folds one character to one.** The fold map is kept per code unit, so a folding that changed a length
+4. **Dart folds one character to one.** The fold map is kept per code unit, so a folding that changed a length
    would still map back to whole characters (banked item 147).
-3. **The context line's colour is `color.text.summary`** (the dark theme's text), unused since redesign-a.
-4. **The search tests run on a phone-sized view (390 by 844)** where a row must be absent, since the default view
-   builds only what is near the screen (a row left out of the build would pass for absent; found by A457).
-5. **`dev_only_test.dart`** now also checks that SoulDreams Dev reaches `search.dart` and `pending.g.dart`. The other
-   two entry points are already checked never to reach `pending.g.dart`.
+5. **The context line's colour is `color.text.summary`** (the dark theme's text), unused since redesign-a.
+6. **The search tests run on a phone-sized view (390 by 844)** where a row must be absent, since the default view
+   builds only what is near the screen (a row left out of the build would pass for absent).
+7. **`dev_only_test.dart`** now also checks that SoulDreams Dev reaches `search.dart`.
 
 ### The places this branch uses
 
-Filed: EM·4 (the field's placeholder), C4-P·5 (as before), and the rows' and pages' places as before. W25 is not used
-(D117 Q2).
-
-**Pending, the owner's (D117; D110's words; shown in SoulDreams Dev only, their handles elsewhere, R1):**
-
-| Handle | Place |
-|---|---|
-| MP·66 | the count when one night matches |
-| MP·67 | the count when more nights match (`{n}`) |
-| MP·68 | the search's empty result |
+All filed (C18-P): MP·72 to MP·75 (the greeting), MP·11 (New Dream), MP·77 (the jump buttons), EM·4 (the field's
+placeholder), MP·76 (the count), W25 (no matches), C4-P·5 (as before), and the rows' and pages' places as before. No
+pending line.
 
 ### The tests (test-first, on the Mac)
 
-Every task adds its tests before its code. Tasks 3 to 5's new tests were run on the code before them and failed to
-load. Task 1's tests were run on the old generator and failed (one failure, one error). Each assertion is shown to
-bite by its row (Part 5). App tests: 577 at the start, 601 at the end. App mutation rows: 29 new (A442 to A470), 3
-follow the code (D67: A322, A377, A379), 460 to 489. Guard tests: 249 to 250. Guard mutation rows: 4 new, 92 to 96.
-The by-eye review on the phone is the owner's (Task 7).
+Every task adds its tests before its code. Each task's new and changed tests were run on the code before it and
+failed to load. Each assertion is shown to bite by its row (Part 5). App tests: 577 at the start, 603 at the end. App
+mutation rows: 36 new (A444 to A479), 1 dropped (A363), and 11 follow the code (D67: A322, A361, A362, A373, A374,
+A377, A379, A385, A386, A394, A405), 462 to 497. No guard change. The
+by-eye review on the phone is the owner's (Task 6).
 
 ## Part 2 · Settings and packages
 
-No new package, no change to settings, Swift, the server, AWS or Soniox, and no storage change. One guard-tool
-change, `wordsgen.py`, with its tests and mutation rows, which the owner applies (Task 1, D60). The pending lines and
-their generated file are the owner's (Task 2).
+No new package, no change to settings, Swift, the server, AWS or Soniox, and no storage change. No guard-tool
+change. The fonts this branch uses (Bellefair, Inter Bold) came with the import.
 
 ## Part 3 · The tasks
 
-**How the blocks work.** Each task's code is one patch, generated from the build that proved it (Part 5). For Claude
-Code's tasks (3 to 6), apply it from the repository root:
+**How the blocks work.** Each task's code is one patch, generated from the build that proved it (Part 5). Apply it
+from the repository root:
 
 ```
 git apply --whitespace=nowarn <<'PATCH'
@@ -129,7 +141,7 @@ PATCH
 `git apply` refuses if any line differs, which is the stop R14 asks for. Then run the task's checks and commit
 through the hook with the message given.
 
-Every Claude Code task ends green:
+Every task ends green:
 - `cd app && fvm flutter analyze --no-pub` prints `No issues found!`, and `fvm flutter test --no-pub` passes at the
   count given;
 - the task's rows (D95): `python3 -I -B tool/app_mutations.py --rows <the task's rows>`, every one caught;
@@ -143,286 +155,758 @@ From the repository root, on `redesign-b`:
 git status --short && git log --oneline -1 && python3 -I -B tool/checks/guards.py | tail -1 ; (cd app && fvm flutter analyze --no-pub | tail -1 && fvm flutter test --no-pub | tail -1)
 ```
 
-Expected: nothing from `git status`; the plan's commit; `guards (tracked): all passed`; `No issues found!`;
+Expected: nothing from `git status`; this plan's commit; `guards (tracked): all passed`; `No issues found!`;
 `+577: All tests passed!`. Anything else: stop (R14).
 
-### Task 1 · [OWNER applies, D60] A pending line takes the register's slots (D117 Q1)
+### Task 1 · The filed greeting, New Dream and jump buttons (D119 item 4)
 
-`wordsgen.py`: `slots_of` takes the source it reports. `read_pending` replaces `pending-slot` with the register's
-rules (`unknown-slot`, `slots-differ`) and keeps each line's slots. `pending_dart` writes a line with a slot as a
-private constant and a function, through `slot_function`, which `lines_dart` now shares. `PendingLine` gains
-`_fill`. `pending.g.dart` is regenerated from the empty pending file (its sha256 unchanged in its header). Tests:
-`test_wordsgen.py`, one new test (`test_a_pending_line_takes_the_registers_slots`) and the row rules' test
-widened. Guard mutation rows: four new (93 to 96).
+`greeting.dart`: `daypartAt` (05, 11, 17, 21), `greetingPlace`, `greetingAt`, `greetingText`. `journal_page.dart`:
+the greeting by `(part, day)`, New Dream MP·11. `night_page.dart`: `Jump`, the jump buttons MP·77. `owed.dart` and
+`owed_test.dart` deleted. Tests: `greeting_test.dart` (5; was 2); in `journal_page_test.dart` one new (the next day,
+the next line) and the greeting's and New Dream's words from the register; in `night_page_test.dart` one new
+(MP·77's words) and the jumps found by key. Rows A444 to A450 new; A361, A362, A373, A374, A385, A386, A394 and
+A405 follow the code; A363 dropped.
 
-**Steps.**
+Expected: 580 app tests; rows `A361,A362,A373,A374,A385,A386,A394,A405,A444,A445,A446,A447,A448,A449,A450`, every
+one caught. Commit:
 
-1. Claude Code writes the block below, exactly, to `.scratch/redesign-b/task-1.diff` (ignored by git) and stops.
-2. The owner, Paste 1 — Terminal:
-
-   ```
-   cd ~/Developer/soul-dreams-app && git apply --check .scratch/redesign-b/task-1.diff && git apply --whitespace=nowarn .scratch/redesign-b/task-1.diff && python3 -I -B tool/checks/wordsgen.py --check | tail -1 && git add -A && python3 -I -B tool/checks/tests/run_tests.py 2>&1 | tail -3 && python3 -I -B tool/checks/tests/mutations.py wordsgen.py | tail -1 && git status --short
-   ```
-
-   Expected:
-   - `wordsgen: up to date`;
-   - `Ran 250 tests`, `OK`;
-   - `mutations: 21 run, all caught`;
-   - `M ` for `app/lib/words/pending.g.dart`, `tool/checks/tests/mutations.py`, `tool/checks/tests/test_wordsgen.py`
-     and `tool/checks/wordsgen.py`, and nothing else.
-
-   Anything else: stop and bring it to the Build chat. Then commit:
-
-   ```
-   cd ~/Developer/soul-dreams-app && git commit -m "Words: a pending line takes the register's slots, as a filed line does (D117 Q1)"
-   ```
-
-   Expected: `guards (staged): all passed`, then the commit.
-3. Claude Code then checks the app is unchanged: `No issues found!`, `+577: All tests passed!`.
+> Journal and night page: the filed greeting, New Dream and jump buttons (C18-P; D119 item 4)
 
 **The block:**
 
 ~~~~diff
-diff --git a/app/lib/words/pending.g.dart b/app/lib/words/pending.g.dart
-index adc9d25fde323b3811e7e507a90b44e21bc67c2b..13d8ec39b9dda789487519dc706d0f99c64a4e72 100644
---- a/app/lib/words/pending.g.dart
-+++ b/app/lib/words/pending.g.dart
-@@ -1,6 +1,7 @@
- // GENERATED by tool/checks/wordsgen.py from the pending lines
- // (sha256 5e35d8a4539c157589e7ed9dd9417a414daab23a2b11d15c938c8317fd956517). Do not edit: the owner changes pending-lines.csv.
- // ignore_for_file: constant_identifier_names
-+// ignore_for_file: non_constant_identifier_names, unused_element
- import 'package:flutter/services.dart' show appFlavor;
+diff --git a/app/lib/journal/greeting.dart b/app/lib/journal/greeting.dart
+index 227790a..004b7e3 100644
+--- a/app/lib/journal/greeting.dart
++++ b/app/lib/journal/greeting.dart
+@@ -1,23 +1,43 @@
+-// The journal's greeting by time of day (D110, head's message 24), in plain
+-// Dart: the part of the day by the phone's wall clock, and its greeting. The
+-// four parts and their hours are the plan's stand-ins until Product files
+-// the greetings; night begins at 21:00, as the dark theme does.
+-import 'owed.dart';
++// The journal's greeting by time of day (D110; C18-P, MP·72 to MP·75), in
++// plain Dart: the part of the day by the phone's wall clock, from 05:00,
++// 11:00, 17:00 and 21:00 (start-inclusive), and one line of that part's four
++// a day, the four in turn. A night after midnight keeps the line of the
++// evening it began on, so the greeting never changes inside a part (D119
++// item 4; the day counted under D91).
++import '../words/lines.g.dart';
++import 'night_rules.dart';
  
- import 'lines.g.dart' show Lang;
-@@ -29,6 +30,14 @@ final class PendingLine {
-     assert(all.length == 1, 'text() needs a line of one part');
-     return all.single;
+-enum Daypart { morning, afternoon, evening, night }
++enum Daypart { morning, day, evening, night }
+ 
+ /// The part of the day at the wall clock's [hour].
+ Daypart daypartAt(int hour) => switch (hour) {
+-  >= 5 && < 12 => Daypart.morning,
+-  >= 12 && < 17 => Daypart.afternoon,
++  >= 5 && < 11 => Daypart.morning,
++  >= 11 && < 17 => Daypart.day,
+   >= 17 && < 21 => Daypart.evening,
+   _ => Daypart.night,
+ };
+ 
+-/// The greeting for [part]: owed by Product, shown as its handle (R1).
+-Owed greetingFor(Daypart part) => switch (part) {
+-  Daypart.morning => OwedLines.greetingMorning,
+-  Daypart.afternoon => OwedLines.greetingAfternoon,
+-  Daypart.evening => OwedLines.greetingEvening,
+-  Daypart.night => OwedLines.greetingNight,
++/// The register's place for [part]'s greeting.
++Line greetingPlace(Daypart part) => switch (part) {
++  Daypart.morning => Lines.MP_72,
++  Daypart.day => Lines.MP_73,
++  Daypart.evening => Lines.MP_74,
++  Daypart.night => Lines.MP_75,
+ };
++
++/// Which greeting stands at the wall clock's [wall]: its part, and the day
++/// that part began on (days since 1970-01-01 by the calendar).
++typedef Greeting = ({Daypart part, int day});
++
++Greeting greetingAt(Wall wall) {
++  final part = daypartAt(wall.hour);
++  final back = wall.hour < 5 ? 1 : 0;
++  final began = DateTime.utc(wall.year, wall.month, wall.day - back);
++  return (part: part, day: began.difference(DateTime.utc(1970)).inDays);
++}
++
++/// The words of [g]: one of its place's four lines, the four in turn by day.
++String greetingText(Greeting g, Lang lang) {
++  final lines = greetingPlace(g.part).parts(lang);
++  return lines[g.day % lines.length];
++}
+diff --git a/app/lib/journal/owed.dart b/app/lib/journal/owed.dart
+deleted file mode 100644
+index 369e8d0..0000000
+--- a/app/lib/journal/owed.dart
++++ /dev/null
+@@ -1,44 +0,0 @@
+-// The places Product still owes (D110, head's message 24): no line and no
+-// handle in the register yet. Each shows a provisional handle in square
+-// brackets, as a place with no line shows its own (R1), until Product files
+-// it; then the page takes the register's line and its entry here goes. Each
+-// is listed in docs/plans/redesign-a.md.
+-
+-/// A place Product owes, by its provisional handle.
+-final class Owed {
+-  const Owed(this.handle);
+-
+-  final String handle;
+-
+-  /// The visible placeholder (R1).
+-  String get text => '[$handle]';
+-}
+-
+-abstract final class OwedLines {
+-  /// The journal's greeting, by the part of the day.
+-  static const greetingMorning = Owed('owed·greeting-morning');
+-  static const greetingAfternoon = Owed('owed·greeting-afternoon');
+-  static const greetingEvening = Owed('owed·greeting-evening');
+-  static const greetingNight = Owed('owed·greeting-night');
+-
+-  /// The journal's button that opens the typing screen.
+-  static const newDream = Owed('owed·new-dream');
+-
+-  /// A read night's jump buttons.
+-  static const jumpDreams = Owed('owed·jump-dreams');
+-  static const jumpQuestions = Owed('owed·jump-questions');
+-  static const jumpReadings = Owed('owed·jump-readings');
+-  static const jumpReflection = Owed('owed·jump-reflection');
+-
+-  static const all = <Owed>[
+-    greetingMorning,
+-    greetingAfternoon,
+-    greetingEvening,
+-    greetingNight,
+-    newDream,
+-    jumpDreams,
+-    jumpQuestions,
+-    jumpReadings,
+-    jumpReflection,
+-  ];
+-}
+diff --git a/app/lib/journal/pages/journal_page.dart b/app/lib/journal/pages/journal_page.dart
+index 42507cf..ca9b5f5 100644
+--- a/app/lib/journal/pages/journal_page.dart
++++ b/app/lib/journal/pages/journal_page.dart
+@@ -1,6 +1,7 @@
+ // The journal list, the app's home (main-path.md, The Journal; C131-I
+ // items 1, 2; S5; D110, head's message 24; D112): a sun or a moon above a
+-// greeting by the part of the day; New Dream, opening the typing screen (the round record button is
++// greeting by the part of the day (MP·72 to MP·75, one line a day; D119);
++// New Dream (MP·11), opening the typing screen (the round record button is
+ // gone); one rounded row per night, newest first, carrying only its date
+ // over the night's picture (an unread night's the painted gradient), never
+ // a time; a month divider over each month with nights; C4-P·5 when there is
+@@ -27,7 +28,6 @@ import '../night.dart';
+ import '../night_action.dart';
+ import '../night_look.dart';
+ import '../night_rules.dart';
+-import '../owed.dart';
+ import '../row_text.dart';
+ import '../sky.dart';
+ import 'night_art.dart';
+@@ -73,11 +73,11 @@ class JournalPage extends StatefulWidget {
+ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+   List<Night>? _nights;
+   late bool _first = widget.firstTime;
+-  late Daypart _daypart = _daypartNow();
++  late Greeting _greeting = _greetingNow();
+   late Sky _sky = _skyNow();
+   late final Timer _clock;
+ 
+-  Daypart _daypartNow() => daypartAt(widget.journal.zone.wall(widget.journal.now()).hour);
++  Greeting _greetingNow() => greetingAt(widget.journal.zone.wall(widget.journal.now()));
+   Sky _skyNow() => skyAt(widget.journal.zone.wall(widget.journal.now()).hour);
+ 
+   @override
+@@ -88,11 +88,11 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+     widget.recording?.retries?.addListener(_load);
+     // The greeting and the sky mark follow the clock while the page is open.
+     _clock = Timer.periodic(const Duration(minutes: 1), (_) {
+-      final now = _daypartNow();
++      final now = _greetingNow();
+       final sky = _skyNow();
+-      if (now != _daypart || sky != _sky) {
++      if (now != _greeting || sky != _sky) {
+         setState(() {
+-          _daypart = now;
++          _greeting = now;
+           _sky = sky;
+         });
+       }
+@@ -125,7 +125,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+     if (!mounted) return;
+     setState(() {
+       _nights = nights;
+-      _daypart = _daypartNow();
++      _greeting = _greetingNow();
+       _sky = _skyNow();
+       // Shown once: a night there ends it, even one deleted later.
+       if (nights.isNotEmpty) _first = false;
+@@ -177,7 +177,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+             Semantics(
+               header: true,
+               child: Text(
+-                greetingFor(_daypart).text,
++                greetingText(_greeting, appLanguage),
+                 textAlign: TextAlign.center,
+                 style: TypeRoles.h2.style(p.text),
+               ),
+@@ -239,7 +239,7 @@ class _NewDream extends StatelessWidget {
+         child: NightSky(
+           child: Padding(
+             padding: StandIns.buttonPadding,
+-            child: Text(OwedLines.newDream.text, style: TypeRoles.button.style(NightArt.over)),
++            child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),
+           ),
+         ),
+       ),
+diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night_page.dart
+index b29b8ef..a19f305 100644
+--- a/app/lib/journal/pages/night_page.dart
++++ b/app/lib/journal/pages/night_page.dart
+@@ -21,8 +21,8 @@
+ // tapped; while it is being turned into text, AI·6 shows in its place,
+ // heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
+ // When its words come, the page shows them. On a read night, under the
+-// header, four jump buttons (Dreams, Questions, Readings, Reflection; their
+-// words owed, shown as handles); Dreams brings "Dreams" into view, the
++// header, four jump buttons (MP·77: Dreams, Questions, Readings,
++// Reflection; D119 item 4); Dreams brings "Dreams" into view, the
+ // other three do nothing until their sections come with the readings. No
+ // night is read yet. Not built: reading, and the space below the dreams
+ // with its field.
+@@ -44,12 +44,22 @@ import '../night.dart';
+ import '../night_action.dart';
+ import '../night_look.dart';
+ import '../night_rules.dart';
+-import '../owed.dart';
+ import '../row_text.dart';
+ import 'night_art.dart';
+ import 'parts.dart';
+ import 'typing_page.dart';
+ 
++/// A read night's jump buttons, in MP·77's order (C18-P; D119 item 4).
++enum Jump {
++  dreams,
++  questions,
++  readings,
++  reflection;
++
++  /// Its words: MP·77's part at this button's place.
++  String text(Lang lang) => Lines.MP_77.parts(lang)[index];
++}
++
+ class NightPage extends StatefulWidget {
+   const NightPage({super.key, required this.journal, required this.id, this.recording, this.action, this.read = noneRead});
+ 
+@@ -62,7 +72,7 @@ class NightPage extends StatefulWidget {
+   static const dreamsKey = Key('night-dreams');
+ 
+   /// A read night's jump button.
+-  static Key jumpKey(Owed label) => ValueKey('jump-${label.handle}');
++  static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');
+ 
+   final Journal journal;
+   final String id;
+@@ -261,7 +271,7 @@ class _NightPageState extends State<NightPage> {
+ 
+   // A read night's four jump buttons, centred, wrapping at large text.
+   Widget _jumps(Palette p) {
+-    Widget jump(Owed label, List<Color> colours, GlobalKey? section) => Semantics(
++    Widget jump(Jump label, List<Color> colours, GlobalKey? section) => Semantics(
+       button: true,
+       child: GestureDetector(
+         key: NightPage.jumpKey(label),
+@@ -273,7 +283,7 @@ class _NightPageState extends State<NightPage> {
+           ),
+           child: Padding(
+             padding: StandIns.labelPadding,
+-            child: Text(label.text, style: TypeRoles.button.style(p.sectionText)),
++            child: Text(label.text(appLanguage), style: TypeRoles.button.style(p.sectionText)),
+           ),
+         ),
+       ),
+@@ -287,10 +297,10 @@ class _NightPageState extends State<NightPage> {
+         spacing: StandIns.jumpGap,
+         runSpacing: StandIns.jumpGap,
+         children: [
+-          jump(OwedLines.jumpDreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
+-          jump(OwedLines.jumpQuestions, StandIns.jumpQuestions, null),
+-          jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], null),
+-          jump(OwedLines.jumpReflection, [tag.colour!, tag.colourEnd!], null),
++          jump(Jump.dreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
++          jump(Jump.questions, StandIns.jumpQuestions, null),
++          jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], null),
++          jump(Jump.reflection, [tag.colour!, tag.colourEnd!], null),
+         ],
+       ),
+     );
+diff --git a/app/test/journal/greeting_test.dart b/app/test/journal/greeting_test.dart
+index 70dcb6c..aa26b5e 100644
+--- a/app/test/journal/greeting_test.dart
++++ b/app/test/journal/greeting_test.dart
+@@ -1,25 +1,65 @@
+-// The journal's greeting by time of day (D110): four parts of the day by the
+-// phone's wall clock, each with its owed greeting.
++// The journal's greeting by time of day (D110; C18-P, MP·72 to MP·75): four
++// parts of the day by the phone's wall clock, each with its filed place, and
++// one line of its four a day, the four in turn (D119 item 4).
+ import 'package:flutter_test/flutter_test.dart';
+ import 'package:souldreams/journal/greeting.dart';
+-import 'package:souldreams/journal/owed.dart';
++import 'package:souldreams/journal/night_rules.dart';
++import 'package:souldreams/words/lines.g.dart';
++
++Wall at(int year, int month, int day, int hour) => (year: year, month: month, day: day, hour: hour);
+ 
+ void main() {
+-  test('the parts of the day: from 05, 12, 17, 21', () {
++  test('the parts of the day: from 05, 11, 17, 21', () {
+     final parts = [for (var h = 0; h < 24; h++) daypartAt(h)];
+     expect(parts, [
+       for (var h = 0; h < 5; h++) Daypart.night,
+-      for (var h = 5; h < 12; h++) Daypart.morning,
+-      for (var h = 12; h < 17; h++) Daypart.afternoon,
++      for (var h = 5; h < 11; h++) Daypart.morning,
++      for (var h = 11; h < 17; h++) Daypart.day,
+       for (var h = 17; h < 21; h++) Daypart.evening,
+       for (var h = 21; h < 24; h++) Daypart.night,
+     ]);
+   });
+ 
+-  test('each part of the day has its own greeting', () {
+-    expect(greetingFor(Daypart.morning), OwedLines.greetingMorning);
+-    expect(greetingFor(Daypart.afternoon), OwedLines.greetingAfternoon);
+-    expect(greetingFor(Daypart.evening), OwedLines.greetingEvening);
+-    expect(greetingFor(Daypart.night), OwedLines.greetingNight);
++  test('each part has its filed place, four lines each', () {
++    expect(greetingPlace(Daypart.morning), Lines.MP_72);
++    expect(greetingPlace(Daypart.day), Lines.MP_73);
++    expect(greetingPlace(Daypart.evening), Lines.MP_74);
++    expect(greetingPlace(Daypart.night), Lines.MP_75);
++    for (final part in Daypart.values) {
++      for (final lang in Lang.values) {
++        expect(greetingPlace(part).parts(lang), hasLength(4), reason: '$part $lang');
++      }
++    }
++  });
++
++  test('one line a day, the four in turn', () {
++    for (final lang in Lang.values) {
++      final seen = [
++        for (var d = 0; d < 8; d++) greetingText(greetingAt(at(2026, 6, 10 + d, 12)), lang),
++      ];
++      final lines = Lines.MP_73.parts(lang);
++      final first = lines.indexOf(seen.first);
++      expect(first, isNot(-1));
++      expect(seen, [for (var d = 0; d < 8; d++) lines[(first + d) % 4]]);
++    }
++  });
++
++  test('one line all day; the day turns at a month end', () {
++    final morning = greetingAt(at(2026, 6, 10, 5));
++    expect(greetingAt(at(2026, 6, 10, 10)), morning);
++    final june30 = greetingAt(at(2026, 6, 30, 12)).day;
++    expect(greetingAt(at(2026, 7, 1, 12)).day, june30 + 1);
++    final dec31 = greetingAt(at(2026, 12, 31, 12)).day;
++    expect(greetingAt(at(2027, 1, 1, 12)).day, dec31 + 1);
++  });
++
++  test('after midnight, the line of the evening it began on', () {
++    final late = greetingAt(at(2026, 6, 10, 23));
++    expect(greetingAt(at(2026, 6, 11, 0)), late);
++    expect(greetingAt(at(2026, 6, 11, 4)), late);
++    expect(greetingAt(at(2026, 6, 11, 5)).day, late.day + 1);
++    expect(greetingAt(at(2026, 6, 11, 5)).part, Daypart.morning);
++    // On the first of a month, after midnight: the last day of the one before.
++    expect(greetingAt(at(2026, 7, 1, 2)), greetingAt(at(2026, 6, 30, 22)));
+   });
+ }
+diff --git a/app/test/journal/owed_test.dart b/app/test/journal/owed_test.dart
+deleted file mode 100644
+index 9e4d1d5..0000000
+--- a/app/test/journal/owed_test.dart
++++ /dev/null
+@@ -1,21 +0,0 @@
+-// The places Product still owes (D110): each shows its provisional handle in
+-// square brackets (R1), no two alike, none a register handle.
+-import 'package:flutter_test/flutter_test.dart';
+-import 'package:souldreams/journal/owed.dart';
+-import 'package:souldreams/words/lines.g.dart';
+-
+-void main() {
+-  test('an owed place shows its handle in square brackets', () {
+-    for (final o in OwedLines.all) {
+-      expect(o.text, '[${o.handle}]');
+-    }
+-  });
+-
+-  test('nine owed places, each handle once, none in the register', () {
+-    final handles = [for (final o in OwedLines.all) o.handle];
+-    expect(handles, hasLength(9));
+-    expect(handles.toSet(), hasLength(9));
+-    final filed = {for (final l in Lines.all) l.handle};
+-    expect(handles.where(filed.contains), isEmpty);
+-  });
+-}
+diff --git a/app/test/journal/pages/journal_page_test.dart b/app/test/journal/pages/journal_page_test.dart
+index 8349a87..d150843 100644
+--- a/app/test/journal/pages/journal_page_test.dart
++++ b/app/test/journal/pages/journal_page_test.dart
+@@ -17,7 +17,6 @@ import 'package:souldreams/journal/greeting.dart';
+ import 'package:souldreams/journal/night.dart';
+ import 'package:souldreams/journal/night_action.dart';
+ import 'package:souldreams/journal/night_look.dart';
+-import 'package:souldreams/journal/owed.dart';
+ import 'package:souldreams/journal/pages/night_art.dart';
+ import 'package:souldreams/journal/pages/journal_page.dart';
+ import 'package:souldreams/journal/pages/night_page.dart';
+@@ -63,15 +62,19 @@ final class BrokenFiles extends MemoryJournalFiles {
    }
-+
-+  PendingLine _fill(Map<String, String> slots) =>
-+      PendingLine(handle, _fillAll(_en, slots), _fillAll(_sv, slots));
-+
-+  static List<String> _fillAll(List<String> parts, Map<String, String> slots) =>
-+      parts.map((p) => p.replaceAllMapped(_slot, (m) => slots[m[0]] ?? m[0]!)).toList();
-+
-+  static final _slot = RegExp(r'\{[a-z ]+\}');
  }
  
- /// Every pending line, by handle.
-diff --git a/tool/checks/tests/mutations.py b/tool/checks/tests/mutations.py
-index 2b4de02b140a8bd6c3aeed7911b421c5376c33c5..5ec48d7796b15f47febbb0199414ed37b701a13c 100644
---- a/tool/checks/tests/mutations.py
-+++ b/tool/checks/tests/mutations.py
-@@ -212,6 +212,17 @@ MUTATIONS = [
-      ['test_wordsgen.Pending.test_a_filed_handle_stops']),
-     ('wordsgen.py', "        if f['status'] != PENDING_STATUS:", "        if False:",
-      ['test_wordsgen.Pending.test_each_row_rule_stops']),
-+    # redesign-b, Task 1 (D117 Q1): a pending line takes the register's slots.
-+    ('wordsgen.py', "        if en_slots != sv_slots:\n            raise WordsError(PENDING, 'slots-differ', n)\n", "",
-+     ['test_wordsgen.Pending.test_each_row_rule_stops']),
-+    ('wordsgen.py', "            raise WordsError(source, 'unknown-slot', row)",
-+     "            raise WordsError(REGISTER, 'unknown-slot', row)",
-+     ['test_wordsgen.Pending.test_each_row_rule_stops']),
-+    ('wordsgen.py', "            out.append(slot_function('PendingLine', name, const, slots))\n", "",
-+     ['test_wordsgen.Pending.test_a_pending_line_takes_the_registers_slots']),
-+    ('wordsgen.py', "        const = name if not slots else '_' + name\n        names.append(const)",
-+     "        const = name\n        names.append(const)",
-+     ['test_wordsgen.Pending.test_a_pending_line_takes_the_registers_slots']),
-     # journal-screens, Task 3 (D58): the screenshots.
-     ('g2_copies.py', "    refused += fingerprint_findings(src, SCREENS, SCREEN_PRINTS, 'screen')\n", "",
-      ['test_g1_g2.G2.test_screens_unlisted_changed_or_unprinted_refuse']),
-diff --git a/tool/checks/tests/test_wordsgen.py b/tool/checks/tests/test_wordsgen.py
-index e0e0d5c95ae9d8ffec5aa1a9b12e6a5ea691d6db..fae0fbd32435b8a74c93cfaab1adec97b89a5406 100644
---- a/tool/checks/tests/test_wordsgen.py
-+++ b/tool/checks/tests/test_wordsgen.py
-@@ -110,6 +110,16 @@ class Pending(unittest.TestCase):
-         self.assertIn('(sha256 %s)' % wordsgen.sha256(body), dart)
-         self.assertNotIn('Line(', dart.replace('PendingLine(', ''))
- 
-+    def test_a_pending_line_takes_the_registers_slots(self):
-+        # D117 Q1: as a filed line does, a private constant and a function.
-+        body = pending(pending_row('MP' + DOT + '67', '{n} pa', 'pb {n}'), pending_row('MP' + DOT + '68'))
-+        dart = pending_dart(body)
-+        self.assertIn("  static const _MP_67 = PendingLine('MP" + DOT + "67', ['{n} pa'], ['pb {n}']);", dart)
-+        self.assertIn("  static PendingLine MP_67({required int n}) => _MP_67._fill({'{n}': '$n'});", dart)
-+        self.assertIn("  static const MP_68 = PendingLine('MP" + DOT + "68', ['pa'], ['pb']);", dart)
-+        self.assertIn('  static const all = <PendingLine>[_MP_67, MP_68];', dart)
-+        self.assertIn('      PendingLine(handle, _fillAll(_en, slots), _fillAll(_sv, slots));', dart)
++/// The greeting's words at Stockholm's wall [hour] on [day] June 2026.
++String greeted(int hour, {int day = 10}) =>
++    greetingText(greetingAt((year: 2026, month: 6, day: day, hour: hour)), Lang.en);
 +
-     def test_a_filed_handle_stops(self):
-         filed = row('MP' + DOT + '60', 'written', 'w', 'v')
-         e = self.refused('pending-filed', pending(pending_row('MP' + DOT + '60')), filed)
-@@ -128,7 +138,9 @@ class Pending(unittest.TestCase):
-         self.refused('pending-given', pending(pending_row(h, given=' ')))
-         self.refused('missing-language', pending(pending_row(h, sv='')))
-         self.refused('parts-differ', pending(pending_row(h, 'pa / pc', 'pb')))
--        self.refused('pending-slot', pending(pending_row(h, '{n} pa', '{n} pb')))
-+        self.refused('slots-differ', pending(pending_row(h, '{n} pa', 'pb')))
-+        self.refused('unknown-slot', pending(pending_row(h, '{name} pa', '{name} pb')))
-+        self.refused('unknown-slot', pending(pending_row(h, 'pa }', 'pb')))
-         self.refused('control-character', pending(pending_row(h, 'p\ta')))
-         self.refused('bad-csv', b'handle,"place\n')
- 
-diff --git a/tool/checks/wordsgen.py b/tool/checks/wordsgen.py
-index f85983fcbf7333be286ef304511451237725e02c..fb5214f551e26a55ac690832b86346a1bedfa86c 100644
---- a/tool/checks/wordsgen.py
-+++ b/tool/checks/wordsgen.py
-@@ -164,7 +164,7 @@ def parse_text(text, row, source=REGISTER):
-     return parts
- 
- 
--def slots_of(parts, row):
-+def slots_of(parts, row, source=REGISTER):
-     found = set()
-     for part in parts:
-         rest = part
-@@ -173,7 +173,7 @@ def slots_of(parts, row):
-                 found.add(token)
-                 rest = rest.replace(token, '')
-         if '{' in rest or '}' in rest:
--            raise WordsError(REGISTER, 'unknown-slot', row)
-+            raise WordsError(source, 'unknown-slot', row)
-     return found
- 
- 
-@@ -212,7 +212,8 @@ def read_pending(data, register_rows):
-     # None (no file) is no pending line. Each row: a handle of the
-     # register's shape that the register does not hold, the status
-     # "pending", where it was given, and one plain line in each language,
--    # with the same number of parts and no slot.
-+    # with the same number of parts and the same slots, the register's own
-+    # (D117 Q1: the search's count, MP·67).
-     if data is None:
-         return []
-     text = decode(data, PENDING)
-@@ -249,11 +250,12 @@ def read_pending(data, register_rows):
-         en, sv = parse_text(f['english'], n, PENDING), parse_text(f['swedish'], n, PENDING)
-         if len(en) != len(sv):
-             raise WordsError(PENDING, 'parts-differ', n)
--        if any('{' in p or '}' in p for p in en + sv):
--            raise WordsError(PENDING, 'pending-slot', n)
-+        en_slots, sv_slots = slots_of(en, n, PENDING), slots_of(sv, n, PENDING)
-+        if en_slots != sv_slots:
-+            raise WordsError(PENDING, 'slots-differ', n)
-         seen.add(handle)
-         names.add(ident(handle))
--        out.append((handle, en, sv))
-+        out.append((handle, en, sv, tuple(s for s in SLOTS if s[0] in en_slots)))
-     return out
- 
- 
-@@ -261,6 +263,7 @@ PENDING_HEAD = ''.join(line + '\n' for line in (
-     '// GENERATED by tool/checks/wordsgen.py from the pending lines',
-     '// (sha256 @SHA@). Do not edit: the owner changes pending-lines.csv.',
-     '// ignore_for_file: constant_identifier_names',
-+    '// ignore_for_file: non_constant_identifier_names, unused_element',
-     "import 'package:flutter/services.dart' show appFlavor;",
-     '',
-     "import 'lines.g.dart' show Lang;",
-@@ -289,6 +292,14 @@ PENDING_HEAD = ''.join(line + '\n' for line in (
-     "    assert(all.length == 1, 'text() needs a line of one part');",
-     '    return all.single;',
-     '  }',
-+    '',
-+    '  PendingLine _fill(Map<String, String> slots) =>',
-+    '      PendingLine(handle, _fillAll(_en, slots), _fillAll(_sv, slots));',
-+    '',
-+    '  static List<String> _fillAll(List<String> parts, Map<String, String> slots) =>',
-+    '      parts.map((p) => p.replaceAllMapped(_slot, (m) => slots[m[0]] ?? m[0]!)).toList();',
-+    '',
-+    "  static final _slot = RegExp(r'\\{[a-z ]+\\}');",
-     '}',
-     '',
-     '/// Every pending line, by handle.',
-@@ -298,12 +309,17 @@ PENDING_HEAD = ''.join(line + '\n' for line in (
- 
- def pending_dart(pending, digest):
-     out = [PENDING_HEAD.replace('@SHA@', digest)]
--    for handle, en, sv in pending:
-+    names = []
-+    for handle, en, sv, slots in pending:
-+        name = ident(handle)
-+        const = name if not slots else '_' + name
-+        names.append(const)
-         out.append('  static const %s = PendingLine(%s, %s, %s);\n'
--                   % (ident(handle), dart_string(handle), dart_list(en), dart_list(sv)))
-+                   % (const, dart_string(handle), dart_list(en), dart_list(sv)))
-+        if slots:
-+            out.append(slot_function('PendingLine', name, const, slots))
-     out.append('\n  /// Every pending line above, in the file\'s order.\n')
--    out.append('  static const all = <PendingLine>[%s];\n}\n'
--               % ', '.join(ident(h) for h, _, _ in pending))
-+    out.append('  static const all = <PendingLine>[%s];\n}\n' % ', '.join(names))
-     return ''.join(out)
- 
- 
-@@ -440,6 +456,15 @@ LINES_HEAD = ''.join(line + '\n' for line in (
- ))
- 
- 
-+def slot_function(kind, name, const, slots):
-+    # A line with slots: its constant is private, and a function of the
-+    # handle's name fills the slots (D32 Q13: plain replacement).
-+    args = ', '.join('required %s %s' % (t, a) for _, a, t in slots)
-+    fills = ', '.join('%s: %s' % (dart_string(k), "'$%s'" % a if t == 'int' else a)
-+                      for k, a, t in slots)
-+    return '  static %s %s({%s}) => %s._fill({%s});\n' % (kind, name, args, const, fills)
+ void main() {
+   testWidgets('the empty journal: the greeting, New Dream and C4-P·5', (tester) async {
+     final h = await Harness.make();
+     await h.pump(tester, JournalPage(journal: h.journal));
+-    expect(find.text(OwedLines.greetingAfternoon.text), findsOneWidget);
+-    expect(find.text(OwedLines.newDream.text), findsOneWidget);
++    expect(find.text(greeted(12)), findsOneWidget);
++    // MP·11 is New Dream's (C18-P), shown once: the round record button is
++    // gone (D110).
++    expect(find.text(Lines.MP_11.text(Lang.en)), findsOneWidget);
+     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
+-    // The round record button is gone (D110).
+-    expect(find.text(Lines.MP_11.text(Lang.en)), findsNothing);
+     // No Settings entry and no search: later branches.
+     expect(find.text(Lines.MP_25.text(Lang.en)), findsNothing);
+     expect(find.byType(TextField), findsNothing);
+@@ -82,7 +85,7 @@ void main() {
+   testWidgets('the greeting: by the clock, centred, a heading, above New Dream', (tester) async {
+     final h = await Harness.make();
+     await h.pump(tester, JournalPage(journal: h.journal));
+-    final greeting = find.text(OwedLines.greetingAfternoon.text);
++    final greeting = find.text(greeted(12));
+     final text = tester.widget<Text>(greeting);
+     expect(text.style!.fontFamily, TypeRoles.h2.family);
+     expect(text.style!.fontSize, TypeRoles.h2.size);
+@@ -90,12 +93,24 @@ void main() {
+     expect(tester.getCenter(greeting).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+     expect(tester.getRect(greeting).bottom, lessThan(tester.getRect(find.byKey(JournalPage.newDreamKey)).top));
+     final handle = tester.ensureSemantics();
+-    expect(tester.getSemantics(greeting), matchesSemantics(label: OwedLines.greetingAfternoon.text, isHeader: true));
++    expect(tester.getSemantics(greeting), matchesSemantics(label: greeted(12), isHeader: true));
+     handle.dispose();
+     Harness.clock = stockholm(2026, 6, 10, 17);
+     await tester.pump(const Duration(minutes: 1));
+-    expect(find.text(OwedLines.greetingEvening.text), findsOneWidget);
+-    expect(greetingFor(Daypart.evening), OwedLines.greetingEvening);
++    expect(find.text(greeted(17)), findsOneWidget);
++  });
 +
++  // D119 item 4: one line a day, the four in turn; the next day at the same
++  // hour, the next line of the same place.
++  testWidgets('the greeting: the next day, the next line', (tester) async {
++    final h = await Harness.make();
++    await h.pump(tester, JournalPage(journal: h.journal));
++    expect(find.text(greeted(12)), findsOneWidget);
++    Harness.clock = stockholm(2026, 6, 11, 12);
++    await tester.pump(const Duration(minutes: 1));
++    expect(greeted(12, day: 11), isNot(greeted(12)));
++    expect(find.text(greeted(12, day: 11)), findsOneWidget);
++    expect(Lines.MP_73.parts(Lang.en), contains(greeted(12, day: 11)));
+   });
+ 
+   // D110: on returning, the greeting follows the clock at once, without
+@@ -103,14 +118,14 @@ void main() {
+   testWidgets('the greeting follows the clock on returning', (tester) async {
+     final h = await Harness.make();
+     await h.pump(tester, JournalPage(journal: h.journal));
+-    expect(find.text(OwedLines.greetingAfternoon.text), findsOneWidget);
++    expect(find.text(greeted(12)), findsOneWidget);
+     Harness.clock = stockholm(2026, 6, 10, 17);
+     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+     await tester.pump();
+     await tester.pump(const Duration(seconds: 1));
+-    expect(find.text(OwedLines.greetingEvening.text), findsOneWidget);
+-    expect(find.text(OwedLines.greetingAfternoon.text), findsNothing);
++    expect(find.text(greeted(17)), findsOneWidget);
++    expect(find.text(greeted(12)), findsNothing);
+   });
+ 
+   // D112: above the greeting, a sun from 08:00 to 21:00 and a moon from 21:00
+@@ -123,7 +138,7 @@ void main() {
+     expect(tester.widget<SkyMark>(mark).sky, Sky.sun);
+     expect(tester.getSize(mark), StandIns.skyMark);
+     expect(tester.getCenter(mark).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+-    final greeting = tester.getRect(find.text(OwedLines.greetingAfternoon.text));
++    final greeting = tester.getRect(find.text(greeted(12)));
+     expect(greeting.top - tester.getRect(mark).bottom, closeTo(StandIns.skyGap, 1));
+   });
+ 
+@@ -135,7 +150,7 @@ void main() {
+     expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
+     Harness.clock = stockholm(2026, 6, 10, 8);
+     await tester.pump(const Duration(minutes: 1));
+-    expect(find.text(OwedLines.greetingMorning.text), findsOneWidget);
++    expect(find.text(greeted(8)), findsOneWidget);
+     expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.sun);
+     Harness.clock = stockholm(2026, 6, 10, 21);
+     await tester.pump(const Duration(minutes: 1));
+@@ -161,11 +176,11 @@ void main() {
+     expect(tester.getCenter(button).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+     expect(find.descendant(of: button, matching: find.byType(NightSky)), findsOneWidget);
+     expect(find.descendant(of: button, matching: find.byType(NightArt)), findsNothing);
+-    final words = tester.widget<Text>(find.text(OwedLines.newDream.text));
++    final words = tester.widget<Text>(find.text(Lines.MP_11.text(Lang.en)));
+     expect(words.style!.color, NightArt.over);
+     expect(words.style!.fontFamily, TypeRoles.button.family);
+     final handle = tester.ensureSemantics();
+-    expect(tester.getSemantics(button), matchesSemantics(label: OwedLines.newDream.text, isButton: true, hasTapAction: true));
++    expect(tester.getSemantics(button), matchesSemantics(label: Lines.MP_11.text(Lang.en), isButton: true, hasTapAction: true));
+     handle.dispose();
+   });
+ 
+diff --git a/app/test/journal/pages/night_page_test.dart b/app/test/journal/pages/night_page_test.dart
+index 3ea68f2..4af4c4c 100644
+--- a/app/test/journal/pages/night_page_test.dart
++++ b/app/test/journal/pages/night_page_test.dart
+@@ -20,7 +20,6 @@ import 'package:souldreams/journal/journal_audio.dart';
+ import 'package:souldreams/journal/night.dart';
+ import 'package:souldreams/journal/night_action.dart';
+ import 'package:souldreams/journal/night_look.dart';
+-import 'package:souldreams/journal/owed.dart';
+ import 'package:souldreams/journal/pages/night_art.dart';
+ import 'package:souldreams/journal/pages/night_page.dart';
+ import 'package:souldreams/journal/pages/parts.dart';
+@@ -500,8 +499,22 @@ void main() {
+ 
+   testWidgets('an unread night has no jump buttons', (tester) async {
+     await open(tester);
+-    for (final o in [OwedLines.jumpDreams, OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection]) {
+-      expect(find.text(o.text), findsNothing);
++    // By key: MP·77's "Dreams" is MP·38's word too, which stands.
++    for (final o in Jump.values) {
++      expect(find.byKey(NightPage.jumpKey(o)), findsNothing);
++    }
++    expect(find.text(Lines.MP_77.parts(Lang.en)[1]), findsNothing);
++  });
 +
- def lines_dart(places, digest):
-     out = [LINES_HEAD.replace('@SHA@', digest)]
-     names = []
-@@ -451,10 +476,7 @@ def lines_dart(places, digest):
-         out.append('  static const %s = Line(%s, %s, %s%s);\n'
-                    % (const, dart_string(p.handle), dart_list(p.en), dart_list(p.sv), stand_in))
-         if p.slots:
--            args = ', '.join('required %s %s' % (t, a) for _, a, t in p.slots)
--            fills = ', '.join('%s: %s' % (dart_string(k), "'$%s'" % a if t == 'int' else a)
--                              for k, a, t in p.slots)
--            out.append('  static Line %s({%s}) => %s._fill({%s});\n' % (name, args, const, fills))
-+            out.append(slot_function('Line', name, const, p.slots))
-     out.append('\n  /// Every place above, in the register\'s order.\n')
-     out.append('  static const all = <Line>[%s];\n}\n' % ', '.join(names))
-     return ''.join(out)
++  // C18-P (D119 item 4): the jump buttons' words are MP·77's four parts, in
++  // order, each on its own button.
++  testWidgets("the jump buttons' words: MP·77, in order", (tester) async {
++    await open(tester, read: (_) => true);
++    expect([for (final o in Jump.values) o.text(Lang.en)], Lines.MP_77.parts(Lang.en));
++    expect([for (final o in Jump.values) o.text(Lang.sv)], Lines.MP_77.parts(Lang.sv));
++    for (final o in Jump.values) {
++      final words = find.descendant(of: find.byKey(NightPage.jumpKey(o)), matching: find.byType(Text));
++      expect(tester.widget<Text>(words).data, Lines.MP_77.parts(Lang.en)[o.index]);
+     }
+   });
+ 
+@@ -513,13 +526,13 @@ void main() {
+     final art = tester.widget<NightArt>(find.byType(NightArt));
+     expect(art.look, Painting(paintingFor(n.id, NightArt.paintings)));
+     final header = tester.getRect(find.byType(NightArt));
+-    final jumps = [OwedLines.jumpDreams, OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection];
++    final jumps = Jump.values;
+     final boxes = [for (final o in jumps) tester.getRect(find.byKey(NightPage.jumpKey(o)))];
+     for (final (i, b) in boxes.indexed) {
+       expect(b.top, greaterThan(header.bottom));
+-      expect(b.bottom, lessThan(tester.getTopLeft(find.text(Lines.MP_38.text(Lang.en))).dy));
++      expect(b.bottom, lessThan(tester.getTopLeft(find.byKey(NightPage.dreamsKey)).dy));
+       expect(tester.getSemantics(find.byKey(NightPage.jumpKey(jumps[i]))), matchesSemantics(
+-        label: jumps[i].text, isButton: true, hasTapAction: true));
++        label: jumps[i].text(Lang.en), isButton: true, hasTapAction: true));
+       if (i > 0) expect(b.left > boxes[i - 1].right || b.top > boxes[i - 1].bottom, isTrue);
+     }
+     // Each row of them centred.
+@@ -535,17 +548,17 @@ void main() {
+   // brown, the tradition label's terracotta and the dream tag's blue.
+   testWidgets('the jump buttons: green, brown, terracotta, blue', (tester) async {
+     await open(tester, read: (_) => true);
+-    List<Color> colours(Owed o) {
++    List<Color> colours(Jump o) {
+       final box = tester.widget<DecoratedBox>(
+         find.descendant(of: find.byKey(NightPage.jumpKey(o)), matching: find.byType(DecoratedBox)),
+       );
+       return ((box.decoration as BoxDecoration).gradient! as LinearGradient).colors;
+     }
+ 
+-    expect(colours(OwedLines.jumpDreams), [LightColours.labelSection.colour, LightColours.labelSection.colourEnd]);
+-    expect(colours(OwedLines.jumpQuestions), StandIns.jumpQuestions);
+-    expect(colours(OwedLines.jumpReadings), [LightColours.labelTradition.colour, LightColours.labelTradition.colourEnd]);
+-    expect(colours(OwedLines.jumpReflection), [LightColours.tagDream.colour, LightColours.tagDream.colourEnd]);
++    expect(colours(Jump.dreams), [LightColours.labelSection.colour, LightColours.labelSection.colourEnd]);
++    expect(colours(Jump.questions), StandIns.jumpQuestions);
++    expect(colours(Jump.readings), [LightColours.labelTradition.colour, LightColours.labelTradition.colourEnd]);
++    expect(colours(Jump.reflection), [LightColours.tagDream.colour, LightColours.tagDream.colourEnd]);
+   });
+ 
+   // The jump buttons stand at the top of the scrolling part, so they scroll
+@@ -553,9 +566,9 @@ void main() {
+   testWidgets('the Dreams jump brings "Dreams" to the top', (tester) async {
+     await open(tester, read: (_) => true, key: 'long-dream-en');
+     final list = tester.getRect(find.byType(ListView));
+-    final jump = find.byKey(NightPage.jumpKey(OwedLines.jumpDreams));
++    final jump = find.byKey(NightPage.jumpKey(Jump.dreams));
+     expect(find.descendant(of: find.byType(ListView), matching: jump), findsOneWidget);
+-    final label = find.text(Lines.MP_38.text(Lang.en));
++    final label = find.descendant(of: find.byKey(NightPage.dreamsKey), matching: find.text(Lines.MP_38.text(Lang.en)));
+     expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, greaterThan(list.top + 10));
+     await tester.tap(jump);
+     await tester.pump();
+@@ -579,7 +592,7 @@ void main() {
+   testWidgets('the three other jumps do nothing yet', (tester) async {
+     await open(tester, read: (_) => true, key: 'long-dream-en');
+     final at = tester.getRect(find.byKey(NightPage.dreamsKey));
+-    for (final o in [OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection]) {
++    for (final o in [Jump.questions, Jump.readings, Jump.reflection]) {
+       await tester.tap(find.byKey(NightPage.jumpKey(o)));
+       await tester.pumpAndSettle();
+       expect(tester.getRect(find.byKey(NightPage.dreamsKey)), at);
+diff --git a/tool/app_mutations.py b/tool/app_mutations.py
+index 69e7f80..b449bb9 100644
+--- a/tool/app_mutations.py
++++ b/tool/app_mutations.py
+@@ -1,9 +1,9 @@
+ # The app's mutation checks (D49 c), run by hand from the repository
+ # root: python3 -I -B tool/app_mutations.py
+ # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
+-# Expected: every row "caught" (A1 to A443, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
++# Expected: every row "caught" (A1 to A450, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+ # the later rulings and the final review among them), then "app
+-# mutations: 462 run, 462 caught", exit 0. Each row breaks one thing in app/, in place, runs the
++# mutations: 468 run, 468 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+ # named test with the pinned Flutter (fvm), which must pass unbroken
+ # and fail broken, and puts the file back byte for byte, whatever
+ # happens. check_all.sh does not call it. It reports row codes only,
+@@ -1691,15 +1691,11 @@ ROWS = [
+     ('A361', 'lib/journal/greeting.dart',
+      '>= 17 && < 21 => Daypart.evening',
+      '>= 17 && < 22 => Daypart.evening',
+-     'test/journal/greeting_test.dart', 'the parts of the day: from 05, 12, 17, 21'),
++     'test/journal/greeting_test.dart', 'the parts of the day: from 05, 11, 17, 21'),
+     ('A362', 'lib/journal/greeting.dart',
+-     'Daypart.night => OwedLines.greetingNight,',
+-     'Daypart.night => OwedLines.greetingEvening,',
+-     'test/journal/greeting_test.dart', 'each part of the day has its own greeting'),
+-    ('A363', 'lib/journal/owed.dart',
+-     "String get text => '[$handle]';",
+-     'String get text => handle;',
+-     'test/journal/owed_test.dart', 'an owed place shows its handle in square brackets'),
++     'Daypart.night => Lines.MP_75,',
++     'Daypart.night => Lines.MP_74,',
++     'test/journal/greeting_test.dart', 'each part has its filed place, four lines each'),
+     ('A364', 'lib/journal/night_look.dart',
+      'read && paintings > 0 ?',
+      'paintings > 0 ?',
+@@ -1739,11 +1735,11 @@ ROWS = [
+      'test/journal/pages/night_art_test.dart', 'a few placeholder paintings stand in the set'),
+     # D110: the journal's greeting, New Dream and rows.
+     ('A373', 'lib/journal/pages/journal_page.dart',
+-     '              header: true,\n              child: Text(\n                greetingFor(_daypart).text,',
+-     '              header: false,\n              child: Text(\n                greetingFor(_daypart).text,',
++     '              header: true,\n              child: Text(\n                greetingText(_greeting, appLanguage),',
++     '              header: false,\n              child: Text(\n                greetingText(_greeting, appLanguage),',
+      'test/journal/pages/journal_page_test.dart', 'the greeting: by the clock, centred, a heading, above New Dream'),
+     ('A374', 'lib/journal/pages/journal_page.dart',
+-     '          _daypart = now;\n          _sky = sky;\n',
++     '          _greeting = now;\n          _sky = sky;\n',
+      '          _sky = sky;\n',
+      'test/journal/pages/journal_page_test.dart', 'the greeting: by the clock, centred, a heading, above New Dream'),
+     ('A376', 'lib/journal/pages/journal_page.dart',
+@@ -1784,12 +1780,12 @@ ROWS = [
+      '',
+      'test/journal/pages/night_page_test.dart', 'the Dreams jump brings "Dreams" to the top'),
+     ('A385', 'lib/journal/pages/night_page.dart',
+-     'jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], null),',
+-     'jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], _dreamsLabel),',
++     'jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], null),',
++     'jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], _dreamsLabel),',
+      'test/journal/pages/night_page_test.dart', 'the three other jumps do nothing yet'),
+     ('A386', 'lib/journal/pages/night_page.dart',
+-     'jump(OwedLines.jumpReflection, [tag.colour!, tag.colourEnd!], null),',
+-     'jump(OwedLines.jumpReflection, [tag.colourEnd!, tag.colour!], null),',
++     'jump(Jump.reflection, [tag.colour!, tag.colourEnd!], null),',
++     'jump(Jump.reflection, [tag.colourEnd!, tag.colour!], null),',
+      'test/journal/pages/night_page_test.dart', 'the jump buttons: green, brown, terracotta, blue'),
+     ('A387', 'lib/journal/pages/night_page.dart',
+      'style: TypeRoles.h2.style(NightArt.over),',
+@@ -1822,7 +1818,7 @@ ROWS = [
+      'test/journal/pages/journal_home_test.dart', 'by default no night is read'),
+     # redesign-a's final review (D91): the greeting on returning, the status bar's room, the jump's time.
+     ('A394', 'lib/journal/pages/journal_page.dart',
+-     '      _nights = nights;\n      _daypart = _daypartNow();\n',
++     '      _nights = nights;\n      _greeting = _greetingNow();\n',
+      '      _nights = nights;\n',
+      'test/journal/pages/journal_page_test.dart', 'the greeting follows the clock on returning'),
+     ('A395', 'lib/journal/pages/night_page.dart',
+@@ -1867,8 +1863,8 @@ ROWS = [
+      '      // Shown once',
+      'test/journal/pages/journal_page_test.dart', 'the mark follows the clock on returning'),
+     ('A405', 'lib/journal/pages/journal_page.dart',
+-     'if (now != _daypart || sky != _sky) {',
+-     'if (now != _daypart) {',
++     'if (now != _greeting || sky != _sky) {',
++     'if (now != _greeting) {',
+      'test/journal/pages/journal_page_test.dart', 'the moon at night, and the mark follows the clock'),
+     ('A406', 'lib/journal/pages/journal_page.dart',
+      'Center(child: SkyMark(_sky)),',
+@@ -2028,6 +2024,36 @@ ROWS = [
+      'PlainButton(Lines.MP_67.parts(appLanguage).first, onPressed: widget.onAgreed)',
+      'PlainButton(Lines.MP_67.parts(appLanguage).last, onPressed: widget.onAgreed)',
+      'test/onboarding/onboarding_test.dart', '18 or over: the disclosure first page, then the consent'),
++    # redesign-b, Task 1 (D119 item 4): the greeting, New Dream and the jump
++    # buttons take their filed lines.
++    ('A444', 'lib/journal/greeting.dart',
++     '  >= 5 && < 11 => Daypart.morning,',
++     '  >= 5 && < 12 => Daypart.morning,',
++     'test/journal/greeting_test.dart', 'the parts of the day: from 05, 11, 17, 21'),
++    ('A445', 'lib/journal/greeting.dart',
++     '  return lines[g.day % lines.length];',
++     '  return lines[0];',
++     'test/journal/greeting_test.dart', 'one line a day, the four in turn'),
++    ('A446', 'lib/journal/greeting.dart',
++     '  final back = wall.hour < 5 ? 1 : 0;',
++     '  final back = 0;',
++     'test/journal/greeting_test.dart', 'after midnight, the line of the evening it began on'),
++    ('A447', 'lib/journal/pages/journal_page.dart',
++     '                greetingText(_greeting, appLanguage),',
++     '                greetingText((part: _greeting.part, day: 0), appLanguage),',
++     'test/journal/pages/journal_page_test.dart', 'the greeting: the next day, the next line'),
++    ('A448', 'lib/journal/pages/journal_page.dart',
++     'child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),',
++     'child: Text(Lines.MP_9.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),',
++     'test/journal/pages/journal_page_test.dart', 'the empty journal: the greeting, New Dream and C4-P·5'),
++    ('A449', 'lib/journal/pages/night_page.dart',
++     '  String text(Lang lang) => Lines.MP_77.parts(lang)[index];',
++     '  String text(Lang lang) => Lines.MP_77.parts(lang)[0];',
++     'test/journal/pages/night_page_test.dart', "the jump buttons' words: MP·77, in order"),
++    ('A450', 'lib/journal/pages/night_page.dart',
++     "  static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');",
++     "  static Key jumpKey(Jump jump) => const ValueKey('jump');",
++     'test/journal/pages/night_page_test.dart', 'a read night: its painting, then four jump buttons'),
+ ]
+ 
+ 
 ~~~~
 
-### Task 2 · [OWNER] Search's three pending lines (D117)
-
-The owner's file, MP·66, MP·67 and MP·68 (sha256 `4da66877…38ab1`), into `app/assets/words/pending-lines.csv`,
-fingerprinted and generated. Paste 2 — Terminal, with the file in place:
-
-```
-cd ~/Developer/soul-dreams-app && shasum -a 256 app/assets/words/pending-lines.csv && (cd app/assets/words && shasum -a 256 pending-lines.csv > pending-fingerprint.txt) && python3 -I -B tool/checks/wordsgen.py --write | grep pending && grep -E 'static (const|PendingLine) _?MP_6' app/lib/words/pending.g.dart && git status --short
-```
-
-Expected:
-- the file's sha256, beginning `4da66877` and ending `38ab1`;
-- `wordsgen: pending lines 3`;
-- four lines, in the file's order:
-  - `static const MP_66 = PendingLine('MP·66', ['1 match'], ['1 träff']);`
-  - `static const _MP_67 = PendingLine('MP·67', ['{n} matches'], ['{n} träffar']);`
-  - `static PendingLine MP_67({required int n}) => _MP_67._fill({'{n}': '$n'});`
-  - `static const MP_68 = PendingLine('MP·68', ['No matches'], ['Inga träffar']);`
-- `M ` for `app/assets/words/pending-fingerprint.txt`, `app/assets/words/pending-lines.csv` and
-  `app/lib/words/pending.g.dart`, and nothing else.
-
-Anything else: stop. Then commit:
-
-```
-cd ~/Developer/soul-dreams-app && git add app/assets/words app/lib/words && git commit -m "Words: search's count lines and empty result, pending (MP·66 to MP·68; D110, D117)"
-```
-
-Expected: `guards (staged): all passed`. Claude Code then checks the app: `No issues found!`, `+577: All tests
-passed!` (no code uses the lines yet).
-
-### Task 3 · The matcher (plain Dart)
+### Task 2 · The matcher (plain Dart)
 
 `lib/journal/search.dart`: `searchable`, `firstMatch`, `findIn`, `search`, `contextOf`, `cut`, `searchFrom`,
-`contextWordsBefore`. Tests: `test/journal/search_test.dart` (9), and in `test/words/lines_test.dart` a pending line
-with a slot, filled in Dev and its handle elsewhere (1). Rows A442 to A452.
+`contextWordsBefore`. Tests: `test/journal/search_test.dart` (9). Rows A451 to A461.
 
-Expected: 587 app tests; rows `A442,A443,A444,A445,A446,A447,A448,A449,A450,A451,A452`, every one caught. Commit:
+Expected: 589 app tests; rows `A451,A452,A453,A454,A455,A456,A457,A458,A459,A460,A461`, every one caught. Commit:
 
 > Journal: search's matcher, one function, and its context line (D116, D117 Q4, Q5, Q8)
 
@@ -431,7 +915,7 @@ Expected: 587 app tests; rows `A442,A443,A444,A445,A446,A447,A448,A449,A450,A451
 ~~~~diff
 diff --git a/app/lib/journal/search.dart b/app/lib/journal/search.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..f28cad9b5b84688ee08b7296f81624ffaba278d1
+index 0000000..f28cad9
 --- /dev/null
 +++ b/app/lib/journal/search.dart
 @@ -0,0 +1,127 @@
@@ -564,7 +1048,7 @@ index 0000000000000000000000000000000000000000..f28cad9b5b84688ee08b7296f81624ff
 +}
 diff --git a/app/test/journal/search_test.dart b/app/test/journal/search_test.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..ffaf194add03def2ad16d11439726fbedfb68275
+index 0000000..ffaf194
 --- /dev/null
 +++ b/app/test/journal/search_test.dart
 @@ -0,0 +1,110 @@
@@ -678,78 +1162,68 @@ index 0000000000000000000000000000000000000000..ffaf194add03def2ad16d11439726fbe
 +    expect(across.after, '. ${d[1]}');
 +  });
 +}
-diff --git a/app/test/words/lines_test.dart b/app/test/words/lines_test.dart
-index 4724f0ad888d79be96c2cfb1505086633e417b18..a6962a4b4ce95f2d9710d86ef3d8bf3d99f2989d 100644
---- a/app/test/words/lines_test.dart
-+++ b/app/test/words/lines_test.dart
-@@ -47,6 +47,17 @@ void main() {
-     expect(line.text(Lang.sv, flavor: 'dev'), 'sv');
-   });
- 
-+  // D117 Q1: a pending line takes the register's slots, filled as a
-+  // filed line's are; outside Dev, still its handle.
-+  test('a pending line with a slot, filled in Dev', () {
-+    final line = PendingLines.MP_67(n: 7);
-+    expect(line.handle, 'MP·67');
-+    expect(line.text(Lang.en, flavor: 'dev'), contains('7'));
-+    expect(line.text(Lang.en, flavor: 'dev'), isNot(contains('{')));
-+    expect(line.text(Lang.sv, flavor: 'dev'), contains('7'));
-+    expect(line.text(Lang.en, flavor: 'tester'), '[MP·67]');
-+  });
-+
-   test('no line is pending and filed at once', () {
-     final filed = Lines.all.map((l) => l.handle).toSet();
-     expect(PendingLines.all.where((p) => filed.contains(p.handle)), isEmpty);
 diff --git a/tool/app_mutations.py b/tool/app_mutations.py
-index 489b07177e7e9c5ae60d7ce06ed91f069a0fdf90..12c915bae9ef5b263aed96bc720626edb6a4bc9a 100644
+index b449bb9..807bd9e 100644
 --- a/tool/app_mutations.py
 +++ b/tool/app_mutations.py
-@@ -2018,6 +2018,51 @@ ROWS = [
-      '      rowBorder: c(rowBorder, other.rowBorder),\n',
-      '      rowBorder: rowBorder,\n',
-      'test/design/palette_test.dart', 'the row border fades with the theme'),
+@@ -1,9 +1,9 @@
+ # The app's mutation checks (D49 c), run by hand from the repository
+ # root: python3 -I -B tool/app_mutations.py
+ # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
+-# Expected: every row "caught" (A1 to A450, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
++# Expected: every row "caught" (A1 to A461, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+ # the later rulings and the final review among them), then "app
+-# mutations: 468 run, 468 caught", exit 0. Each row breaks one thing in app/, in place, runs the
++# mutations: 479 run, 479 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+ # named test with the pinned Flutter (fvm), which must pass unbroken
+ # and fail broken, and puts the file back byte for byte, whatever
+ # happens. check_all.sh does not call it. It reports row codes only,
+@@ -2054,6 +2054,51 @@ ROWS = [
+      "  static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');",
+      "  static Key jumpKey(Jump jump) => const ValueKey('jump');",
+      'test/journal/pages/night_page_test.dart', 'a read night: its painting, then four jump buttons'),
 +    # redesign-b (D116, D117): search's matcher and context line.
-+    ('A442', 'lib/journal/search.dart',
++    ('A451', 'lib/journal/search.dart',
 +     '      final f = String.fromCharCode(r).toLowerCase();',
 +     '      final f = String.fromCharCode(r);',
 +     'test/journal/search_test.dart', 'capitals fold; å, ä and ö stay apart'),
-+    ('A443', 'lib/journal/search.dart',
++    ('A452', 'lib/journal/search.dart',
 +     '    if (_wordStart(text, t.from[at])) {',
 +     '    if (true) {',
 +     'test/journal/search_test.dart', 'the typed characters match only at the start of a word'),
-+    ('A444', 'lib/journal/search.dart',
++    ('A453', 'lib/journal/search.dart',
 +     '0xDFFF) j--;',
 +     '0xDFFF) {}',
 +     'test/journal/search_test.dart', 'the span is on the text\'s own characters'),
-+    ('A445', 'lib/journal/search.dart',
++    ('A454', 'lib/journal/search.dart',
 +     '      final width = r > 0xFFFF ? 2 : 1;',
 +     '      const width = 1;',
 +     'test/journal/search_test.dart', 'the span is on the text\'s own characters'),
-+    ('A446', 'lib/journal/search.dart',
++    ('A455', 'lib/journal/search.dart',
 +     '  return q.runes.length >= searchFrom ? q : null;',
 +     '  return q.length >= searchFrom ? q : null;',
 +     'test/journal/search_test.dart', 'a search starts from three characters, the spaces around left out'),
-+    ('A447', 'lib/journal/search.dart',
++    ('A456', 'lib/journal/search.dart',
 +     '  final q = typed.trim();',
 +     '  final q = typed;',
 +     'test/journal/search_test.dart', 'a search starts from three characters, the spaces around left out'),
-+    ('A448', 'lib/journal/search.dart',
++    ('A457', 'lib/journal/search.dart',
 +     'return (night: night, entry: i, span: span);',
 +     'return (night: night, entry: i - 1, span: span);',
 +     'test/journal/search_test.dart', 'a night: its told dreams in order, never its name'),
-+    ('A449', 'lib/journal/search.dart',
++    ('A458', 'lib/journal/search.dart',
 +     'const int contextWordsBefore = 3;',
 +     'const int contextWordsBefore = 4;',
 +     'test/journal/search_test.dart', 'the context: three words before, the match, then the rest'),
-+    ('A450', 'lib/journal/search.dart',
++    ('A459', 'lib/journal/search.dart',
 +     "    before: left ? '$cut $before' : before,",
 +     '    before: before,',
 +     'test/journal/search_test.dart', 'the context: three words before, the match, then the rest'),
-+    ('A451', 'lib/journal/search.dart',
++    ('A460', 'lib/journal/search.dart',
 +     '    match: _oneLine(text.substring(span.start, span.end)),\n    after: _oneLine(text.substring(span.end)).trimRight(),',
 +     '    match: _oneLine(text.substring(span.start, span.end)),\n    after: text.substring(span.end).trimRight(),',
 +     'test/journal/search_test.dart', 'the context is one line, each run of spaces one space'),
-+    ('A452', 'lib/journal/search.dart',
++    ('A461', 'lib/journal/search.dart',
 +     '  var at = t.folded.indexOf(q);',
 +     '  var at = t.folded.lastIndexOf(q);',
 +     'test/journal/search_test.dart', 'the first place in the text, never a later one'),
@@ -758,15 +1232,15 @@ index 489b07177e7e9c5ae60d7ce06ed91f069a0fdf90..12c915bae9ef5b263aed96bc720626ed
  
 ~~~~
 
-### Task 4 · The journal: the field, the count, the matching rows and their context lines
+### Task 3 · The journal: the field, the count, the matching rows and their context lines
 
 `journal_page.dart`: the field (`_SearchField`, `_Magnifier`), the query (`_search`, `_query`), the count
-(`_count`), the results through `listItems`, and `_Row`'s context line (`_ContextLine`). `stand_ins.dart`: the
-field's and the context line's stand-ins. Tests: `test/journal/pages/journal_search_test.dart` (10); in
-`journal_page_test.dart` the empty journal now has one field, search's. Rows A453 to A465 new; A322, A377 and A379
-follow the code (D67: the row's builder moved).
+(`_count`: MP·76, W25), the results through `listItems`, and `_Row`'s context line (`_ContextLine`).
+`stand_ins.dart`: the field's and the context line's stand-ins. Tests: `test/journal/pages/journal_search_test.dart`
+(10); in `journal_page_test.dart` the empty journal now has one field, search's. Rows A462 to A474 new; A322, A377
+and A379 follow the code (D67: the row's builder moved).
 
-Expected: 597 app tests; rows `A322,A377,A379,A453,A454,A455,A456,A457,A458,A459,A460,A461,A462,A463,A464,A465`,
+Expected: 599 app tests; rows `A322,A377,A379,A462,A463,A464,A465,A466,A467,A468,A469,A470,A471,A472,A473,A474`,
 every one caught. Commit:
 
 > Journal: search, from three characters, with the count, the matching nights and their context (D110, D116, D117)
@@ -775,7 +1249,7 @@ every one caught. Commit:
 
 ~~~~diff
 diff --git a/app/lib/design/stand_ins.dart b/app/lib/design/stand_ins.dart
-index bfe09e63fe929a2204ba8ba34df0bc568b8375a1..db0c1d091df4f65d8ceeca52e29d6e6f6a784fb0 100644
+index bfe09e6..db0c1d0 100644
 --- a/app/lib/design/stand_ins.dart
 +++ b/app/lib/design/stand_ins.dart
 @@ -28,6 +28,16 @@ abstract final class StandIns {
@@ -796,10 +1270,10 @@ index bfe09e63fe929a2204ba8ba34df0bc568b8375a1..db0c1d091df4f65d8ceeca52e29d6e6f
    /// and the colours of the sun and the moon, stand-ins drawn in code until
    /// the founder supplies the images.
 diff --git a/app/lib/journal/pages/journal_page.dart b/app/lib/journal/pages/journal_page.dart
-index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb163e2f300b 100644
+index ca9b5f5..e9d654d 100644
 --- a/app/lib/journal/pages/journal_page.dart
 +++ b/app/lib/journal/pages/journal_page.dart
-@@ -7,8 +7,16 @@
+@@ -8,8 +8,16 @@
  // no night. Straight from onboarding, the first empty journal also shows
  // MP·9 under New Dream, with an arrow up to it, once (main-path.md,
  // Onboarding, 5); the logo waits for the founder's file. No Settings entry
@@ -808,32 +1282,24 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
  // count or status.
 +// Search (D110; D116; D117): the field at the top, as wide as a row, EM·4
 +// its placeholder, a magnifier drawn in code and silent, no clear button.
-+// From three characters, where the list starts: the count of nights (MP·66,
-+// MP·67) or MP·68, then only the matching nights' rows, newest first, under
-+// their month dividers, each with its context line under it, the match in
-+// SemiBold. The query lives only while the page does: never kept, never
-+// logged (R3), no recent searches. The count lines are pending (D117 Q1).
++// From three characters, where the list starts: the count of nights (MP·76)
++// or W25, then only the matching nights' rows, newest first, under their
++// month dividers, each with its context line under it, the match in Inter
++// Bold. The query lives only while the page does: never kept, never logged
++// (R3), no recent searches.
 +// The sky mark stays 140 down.
  import 'dart:async';
  
  import 'package:flutter/material.dart';
-@@ -20,6 +28,7 @@ import '../../design/palette.dart';
- import '../../design/stand_ins.dart';
- import '../../design/tokens.g.dart';
- import '../../words/lines.g.dart';
-+import '../../words/pending.g.dart';
- import '../../recording/recording.dart';
- import '../greeting.dart';
- import '../journal.dart';
-@@ -29,6 +38,7 @@ import '../night_look.dart';
+@@ -29,6 +37,7 @@ import '../night_action.dart';
+ import '../night_look.dart';
  import '../night_rules.dart';
- import '../owed.dart';
  import '../row_text.dart';
 +import '../search.dart';
  import '../sky.dart';
  import 'night_art.dart';
  import 'night_page.dart';
-@@ -53,6 +63,12 @@ class JournalPage extends StatefulWidget {
+@@ -53,6 +62,12 @@ class JournalPage extends StatefulWidget {
  
    static const arrowKey = Key('first-arrow');
    static const newDreamKey = Key('new-dream');
@@ -846,7 +1312,7 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
  
    /// A night's row.
    static Key rowKey(String id) => ValueKey('row-$id');
-@@ -77,6 +93,10 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -77,6 +92,10 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
    late Sky _sky = _skyNow();
    late final Timer _clock;
  
@@ -854,10 +1320,10 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
 +  final _search = TextEditingController();
 +  String? _query;
 +
-   Daypart _daypartNow() => daypartAt(widget.journal.zone.wall(widget.journal.now()).hour);
+   Greeting _greetingNow() => greetingAt(widget.journal.zone.wall(widget.journal.now()));
    Sky _skyNow() => skyAt(widget.journal.zone.wall(widget.journal.now()).hour);
  
-@@ -85,6 +105,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -85,6 +104,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
      super.initState();
      WidgetsBinding.instance.addObserver(this);
      _load();
@@ -865,7 +1331,7 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
      widget.recording?.retries?.addListener(_load);
      // The greeting and the sky mark follow the clock while the page is open.
      _clock = Timer.periodic(const Duration(minutes: 1), (_) {
-@@ -102,11 +123,17 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -102,11 +122,17 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
    @override
    void dispose() {
      _clock.cancel();
@@ -883,7 +1349,7 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
    // On returning, the year may have turned: the dividers are built again.
    @override
    void didChangeAppLifecycleState(AppLifecycleState state) {
-@@ -165,11 +192,36 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -165,11 +191,36 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
      final p = Palette.of(context);
      final nights = _nights;
      final year = widget.journal.zone.wall(widget.journal.now()).year;
@@ -921,7 +1387,7 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
              // The sun by day, the moon by night, then the greeting (D112).
              Center(child: SkyMark(_sky)),
              const SizedBox(height: StandIns.skyGap),
-@@ -190,28 +242,29 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -190,28 +241,29 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
                const SizedBox(height: StandIns.arrowGap),
                AppLine(Lines.MP_9.text(appLanguage), style: TypeRoles.button.style(p.text)),
              ],
@@ -966,15 +1432,15 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
                  },
              ],
            ],
-@@ -221,6 +274,94 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -221,6 +273,94 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
    }
  }
  
 +/// The search's count: one night, more, or none (D117 Q2, Q3, Q5).
 +String _count(int nights) => switch (nights) {
-+  0 => PendingLines.MP_68.text(appLanguage),
-+  1 => PendingLines.MP_66.text(appLanguage),
-+  _ => PendingLines.MP_67(n: nights).text(appLanguage),
++  0 => Lines.W25.text(appLanguage),
++  1 => Lines.MP_76(n: 1).parts(appLanguage).first,
++  _ => Lines.MP_76(n: nights).parts(appLanguage).last,
 +};
 +
 +/// The search field (D116; D117 Q7): a pill as wide as a row, 50 tall,
@@ -1061,8 +1527,12 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
  /// New Dream (D110, D112): a pill on a night sky, its words in the button
  /// type over it, opening the typing screen; heard as a button.
  class _NewDream extends StatelessWidget {
-@@ -315,39 +456,53 @@ class _Divider extends StatelessWidget {
- /// h6 over the night's picture; heard as a button named by its date. A name
+@@ -312,42 +452,56 @@ class _Divider extends StatelessWidget {
+ 
+ /// A night's row (D110, D115): a rounded row, 48 from each side of the
+ /// screen and edged by a thin grey border, carrying only its date, centred in
+-/// h6 over the night's picture; heard as a button named by its date. A name
++/// type.row.date over the night's picture (C18-P); heard as a button named by its date. A name
  /// kept from before naming was removed is not shown.
  class _Row extends StatelessWidget {
 -  const _Row(this.night, {required this.look, required this.onTap});
@@ -1100,7 +1570,7 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
 -                child: Center(
 -                  child: Padding(
 -                    padding: StandIns.labelPadding,
--                    child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over))),
+-                    child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over))),
 -                  ),
 +    child: Column(
 +      crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1135,18 +1605,18 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
 +              child: Center(
 +                child: Padding(
 +                  padding: StandIns.labelPadding,
-+                  child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over))),
++                  child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over))),
                  ),
                ),
              ),
-@@ -357,3 +512,33 @@ class _Row extends StatelessWidget {
+@@ -357,3 +511,33 @@ class _Row extends StatelessWidget {
      ),
    );
  }
 +
 +/// A search result's context line (D116 item 3; D117 Q8): one line under
 +/// its row, as wide as the row, centred, in the button type and
-+/// `color.text.summary`, the matched characters in Inter SemiBold, cut with
++/// `color.text.summary`, the matched characters in Inter Bold, cut with
 +/// an ellipsis where it runs out.
 +class _ContextLine extends StatelessWidget {
 +  const _ContextLine(this.id, this.line);
@@ -1162,7 +1632,7 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
 +      TextSpan(
 +        children: [
 +          TextSpan(text: line.before),
-+          TextSpan(text: line.match, style: const TextStyle(fontWeight: FontWeight.w600)),
++          TextSpan(text: line.match, style: const TextStyle(fontWeight: FontWeight.w700)),
 +          TextSpan(text: line.after),
 +        ],
 +      ),
@@ -1174,13 +1644,13 @@ index 71100da4e8245ab4fd378609bc8698488fd1f138..38566554b40fafcbc24039f2b24fdb16
 +  }
 +}
 diff --git a/app/test/journal/pages/journal_page_test.dart b/app/test/journal/pages/journal_page_test.dart
-index c11bd16bdf28aaec3d965b77436958bd93bdc2dc..9688c4661f0d248f4bf917365d7bcf827d826298 100644
+index d150843..1e61a8a 100644
 --- a/app/test/journal/pages/journal_page_test.dart
 +++ b/app/test/journal/pages/journal_page_test.dart
-@@ -72,9 +72,10 @@ void main() {
+@@ -75,9 +75,10 @@ void main() {
+     // gone (D110).
+     expect(find.text(Lines.MP_11.text(Lang.en)), findsOneWidget);
      expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
-     // The round record button is gone (D110).
-     expect(find.text(Lines.MP_11.text(Lang.en)), findsNothing);
 -    // No Settings entry and no search: later branches.
 +    // No Settings entry: a later branch (D116 item 5). One field, search's.
      expect(find.text(Lines.MP_25.text(Lang.en)), findsNothing);
@@ -1192,15 +1662,14 @@ index c11bd16bdf28aaec3d965b77436958bd93bdc2dc..9688c4661f0d248f4bf917365d7bcf82
    // D110: a greeting by the part of the day, centred in h2, heard as a
 diff --git a/app/test/journal/pages/journal_search_test.dart b/app/test/journal/pages/journal_search_test.dart
 new file mode 100644
-index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d69978df13b5
+index 0000000..fe6218d
 --- /dev/null
 +++ b/app/test/journal/pages/journal_search_test.dart
-@@ -0,0 +1,179 @@
+@@ -0,0 +1,177 @@
 +// The journal's search (D110; D116; D117 Q2 to Q8): the field at the top
-+// with EM·4, from three characters the count (MP·66, MP·67) or MP·68, only
-+// the matching nights' rows, newest first, each with its context line, the
-+// match in SemiBold. Pending lines show their handles outside SoulDreams
-+// Dev, so the tests see the handles (R1).
++// with EM·4, from three characters the count (MP·76) or W25, only the
++// matching nights' rows, newest first, each with its context line, the match
++// in Inter Bold.
 +import 'package:flutter/material.dart';
 +import 'package:flutter_test/flutter_test.dart';
 +import 'package:souldreams/design/palette.dart';
@@ -1213,7 +1682,6 @@ index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d699
 +import 'package:souldreams/journal/row_text.dart';
 +import 'package:souldreams/journal/search.dart';
 +import 'package:souldreams/words/lines.g.dart';
-+import 'package:souldreams/words/pending.g.dart';
 +
 +import '../zones.dart';
 +import 'harness.dart';
@@ -1284,7 +1752,7 @@ index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d699
 +    final [en, sv, named] = await three(h);
 +    await h.pump(tester, JournalPage(journal: h.journal));
 +    await type(tester, 'GLAS');
-+    expect(find.text(PendingLines.MP_67(n: 2).text(Lang.en)), findsOneWidget);
++    expect(find.text(Lines.MP_76(n: 2).parts(Lang.en).last), findsOneWidget);
 +    expect(row(en), findsNothing);
 +    expect(row(sv), findsOneWidget);
 +    expect(row(named), findsOneWidget);
@@ -1294,16 +1762,16 @@ index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d699
 +    expect(tester.getRect(row(sv)).top, greaterThan(tester.getRect(row(named)).bottom));
 +  });
 +
-+  testWidgets('one night: MP·66; none: MP·68 and no row', (tester) async {
++  testWidgets('one night: MP·76; none: W25 and no row', (tester) async {
 +    phone(tester);
 +    final h = await Harness.make();
 +    final [en, sv, named] = await three(h);
 +    await h.pump(tester, JournalPage(journal: h.journal));
 +    await type(tester, 'lighth');
-+    expect(find.text(PendingLines.MP_66.text(Lang.en)), findsOneWidget);
++    expect(find.text(Lines.MP_76(n: 1).parts(Lang.en).first), findsOneWidget);
 +    expect(row(en), findsOneWidget);
 +    await type(tester, 'zzz');
-+    expect(find.text(PendingLines.MP_68.text(Lang.en)), findsOneWidget);
++    expect(find.text(Lines.W25.text(Lang.en)), findsOneWidget);
 +    for (final n in [en, sv, named]) {
 +      expect(row(n), findsNothing);
 +    }
@@ -1334,7 +1802,7 @@ index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d699
 +    expect(find.byKey(JournalPage.countKey), findsNothing);
 +  });
 +
-+  testWidgets('a context line under its row, the match in SemiBold', (tester) async {
++  testWidgets('a context line under its row, the match in Bold', (tester) async {
 +    final h = await Harness.make();
 +    final [_, sv, _] = await three(h);
 +    await h.pump(tester, JournalPage(journal: h.journal));
@@ -1349,7 +1817,7 @@ index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d699
 +    final c = contextOf(sv.dreams.first, firstMatch(sv.dreams.first, 'tåg')!);
 +    final parts = (text.textSpan! as TextSpan).children!.cast<TextSpan>();
 +    expect([for (final s in parts) s.text], [c.before, c.match, c.after]);
-+    expect(parts[1].style!.fontWeight, FontWeight.w600);
++    expect(parts[1].style!.fontWeight, FontWeight.w700);
 +    expect(parts[0].style, isNull);
 +    expect(parts[2].style, isNull);
 +  });
@@ -1376,9 +1844,21 @@ index 0000000000000000000000000000000000000000..a65ce3fb2f66d91e8aebc1dff523d699
 +  });
 +}
 diff --git a/tool/app_mutations.py b/tool/app_mutations.py
-index 12c915bae9ef5b263aed96bc720626edb6a4bc9a..ce544cae0b5de70734386a37be570e9d3e2b7ab6 100644
+index 807bd9e..bf49683 100644
 --- a/tool/app_mutations.py
 +++ b/tool/app_mutations.py
+@@ -1,9 +1,9 @@
+ # The app's mutation checks (D49 c), run by hand from the repository
+ # root: python3 -I -B tool/app_mutations.py
+ # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
+-# Expected: every row "caught" (A1 to A461, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
++# Expected: every row "caught" (A1 to A474, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+ # the later rulings and the final review among them), then "app
+-# mutations: 479 run, 479 caught", exit 0. Each row breaks one thing in app/, in place, runs the
++# mutations: 492 run, 492 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+ # named test with the pinned Flutter (fvm), which must pass unbroken
+ # and fail broken, and puts the file back byte for byte, whatever
+ # happens. check_all.sh does not call it. It reports row codes only,
 @@ -1512,7 +1512,7 @@ ROWS = [
       '',
       'test/journal/pages/night_page_test.dart', 'a given item runs once, with the night shown'),
@@ -1388,7 +1868,7 @@ index 12c915bae9ef5b263aed96bc720626edb6a4bc9a..ce544cae0b5de70734386a37be570e9d
       '',
       'test/journal/pages/journal_page_test.dart', "a row hands its night's page the menu's item"),
      ('A323', 'lib/journal/pages/journal_home.dart',
-@@ -1751,7 +1751,7 @@ ROWS = [
+@@ -1747,7 +1747,7 @@ ROWS = [
       'look: lookOf(night, read: false, paintings: NightArt.paintings),',
       'test/journal/pages/journal_page_test.dart', "a read night's row shows its painting"),
      ('A377', 'lib/journal/pages/journal_page.dart',
@@ -1397,7 +1877,7 @@ index 12c915bae9ef5b263aed96bc720626edb6a4bc9a..ce544cae0b5de70734386a37be570e9d
       '',
       'test/journal/pages/journal_page_test.dart', "a row hands its night's page whether it is read"),
      ('A378', 'lib/journal/pages/journal_page.dart',
-@@ -1759,8 +1759,8 @@ ROWS = [
+@@ -1755,8 +1755,8 @@ ROWS = [
       'constraints: const BoxConstraints(),',
       'test/journal/pages/journal_page_test.dart', "a row: the date over an unread night's gradient"),
      ('A379', 'lib/journal/pages/journal_page.dart',
@@ -1407,61 +1887,61 @@ index 12c915bae9ef5b263aed96bc720626edb6a4bc9a..ce544cae0b5de70734386a37be570e9d
 +     '    button: false,\n    child: GestureDetector(\n      key: JournalPage.rowKey(night.id),',
       'test/journal/pages/journal_page_test.dart', "a row: the date over an unread night's gradient"),
      ('A380', 'lib/journal/pages/journal_page.dart',
-      'TypeRoles.h6.style(NightArt.over)',
-@@ -2063,6 +2063,59 @@ ROWS = [
+      'TypeRoles.rowDate.style(NightArt.over)',
+@@ -2099,6 +2099,59 @@ ROWS = [
       '  var at = t.folded.indexOf(q);',
       '  var at = t.folded.lastIndexOf(q);',
       'test/journal/search_test.dart', 'the first place in the text, never a later one'),
 +    # redesign-b (D116, D117): the journal's search.
-+    ('A453', 'lib/journal/pages/journal_page.dart',
++    ('A462', 'lib/journal/pages/journal_page.dart',
 +     '                  autocorrect: false,',
 +     '                  autocorrect: true,',
 +     'test/journal/pages/journal_search_test.dart', 'the field suggests and corrects nothing'),
-+    ('A454', 'lib/journal/pages/journal_page.dart',
++    ('A463', 'lib/journal/pages/journal_page.dart',
 +     '                  enableSuggestions: false,',
 +     '                  enableSuggestions: true,',
 +     'test/journal/pages/journal_search_test.dart', 'the field suggests and corrects nothing'),
-+    ('A455', 'lib/journal/pages/journal_page.dart',
++    ('A464', 'lib/journal/pages/journal_page.dart',
 +     '                  textInputAction: TextInputAction.search,',
 +     '                  textInputAction: TextInputAction.done,',
 +     'test/journal/pages/journal_search_test.dart', 'the field suggests and corrects nothing'),
-+    ('A456', 'lib/journal/pages/journal_page.dart',
++    ('A465', 'lib/journal/pages/journal_page.dart',
 +     '    if (q != _query) setState(() => _query = q);',
 +     '    if (q != _query) _query = q;',
 +     'test/journal/pages/journal_search_test.dart', 'from three characters: the count and only the matching rows'),
-+    ('A457', 'lib/journal/pages/journal_page.dart',
++    ('A466', 'lib/journal/pages/journal_page.dart',
 +     'listItems([for (final f in found) f.night])',
 +     'listItems(nights!)',
 +     'test/journal/pages/journal_search_test.dart', 'from three characters: the count and only the matching rows'),
-+    ('A458', 'lib/journal/pages/journal_page.dart',
-+     '  1 => PendingLines.MP_66.text(appLanguage),\n',
++    ('A467', 'lib/journal/pages/journal_page.dart',
++     '  1 => Lines.MP_76(n: 1).parts(appLanguage).first,\n',
 +     '',
-+     'test/journal/pages/journal_search_test.dart', 'one night: MP·66; none: MP·68 and no row'),
-+    ('A459', 'lib/journal/pages/journal_page.dart',
-+     '  0 => PendingLines.MP_68.text(appLanguage),\n',
++     'test/journal/pages/journal_search_test.dart', 'one night: MP·76; none: W25 and no row'),
++    ('A468', 'lib/journal/pages/journal_page.dart',
++     '  0 => Lines.W25.text(appLanguage),\n',
 +     '',
-+     'test/journal/pages/journal_search_test.dart', 'one night: MP·66; none: MP·68 and no row'),
-+    ('A460', 'lib/journal/pages/journal_page.dart',
-+     'fontWeight: FontWeight.w600',
++     'test/journal/pages/journal_search_test.dart', 'one night: MP·76; none: W25 and no row'),
++    ('A469', 'lib/journal/pages/journal_page.dart',
++     'fontWeight: FontWeight.w700',
 +     'fontWeight: FontWeight.w400',
-+     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in SemiBold'),
-+    ('A461', 'lib/journal/pages/journal_page.dart',
++     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in Bold'),
++    ('A470', 'lib/journal/pages/journal_page.dart',
 +     '      maxLines: 1,\n      overflow: TextOverflow.ellipsis,\n    );',
 +     '      maxLines: 2,\n      overflow: TextOverflow.ellipsis,\n    );',
-+     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in SemiBold'),
-+    ('A462', 'lib/journal/pages/journal_page.dart',
++     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in Bold'),
++    ('A471', 'lib/journal/pages/journal_page.dart',
 +     '    final style = TypeRoles.button.style(Palette.of(context).summary);',
 +     '    final style = TypeRoles.button.style(Palette.of(context).text);',
-+     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in SemiBold'),
-+    ('A463', 'lib/journal/pages/journal_page.dart',
++     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in Bold'),
++    ('A472', 'lib/journal/pages/journal_page.dart',
 +     '          _ContextLine(night.id, c),',
 +     '          const SizedBox(),',
-+     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in SemiBold'),
-+    ('A464', 'lib/journal/pages/journal_page.dart',
++     'test/journal/pages/journal_search_test.dart', 'a context line under its row, the match in Bold'),
++    ('A473', 'lib/journal/pages/journal_page.dart',
 +     'StandIns.greetingAbove - StandIns.searchAbove - Spacing.sizeFieldSearch',
 +     'StandIns.greetingAbove - StandIns.searchAbove',
 +     'test/journal/pages/journal_search_test.dart', 'the field: EM·4 at the top, as wide as a row'),
-+    ('A465', 'lib/journal/pages/journal_page.dart',
++    ('A474', 'lib/journal/pages/journal_page.dart',
 +     '              padding: const EdgeInsets.symmetric(horizontal: StandIns.rowSide - Spacing.pageSide),',
 +     '              padding: EdgeInsets.zero,',
 +     'test/journal/pages/journal_search_test.dart', 'the field: EM·4 at the top, as wide as a row'),
@@ -1470,23 +1950,23 @@ index 12c915bae9ef5b263aed96bc720626edb6a4bc9a..ce544cae0b5de70734386a37be570e9d
  
 ~~~~
 
-### Task 5 · The opened night: its match in SemiBold (D117 Q6)
+### Task 4 · The opened night: its match in Inter Bold (D117 Q6)
 
 `NightPage.query`; `DreamBubble.bold`; the journal hands the query on from a result. Tests: in
-`night_page_test.dart` (3) and `journal_search_test.dart` (1, and the result's test widened). Rows A466 to A470.
+`night_page_test.dart` (3) and `journal_search_test.dart` (1, and the result's test widened). Rows A475 to A479.
 
-Expected: 601 app tests; rows `A466,A467,A468,A469,A470`, every one caught. Commit:
+Expected: 603 app tests; rows `A475,A476,A477,A478,A479`, every one caught. Commit:
 
-> Night page: opened from a search, the first match in SemiBold in its dream (D117 Q6)
+> Night page: opened from a search, the first match in Inter Bold in its dream (D117 Q6)
 
 **The block:**
 
 ~~~~diff
 diff --git a/app/lib/journal/pages/journal_page.dart b/app/lib/journal/pages/journal_page.dart
-index 38566554b40fafcbc24039f2b24fdb163e2f300b..d228b72572f2946c68ce84818d7cbda357f09605 100644
+index e9d654d..c852395 100644
 --- a/app/lib/journal/pages/journal_page.dart
 +++ b/app/lib/journal/pages/journal_page.dart
-@@ -209,6 +209,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
+@@ -208,6 +208,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
            recording: widget.recording,
            action: widget.nightAction,
            read: widget.read,
@@ -1495,28 +1975,30 @@ index 38566554b40fafcbc24039f2b24fdb163e2f300b..d228b72572f2946c68ce84818d7cbda3
        ),
      );
 diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night_page.dart
-index b29b8ef7a66b4c41972548fd22c7c33ed611440a..8f06dc35b449a31b4c799006933884dea869b868 100644
+index a19f305..12768e9 100644
 --- a/app/lib/journal/pages/night_page.dart
 +++ b/app/lib/journal/pages/night_page.dart
 @@ -25,7 +25,9 @@
- // words owed, shown as handles); Dreams brings "Dreams" into view, the
+ // Reflection; D119 item 4); Dreams brings "Dreams" into view, the
  // other three do nothing until their sections come with the readings. No
  // night is read yet. Not built: reading, and the space below the dreams
 -// with its field.
 +// with its field. Opened from a search, the night's first match shows in
-+// SemiBold in its dream, found again on each read; gone when the page goes
++// Bold in its dream, found again on each read; gone when the page goes
 +// (main-path.md, Search; D117 Q6).
  import 'package:flutter/cupertino.dart';
  import 'package:flutter/material.dart';
  import 'package:flutter/services.dart';
-@@ -46,12 +48,21 @@ import '../night_look.dart';
+@@ -45,6 +47,7 @@ import '../night_action.dart';
+ import '../night_look.dart';
  import '../night_rules.dart';
- import '../owed.dart';
  import '../row_text.dart';
 +import '../search.dart';
  import 'night_art.dart';
  import 'parts.dart';
  import 'typing_page.dart';
+@@ -61,7 +64,15 @@ enum Jump {
+ }
  
  class NightPage extends StatefulWidget {
 -  const NightPage({super.key, required this.journal, required this.id, this.recording, this.action, this.read = noneRead});
@@ -1532,7 +2014,7 @@ index b29b8ef7a66b4c41972548fd22c7c33ed611440a..8f06dc35b449a31b4c799006933884de
  
    static const menuKey = Key('night-menu');
    static const deleteKey = Key('night-delete');
-@@ -76,6 +87,9 @@ class NightPage extends StatefulWidget {
+@@ -86,6 +97,9 @@ class NightPage extends StatefulWidget {
    /// Whether a night has been read: none is yet (the readings come later).
    final ReadCheck read;
  
@@ -1542,7 +2024,7 @@ index b29b8ef7a66b4c41972548fd22c7c33ed611440a..8f06dc35b449a31b4c799006933884de
    @override
    State<NightPage> createState() => _NightPageState();
  }
-@@ -304,6 +318,8 @@ class _NightPageState extends State<NightPage> {
+@@ -314,6 +328,8 @@ class _NightPageState extends State<NightPage> {
      final top = MediaQuery.paddingOf(context).top;
      final read = n != null && widget.read(n);
      final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings);
@@ -1551,7 +2033,7 @@ index b29b8ef7a66b4c41972548fd22c7c33ed611440a..8f06dc35b449a31b4c799006933884de
      // Light time and battery over the header's picture, in both themes (D113);
      // while the page is blank, the app's own theme (D114).
      final overlay = look != null ? SystemUiOverlayStyle.light : statusBarFor(Theme.of(context).brightness);
-@@ -386,7 +402,11 @@ class _NightPageState extends State<NightPage> {
+@@ -396,7 +412,11 @@ class _NightPageState extends State<NightPage> {
                      const SizedBox(height: StandIns.gap),
                      for (final (i, d) in n.entries.indexed)
                        if (d case Told(:final text)) ...[
@@ -1565,7 +2047,7 @@ index b29b8ef7a66b4c41972548fd22c7c33ed611440a..8f06dc35b449a31b4c799006933884de
                        ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
                          Padding(
 diff --git a/app/lib/journal/pages/parts.dart b/app/lib/journal/pages/parts.dart
-index b2d083449b50cdcd42ca196797b77a3562093ef8..98a5bb3512a9c62214e5bf638c5705a8b9340512 100644
+index b2d0834..4db2a57 100644
 --- a/app/lib/journal/pages/parts.dart
 +++ b/app/lib/journal/pages/parts.dart
 @@ -7,6 +7,7 @@ import '../../design/palette.dart';
@@ -1582,7 +2064,7 @@ index b2d083449b50cdcd42ca196797b77a3562093ef8..98a5bb3512a9c62214e5bf638c5705a8
  
 -/// A dream in the dreamer's bubble, from the right (Spacing.bubbleDreamer).
 +/// A dream in the dreamer's bubble, from the right (Spacing.bubbleDreamer);
-+/// opened from a search, its [bold] characters in SemiBold (D117 Q6).
++/// opened from a search, its [bold] characters in Bold (D117 Q6).
  class DreamBubble extends StatelessWidget {
 -  const DreamBubble(this.text, {super.key, required this.onTap});
 +  const DreamBubble(this.text, {super.key, required this.onTap, this.bold});
@@ -1606,7 +2088,7 @@ index b2d083449b50cdcd42ca196797b77a3562093ef8..98a5bb3512a9c62214e5bf638c5705a8
 +                        TextSpan(text: text.substring(0, b.start)),
 +                        TextSpan(
 +                          text: text.substring(b.start, b.end),
-+                          style: const TextStyle(fontWeight: FontWeight.w600),
++                          style: const TextStyle(fontWeight: FontWeight.w700),
 +                        ),
 +                        TextSpan(text: text.substring(b.end)),
 +                      ],
@@ -1618,10 +2100,10 @@ index b2d083449b50cdcd42ca196797b77a3562093ef8..98a5bb3512a9c62214e5bf638c5705a8
              ),
            ),
 diff --git a/app/test/journal/pages/journal_search_test.dart b/app/test/journal/pages/journal_search_test.dart
-index a65ce3fb2f66d91e8aebc1dff523d69978df13b5..e0f26cf4aab3a675442004403121ae516e4e31dc 100644
+index fe6218d..e4b4772 100644
 --- a/app/test/journal/pages/journal_search_test.dart
 +++ b/app/test/journal/pages/journal_search_test.dart
-@@ -160,10 +160,23 @@ void main() {
+@@ -158,10 +158,23 @@ void main() {
      final h = await Harness.make();
      final [_, sv, _] = await three(h);
      await h.pump(tester, JournalPage(journal: h.journal));
@@ -1648,10 +2130,10 @@ index a65ce3fb2f66d91e8aebc1dff523d69978df13b5..e0f26cf4aab3a675442004403121ae51
  
    testWidgets('a search at twice the size does not overflow', (tester) async {
 diff --git a/app/test/journal/pages/night_page_test.dart b/app/test/journal/pages/night_page_test.dart
-index 423c77b4a2ec65d7466afbad01861d475907344e..5d07ae3619769a570eeb137bc8aa5abb87818e1e 100644
+index 4af4c4c..7e3bc4b 100644
 --- a/app/test/journal/pages/night_page_test.dart
 +++ b/app/test/journal/pages/night_page_test.dart
-@@ -26,6 +26,7 @@ import 'package:souldreams/journal/pages/night_page.dart';
+@@ -25,6 +25,7 @@ import 'package:souldreams/journal/pages/night_page.dart';
  import 'package:souldreams/journal/pages/parts.dart';
  import 'package:souldreams/journal/pages/typing_page.dart';
  import 'package:souldreams/journal/row_text.dart';
@@ -1659,7 +2141,7 @@ index 423c77b4a2ec65d7466afbad01861d475907344e..5d07ae3619769a570eeb137bc8aa5abb
  import 'package:souldreams/recording/recording.dart';
  import 'package:souldreams/words/lines.g.dart';
  
-@@ -84,6 +85,7 @@ void main() {
+@@ -83,6 +84,7 @@ void main() {
      bool wide = false,
      int hour = 12,
      bool unread = false,
@@ -1667,7 +2149,7 @@ index 423c77b4a2ec65d7466afbad01861d475907344e..5d07ae3619769a570eeb137bc8aa5abb
    }) async {
      // The test's own 800 by 600, where the foot's two buttons do not fill
      // the row, or a phone.
-@@ -105,12 +107,48 @@ void main() {
+@@ -104,12 +106,48 @@ void main() {
      }
      // A first read that fails leaves the page blank, with no picture.
      if (unread) files!.failReads = true;
@@ -1679,7 +2161,7 @@ index 423c77b4a2ec65d7466afbad01861d475907344e..5d07ae3619769a570eeb137bc8aa5abb
    }
  
 +  // D117 Q6: opened from a search, the night shows its first match in
-+  // SemiBold, in its dream; every other dream, and every opening without a
++  // Bold, in its dream; every other dream, and every opening without a
 +  // search, as before.
 +  List<TextSpan>? boldParts(WidgetTester tester, String dream) {
 +    final text = tester.widget<Text>(find.text(dream));
@@ -1687,13 +2169,13 @@ index 423c77b4a2ec65d7466afbad01861d475907344e..5d07ae3619769a570eeb137bc8aa5abb
 +    return (text.textSpan! as TextSpan).children!.cast<TextSpan>();
 +  }
 +
-+  testWidgets('from a search: the first match in its dream, in SemiBold', (tester) async {
++  testWidgets('from a search: the first match in its dream, in Bold', (tester) async {
 +    await open(tester, key: 'named-three-dreams-sv', query: 'NYCKEL');
 +    final d = n.dreams[2];
 +    final at = firstMatch(d, 'NYCKEL')!;
 +    final parts = boldParts(tester, d)!;
 +    expect([for (final s in parts) s.text], [d.substring(0, at.start), d.substring(at.start, at.end), d.substring(at.end)]);
-+    expect(parts[1].style!.fontWeight, FontWeight.w600);
++    expect(parts[1].style!.fontWeight, FontWeight.w700);
 +    expect(parts[0].style, isNull);
 +    expect(parts[2].style, isNull);
 +    expect(boldParts(tester, n.dreams[0]), isNull);
@@ -1718,31 +2200,43 @@ index 423c77b4a2ec65d7466afbad01861d475907344e..5d07ae3619769a570eeb137bc8aa5abb
      await tester.tap(find.byKey(NightPage.menuKey));
      await tester.pumpAndSettle();
 diff --git a/tool/app_mutations.py b/tool/app_mutations.py
-index ce544cae0b5de70734386a37be570e9d3e2b7ab6..49432702b9f34730eadfac5caf052928c013a55d 100644
+index bf49683..af32b89 100644
 --- a/tool/app_mutations.py
 +++ b/tool/app_mutations.py
-@@ -2116,6 +2116,27 @@ ROWS = [
+@@ -1,9 +1,9 @@
+ # The app's mutation checks (D49 c), run by hand from the repository
+ # root: python3 -I -B tool/app_mutations.py
+ # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
+-# Expected: every row "caught" (A1 to A474, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
++# Expected: every row "caught" (A1 to A479, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+ # the later rulings and the final review among them), then "app
+-# mutations: 492 run, 492 caught", exit 0. Each row breaks one thing in app/, in place, runs the
++# mutations: 497 run, 497 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+ # named test with the pinned Flutter (fvm), which must pass unbroken
+ # and fail broken, and puts the file back byte for byte, whatever
+ # happens. check_all.sh does not call it. It reports row codes only,
+@@ -2152,6 +2152,27 @@ ROWS = [
       '              padding: const EdgeInsets.symmetric(horizontal: StandIns.rowSide - Spacing.pageSide),',
       '              padding: EdgeInsets.zero,',
       'test/journal/pages/journal_search_test.dart', 'the field: EM·4 at the top, as wide as a row'),
-+    # redesign-b (D117 Q6): the opened night's match in SemiBold.
-+    ('A466', 'lib/journal/pages/night_page.dart',
++    # redesign-b (D117 Q6): the opened night's match in Bold.
++    ('A475', 'lib/journal/pages/night_page.dart',
 +     '                          bold: found?.entry == i ? found!.span : null,',
 +     '                          bold: null,',
-+     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in SemiBold'),
-+    ('A467', 'lib/journal/pages/night_page.dart',
++     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in Bold'),
++    ('A476', 'lib/journal/pages/night_page.dart',
 +     '                          bold: found?.entry == i ? found!.span : null,',
 +     '                          bold: found?.span,',
-+     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in SemiBold'),
-+    ('A468', 'lib/journal/pages/parts.dart',
-+     '                          style: const TextStyle(fontWeight: FontWeight.w600),',
++     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in Bold'),
++    ('A477', 'lib/journal/pages/parts.dart',
++     '                          style: const TextStyle(fontWeight: FontWeight.w700),',
 +     '                          style: const TextStyle(fontWeight: FontWeight.w400),',
-+     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in SemiBold'),
-+    ('A469', 'lib/journal/pages/journal_page.dart',
++     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in Bold'),
++    ('A478', 'lib/journal/pages/journal_page.dart',
 +     '          query: query,\n',
 +     '',
 +     'test/journal/pages/journal_search_test.dart', 'a result opens its night'),
-+    ('A470', 'lib/journal/pages/journal_page.dart',
++    ('A479', 'lib/journal/pages/journal_page.dart',
 +     '          query: query,\n',
 +     '          query: _search.text,\n',
 +     'test/journal/pages/journal_search_test.dart', 'a row opened with no search hands no query'),
@@ -1751,259 +2245,227 @@ index ce544cae0b5de70734386a37be570e9d3e2b7ab6..49432702b9f34730eadfac5caf052928
  
 ~~~~
 
-### Task 6 · Docs: Status.md, the runner's count, the Dev-only test's note
+### Task 5 · Docs: Status.md and the Dev-only test
 
-Status.md: "Last updated", the current branch, the road ahead, the pending lines, search, the counts (601 tests,
-489 rows; 250 guard tests and 96 guard mutations), banked items 145 to 149, the pending lines' section, and
-"Rulings during redesign-b": the redesign-a merge, D116 and D117. The runner's header: A1 to A470, 489.
-`dev_only_test.dart`: SoulDreams Dev reaches `search.dart` and `pending.g.dart`. Then the full run (D95), once,
-before the final review: `python3 -I -B tool/app_mutations.py` → `app mutations: 489 run, 489 caught`.
+Status.md: "Last updated", the road ahead, the greeting and search, the counts (603 tests, 497 rows), banked items
+145 to 149 (and 144's note), and "Rulings during redesign-b": the redesign-a merge, D116 and D117 written out.
+`dev_only_test.dart`: SoulDreams Dev reaches `search.dart`. Then the full run (D95), once, before the final review:
+`python3 -I -B tool/app_mutations.py` → `app mutations: 497 run, 497 caught`.
 
-Expected: 601 app tests. Commit:
+Expected: 603 app tests; the rows naming `dev_only_test.dart`, every one caught. Commit:
 
-> Docs: Status.md for redesign-b (D116, D117); 489 mutation rows
+> Docs: Status.md for redesign-b (D116 to D119); 497 mutation rows
 
 **The block:**
 
 ~~~~diff
 diff --git a/app/test/dev_only_test.dart b/app/test/dev_only_test.dart
-index 04d9aa8c39d425375a9a1f7daf473aa1cbb4f59e..857494bca69a66d3c2eb9282b79563391ec32841 100644
+index 04d9aa8..0b3db8b 100644
 --- a/app/test/dev_only_test.dart
 +++ b/app/test/dev_only_test.dart
-@@ -73,10 +73,12 @@ void main() {
-     });
-   }
- 
--  // C17-P filed every pending line, so nothing reaches pending.g.dart
--  // until the owner gives the next one.
-+  // Search's count lines are pending (D117 Q1): SoulDreams Dev reaches
-+  // pending.g.dart through the journal, and the other two never do (above).
+@@ -77,6 +77,7 @@ void main() {
+   // until the owner gives the next one.
    test('SoulDreams Dev reaches the journal pages', () {
      final files = reached('lib/main_dev.dart');
 +    expect(files, contains('lib/journal/search.dart'));
-+    expect(files, contains('lib/words/pending.g.dart'));
      expect(files, contains('lib/journal/pages/journal_page.dart'));
      expect(files, contains('lib/journal/pages/night_page.dart'));
      expect(files, contains('lib/recording/record_microphone.dart'));
 diff --git a/docs/Status.md b/docs/Status.md
-index f56c178888daf3530f884859e0e1441a56616a48..cc75e944bbd63323dcb1e5054808527da58ba812 100644
+index 317f577..1629588 100644
 --- a/docs/Status.md
 +++ b/docs/Status.md
 @@ -1,6 +1,6 @@
  # Status — SoulDreams app
  
--Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110, D112 to D115; the owner's by-eye review, then the merge, next), by Claude Code.
-+Last updated: 2026-11-21, in branch `redesign-b` (search, D110, D116, D117; the owner's by-eye review, then the merge, next), by Claude Code.
+-Last updated: 2026-11-21, in branch `redesign-b` (C18-P imported, D118 and D119; the search plan amended to it; the owner's by-eye checks of the fonts next), by Claude Code.
++Last updated: 2026-11-21, in branch `redesign-b` (C18-P imported, D118 and D119; the filed greeting, New Dream and jump buttons; search, D110, D116, D117; the owner's by-eye review, then the merge, next), by Claude Code.
  
  *No matter where you are on your journey, the steps you take are equally important.*
  
-@@ -14,13 +14,14 @@ rulings given during each branch are listed in this file, one line each, under "
- 
- ## Current branch
- 
--`redesign-a`: the journal and a night's page to the new design (D110, head's message 24; plan
--`docs/plans/redesign-a.md`). `c17p-import` is merged (`a2580db`).
-+`redesign-b`: search (D110, head's message 24; D116, D117; plan `docs/plans/redesign-b.md`). `redesign-a` is merged
-+(`e81f29c`).
+@@ -19,9 +19,9 @@ rulings given during each branch are listed in this file, one line each, under "
  
  ## Road ahead
  
 -- `redesign-a`: the owner's by-eye review (the plan's Task 9), then the merge.
 -- Redesign B and C (D110): search, Settings (with Word Animation's setting) and the consent's controls; then Life
-+- `redesign-b`: the owner's by-eye review (the plan's Task 7), then the merge.
+-  Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
++- `redesign-b`: the owner's by-eye review (the plan's Task 6), then the merge.
 +- Redesign B's rest and C (D110): Settings (with Word Animation's setting, and the gear, D116 item 5) and the
-+  consent's controls; then Life
-   Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
++  consent's controls, with C18-P's three consents (MP·66 to MP·70, D119 item 1); then Life Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
    replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
  - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
-@@ -225,8 +226,9 @@ rulings given during each branch are listed in this file, one line each, under "
- - The pending lines (D57 Q11; D58 Q11): `app/assets/words/pending-lines.csv` and its fingerprint, the owner's;
-   `wordsgen.py` makes `app/lib/words/pending.g.dart`, whose `PendingLine` is not a `Line` and shows its words in
-   SoulDreams Dev only (any other flavour gets its handle), and G1 proves both. A row whose handle the register holds
--  stops the generator (`pending-filed`). Since C17-P none is pending: the file holds its header only, and nothing in
--  `lib/` imports `pending.g.dart` (a test in `test/words/` keeps the Dev-only rule proved on a line built there).
-+  stops the generator (`pending-filed`). A pending line takes the register's slots under the register's rules, and
-+  one with a slot is a function, as a filed one is (D117 Q1). Pending now: MP·66, MP·67 and MP·68, search's (D117);
-+  `lib/journal/` imports `pending.g.dart`, which SoulDreams Dev alone reaches (`dev_only_test.dart`).
- - Waiting statuses (D109): "English written, Swedish to write" (W12, W13) has no line, as "to write"; the readings
-   branch revisits them.
- - Design values: `Spacing.pageSide` (30) and `Spacing.journalRow` (12) are filed at C17-P and replace the stand-ins
-@@ -234,11 +236,22 @@ rulings given during each branch are listed in this file, one line each, under "
- - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
-   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
-   (P13).
--- The app's analyzer baseline: `No issues found!`. The app has 577 tests, and 460 mutation checks (A1 to A441; A24ah,
+   C17-P (and, for the founder app, with his export).
+@@ -239,14 +239,29 @@ rulings given during each branch are listed in this file, one line each, under "
+   At C18-P (D118): `TypeRoles.rowDate` (Inter SemiBold 20) carries a row's date; a line or letter "[to set in
+   Framer]" is null, the font's own; a colour "[to try ...]" or "[proposed ...]" has no constant
+   (`color.label.questions`, the dark `color.lifecontext.delete`), one "[owed: ...]" keeps its value.
++- The journal's greeting (C18-P; D119 item 4): MP·72 to MP·75 by the part of the day, from 05:00, 11:00, 17:00
++  and 21:00, one line of the part's four a day, in turn; a night after midnight keeps the line of the evening it
++  began on (the day counted under D91). New Dream is MP·11; a read night's jump buttons are MP·77's four parts.
++  `owed.dart` is gone: no owed handle is left on a screen.
 +- Search (D110; D116; D117; `redesign-b`; TO TRY where a stand-in): the journal's field at the top (20 down, 50 tall,
 +  as wide as a row; `color.field` with its border; EM·4 its placeholder; a magnifier drawn in code, silent; no clear
 +  button; no autocorrect or suggestions), the sky mark still 140 down. From three characters (code points, the
-+  spaces around left out): where the list starts, the count of nights (MP·66, MP·67) or MP·68, then only the
-+  matching nights' rows, newest first, under their month dividers, each with a context line under it: up to three
-+  words before the match (an ellipsis when words were left off), the match in Inter SemiBold, then the rest, one
-+  line, the button type in `color.text.summary`. The matcher (`journal/search.dart`, `firstMatch`, one function for
-+  recurring images later): each character folded by itself (Dart's own folding), marks kept, the typed characters
-+  at the start of a word (D117 Q4), the told dreams in order, never a name, the first place. A result opens its
-+  night with the match in SemiBold in its dream (D117 Q6), found again on each read, gone when the page goes. The
-+  query is never kept or logged (R3).
-+- The app's analyzer baseline: `No issues found!`. The app has 601 tests, and 489 mutation checks (A1 to A470; A24ah,
++  spaces around left out): where the list starts, the count of nights (MP·76, "1 match" or "{n} matches") or W25,
++  then only the matching nights' rows, newest first, under their month dividers, each with a context line under it:
++  up to three words before the match (an ellipsis when words were left off), the match in Inter Bold, then the
++  rest, one line, the button type in `color.text.summary`. The matcher (`journal/search.dart`, `firstMatch`, one
++  function for recurring images later): each character folded by itself (Dart's own folding), marks kept, the typed
++  characters at the start of a word (D117 Q4), the told dreams in order, never a name, the first place. A result
++  opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
++  goes. The query is never kept or logged (R3).
+ - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
+   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
+   (P13).
+-- The app's analyzer baseline: `No issues found!`. The app has 577 tests, and 462 mutation checks (A1 to A443; A24ah,
++- The app's analyzer baseline: `No issues found!`. The app has 603 tests, and 497 mutation checks (A1 to A479; A24ah,
    A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-   A313 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
+-  A313 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
++  A313, A363 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
    `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
--  (expected: `app mutations: 460 run, 460 caught`); `check_all.sh` does not call it (D55). During a task only the
-+  (expected: `app mutations: 489 run, 489 caught`); `check_all.sh` does not call it (D55). During a task only the
+-  (expected: `app mutations: 462 run, 462 caught`); `check_all.sh` does not call it (D55). During a task only the
++  (expected: `app mutations: 497 run, 497 caught`); `check_all.sh` does not call it (D55). During a task only the
    rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
  
  ## The server
-@@ -324,7 +337,8 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Task
- - G1 also proves the pending lines against `pending-fingerprint.txt` and `pending.g.dart` against the generator; G2
-   also proves every file in `docs/reference/screens/` against its `fingerprints.txt`; G0 knows those two
-   fingerprint files by exact path (D57 Q11, D58).
--- Totals: 241 guard tests and 87 mutation checks.
-+- Totals: 250 guard tests and 96 mutation checks (measured at redesign-b's start: 249 and 92; the earlier figure had
-+  not followed the branches since).
- 
- ## Banked
- 
-@@ -819,6 +833,20 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
+@@ -826,6 +841,23 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
+      it).
  144. Shown dates now have a two-digit year (D112). MP·27 and `main-path.md` (Every Screen) say `dd/mm/yyyy`, and the
       C17-P copies stay as filed: for Product's next filing, with Part 4 item 12's list. The export is unchanged.
- 
-+Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 and D117):
++     (C18-P files MP·27 as dd/mm/yy; `main-path.md` waits for Product's next pass.)
 +
-+145. For Product's next filing, through the head: MP·66, MP·67 and MP·68 (pending, D117); W25 unused while MP·68
-+     stands (D117 Q2); "1 match" shown against C134-I item 6's "by itself, with no line" (D117 Q3); names no longer
-+     searched (D116 item 1, against `main-path.md`'s "night names included"). For Interpretation, through the head:
-+     the matcher's rule, the typed characters at the start of a word, against C140-I item 6's plain forms (D117 Q4).
++Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D119 and the filed lines and values):
++
++145. For Product's next filing, through the head: names no longer searched (D116 item 1, against `main-path.md`'s
++     "night names included"); "1 match" shown against C134-I item 6's "by itself, with no line" (D117 Q3); the
++     microphone's spoken name still MP·11, now "New Dream" (D119 item 3); a night greeting after midnight keeps the
++     evening's line (the day counted under D91). For Interpretation, through the head: the matcher's rule, the typed
++     characters at the start of a word, against C140-I item 6's plain forms (D117 Q4).
 +146. Text and query are not normalised (NFC would need a package): a letter typed composed does not match the same
 +     letter stored as a letter and a mark. Keyboards and Soniox give composed letters.
 +147. Dart folds each character to one (a capital I with a dot to a plain i); a folding that changed a character's
 +     length would still map back to whole characters. Greek's final sigma folds as Dart folds it.
-+148. Nunito has no SemiBold file: the match in a dream bubble is the phone's drawn bold of Nunito Regular (by eye in
-+     the owner's review). The context line's Inter SemiBold is bundled.
++148. Since C18-P no type role names Nunito or Habibi; both stay declared until a ruling removes them. The dreamer's
++     words quoted in a reflection take "Inter Display Italic" (§1), which the app does not have (no Inter Italic
++     file): for the readings' branch.
 +149. `opening()` (`row_text.dart`) stays unused: D116 item 3's context replaced it for search (banked item 136).
-+
+ 
  ## Before Cohort 1
  
- 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
-@@ -858,8 +886,8 @@ message 20 and built in `journal-design`, except the night's page's field in 10,
+@@ -1158,7 +1190,18 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
  
- Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
+ ## Rulings during redesign-b
  
--- None. MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`), and
--  `pending-lines.csv` emptied to its header.
-+- MP·66, MP·67 and MP·68, search's count lines and its empty result (D110's words; D117), added by the owner in
-+  `redesign-b`. MP·60 to MP·65 were filed at C17-P.
- 
- ## Rulings during branch 2
- 
-@@ -1148,6 +1176,19 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
-   the light theme, `#8A8A8A` in the dark, TO TRY); 100 pt more empty space above the sky mark and the greeting (140,
-   was 40).
- 
-+## Rulings during redesign-b
-+
+-- D116 and D117 (owner): the search plan's brainstorm and its stop, listed in `docs/plans/redesign-b.md`.
 +- `redesign-a` merged by the owner (`e81f29c`).
 +- D116 (owner, the brainstorm): (1) search covers the dreams' text in every night (no readings or Life Context
 +  yet); (2) matching ignores case, Unicode-aware, and keeps letters with marks distinct; (3) the context line is a
 +  short stretch around the first match, the matched characters in bold; (4) the count lines and "No matches" as
-+  pending lines where the register has no place; (5) the settings gear stays out until redesign C.
-+- D117 (owner, on the stop of 2026-11-21): Q1 a pending line takes the register's slots (a checks change the owner
-+  applies, D60), then the owner's three pending lines; Q2 D110 governs (MP·68; W25 to Product); Q3 D110 governs
-+  ("1 match" shown; C134-I item 6 to the head); Q4 the typed characters at the start of a word, one reusable
-+  function, flagged to the head for Interpretation; Q5 nights are counted; Q6 the opened night's match in bold;
-+  Q7 the journal while searching as leaned, no clear button; Q8 the context line as leaned.
-+
- ## Documents as last imported
- 
- Imported by the owner at the documents repository's C17-P state (`d8d71c3`), in branch `c17p-import`; the nine
-diff --git a/tool/app_mutations.py b/tool/app_mutations.py
-index 49432702b9f34730eadfac5caf052928c013a55d..1ec801f11d936d059e2b9eac80fe80a48580a322 100644
---- a/tool/app_mutations.py
-+++ b/tool/app_mutations.py
-@@ -1,9 +1,9 @@
- # The app's mutation checks (D49 c), run by hand from the repository
- # root: python3 -I -B tool/app_mutations.py
- # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
--# Expected: every row "caught" (A1 to A441, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
-+# Expected: every row "caught" (A1 to A470, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
- # the later rulings and the final review among them), then "app
--# mutations: 460 run, 460 caught", exit 0. Each row breaks one thing in app/, in place, runs the
-+# mutations: 489 run, 489 caught", exit 0. Each row breaks one thing in app/, in place, runs the
- # named test with the pinned Flutter (fvm), which must pass unbroken
- # and fail broken, and puts the file back byte for byte, whatever
- # happens. check_all.sh does not call it. It reports row codes only,
++  pending lines where the register has no place (C18-P has since filed them: MP·76 and W25); (5) the settings gear
++  stays out until redesign C.
++- D117 (owner, on the stop of 2026-11-21): Q1 a pending line takes the register's slots, and Q2 MP·68 for "No
++  matches" (both superseded by C18-P's filing: the count is MP·76, the empty result W25, no pending line); Q3 D110
++  governs ("1 match" shown; C134-I item 6 to the head); Q4 the typed characters at the start of a word, one
++  reusable function, flagged to the head for Interpretation; Q5 nights are counted; Q6 the opened night's match in
++  bold (Inter Bold since C18-P, D118); Q7 the journal while searching as leaned, no clear button; Q8 the context
++  line as leaned.
+ - D118 (founder): where the Design System names "Inter Display", the app uses Inter (already installed), at the same
+   sizes and spacing; the Build chat tells Product.
+ - D119 (owner, on C18-P's import stop, `.scratch/for-build-chat/c18p-import-stop.md`), as leaned: (1) until the three
 ~~~~
 
-### Task 7 · [OWNER] The by-eye review, SoulDreams Dev, invented nights only
+### Task 6 · [OWNER] The by-eye review, SoulDreams Dev, invented nights only
 
 By eye only, in SoulDreams Dev built from this branch, with invented nights typed from
 `fixtures/invented-nights.json` (save at least `two-dreams-en`, `one-dream-sv` and `named-three-dreams-sv`, each
 as its own night). Check each step in the light theme and, where it says so, in the dark one (after 21:00 or before
-08:00). If any result differs, stop and bring it to the Build chat; nothing is fixed on the phone. The count lines
-show their words in SoulDreams Dev.
+08:00). If any result differs, stop and bring it to the Build chat; nothing is fixed on the phone.
 
-1. **The field (light and dark).** At the top, a white pill (in the dark theme, a beige one with no edge) as wide as
+**The fonts and lines from C18-P** (the import, D118, D119):
+
+1. **The row's date** (light and dark): each row's date in Inter SemiBold, white, a little larger than before (20,
+   was 18), centred over its picture or gradient, with the soft shade behind it on a painting.
+2. **The dreamer's words** (a night's dream bubbles, and the typing screen as you type): Inter, slightly spaced
+   (0.02em), where it was Nunito. Line height as before.
+3. **The app's voice** (onboarding's lines, and "Read everything", the full disclosure page): Bellefair at 22, with
+   tight letter spacing (−0.04em), where it was Sorts Mill Goudy at 18. Check it reads calmly at the usual text size
+   and at the largest.
+4. **Onboarding's consent step** (D119 1): the right button reads "I consent"; "I don't agree" (EM·6) is still the
+   left one; the line "By clicking I agree…" is gone, with no gap where it stood.
+5. **The greeting**: by the clock (morning from 05:00, day from 11:00, evening from 17:00, night from 21:00); the
+   next day, at the same time, a different line of the same part. New Dream reads "New Dream". On a read night
+   (`PREVIEW_READ`), the jump buttons read Dreams, Questions, Readings, Reflection.
+6. **The first empty journal** (a fresh install): "Tap here to record your first dream" under New Dream.
+
+**Search:**
+
+7. **The field (light and dark).** At the top, a white pill (in the dark theme, a beige one with no edge) as wide as
    the rows, with a thin magnifier at its left and "Search your journal" in grey. The sun or moon, the greeting
    and New Dream are where they were. No settings gear and no clear button.
-2. **Typing.** Tap the field: the keyboard's key reads Search; no word suggestions above the keys; nothing typed is
+8. **Typing.** Tap the field: the keyboard's key reads Search; no word suggestions above the keys; nothing typed is
    corrected.
-3. **Under three characters** (type `gl`): the journal is unchanged, with every row.
-4. **From three characters** (type `glas`): under New Dream, "2 matches", then only the two Swedish nights' rows,
-   newest first, under their month's divider. Under each row, one grey line: a few words, "glas" in bold, then the
-   rest, cut with "…" where it runs out.
-5. **Capitals and marks.** `GLAS` gives the same as `glas`. `tåg` finds the night with "tågen"; `tag` finds nothing.
-6. **Start of a word only.** `citron` finds the night with "citronträd"; `träd` finds nothing.
-7. **One and none.** `lighth` shows "1 match" and one row; `zzz` shows "No matches" and no row (and not the empty
-   journal's line).
-8. **A result opens its night.** With `nyckel` typed, tap the row: the night opens, and in its third dream "nyckel"
-   is in bold (Nunito has no bold file, so the phone draws it; check it looks bold and calm). Back: the search is
-   still there. Open the same night from the plain journal (clear the field): nothing is bold.
-9. **Back under three characters** (delete to `ny`): the whole journal returns.
-10. **Large text** (the phone's largest): the field grows to fit, and the results and context lines show no cut-off
+9. **Under three characters** (type `gl`): the journal is unchanged, with every row.
+10. **From three characters** (type `glas`): under New Dream, "2 matches", then only the two Swedish nights' rows,
+    newest first, under their month's divider. Under each row, one grey line: a few words, "glas" in bold, then the
+    rest, cut with "…" where it runs out.
+11. **Capitals and marks.** `GLAS` gives the same as `glas`. `tåg` finds the night with "tågen"; `tag` finds nothing.
+12. **Start of a word only.** `citron` finds the night with "citronträd"; `träd` finds nothing.
+13. **One and none.** `lighth` shows "1 match" and one row; `zzz` shows "No matches" and no row (and not the empty
+    journal's line).
+14. **A result opens its night.** With `nyckel` typed, tap the row: the night opens, and in its third dream "nyckel"
+    is in bold (Inter Bold, a true bold). Back: the search is still there. Open the same night from the plain
+    journal (clear the field): nothing is bold.
+15. **Back under three characters** (delete to `ny`): the whole journal returns.
+16. **Large text** (the phone's largest): the field grows to fit, and the results and context lines show no cut-off
     or overlap beyond the line's own "…".
-11. **The founder's verdict, TO TRY** (P13): the field's place (20 from the top), the context line (three words
-    before, its grey, 6 below the row), the count's place. Keep, or the values he wants.
+
+**The founder's verdict, TO TRY** (P13; design-system.md §8, C18-P):
+
+17. The journal rows' height, edge and width (now 48 from each side, 1 pt grey border, the stand-in height).
+18. The night's header (about 240 tall in §8; check how it scrolls away as the night is read).
+19. The jump buttons' colours, read from his screens: Dreams green, Questions brown (a stand-in until
+    `color.label.questions` is set), Readings terracotta, Reflection blue, in both themes.
+20. Search's places: the field (20 from the top), the context line (three words before, its grey, 6 below the row),
+    the count's place. Keep, or the values he wants.
 
 ## Part 4 · Questions (numbered; a blank is not a yes)
 
-None open. D117 answered the stop's eight questions, and each is built as answered. Carried upward by the Build chat
-(banked item 145): for Product, MP·66 to MP·68 to file, W25 unused, "1 match" against C134-I item 6, and names no
-longer searched; for Interpretation, the matcher's start-of-word rule against C140-I item 6's plain forms.
+None open. D117 answered the first stop, and D119 the import's; each is built as answered. Carried upward by the
+Build chat (banked item 145): for Product, names no longer searched, "1 match" against C134-I item 6, the
+microphone's spoken name (MP·11, D119 item 3), and the greeting's day after midnight; for Interpretation, the
+matcher's start-of-word rule against C140-I item 6's plain forms.
 
 ## Part 5 · How this plan was proven
 
-1. **Built task by task in a copy of the tracked tree**, `./.scratch/rb/build`, from `git archive` of `e81f29c`, each
-   task's state kept as a snapshot (`./.scratch/rb/snaps/<task>`). Each block in Part 3 is `git diff --no-index`
-   between two snapshots. Harness files (`.claude/`), `.dart_tool`, the app's `build/` and Python's `__pycache__` are
-   left out of every snapshot.
-2. **Task 2 in the build** used a stand-in pending file with the same three handles and words (sha256 `64938d82…`),
-   since the owner's file is his. No block touches `pending.g.dart` after Task 1, so the owner's file changes only
-   the hash in that file's header.
-3. **The counts measured on the build**: app tests 577 (baseline), 577, 577, 587, 597, 601, 601, with
-   `No issues found!` at each.
-4. **Test first**: Tasks 3 to 5's new tests were run on the code before them and failed to load. Task 1's tests
-   were run on the old generator: one failure (`test_each_row_rule_stops`) and one error (the new test). During the
-   build: a test of a folding that changes length was replaced (Dart folds the capital I with a dot to one plain i,
-   so the length never changes; the bookkeeping for partial characters was then dropped as dead); G4 refused several
-   test names and row patterns of twelve words or more, each shortened; A451 first survived (the test had no break after
-   the match; one added), and A457 first survived (the default view did not build the row that should be absent;
-   those tests now run on a phone-sized view).
-5. **Mutations on the build** (D95, every row of the files changed): Task 1, the generator's guard rows
-   `21 run, all caught`; Task 3 `11 run, 11 caught`; Task 4 every row of `journal_page.dart` and `stand_ins.dart`
-   `45 run, 45 caught` (after A322, A377, A379 followed the code); Task 5 every row of `night_page.dart`,
-   `parts.dart` and `journal_page.dart` `93 run, 93 caught`; Task 6 the rows naming `dev_only_test.dart`
-   `5 run, 5 caught`.
+1. **Built task by task in a copy of the tracked tree**, `./.scratch/rb2/build`, from `git archive` of `3e95600` (the
+   import), each task's state kept as a snapshot (`./.scratch/rb2/snaps/s<task>`). Each block in Part 3 is
+   `git diff --no-index` between two snapshots. Harness files (`.claude/`), `.dart_tool`, the app's `build/`, the
+   generated iOS files (`Generated.xcconfig`, `flutter_export_environment.sh`, `GeneratedPluginRegistrant.*`,
+   `ephemeral`) and Python's `__pycache__` are left out of every snapshot.
+2. **Tasks 2 to 4 began from the first plan's blocks**, ported: MP·66 and MP·67 to MP·76's parts, MP·68 to W25, the
+   pending import and the pending-line test removed, SemiBold to Bold (`FontWeight.w700`), the rows renumbered from
+   A442 to A451. Three hunks no longer applied after Task 1 (their context had `_daypart` and the row date's `h6`);
+   each was applied by hand to the new context, then the whole task proven as below.
+3. **The counts measured on the build**: app tests 577 (baseline), 580, 589, 599, 603, 603, with `No issues
+   found!` at each.
+4. **Test first**: each task's new and changed test files, put on the snapshot before the task, failed to load.
+   During the build: G4 refused three test names of twelve words or more (Task 1), each shortened; two Task 1 tests
+   found the jump buttons by their words, which MP·38's "Dreams" now shares, so they find them by key; rows A394 and
+   A405 named `_daypart` and followed the code (D67).
+5. **Mutations on the build** (D95, every row of the files changed): Task 1, `greeting.dart`, `journal_page.dart`,
+   `night_page.dart` `74 run, 74 caught` (after A394 and A405 followed); Task 2, `search.dart` `11 run, 11 caught`;
+   Task 3, `journal_page.dart` and `stand_ins.dart` `48 run, 48 caught`; Task 4, `night_page.dart`, `parts.dart` and
+   `journal_page.dart` `98 run, 98 caught`; Task 5, the rows naming `dev_only_test.dart` `5 run, 5 caught`.
 6. **The guards** on each snapshot: `guards (walk): all passed`.
-7. **Replayed on a fresh copy**, `./.scratch/rb/replay`, from `git archive` of `e81f29c`: every block applied with
+7. **Replayed on a fresh copy**, `./.scratch/rb2/replay`, from `git archive` of `3e95600`: every block applied with
    `git apply` in order (with `GIT_CEILING_DIRECTORIES` set, so `git apply` is not silently skipped inside the
-   repository), Task 2 done as the owner would (the stand-in file, its fingerprint, `wordsgen.py --write`), and
-   after each step the tree compared with its snapshot: no difference. On the replayed tree: `guards (walk): all
-   passed`, `No issues found!`, `+601: All tests passed!`, the generator's tests `Ran 39 tests`, `OK`; the 29 new and
-   3 followed rows `app mutations: 32 run, 32 caught`; every guard mutation `mutations: 96 run, all caught`.
-8. **Not run in the sandbox**: the full app mutation run (D95, Task 6); the guard test suite whole on a copy, where
-   `test_check_all` needs the repository's own git (it passed in the repository at the start: `Ran 249 tests`,
-   `OK`); `tool/check_all.sh` whole (the owner's).
-9. **Not provable in the sandbox, so the owner's** (Task 7): the look on the phone in both themes; the keyboard's
-   Search key and no suggestions; the drawn bold of Nunito; large text on a real phone.
-10. The scratch copies (`./.scratch/rb/`) are deleted after this plan is committed.
+   repository), and after each the tree compared with its snapshot: no difference. On the replayed tree:
+   `guards (walk): all passed`, `No issues found!`, `+603: All tests passed!`; the 36 new and 11 followed rows, with A380 and A425 (the row date's, from the import),
+   `app mutations: 49 run, 49 caught`.
+8. **Not run in the sandbox**: the full app mutation run (D95, Task 5); `tool/check_all.sh` whole (the owner's).
+9. **Not provable in the sandbox, so the owner's** (Task 6): the look on the phone in both themes, the fonts
+   included; the keyboard's Search key and no suggestions; large text on a real phone.
+10. The scratch copies (`./.scratch/rb2/`) are deleted after this plan is committed.
 
 *No matter where you are on your journey, the steps you take are equally important.*
