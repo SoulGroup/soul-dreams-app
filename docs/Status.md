@@ -813,7 +813,7 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
      minute timer, so for up to a minute around 08:00 and 21:00 it and the theme can differ; on returning, the mark
      and the greeting follow the clock only when the journal read succeeds; the night's picture now clips what
      stands over it, so a header date too wide at extreme text sizes is cut off rather than painting over the list;
-     the dark-phone half of the status-bar test would also pass with no outer region (the light-phone half covers
+     the 22:00 (dark theme) half of the status-bar test would also pass with no outer region (the noon half covers
      it).
 144. Shown dates now have a two-digit year (D112). MP·27 and `main-path.md` (Every Screen) say `dd/mm/yyyy`, and the
      C17-P copies stay as filed: for Product's next filing, with Part 4 item 12's list. The export is unchanged.
