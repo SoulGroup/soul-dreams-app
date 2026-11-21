@@ -1748,6 +1748,27 @@ ROWS = [
      'bool noneRead(Night night) => false;',
      'bool noneRead(Night night) => true;',
      'test/journal/night_look_test.dart', 'no night is read before the readings'),
+    # D110: a night's picture (the painted gradient, the placeholder paintings).
+    ('A368', 'lib/journal/pages/night_art.dart',
+     '        canvas.drawRect(box, Paint()..shader = _vertical(box, NightArt.gradient));\n',
+     '',
+     'test/journal/pages/night_art_test.dart', 'the gradient fills its box, and nothing else is drawn'),
+    ('A369', 'lib/journal/pages/night_art.dart',
+     '        canvas.drawRect(box, Paint()..shader = _vertical(box, [p.top, p.foot]));\n',
+     '',
+     'test/journal/pages/night_art_test.dart', 'each painting fills its box and draws its own light'),
+    ('A370', 'lib/journal/pages/night_art.dart',
+     'static final gradient = [DarkColours.surface.colour!, DarkColours.surface.colourEnd!];',
+     'static final gradient = [DarkColours.surface.colourEnd!, DarkColours.surface.colour!];',
+     'test/journal/pages/night_art_test.dart', "the gradient and the words over it: from the dark theme"),
+    ('A371', 'lib/journal/pages/night_art.dart',
+     '      CustomPaint(painter: _ArtPainter(look), child: child ?? const SizedBox.expand());',
+     '      ExcludeSemantics(child: CustomPaint(painter: _ArtPainter(look), child: child ?? const SizedBox.expand()));',
+     'test/journal/pages/night_art_test.dart', 'the picture is silent; what stands over it is heard'),
+    ('A372', 'lib/journal/pages/night_art.dart',
+     '  static const paintings = 5;',
+     '  static const paintings = 4;',
+     'test/journal/pages/night_art_test.dart', 'a few placeholder paintings stand in the set'),
 ]
 
 
