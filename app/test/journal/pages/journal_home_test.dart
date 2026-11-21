@@ -13,6 +13,7 @@ import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_action.dart';
+import 'package:souldreams/journal/night_look.dart';
 import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
@@ -119,6 +120,20 @@ void main() {
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).nightAction, same(action));
   });
 
+  testWidgets('whether a night is read is handed to the journal', (tester) async {
+    JournalStore.newQueueForTests();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), read: allRead)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).read, same(allRead));
+  });
+
+  testWidgets('by default no night is read', (tester) async {
+    JournalStore.newQueueForTests();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).read, same(noneRead));
+  });
+
   // D92 item 3: a recording waiting is retried only while the app is open:
   // when the journal opens and when the app comes back; leaving cuts it.
   testWidgets('the journal opening retries; leaving cuts it; back resumes', (tester) async {
@@ -203,8 +218,10 @@ void main() {
     // With each night's export (D108).
     expect(
       text,
-      contains('JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action)'),
+      contains('JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read)'),
     );
+    // Every night read only in a build made for the by-eye preview (D110).
+    expect(text, contains("bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead"));
     expect(text, contains("betaKey: const String.fromEnvironment('BETA_KEY')"));
   });
 

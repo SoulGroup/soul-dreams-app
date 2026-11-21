@@ -54,4 +54,8 @@ void main() {
   test('no night is read before the readings', () {
     expect(noneRead(nightWith(a)), isFalse);
   });
+
+  test("the preview's check calls every night read", () {
+    expect(allRead(nightWith(a)), isTrue);
+  });
 }

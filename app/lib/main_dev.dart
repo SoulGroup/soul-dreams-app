@@ -1,7 +1,9 @@
 // SoulDreams Dev (app.souldreams.dev): the owner's test app, invented
 // nights only. It opens on onboarding until the dreamer agrees, then on the
 // journal (D49 O1; D56; D103). Each night's menu holds the founder's export
-// (D107; D108; R8 lets this file and main_founder.dart import it).
+// (D107; D108; R8 lets this file and main_founder.dart import it). Built
+// with --dart-define=PREVIEW_READ=true, every night shows as read, for the
+// owner's by-eye review of a read night's look (D110); nothing is stored.
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -12,6 +14,7 @@ import 'core/keyboard_check.dart';
 import 'core/safe_log.dart';
 import 'founder/founder_export.dart';
 import 'journal/channel_journal_files.dart';
+import 'journal/night_look.dart';
 import 'journal/pages/journal_home.dart';
 import 'journal/self_check.dart';
 import 'recording/connection.dart';
@@ -34,13 +37,14 @@ void main() {
     betaKey: const String.fromEnvironment('BETA_KEY'),
     connection: ChannelConnection(),
   );
+  const read = bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead;
   // The keyboard check (D50 1): only in a build made with
   // --dart-define=KEYBOARD_CHECK=true.
   runApp(
     SoulDreamsApp(
       home: const bool.fromEnvironment('KEYBOARD_CHECK')
           ? const KeyboardCheck()
-          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action),
+          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read),
     ),
   );
   if (check != null) unawaited(check);

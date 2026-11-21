@@ -26,10 +26,18 @@ import '../journal_audio.dart';
 import '../journal_files.dart';
 import '../journal_store.dart';
 import '../night_action.dart';
+import '../night_look.dart';
 import 'journal_page.dart';
 
 class JournalHome extends StatefulWidget {
-  const JournalHome({super.key, required this.files, this.after, this.recording, this.nightAction});
+  const JournalHome({
+    super.key,
+    required this.files,
+    this.after,
+    this.recording,
+    this.nightAction,
+    this.read = noneRead,
+  });
 
   final JournalFiles files;
 
@@ -42,6 +50,9 @@ class JournalHome extends StatefulWidget {
 
   /// The item each night's menu gains, or null (D107 item 1).
   final NightAction? nightAction;
+
+  /// Whether a night has been read (D110): none is yet.
+  final ReadCheck read;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -163,7 +174,13 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     return switch (_agreed) {
       null => const Scaffold(),
       false => Onboarding(onAgreed: _agree),
-      true => JournalPage(journal: _journal!, recording: _recording, firstTime: _first, nightAction: widget.nightAction),
+      true => JournalPage(
+        journal: _journal!,
+        recording: _recording,
+        firstTime: _first,
+        nightAction: widget.nightAction,
+        read: widget.read,
+      ),
     };
   }
 }
