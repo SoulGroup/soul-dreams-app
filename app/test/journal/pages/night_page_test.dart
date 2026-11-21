@@ -25,6 +25,7 @@ import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
+import 'package:souldreams/journal/search.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
 
@@ -83,6 +84,7 @@ void main() {
     bool wide = false,
     int hour = 12,
     bool unread = false,
+    String? query,
   }) async {
     // The test's own 800 by 600, where the foot's two buttons do not fill
     // the row, or a phone.
@@ -104,11 +106,47 @@ void main() {
     }
     // A first read that fails leaves the page blank, with no picture.
     if (unread) files!.failReads = true;
-    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read)),
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read, query: query)),
         hour: hour);
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
   }
+
+  // D117 Q6: opened from a search, the night shows its first match in
+  // Bold, in its dream; every other dream, and every opening without a
+  // search, as before.
+  List<TextSpan>? boldParts(WidgetTester tester, String dream) {
+    final text = tester.widget<Text>(find.text(dream));
+    if (text.data != null) return null;
+    return (text.textSpan! as TextSpan).children!.cast<TextSpan>();
+  }
+
+  testWidgets('from a search: the first match in its dream, in Bold', (tester) async {
+    await open(tester, key: 'named-three-dreams-sv', query: 'NYCKEL');
+    final d = n.dreams[2];
+    final at = firstMatch(d, 'NYCKEL')!;
+    final parts = boldParts(tester, d)!;
+    expect([for (final s in parts) s.text], [d.substring(0, at.start), d.substring(at.start, at.end), d.substring(at.end)]);
+    expect(parts[1].style!.fontWeight, FontWeight.w700);
+    expect(parts[0].style, isNull);
+    expect(parts[2].style, isNull);
+    expect(boldParts(tester, n.dreams[0]), isNull);
+    expect(boldParts(tester, n.dreams[1]), isNull);
+  });
+
+  testWidgets('without a search, or with no match, nothing is bold', (tester) async {
+    await open(tester, key: 'named-three-dreams-sv');
+    for (final d in n.dreams) {
+      expect(boldParts(tester, d), isNull);
+    }
+  });
+
+  testWidgets('a match no longer there leaves nothing bold', (tester) async {
+    await open(tester, key: 'named-three-dreams-sv', query: 'zzz');
+    for (final d in n.dreams) {
+      expect(boldParts(tester, d), isNull);
+    }
+  });
 
   Future<void> openMenu(WidgetTester tester) async {
     await tester.tap(find.byKey(NightPage.menuKey));

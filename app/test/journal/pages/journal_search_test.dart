@@ -158,10 +158,23 @@ void main() {
     final h = await Harness.make();
     final [_, sv, _] = await three(h);
     await h.pump(tester, JournalPage(journal: h.journal));
-    await type(tester, 'citron');
+    await type(tester, ' citron ');
     await tester.tap(find.text(shownDate(sv.date)));
     await tester.pumpAndSettle();
-    expect(tester.widget<NightPage>(find.byType(NightPage)).id, sv.id);
+    final page = tester.widget<NightPage>(find.byType(NightPage));
+    expect(page.id, sv.id);
+    // The query as searched, for the match in bold (D117 Q6).
+    expect(page.query, 'citron');
+  });
+
+  testWidgets('a row opened with no search hands no query', (tester) async {
+    final h = await Harness.make();
+    final [_, sv, _] = await three(h);
+    await h.pump(tester, JournalPage(journal: h.journal));
+    await type(tester, 'ci');
+    await tester.tap(find.text(shownDate(sv.date)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<NightPage>(find.byType(NightPage)).query, isNull);
   });
 
   testWidgets('a search at twice the size does not overflow', (tester) async {

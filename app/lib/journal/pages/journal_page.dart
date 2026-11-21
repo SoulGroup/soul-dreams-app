@@ -208,6 +208,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
           recording: widget.recording,
           action: widget.nightAction,
           read: widget.read,
+          query: query,
         ),
       ),
     );

@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A474, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A479, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 492 run, 492 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 497 run, 497 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -2152,6 +2152,27 @@ ROWS = [
      '              padding: const EdgeInsets.symmetric(horizontal: StandIns.rowSide - Spacing.pageSide),',
      '              padding: EdgeInsets.zero,',
      'test/journal/pages/journal_search_test.dart', 'the field: EM·4 at the top, as wide as a row'),
+    # redesign-b (D117 Q6): the opened night's match in Bold.
+    ('A475', 'lib/journal/pages/night_page.dart',
+     '                          bold: found?.entry == i ? found!.span : null,',
+     '                          bold: null,',
+     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in Bold'),
+    ('A476', 'lib/journal/pages/night_page.dart',
+     '                          bold: found?.entry == i ? found!.span : null,',
+     '                          bold: found?.span,',
+     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in Bold'),
+    ('A477', 'lib/journal/pages/parts.dart',
+     '                          style: const TextStyle(fontWeight: FontWeight.w700),',
+     '                          style: const TextStyle(fontWeight: FontWeight.w400),',
+     'test/journal/pages/night_page_test.dart', 'from a search: the first match in its dream, in Bold'),
+    ('A478', 'lib/journal/pages/journal_page.dart',
+     '          query: query,\n',
+     '',
+     'test/journal/pages/journal_search_test.dart', 'a result opens its night'),
+    ('A479', 'lib/journal/pages/journal_page.dart',
+     '          query: query,\n',
+     '          query: _search.text,\n',
+     'test/journal/pages/journal_search_test.dart', 'a row opened with no search hands no query'),
 ]
 
 

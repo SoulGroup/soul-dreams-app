@@ -7,6 +7,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
+import '../search.dart';
 
 BoxDecoration _pill(Color top, Color bottom, [Color? border]) => BoxDecoration(
   gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, bottom]),
@@ -107,12 +108,14 @@ BoxDecoration surface(Palette p) => BoxDecoration(
   border: Border.all(color: p.surfaceBorder),
 );
 
-/// A dream in the dreamer's bubble, from the right (Spacing.bubbleDreamer).
+/// A dream in the dreamer's bubble, from the right (Spacing.bubbleDreamer);
+/// opened from a search, its [bold] characters in Bold (D117 Q6).
 class DreamBubble extends StatelessWidget {
-  const DreamBubble(this.text, {super.key, required this.onTap});
+  const DreamBubble(this.text, {super.key, required this.onTap, this.bold});
 
   final String text;
   final VoidCallback onTap;
+  final Span? bold;
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +132,22 @@ class DreamBubble extends StatelessWidget {
               decoration: surface(p),
               child: Padding(
                 padding: StandIns.bubblePadding,
-                child: Text(text, style: TypeRoles.voiceDreamer.style(p.text)),
+                child: switch (bold) {
+                  null => Text(text, style: TypeRoles.voiceDreamer.style(p.text)),
+                  final b => Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(text: text.substring(0, b.start)),
+                        TextSpan(
+                          text: text.substring(b.start, b.end),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                        TextSpan(text: text.substring(b.end)),
+                      ],
+                    ),
+                    style: TypeRoles.voiceDreamer.style(p.text),
+                  ),
+                },
               ),
             ),
           ),

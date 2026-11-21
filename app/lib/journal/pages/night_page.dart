@@ -25,7 +25,9 @@
 // Reflection; D119 item 4); Dreams brings "Dreams" into view, the
 // other three do nothing until their sections come with the readings. No
 // night is read yet. Not built: reading, and the space below the dreams
-// with its field.
+// with its field. Opened from a search, the night's first match shows in
+// Bold in its dream, found again on each read; gone when the page goes
+// (main-path.md, Search; D117 Q6).
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,6 +47,7 @@ import '../night_action.dart';
 import '../night_look.dart';
 import '../night_rules.dart';
 import '../row_text.dart';
+import '../search.dart';
 import 'night_art.dart';
 import 'parts.dart';
 import 'typing_page.dart';
@@ -61,7 +64,15 @@ enum Jump {
 }
 
 class NightPage extends StatefulWidget {
-  const NightPage({super.key, required this.journal, required this.id, this.recording, this.action, this.read = noneRead});
+  const NightPage({
+    super.key,
+    required this.journal,
+    required this.id,
+    this.recording,
+    this.action,
+    this.read = noneRead,
+    this.query,
+  });
 
   static const menuKey = Key('night-menu');
   static const deleteKey = Key('night-delete');
@@ -85,6 +96,9 @@ class NightPage extends StatefulWidget {
 
   /// Whether a night has been read: none is yet (the readings come later).
   final ReadCheck read;
+
+  /// The search this night was opened from, as searched, or null.
+  final String? query;
 
   @override
   State<NightPage> createState() => _NightPageState();
@@ -314,6 +328,8 @@ class _NightPageState extends State<NightPage> {
     final top = MediaQuery.paddingOf(context).top;
     final read = n != null && widget.read(n);
     final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings);
+    final query = widget.query;
+    final found = n == null || query == null ? null : findIn(n, query);
     // Light time and battery over the header's picture, in both themes (D113);
     // while the page is blank, the app's own theme (D114).
     final overlay = look != null ? SystemUiOverlayStyle.light : statusBarFor(Theme.of(context).brightness);
@@ -396,7 +412,11 @@ class _NightPageState extends State<NightPage> {
                     const SizedBox(height: StandIns.gap),
                     for (final (i, d) in n.entries.indexed)
                       if (d case Told(:final text)) ...[
-                        DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
+                        DreamBubble(
+                          text,
+                          bold: found?.entry == i ? found!.span : null,
+                          onTap: () => _type((id: n.id, index: i, text: text)),
+                        ),
                         const SizedBox(height: StandIns.bubbleGap),
                       ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
                         Padding(
