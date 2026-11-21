@@ -77,6 +77,7 @@ void main() {
   // until the owner gives the next one.
   test('SoulDreams Dev reaches the journal pages', () {
     final files = reached('lib/main_dev.dart');
+    expect(files, contains('lib/journal/search.dart'));
     expect(files, contains('lib/journal/pages/journal_page.dart'));
     expect(files, contains('lib/journal/pages/night_page.dart'));
     expect(files, contains('lib/recording/record_microphone.dart'));

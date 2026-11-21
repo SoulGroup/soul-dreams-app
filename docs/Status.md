@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-21, in branch `redesign-b` (C18-P imported, D118 and D119; the search plan amended to it; the owner's by-eye checks of the fonts next), by Claude Code.
+Last updated: 2026-11-21, in branch `redesign-b` (C18-P imported, D118 and D119; the filed greeting, New Dream and jump buttons; search, D110, D116, D117; the owner's by-eye review, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -19,9 +19,9 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Road ahead
 
-- `redesign-a`: the owner's by-eye review (the plan's Task 9), then the merge.
-- Redesign B and C (D110): search, Settings (with Word Animation's setting) and the consent's controls; then Life
-  Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
+- `redesign-b`: the owner's by-eye review (the plan's Task 6), then the merge.
+- Redesign B's rest and C (D110): Settings (with Word Animation's setting, and the gear, D116 item 5) and the
+  consent's controls, with C18-P's three consents (MP·66 to MP·70, D119 item 1); then Life Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
   replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
   C17-P (and, for the founder app, with his export).
@@ -239,14 +239,29 @@ rulings given during each branch are listed in this file, one line each, under "
   At C18-P (D118): `TypeRoles.rowDate` (Inter SemiBold 20) carries a row's date; a line or letter "[to set in
   Framer]" is null, the font's own; a colour "[to try ...]" or "[proposed ...]" has no constant
   (`color.label.questions`, the dark `color.lifecontext.delete`), one "[owed: ...]" keeps its value.
+- The journal's greeting (C18-P; D119 item 4): MP·72 to MP·75 by the part of the day, from 05:00, 11:00, 17:00
+  and 21:00, one line of the part's four a day, in turn; a night after midnight keeps the line of the evening it
+  began on (the day counted under D91). New Dream is MP·11; a read night's jump buttons are MP·77's four parts.
+  `owed.dart` is gone: no owed handle is left on a screen.
+- Search (D110; D116; D117; `redesign-b`; TO TRY where a stand-in): the journal's field at the top (20 down, 50 tall,
+  as wide as a row; `color.field` with its border; EM·4 its placeholder; a magnifier drawn in code, silent; no clear
+  button; no autocorrect or suggestions), the sky mark still 140 down. From three characters (code points, the
+  spaces around left out): where the list starts, the count of nights (MP·76, "1 match" or "{n} matches") or W25,
+  then only the matching nights' rows, newest first, under their month dividers, each with a context line under it:
+  up to three words before the match (an ellipsis when words were left off), the match in Inter Bold, then the
+  rest, one line, the button type in `color.text.summary`. The matcher (`journal/search.dart`, `firstMatch`, one
+  function for recurring images later): each character folded by itself (Dart's own folding), marks kept, the typed
+  characters at the start of a word (D117 Q4), the told dreams in order, never a name, the first place. A result
+  opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
+  goes. The query is never kept or logged (R3).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 577 tests, and 462 mutation checks (A1 to A443; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 603 tests, and 497 mutation checks (A1 to A479; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A313 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
+  A313, A363 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 462 run, 462 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 497 run, 497 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -826,6 +841,23 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
      it).
 144. Shown dates now have a two-digit year (D112). MP·27 and `main-path.md` (Every Screen) say `dd/mm/yyyy`, and the
      C17-P copies stay as filed: for Product's next filing, with Part 4 item 12's list. The export is unchanged.
+     (C18-P files MP·27 as dd/mm/yy; `main-path.md` waits for Product's next pass.)
+
+Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D119 and the filed lines and values):
+
+145. For Product's next filing, through the head: names no longer searched (D116 item 1, against `main-path.md`'s
+     "night names included"); "1 match" shown against C134-I item 6's "by itself, with no line" (D117 Q3); the
+     microphone's spoken name still MP·11, now "New Dream" (D119 item 3); a night greeting after midnight keeps the
+     evening's line (the day counted under D91). For Interpretation, through the head: the matcher's rule, the typed
+     characters at the start of a word, against C140-I item 6's plain forms (D117 Q4).
+146. Text and query are not normalised (NFC would need a package): a letter typed composed does not match the same
+     letter stored as a letter and a mark. Keyboards and Soniox give composed letters.
+147. Dart folds each character to one (a capital I with a dot to a plain i); a folding that changed a character's
+     length would still map back to whole characters. Greek's final sigma folds as Dart folds it.
+148. Since C18-P no type role names Nunito or Habibi; both stay declared until a ruling removes them. The dreamer's
+     words quoted in a reflection take "Inter Display Italic" (§1), which the app does not have (no Inter Italic
+     file): for the readings' branch.
+149. `opening()` (`row_text.dart`) stays unused: D116 item 3's context replaced it for search (banked item 136).
 
 ## Before Cohort 1
 
@@ -1158,7 +1190,18 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 ## Rulings during redesign-b
 
-- D116 and D117 (owner): the search plan's brainstorm and its stop, listed in `docs/plans/redesign-b.md`.
+- `redesign-a` merged by the owner (`e81f29c`).
+- D116 (owner, the brainstorm): (1) search covers the dreams' text in every night (no readings or Life Context
+  yet); (2) matching ignores case, Unicode-aware, and keeps letters with marks distinct; (3) the context line is a
+  short stretch around the first match, the matched characters in bold; (4) the count lines and "No matches" as
+  pending lines where the register has no place (C18-P has since filed them: MP·76 and W25); (5) the settings gear
+  stays out until redesign C.
+- D117 (owner, on the stop of 2026-11-21): Q1 a pending line takes the register's slots, and Q2 MP·68 for "No
+  matches" (both superseded by C18-P's filing: the count is MP·76, the empty result W25, no pending line); Q3 D110
+  governs ("1 match" shown; C134-I item 6 to the head); Q4 the typed characters at the start of a word, one
+  reusable function, flagged to the head for Interpretation; Q5 nights are counted; Q6 the opened night's match in
+  bold (Inter Bold since C18-P, D118); Q7 the journal while searching as leaned, no clear button; Q8 the context
+  line as leaned.
 - D118 (founder): where the Design System names "Inter Display", the app uses Inter (already installed), at the same
   sizes and spacing; the Build chat tells Product.
 - D119 (owner, on C18-P's import stop, `.scratch/for-build-chat/c18p-import-stop.md`), as leaned: (1) until the three
