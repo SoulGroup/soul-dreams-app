@@ -30,13 +30,14 @@ import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
 import '../night_action.dart';
+import '../night_look.dart';
 import '../night_rules.dart';
 import '../row_text.dart';
 import 'parts.dart';
 import 'typing_page.dart';
 
 class NightPage extends StatefulWidget {
-  const NightPage({super.key, required this.journal, required this.id, this.recording, this.action});
+  const NightPage({super.key, required this.journal, required this.id, this.recording, this.action, this.read = noneRead});
 
   static const menuKey = Key('night-menu');
   static const deleteKey = Key('night-delete');
@@ -53,6 +54,9 @@ class NightPage extends StatefulWidget {
 
   /// The menu's item above delete, or null (D107 item 1).
   final NightAction? action;
+
+  /// Whether a night has been read: none is yet (the readings come later).
+  final ReadCheck read;
 
   @override
   State<NightPage> createState() => _NightPageState();

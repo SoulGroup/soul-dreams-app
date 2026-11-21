@@ -9,18 +9,18 @@ abstract final class StandIns {
   // The page's side margin and the space between two journal rows, once
   // here, are filed at C17-P: `Spacing.pageSide` and `Spacing.journalRow`.
 
-  /// The chevron at a row's trailing edge (item 4): its size, its line, and
-  /// the space before it.
+  /// A chevron (head's message 20, items 4 and 9): its size, and its line.
   static const rowChevron = Size(10, 18);
   static const double chevronStroke = 2;
-  static const double chevronGap = 16;
 
-  /// Inside a journal row.
-  static const rowPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 20);
+  /// The journal (D110): above the greeting; between New Dream and the
+  /// first row or the empty journal's line; a row's least height.
+  static const double greetingAbove = 40;
+  static const double listAbove = 40;
+  static const double rowHeight = 64;
 
-  /// space.journal.end: below the last row, so the list scrolls clear of
-  /// the record button.
-  static const double journalEnd = 120;
+  /// space.journal.end: below the last row.
+  static const double journalEnd = 40;
 
   /// Above a month divider.
   static const double dividerAbove = 24;
@@ -41,15 +41,10 @@ abstract final class StandIns {
   /// (head's message 20, item 10).
   static const double menuWidth = 55;
 
-  /// The first empty journal's arrow to the record button (main-path.md,
+  /// The first empty journal's arrow up to New Dream (main-path.md,
   /// Onboarding, 5): its size, and the space above and below it.
   static const firstArrow = Size(12, 32);
   static const double arrowGap = 8;
-
-  /// The record button.
-  static const double recordHeight = 120;
-  static const double recordWidth = 120;
-  static const double recordBelow = 40;
 
   /// Inside a button, and a section label.
   static const buttonPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 15);

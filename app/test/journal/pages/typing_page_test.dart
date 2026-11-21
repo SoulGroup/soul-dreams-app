@@ -646,6 +646,8 @@ void main() {
     final chevron = tester.widget<Chevron>(find.descendant(of: back, matching: find.byType(Chevron)));
     expect(chevron.left, isTrue);
     expect(chevron.colour, LightColours.button.text);
+    final mark = find.descendant(of: back, matching: find.byType(Chevron));
+    expect(find.descendant(of: mark, matching: find.byType(ExcludeSemantics)), findsOneWidget);
     expect(find.byTooltip(Lines.MP_14.text(Lang.en)), findsOneWidget);
     final handle = tester.ensureSemantics();
     expect(tester.getSemantics(back).flagsCollection.isButton, isTrue);

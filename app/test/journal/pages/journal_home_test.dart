@@ -362,7 +362,7 @@ void main() {
       ));
       await tester.pumpAndSettle();
       final journal = tester.widget<JournalPage>(find.byType(JournalPage)).journal;
-      await tester.tap(find.text(Lines.MP_11.text(Lang.en)));
+      await tester.tap(find.byKey(JournalPage.newDreamKey));
       await tester.pumpAndSettle();
       expect(find.byType(TypingPage), findsOneWidget);
       await go(journal);

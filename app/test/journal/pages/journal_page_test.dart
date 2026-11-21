@@ -1,19 +1,23 @@
-// The journal list (main-path.md, The Journal; S5; D58 Q7; P5, P8): the
-// empty journal, rows newest first with no time and no count, dividers,
-// the record button opening the typing screen, a row opening its night.
+// The journal list (main-path.md, The Journal; S5; D58 Q7; P5; D110): the
+// greeting by time of day, New Dream opening the typing screen, no record
+// button, the empty journal, rows newest first carrying only the date over
+// the night's picture, dividers, a row opening its night.
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:souldreams/app.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
+import 'package:souldreams/journal/greeting.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_action.dart';
+import 'package:souldreams/journal/night_look.dart';
+import 'package:souldreams/journal/owed.dart';
+import 'package:souldreams/journal/pages/night_art.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
@@ -57,20 +61,61 @@ final class BrokenFiles extends MemoryJournalFiles {
 }
 
 void main() {
-  testWidgets('the empty journal: C4-P·5 and the record button, nothing else', (tester) async {
+  testWidgets('the empty journal: the greeting, New Dream and C4-P·5', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
+    expect(find.text(OwedLines.greetingAfternoon.text), findsOneWidget);
+    expect(find.text(OwedLines.newDream.text), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
-    expect(find.text(Lines.MP_11.text(Lang.en)), findsOneWidget);
-    // No Settings entry and no search (P8).
+    // The round record button is gone (D110).
+    expect(find.text(Lines.MP_11.text(Lang.en)), findsNothing);
+    // No Settings entry and no search: later branches.
     expect(find.text(Lines.MP_25.text(Lang.en)), findsNothing);
     expect(find.byType(TextField), findsNothing);
   });
 
+  // D110: a greeting by the part of the day, centred in h2, heard as a
+  // heading, above New Dream; it follows the clock while the page is open.
+  testWidgets('the greeting: by the clock, centred, a heading, above New Dream', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final greeting = find.text(OwedLines.greetingAfternoon.text);
+    final text = tester.widget<Text>(greeting);
+    expect(text.style!.fontFamily, TypeRoles.h2.family);
+    expect(text.style!.fontSize, TypeRoles.h2.size);
+    expect(text.textAlign, TextAlign.center);
+    expect(tester.getCenter(greeting).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+    expect(tester.getRect(greeting).bottom, lessThan(tester.getRect(find.byKey(JournalPage.newDreamKey)).top));
+    final handle = tester.ensureSemantics();
+    expect(tester.getSemantics(greeting), matchesSemantics(label: OwedLines.greetingAfternoon.text, isHeader: true));
+    handle.dispose();
+    Harness.clock = stockholm(2026, 6, 10, 17);
+    await tester.pump(const Duration(minutes: 1));
+    expect(find.text(OwedLines.greetingEvening.text), findsOneWidget);
+    expect(greetingFor(Daypart.evening), OwedLines.greetingEvening);
+  });
+
+  // D110: New Dream, centred, the painted gradient behind its words, heard
+  // as a button.
+  testWidgets('New Dream: centred, on the painted gradient, a button', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final button = find.byKey(JournalPage.newDreamKey);
+    expect(tester.getCenter(button).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+    final art = tester.widget<NightArt>(find.descendant(of: button, matching: find.byType(NightArt)));
+    expect(art.look, const PaintedGradient());
+    final words = tester.widget<Text>(find.text(OwedLines.newDream.text));
+    expect(words.style!.color, NightArt.over);
+    expect(words.style!.fontFamily, TypeRoles.button.family);
+    final handle = tester.ensureSemantics();
+    expect(tester.getSemantics(button), matchesSemantics(label: OwedLines.newDream.text, isButton: true, hasTapAction: true));
+    handle.dispose();
+  });
+
   // Onboarding's last step (main-path.md, Onboarding, 5): the first empty
-  // journal adds MP·9 with an arrow to the record button, shown once: gone
-  // when a night is there, and never on a later empty journal.
-  testWidgets('the first empty journal: MP·9 above the record button, once', (tester) async {
+  // journal adds MP·9 with an arrow up to New Dream, shown once: gone when a
+  // night is there, and never on a later empty journal.
+  testWidgets('the first empty journal: MP·9 under New Dream, once', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal, firstTime: true));
     final pointer = find.bySemanticsLabel(Lines.MP_9.text(Lang.en));
@@ -78,10 +123,11 @@ void main() {
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
     expect(find.byKey(JournalPage.arrowKey), findsOneWidget);
     final arrow = tester.getRect(find.byKey(JournalPage.arrowKey));
-    final record = tester.getRect(find.byKey(RecordButton.buttonKey));
-    expect(arrow.bottom, lessThanOrEqualTo(record.top));
-    expect(arrow.center.dx, closeTo(record.center.dx, 1));
-    expect(tester.getRect(find.byType(AppLine).last).bottom, lessThanOrEqualTo(arrow.top));
+    final button = tester.getRect(find.byKey(JournalPage.newDreamKey));
+    expect(arrow.top, greaterThanOrEqualTo(button.bottom));
+    expect(arrow.center.dx, closeTo(button.center.dx, 1));
+    final mp9 = tester.getRect(find.byWidgetPredicate((w) => w is AppLine && w.text == Lines.MP_9.text(Lang.en)));
+    expect(mp9.top, greaterThanOrEqualTo(arrow.bottom));
     // A night comes, then goes, on the same visit: MP·9 does not return.
     final night = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 7));
     Future<void> back() async {
@@ -119,7 +165,7 @@ void main() {
     expect(at.dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
   });
 
-  testWidgets('rows newest first: the date, then the trimmed opening', (tester) async {
+  testWidgets('rows newest first, carrying only the date', (tester) async {
     final h = await Harness.make();
     final older = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     final newer = await keep(h, 'framed-opening-en', stockholm(2026, 6, 9, 23));
@@ -127,8 +173,10 @@ void main() {
     final newDate = tester.getTopLeft(find.text(dayDigits(newer.date)));
     final oldDate = tester.getTopLeft(find.text(dayDigits(older.date)));
     expect(newDate.dy, lessThan(oldDate.dy));
-    expect(find.text(opening(newer)), findsOneWidget);
-    expect(find.text(newer.dreams.first), findsNothing);
+    // No opening, no chevron (D110).
+    expect(find.text(opening(newer)), findsNothing);
+    expect(find.textContaining(newer.dreams.first.substring(0, 12)), findsNothing);
+    expect(find.byType(Chevron), findsNothing);
     // A row shows no time, and no count of dreams.
     expect(find.textContaining(':'), findsNothing);
     expect(find.textContaining('2 '), findsNothing);
@@ -156,58 +204,63 @@ void main() {
     expect(tester.getCenter(divider).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
   });
 
-  // Item 1: the summary in the button type, #767676 on the white row; in
-  // the dark theme, color.text on the bubble gradient (design-system.md §3).
-  testWidgets("the summary: the button type, the summary's colour", (tester) async {
-    final h = await Harness.make();
-    final n = await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
-    await h.pump(tester, JournalPage(journal: h.journal));
-    final light = tester.widget<Text>(find.text(opening(n)));
-    expect(light.style!.fontFamily, TypeRoles.button.family);
-    expect(light.style!.fontSize, TypeRoles.button.size);
-    expect(light.style!.color, LightColours.textSummary.colour);
-    await tester.pumpWidget(
-      SoulDreamsApp(key: UniqueKey(), home: JournalPage(journal: h.journal), clock: () => DateTime(2026, 6, 10, 22)),
-    );
-    await tester.pumpAndSettle();
-    expect(tester.widget<Text>(find.text(opening(n))).style!.color, DarkColours.text.colour);
-  });
-
-  // Item 4: a chevron at each row's trailing edge, in the text's colour,
-  // centred on the row's height, heard as nothing; item 12: rows 30 from
-  // the screen's sides, 12 apart (TO TRY).
-  testWidgets("a chevron at each row's trailing edge", (tester) async {
+  // D110: a rounded row, the date centred over the night's picture: an
+  // unread night's the painted gradient; 30 from the screen's sides, 12
+  // apart; heard as a button named by its date.
+  testWidgets("a row: the date over an unread night's gradient", (tester) async {
     final h = await Harness.make();
     final older = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
-    await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
+    final newer = await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
     await h.pump(tester, JournalPage(journal: h.journal));
-    final chevrons = find.byType(Chevron);
-    expect(chevrons, findsNWidgets(2));
-    final row = find.ancestor(of: find.text(dayDigits(older.date)), matching: find.byType(Container)).first;
-    final chevron = find.descendant(of: row, matching: find.byType(Chevron));
-    final rowBox = tester.getRect(row);
-    final mark = tester.getRect(chevron);
-    expect(rowBox.right - mark.right, closeTo(StandIns.rowPadding.right, 1));
-    expect(mark.center.dy, closeTo(rowBox.center.dy, 1));
-    expect(mark.left, greaterThan(tester.getRect(find.text(opening(older))).right));
-    expect(tester.widget<Chevron>(chevron).colour, LightColours.text.colour);
+    final arts = find.descendant(of: find.byType(ListView), matching: find.byType(NightArt));
+    // New Dream's, and one per row.
+    expect(arts, findsNWidgets(3));
+    for (final n in [older, newer]) {
+      final date = find.text(dayDigits(n.date));
+      final row = find.ancestor(of: date, matching: find.byKey(JournalPage.rowKey(n.id)));
+      final art = find.descendant(of: row, matching: find.byType(NightArt));
+      expect(tester.widget<NightArt>(art).look, const PaintedGradient());
+      expect(tester.getRect(art), tester.getRect(row));
+      expect(tester.getCenter(date).dx, closeTo(tester.getCenter(row).dx, 1));
+      expect(tester.getCenter(date).dy, closeTo(tester.getCenter(row).dy, 1));
+      final style = tester.widget<Text>(date).style!;
+      expect(style.color, NightArt.over);
+      expect(style.fontFamily, TypeRoles.h6.family);
+      expect(style.fontSize, TypeRoles.h6.size);
+      expect(tester.getSize(row).height, StandIns.rowHeight);
+      final clip = tester.widget<ClipRRect>(find.descendant(of: row, matching: find.byType(ClipRRect)));
+      expect(clip.borderRadius, BorderRadius.circular(Spacing.radius));
+    }
     final width = tester.getSize(find.byType(JournalPage)).width;
-    expect(rowBox.left, closeTo(Spacing.pageSide, 1));
-    expect(rowBox.right, closeTo(width - Spacing.pageSide, 1));
-    final rows = tester.widgetList<Container>(find.ancestor(of: find.byType(Chevron), matching: find.byType(Container)));
-    expect(rows, hasLength(2));
-    final tops = [for (final c in chevrons.evaluate()) tester.getRect(find.ancestor(of: find.byWidget(c.widget), matching: find.byType(Container)).first)];
-    expect(tops[1].top - tops[0].bottom, closeTo(Spacing.journalRow, 1));
+    final first = tester.getRect(find.byKey(JournalPage.rowKey(newer.id)));
+    final second = tester.getRect(find.byKey(JournalPage.rowKey(older.id)));
+    expect(first.left, closeTo(Spacing.pageSide, 1));
+    expect(first.right, closeTo(width - Spacing.pageSide, 1));
+    expect(second.top - first.bottom, closeTo(Spacing.journalRow, 1));
     final handle = tester.ensureSemantics();
-    expect(find.descendant(of: chevron, matching: find.byType(ExcludeSemantics)), findsOneWidget);
+    expect(
+      tester.getSemantics(find.byKey(JournalPage.rowKey(older.id))),
+      matchesSemantics(label: dayDigits(older.date), isButton: true, hasTapAction: true),
+    );
     handle.dispose();
   });
 
-  testWidgets('a named night shows its name, then its date', (tester) async {
+  testWidgets("a read night's row shows its painting", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal, read: (_) => true));
+    final row = find.byKey(JournalPage.rowKey(n.id));
+    final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
+    expect(art.look, Painting(paintingFor(n.id, NightArt.paintings)));
+    expect(find.text(dayDigits(n.date)), findsOneWidget);
+  });
+
+  // D110: naming a night is removed; a name kept from before is not shown.
+  testWidgets('a named night shows only its date', (tester) async {
     final h = await Harness.make();
     final n = await keep(h, 'named-three-dreams-sv', stockholm(2026, 6, 2, 23));
     final name = invented('named-three-dreams-sv').name!;
-    // Naming is not built (P7); a name reaches the store only directly.
+    // A name reaches the store only directly.
     await h.store.save(
       Night(
         id: n.id,
@@ -220,35 +273,22 @@ void main() {
       ),
     );
     await h.pump(tester, JournalPage(journal: h.journal));
-    final nameAt = tester.getTopLeft(find.text(name));
-    final dateAt = tester.getTopLeft(find.text(dayDigits(n.date)));
-    expect(nameAt.dy, lessThan(dateAt.dy));
+    expect(find.text(name), findsNothing);
+    expect(find.text(dayDigits(n.date)), findsOneWidget);
   });
 
-  testWidgets('the summary is always three lines', (tester) async {
-    final h = await Harness.make();
-    await keep(h, 'long-dream-en', stockholm(2026, 6, 2, 23));
-    await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
-    await h.pump(tester, JournalPage(journal: h.journal));
-    final long = find.textContaining(invented('long-dream-en').dreams.single.substring(0, 20));
-    final text = tester.widget<Text>(long);
-    expect(text.maxLines, 3);
-    expect(text.overflow, TextOverflow.ellipsis);
-    final short = find.text(invented('one-dream-sv').dreams.single);
-    expect(tester.getSize(short).height, closeTo(tester.getSize(long).height, 0.5));
-  });
-
-  testWidgets('the record button opens typing; a Save adds a row', (tester) async {
+  testWidgets('New Dream opens typing; a Save adds a row', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
-    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
     final dream = invented('one-dream-sv').dreams.single;
     await tester.enterText(find.byKey(TypingPage.fieldKey), dream);
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
-    expect(find.text(dream), findsOneWidget);
+    final n = (await h.nights()).single;
+    expect(find.text(dayDigits(n.date)), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsNothing);
   });
 
@@ -260,6 +300,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(NightPage), findsOneWidget);
     expect(find.text(n.dreams[1]), findsOneWidget);
+  });
+
+  testWidgets("a row hands its night's page whether it is read", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    bool read(Night night) => night.id == n.id;
+    await h.pump(tester, JournalPage(journal: h.journal, read: read));
+    await tester.tap(find.text(dayDigits(n.date)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<NightPage>(find.byType(NightPage)).read, same(read));
   });
 
   testWidgets("a row hands its night's page the menu's item", (tester) async {
@@ -282,39 +332,17 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  // 15a (the owner's correction, P13): the record button is a circle.
-  testWidgets('the record button is a circle, radius half its height', (tester) async {
-    final h = await Harness.make();
-    await h.pump(tester, JournalPage(journal: h.journal));
-    final button = find.byKey(RecordButton.buttonKey);
-    final size = tester.getSize(button);
-    expect(size.width, size.height);
-    expect(size.height, StandIns.recordHeight);
-    final box = tester.widget<DecoratedBox>(find.descendant(of: button, matching: find.byType(DecoratedBox)).first);
-    expect((box.decoration as BoxDecoration).borderRadius, BorderRadius.circular(size.height / 2));
-  });
-
-  testWidgets('large text cannot stretch the record button', (tester) async {
-    tester.platformDispatcher.textScaleFactorTestValue = 3;
-    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-    final h = await Harness.make();
-    await h.pump(tester, JournalPage(journal: h.journal));
-    expect(tester.takeException(), isNull);
-    final size = tester.getSize(find.byKey(RecordButton.buttonKey));
-    expect(size, Size(StandIns.recordHeight, StandIns.recordHeight));
-  });
-
-  // The final review: the record button reads the journal before the
-  // typing screen opens, so a second tap in that time must open nothing,
+  // The final review of journal-screens: New Dream reads the journal before
+  // the typing screen opens, so a second tap in that time must open nothing,
   // or one evening's dreams could be split into two nights.
-  testWidgets('two quick taps on the record button open one typing screen', (tester) async {
+  testWidgets('two quick taps on New Dream open one typing screen', (tester) async {
     final files = SlowFiles();
     final h = await Harness.make(files: files);
     await h.pump(tester, JournalPage(journal: h.journal));
     files.hold = Completer<void>();
-    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pump(const Duration(milliseconds: 80));
-    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pump(const Duration(milliseconds: 80));
     files.hold!.complete();
     await tester.pumpAndSettle();
@@ -323,7 +351,7 @@ void main() {
     await tester.tap(find.byKey(BackControl.buttonKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage, skipOffstage: false), findsNothing);
-    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
   });
@@ -350,19 +378,19 @@ void main() {
     expect(lines, ['journalListFailed']);
   });
 
-  testWidgets('a failed read at the record button opens nothing', (tester) async {
+  testWidgets('a failed read at New Dream opens nothing', (tester) async {
     final lines = await logged();
     final files = BrokenFiles();
     final h = await Harness.make(files: files);
     await h.pump(tester, JournalPage(journal: h.journal));
     files.broken = true;
-    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsNothing);
     expect(lines, ['journalListFailed']);
     // The button works again once the folder reads.
     files.broken = false;
-    await tester.tap(find.byKey(RecordButton.buttonKey));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
   });

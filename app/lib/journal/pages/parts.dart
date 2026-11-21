@@ -77,8 +77,7 @@ class PlainButton extends StatelessWidget {
 }
 
 /// Two pills at the foot of a page, one at each side; at large text each
-/// shrinks its words to stay on one row, as the record button does (Task
-/// 15a): Save and Start Interpretation, or Add dreams and Start
+/// shrinks its words to stay on one row: Save and Start Interpretation, or Add dreams and Start
 /// Interpretation (D70 8; head's message 20, item 10).
 class ButtonRow extends StatelessWidget {
   const ButtonRow({super.key, required this.left, required this.right});
@@ -97,58 +96,7 @@ class ButtonRow extends StatelessWidget {
   );
 }
 
-/// The record button: the biggest thing on the journal's screen, the
-/// terracotta gradient, its words in white (main-path.md, The Journal).
-class RecordButton extends StatelessWidget {
-  const RecordButton({super.key, required this.onPressed});
-
-  static const buttonKey = Key('record-button');
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final p = Palette.of(context);
-    return Semantics(
-      button: true,
-      child: GestureDetector(
-        key: buttonKey,
-        onTap: onPressed,
-        // A circle (the owner's correction, P13): as wide as tall, its corner
-        // radius half of that. Its words shrink to fit, never stretch it.
-        child: SizedBox(
-          width: StandIns.recordWidth,
-          height: StandIns.recordHeight,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [p.recordTop, p.recordBottom],
-              ),
-              borderRadius: BorderRadius.circular(StandIns.recordHeight / 2),
-            ),
-            child: Padding(
-              padding: StandIns.buttonPadding,
-              child: Center(
-                child: FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    Lines.MP_11.text(appLanguage),
-                    textAlign: TextAlign.center,
-                    style: TypeRoles.button.style(p.recordText),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// A surface: a journal row or a dreamer's bubble (color.surface, radius).
+/// A surface: a dreamer's bubble (color.surface, radius).
 BoxDecoration surface(Palette p) => BoxDecoration(
   gradient: LinearGradient(
     begin: Alignment.topCenter,
