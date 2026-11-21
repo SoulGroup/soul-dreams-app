@@ -31,12 +31,22 @@ TYPE_HEADER = ('Role', 'Face', 'Weight', 'Size', 'Line', 'Letter', 'Used for')
 VALUE_HEADER = ('Role', 'Value')
 # Each face the system names, and its font family in pubspec.yaml. A new
 # face needs its font files first, so it stops the generator.
+# D118 (founder): where the system names "Inter Display", the app uses
+# Inter, at the same sizes and spacing.
 FACES = {'Tangerine': 'Tangerine', 'Sorts Mill Goudy': 'SortsMillGoudy', 'Inter': 'Inter',
-         'Nunito': 'Nunito', 'Habibi': 'Habibi'}
+         'Nunito': 'Nunito', 'Habibi': 'Habibi', 'Bellefair': 'Bellefair',
+         'Inter Display': 'Inter'}
 WEIGHTS = {'Regular': 'FontWeight.w400', 'Semibold': 'FontWeight.w600'}
 # The notes a colour value may carry after its colours; kept as comments.
 NOTES = ('only ever on white', 'and on the bubble gradient everywhere',
-         "a row's summary included", 'no border')
+         "a row's summary included", 'no border', 'pure white', 'on the white box only')
+# C18-P: a colour value may end in one bracketed note. "[owed: ...]" is a
+# note on a value that stands; "[to try ...]" and "[proposed ...]" are
+# values not yet ruled, so the role is unset and has no constant. Any
+# other bracket stops the generator.
+BRACKET = re.compile(r'^(.*?) ?\[([^\[\]]*)\]$')
+OWED = 'owed:'
+NOT_RULED = ('to try', 'proposed')
 UNSET = '[to set in Framer]'
 EVERYTHING_ELSE = 'Everything else'
 MINUS = '−'
@@ -52,6 +62,8 @@ LINE_ONLY = re.compile(r'^(\d+)px ' + HEXC + '$')
 BORDER = re.compile(r'^border (?:(\d+)px )?' + HEXC + '$')
 TEXT = re.compile('^text ' + HEXC + '$')
 AS_ROLE = re.compile(r'^as color\.[a-z.]+: (.+)$')
+# C18-P: "as color.x", the value of a role above it in the same theme.
+AS_SAME = re.compile(r'^as (color\.[a-z.]+)$')
 AS_LIGHT = 'as in the light theme'
 SCALAR = re.compile(r'^(\d+)(?:, in both themes)?$')
 BOX = re.compile(r'^(\d+)px above and below, (\d+)px left and right$')
@@ -139,10 +151,13 @@ def read_type(lines):
             raise DesignError('weight-unknown', line)
         m = SIZE.match(size)
         e = LETTER.match(number(letter))
-        if not m or not NUMBER.match(height) or not (letter == '0' or e):
+        # C18-P: a line or letter not set yet is null, the font's own.
+        if not m or not (height == UNSET or NUMBER.match(height)) \
+                or not (letter in ('0', UNSET) or e):
             raise DesignError('type-form', line)
-        out.append((line, role, used, (FACES[face], WEIGHTS[weight], m.group(1), height,
-                                       e.group(1) if e else '0')))
+        out.append((line, role, used, (FACES[face], WEIGHTS[weight], m.group(1),
+                                       'null' if height == UNSET else height,
+                                       'null' if letter == UNSET else (e.group(1) if e else '0'))))
     return out
 
 
@@ -179,13 +194,27 @@ def colour_value(value, line):
 def read_colours(lines, heading, light=None):
     out = []
     seen = {}
+    unset = []
     for line, (role, value) in table(lines, heading, VALUE_HEADER):
         role, note = role_of(role, line)
         if not role.startswith('color.'):
             raise DesignError('role-form', line)
-        if role in seen:
+        if role in seen or role in unset:
             raise DesignError('role-repeated', line)
-        if value == AS_LIGHT:
+        b = BRACKET.match(value)
+        if b:
+            value, inside = b.groups()
+            if inside.startswith(NOT_RULED):
+                unset.append(role)
+                continue
+            if not inside.startswith(OWED) or not value:
+                raise DesignError('colour-form', line)
+        same = AS_SAME.match(value)
+        if same:
+            if same.group(1) not in seen:
+                raise DesignError('as-unknown', line)
+            v, notes = seen[same.group(1)][0], ['as']
+        elif value == AS_LIGHT:
             if light is None or role not in light:
                 raise DesignError('as-unknown', line)
             v, notes = light[role][0], [AS_LIGHT]
@@ -193,7 +222,7 @@ def read_colours(lines, heading, light=None):
             v, notes = colour_value(value, line)
         seen[role] = (v, notes)
         out.append((line, role, note, v, notes))
-    return out, seen
+    return out, seen, unset
 
 
 def read_spacing(lines):
@@ -254,7 +283,8 @@ HEAD = ''.join(line + '\n' for line in (
     '',
     '/// A type role (Design System §1). Sizes are logical',
     "/// pixels and grow with the phone's text size; [height]",
-    '/// is a multiple of the size.',
+    '/// is a multiple of the size. An unset line',
+    "/// or letter is null: the font's own.",
     'final class TypeRole {',
     '  const TypeRole(this.family, this.weight, this.size, this.height, this.letterEm);',
     '',
@@ -262,13 +292,14 @@ HEAD = ''.join(line + '\n' for line in (
     '  final String family;',
     '  final FontWeight weight;',
     '  final double size;',
-    '  final double height;',
+    '  final double? height;',
     '',
     '  /// Letter spacing in em.',
-    '  final double letterEm;',
+    '  final double? letterEm;',
     '',
     '  /// Letter spacing in logical pixels.',
-    '  double get letterSpacing => letterEm * size;',
+    '  double? get letterSpacing =>',
+    '      letterEm == null ? null : letterEm! * size;',
     '',
     '  TextStyle style(Color colour) => TextStyle(',
     '        fontFamily: family,',
@@ -308,11 +339,13 @@ def tokens_dart(type_rows, light, dark, spacing, unset, digest):
                                "  static const %s = TypeRole('%s', %s, %s, %s, %s);"
                                % (ident(role, line), family, weight, size, height, letter)]))
     out.append('\n\n'.join(body) + '\n}\n\n')
-    for name, section, rows in (('LightColours', '§2, the light theme', light),
-                                ('DarkColours', '§3, the dark theme', dark)):
+    for name, section, (rows, not_set) in (('LightColours', '§2, the light theme', light),
+                                           ('DarkColours', '§3, the dark theme', dark)):
         out.append('/// Design System %s.\nabstract final class %s {\n' % (section, name))
         out.append('\n\n'.join('\n'.join(colour_const(role, note, v, notes, line))
-                               for line, role, note, v, notes in rows) + '\n}\n\n')
+                               for line, role, note, v, notes in rows) + '\n')
+        out.append(unset_comment(not_set))
+        out.append('}\n\n')
     out.append('/// Design System §5, in logical pixels.\n')
     out.append('abstract final class Spacing {\n')
     body = []
@@ -338,13 +371,22 @@ def tokens_dart(type_rows, light, dark, spacing, unset, digest):
     return ''.join(out)
 
 
+def unset_comment(roles):
+    # C18-P: the colour roles still to try or proposed, by name only.
+    if not roles:
+        return ''
+    return ('\n  // Not ruled in the source yet\n'
+            + '  // (to try, or proposed), so no constant:\n'
+            + ''.join('  // `%s`\n' % role for role in roles))
+
+
 def parse(data):
     lines = decode(data).split('\n')
     type_rows = read_type(lines)
-    light, light_roles = read_colours(lines, LIGHT)
-    dark, _ = read_colours(lines, DARK, light_roles)
+    light, light_roles, light_unset = read_colours(lines, LIGHT)
+    dark, _, dark_unset = read_colours(lines, DARK, light_roles)
     spacing, unset = read_spacing(lines)
-    return type_rows, light, dark, spacing, unset
+    return type_rows, (light, light_unset), (dark, dark_unset), spacing, unset
 
 
 def generate(data):
@@ -356,9 +398,9 @@ def generate(data):
 
 def summary(data):
     type_rows, light, dark, spacing, unset = parse(data)
-    return ['designgen: type %d' % len(type_rows), 'designgen: light %d' % len(light),
-            'designgen: dark %d' % len(dark), 'designgen: spacing %d' % len(spacing),
-            'designgen: unset %d' % len(unset)]
+    return ['designgen: type %d' % len(type_rows), 'designgen: light %d' % len(light[0]),
+            'designgen: dark %d' % len(dark[0]), 'designgen: spacing %d' % len(spacing),
+            'designgen: unset %d' % (len(unset) + len(light[1]) + len(dark[1]))]
 
 
 def main(argv):

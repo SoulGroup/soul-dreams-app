@@ -234,6 +234,30 @@ MUTATIONS = [
     ('designgen.py', "OUTER = re.compile(r'^(\\d+)px outer margins, left and right only$')",
      "OUTER = re.compile(r'^(\\d+)px outer margins.*$')",
      ['test_designgen.Generate.test_refusals']),
+    # c18p-import (D118; the owner's item 3): the new faces, an unset line
+    # or letter, a colour's bracket and "as color.x", and "to rewrite".
+    ('designgen.py', "'Inter Display': 'Inter'}", "'Inter Display': 'InterDisplay'}",
+     ['test_designgen.Generate.test_c18p_faces']),
+    ('designgen.py', "'null' if height == UNSET else height", "'1' if height == UNSET else height",
+     ['test_designgen.Generate.test_an_unset_line_or_letter_is_null']),
+    ('designgen.py', "            if inside.startswith(NOT_RULED):", "            if inside.startswith(('to try',)):",
+     ['test_designgen.Generate.test_a_bracketed_note']),
+    ('designgen.py', "            if not inside.startswith(OWED) or not value:", "            if not value:",
+     ['test_designgen.Generate.test_a_bracket_or_as_form_it_does_not_know_stops']),
+    ('designgen.py', "            if same.group(1) not in seen:\n                raise DesignError('as-unknown', line)",
+     "            if False:\n                raise DesignError('as-unknown', line)",
+     ['test_designgen.Generate.test_a_bracket_or_as_form_it_does_not_know_stops']),
+    ('designgen.py', "        out.append(unset_comment(not_set))\n", "",
+     ['test_designgen.Generate.test_a_bracketed_note']),
+    ('wordsgen.py', "'composed (stand-in written)': True, 'to rewrite': True}",
+     "'composed (stand-in written)': True}",
+     ['test_wordsgen.Generator.test_to_rewrite_is_built_as_written']),
+    ('wordsgen.py', "if m[1:2].isupper()]", "]",
+     ['test_wordsgen.Generator.test_an_owed_sentence_only_in_to_rewrite']),
+    ('wordsgen.py', "        owed = status == REWRITE", "        owed = True",
+     ['test_wordsgen.Generator.test_an_owed_sentence_only_in_to_rewrite']),
+    ('wordsgen.py', "        if owed and len(owed_of(en_parts)) != len(owed_of(sv_parts)):", "        if False:",
+     ['test_wordsgen.Generator.test_an_owed_sentence_only_in_to_rewrite']),
 ]
 
 

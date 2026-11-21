@@ -135,6 +135,9 @@ void main() {
 
   testWidgets('tapping a dream opens it filled; Save replaces it', (tester) async {
     await open(tester);
+    // C18-P's larger voices push the second dream below the test's view.
+    await tester.ensureVisible(find.text(n.dreams[1]));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(n.dreams[1]));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
@@ -159,6 +162,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(DreamBubble), findsNWidgets(2));
     expect(tester.getTopLeft(find.text(n.dreams[0])).dy, lessThan(tester.getTopLeft(find.text(n.dreams[1])).dy));
+    await tester.ensureVisible(find.text(n.dreams[1]));
+    await tester.pumpAndSettle();
     await tester.tap(find.text(n.dreams[1]));
     await tester.pumpAndSettle();
     final other = invented('one-dream-sv').dreams.single;
@@ -307,7 +312,6 @@ void main() {
     expect(items, hasLength(1));
     expect(items.single.isDestructiveAction, isFalse);
     expect(find.text(Lines.EM_11.parts(Lang.en)[1]), findsOneWidget);
-    expect(find.text(Lines.MP_28.text(Lang.en)), findsNothing);
     handle.dispose();
   });
 

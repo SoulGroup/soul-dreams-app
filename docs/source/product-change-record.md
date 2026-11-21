@@ -2539,3 +2539,192 @@ printed nothing or matched. The word check is not run on the register, as at eve
   product-change-record.md are replaced by these versions; change-record.md by the record as read.
 
 ---
+
+## C18-P — The founder's redesign, Life Context and the night's image in the Places Register and the Design System; thirty-two new places; the three consents, MP·8 and MP·59 retired; naming a night retired; two founder-ruled departures; W27·2 and W27·6 to rewrite; Word Animation on by default; the Shared Core pass of C160-I; the files as filed before archived; the hash C17-P could not state
+
+**Filed 2026-11-21, by this machine.** *Drafted by Product & Design's C18-P Filing chat, briefed by Head of Product & Design (its brief, its message 2 answering the chat's message 1, and its message 3) [RELAYED, Head of Product & Design]. Technology builds these places now and shows each place's handle until its line is filed (Technology Message 23 item 5 [RELAYED]). This filing is the register and the Design System, nothing more. The filing script refused unless every file it reads was at the hash the chat read, and every check printed nothing on a test copy of the repository built from the project mirror.*
+
+**1. THE METHOD.** The founder's lean check, as C16-P item 1 records it. **What this filing read** [READ]: Interpretation's
+record through C159-I, at `7b7226a2c40f10ab20df4a6e9675f0c49d29e33f81a6f032b9c0c0919019217d`, and in it C159-I whole; the Requirements List, every Product file it
+changes or checks, and the Principles (its lines on memory of the dreamer only), each at its C17-P hash. Not read here,
+and [RELAYED, Head of Product & Design] for what this filing takes from them: the founder's rulings of 2026-11-20 and
+2026-11-21 in Product's head chat; Technology Messages 23 and 24; Technology's Build worker, its Message 30 (the
+founder's D112 rulings); interpretation/message-to-product-2026-11-20.md; Run B; C160-I and SHARED-CORE.md.
+
+**2. THE LINES AND THE WORDS RULE.** Every line this filing writes was drafted in Product's head chat under the words
+rule (C155-I item 7) and approved by the founder on 2026-11-20 or 2026-11-21 [RELAYED, Head of Product & Design]. Each
+is copied verbatim into the register and named there in its flag; this record does not restate them. They are: MP·9,
+MP·11, MP·27, MP·39, W25, and MP·66 to MP·97.
+
+**3. THE REDESIGN, IN THE REGISTER** (founder-ruled 2026-11-20 and 2026-11-21 [RELAYED, Head of Product & Design]).
+- **MP·11** keeps its handle with "New Dream": the same place, the journal's button to record. The round record button
+  is gone. Its title is now "The journal's button to record", and its length a short line: "Record dream" was
+  already two words. **MP·9** sits under it, its arrow pointing up.
+- **Naming a night is removed.** MP·28 is retired. This undoes C131-I item 1, an Interpretation ruling; C159-I names the
+  removal among what Product depends on. MP·39, the night's menu, takes a new spoken name, and its must names the
+  image controls where it named naming.
+- **The greeting** is four places, MP·72 to MP·75, one per slot: Morning 05:00–11:00, Day 11:00–17:00, Evening
+  17:00–21:00, Night 21:00–05:00, start-inclusive (founder-approved 2026-11-21: night begins at the Night/Day switch).
+  One line a day, the four in turn.
+- **Search.** W25 takes "No matches"; MP·76 is the count. Results only from three characters.
+- **MP·27.** A night's date is dd/mm/yy; the month dividers are unchanged.
+- **A night's page.** The jump buttons (MP·77), the image controls (MP·78 to MP·81), the picture's spoken name (MP·82),
+  and the AI mark (MP·71), under each reading and on each image (C159-I item 5).
+
+**4. LIFE CONTEXT AND THE CONSENTS, IN THE REGISTER** (C159-I items 1, 4 and 5).
+- **Settings and the page.** MP·83 to MP·97: the three settings; the page "What you've told Soul Dreams", its list
+  labels, its menu, the sentence controls, deleting the selected and deleting all, its empty line; turning Life
+  Context off and its confirmation; withdrawing and giving consent (a) and its confirmation. "Life Context" is the
+  feature's name everywhere (founder-ruled 2026-11-21). Life Context's deletions use C4-P·4, MP·60 and MP·61: C4-P·4's
+  must now names them, and MP·60's flag.
+- **The three consents** (MP·66 to MP·70) replace the one. **MP·8 and MP·59 are retired** (founder-ruled 2026-11-20).
+  W27's must and flag now say three consents where they said one (§7 W27; X2): C159-I item 5 governs. EM·6, the
+  decline that stood beside MP·8, stands as filed; whether it stays beside the three consents is the founder's to rule
+  before Cohort 1, and its flag says so.
+- **Consent (a), MP·68, and consent (c), MP·70, are to rewrite**: each holds one sentence still owed, in braces, which
+  waits on Technology's report on the providers' terms (Amazon, Soniox, Google). Consent (b), MP·69, is written.
+- **Two founder-ruled departures**, removed by the founder on 2026-11-20 from Product's drafts of the consents, named
+  for Interpretation and counsel. From consent (a), against C159-I item 5 (Part 4.2 of
+  interpretation/message-to-product-2026-11-20.md): "Your words may reveal things like your health, your faith, your
+  sexuality or people in your life." / "Dina ord kan avslöja saker som din hälsa, din tro, din sexualitet eller
+  människor i ditt liv." From consent (b), against C159-I item 1 (its Part 2.9): "When you write about others, call
+  them by their role, not their name, and leave out their health and private matters." / "När du skriver om andra,
+  nämn dem efter deras roll, inte deras namn, och utelämna deras hälsa och privata angelägenheter." C159-I item 1 also
+  asks for that line where the dreamer writes about life; that place is not ruled here.
+- **The withdrawal line, MP·96, is written.** It is true only while the build stops every departure when consent (a)
+  is withdrawn: voice to Soniox, the counts, Personal paintings and descriptions, and kept words. Its flag says so, for
+  the handover.
+- **The disclosure.** W27·2 and W27·6 are to rewrite (C159-I item 3): kept words now leave with later readings, and a
+  Personal painting's words go to Google. W27·3's flag and W27·2's now say the founder approves before Cohort 1 and
+  counsel reads before public launch, where they said counsel before Cohort 1 (C159-I item 5).
+- **The images** (Technology Message 24, founder-ruled 2026-11-21 [RELAYED]). The calm and Random paintings are a
+  curated set shipped inside the app; only Personal paintings go out, to Google Vertex AI in an EU region. No flag in
+  the register named Amazon Nova Canvas or Ireland [READ, the register at its C17-P hash, searched]. When consent (c)
+  is refused, Night images is Off.
+
+**5. THE PLACES REGISTER,** at product/places-register.md and .csv. Changed: W27, W27·2, W27·3, W27·6, MP·8, MP·59,
+EM·6, MP·9, MP·11, W25, MP·27, MP·28, MP·39, MP·26, C4-P·4 and MP·60. New: MP·66 to MP·97. The header's "How a line is
+written here" names the sentence still owed in braces. Nothing else changed.
+- **The check,** product/check-places-register.sh, taught MP·66 to MP·97, and a sentence still owed: whole in braces,
+  in a row that is to rewrite. Nothing else. It was
+  `b58d51f41f7c7ae2e2f78e6cf438833a281877021f7444b2ef9ca1184d269709` and is `7e2e0c4aeaacc7430dfd9ce3edee154033e38a904f0059cd1f7ad9bb25c33a56`. Run on the new register
+  without its amendment, it names exactly the thirty-two new places and the four braced sentences [READ, the C18-P
+  Filing chat's test on a copy of the repository].
+- **The counts** [READ, `bash product/check-places-register.sh --count`]:
+
+    places 203
+    screen Every Screen 2
+    screen Onboarding 43
+    screen Recording 17
+    screen The Mirror 9
+    screen The Opening 11
+    screen The Readings & Close 35
+    screen The Journal 25
+    screen Settings 25
+    screen Not on a screen yet 36
+    status retired 39
+    status written 137
+    status written, in its parts 1
+    status to rewrite 5
+    status merged into W27·6 1
+    status paused 2
+    status composed (stand-in written) 10
+    status English written, Swedish to write 2
+    status no line: prohibition 1
+    status composed, no stand-in 3
+    status no line: by decision 2
+
+**6. product/design-system.md** (founder-ruled 2026-11-20 and 2026-11-21 [RELAYED, Head of Product & Design]).
+- **The three voices.** The app's voice Bellefair 22px, −0.04em; the dreamer's voice Inter Display 16px, 0.02em; the
+  traditions' voice Sorts Mill Goudy 18px, −0.02em, with its true italic for the dreamer's quoted words inside a
+  reading; each at line 1.5. They replace Sorts Mill Goudy, Nunito and Habibi in their roles.
+- **The journal and the night's page.** Rounded rows carrying only the date, Inter Display 20px semibold, white, over
+  the night's image; an unread night's row shows the painted gradient. The night's header: the image and the date,
+  the jump buttons under it as section labels. type.h3 and type.h5 now name no use. The sun and the moon above the
+  greeting; New Dream's night-sky image; the curated paintings; the painted gradient; words over a picture white with
+  a soft dark shadow.
+- **Life Context's page.** Each sentence in quotation marks in a pure white box, its date beneath in #767676; delete
+  icons #8F3D24. Computed here [READ, WCAG 2.2 relative luminance]: in the dark theme the date takes #ABAB93 (4.56:1
+  and 6.35:1), and the delete icon #8F3D24 fails (1.45:1 and 2.02:1), so #D0775A (3.28:1 and 4.58:1) is proposed, for
+  the founder to approve.
+- **Word Animation: On by default** (founder-ruled 2026-11-20), replacing C17-P's "Off by default, everywhere", whose
+  text is in the archive below. Word by word is only for the app's responses to the dreamer: the questions, the bridge,
+  the reflections; the app's own lines appear whole. MP·26 keeps its name and still governs the waiting shimmer.
+- **To try**, a new §8: the rows' height, edge and width; the header, about 240px; the jump buttons' colours, Questions
+  brown a new role. No section is renumbered, so the handover's §1 and §7 still resolve.
+- **Marked owed, not removed:** color.record, control.record and control.row.chevron, unused since the redesign.
+
+**7. THE SHARED CORE PASS, RECORDED HERE AS THE SHARED CORE REQUIRES** (C160-I, commit ea03c89; SHARED-CORE.md
+`12faf20f` [RELAYED, Head of Product & Design, its message 2; neither read by this filing]). It carries C159-I's change:
+the app knows only what the dreamer has shared, in their own words, and makes no picture of the dreamer. This
+project's instructions carry it [READ, this chat's instructions]. The Principles still say memory of the dreamer is
+refused (lines 163 and 164 at its C17-P hash [READ]); owed below.
+
+**8. THREE FILES ARCHIVED WHOLE,** each in an archive note. The new versions take their paths.
+
+| File | sha256 |
+|---|---|
+| Original, product/places-register.md | `6b5fa3260493263c641e68dac51e6e9c403a7d506cb92f7a354f5daa90a764c5` |
+| Archived, archive/places-register-superseded-2026-11-21-at-C18-P.md, note included | `af00adeca57959c4009e207686ce013d96aa9d1552152d0bf6fb30e9a49bfa57` |
+| Original, product/places-register.csv | `656051d0ae4d056d9d41703c9637fc6fc73fb5a71163e80e5ee1fdb9be3d9741` |
+| Archived, archive/places-register-superseded-2026-11-21-at-C18-P.csv, note included | `d99f65d6a3dd98bae846721fc07842e3a6b3af24bd6d2effa7db10ce89464e61` |
+| Original, product/design-system.md | `ff2f7c905b6021eb2eabbc3d0dfcf5e88d2c7994f93d1b5d15c9b227448c56e5` |
+| Archived, archive/design-system-superseded-2026-11-21-at-C18-P.md, note included | `9d72e7c5e3e29a895058555e46fb1c273ca55fb90593788381b6e65105a72f87` |
+
+Each of these prints its original's hash, and printed it at filing [READ, by the filing script]:
+
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/places-register-superseded-2026-11-21-at-C18-P.md | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/places-register-superseded-2026-11-21-at-C18-P.csv | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/design-system-superseded-2026-11-21-at-C18-P.md | shasum -a 256
+
+**9. THE FILES NOW.** Their hashes at filing [READ, by the filing script]:
+
+| File | sha256 |
+|---|---|
+| product/places-register.md | `e2dfee48acd6e532cf86cabad6354c74109fc2ca9e9154f0cd9e91327320737d` |
+| product/places-register.csv | `cd523e7d69591369ef7dabf54495e35981614a54ae00033e95002e7925ae2c97` |
+| product/design-system.md | `1c41ff6b3b920af7afb7413200f8c1d5a2b9d131d9eb0efe8140ce4309780b61` |
+| product/check-places-register.sh | `7e2e0c4aeaacc7430dfd9ce3edee154033e38a904f0059cd1f7ad9bb25c33a56` |
+
+**10. THE HASH C17-P COULD NOT STATE.** At d8d71c3 this record was `7ce7e0b4e35bdcc45d715a1c4aefc5681a6f6931c3c94ae49119c857170fbf15` [READ, by the filing script: the
+file at that commit hashes so, and d8d71c3 is the commit that last changed it before this one]. This record still
+cannot state its own current hash; the filing script prints it, and the next Product filing records it.
+
+**11. CHECKED BEFORE FILING** [READ, by the filing script]: the tree clean; the new paths absent; Interpretation's record
+as read, through C159-I at `7b7226a2c40f10ab20df4a6e9675f0c49d29e33f81a6f032b9c0c0919019217d`, the exact start of the record at filing; the Requirements List, the
+Principles and every Product file read at its C17-P hash. Product's heading check, the map's check, the register's
+check as amended, product/check-principles.sh on How the AI Appears and the Design System, and each archive note's
+original hash all printed nothing or matched. The word check is not run on the register, as at every earlier filing.
+
+**WHAT DEPENDED ON THIS.**
+
+- **Technology.** One message from Head of Product & Design after the push: every place MP·66 to MP·97 and the changed
+  lines, now filed, so their handles can come off the screens; MP·8, MP·59 and MP·28 retired; the withdrawal of
+  consent (a) stopping every departure (MP·96's flag); Night images Off when consent (c) is refused; search from three
+  characters; the greeting's hours and order; dd/mm/yy; the Design System's values, Word Animation on by default.
+  Owed back: the report on the providers' terms, for MP·68's and MP·70's braced sentences.
+- **Interpretation.** In Product's next weekly batch: the two founder-ruled departures (item 4); MP·28's retirement,
+  which undoes C131-I item 1; three consents where §7 W27 and X2 say one; EM·6 and C127-I I7; C159-I item 1's line
+  on other people where the dreamer writes about life, unruled; W27·2 and W27·6 to rewrite.
+- **Counsel, before public launch** (C159-I item 5). The three consents and the two departures; W27·2, W27·3, W27·6.
+- **The founder.** MP·68's and MP·70's braced sentences, after Technology's report; W27·2's and W27·6's next text;
+  EM·6; #D0775A; the values to try (§8); the sun, the moon, New Dream's night-sky image, the curated paintings and the
+  painted gradient; whether Bellefair has a true italic.
+- **The next Product filing, before Cohort 1.** C17-P's list, carried, and now: main-path.md's pass for the redesign
+  (the Journal without a record button or row summaries; naming removed; the greeting; search; the night's page;
+  onboarding's consents; Life Context's page and settings); the handover's pass (the withdrawal's behaviour; Night
+  images Off on refusal; three characters; the greeting's order; its Design System pointer that still names Habibi);
+  How the AI Appears' pass (Word Animation on by default, for the app's responses only; the AI mark); the
+  Principles' dated block for its lines on memory of the dreamer (item 7); the Design System's unused roles,
+  type.button's row summary and color.text.summary among them; checking the age gate against C159-I item 5 (no one
+  under 18).
+- **Interpretation's entries filed after this filing was drafted.** Not read for it. At filing, the record read,
+  through C159-I, was the exact start of the record [READ, by the filing script]. Each is read at the next Product
+  filing:
+
+- C160-I — The Foundations' dated block of 2026-11-21: the app knows what the dreamer has shared and never makes a picture of the dreamer; §6's crisis paragraph made true; the Shared Core pass
+
+- **The project mirrors.** places-register.md and .csv, design-system.md and product-change-record.md are replaced by
+  these versions; change-record.md by the record as read.
+
+---

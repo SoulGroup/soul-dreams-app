@@ -36,6 +36,8 @@ flutter:
         - asset: assets/fonts/Inter-Regular.ttf
         - asset: assets/fonts/Inter-SemiBold.ttf
           weight: 600
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
     - family: Nunito
       fonts:
         - asset: assets/fonts/Nunito-Regular.ttf
@@ -44,3 +46,6 @@ flutter:
     - family: Habibi
       fonts:
         - asset: assets/fonts/Habibi-Regular.ttf
+    - family: Bellefair
+      fonts:
+        - asset: assets/fonts/Bellefair-Regular.ttf

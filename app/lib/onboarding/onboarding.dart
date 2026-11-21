@@ -5,7 +5,8 @@
 // holds the app light (AlwaysLight). Every word is the register's; a part
 // with no line yet shows nothing in its place (D106 3; R1). Every box is
 // centred between the top and the foot (D106 1), and the words appear whole
-// (D106 2). Nothing is kept here: "I agree" is
+// (D106 2). Nothing is kept here: "I consent" (MP·67's first part, in
+// place of the retired MP·8 until the three consents are built; D119) is
 // told to the page that shows this, which keeps only that the dreamer
 // agreed and is 18 or over (D103 items 2 and 4). Under 18: EM·5 and
 // "I understand", which changes nothing; the card stays until the app
@@ -45,7 +46,7 @@ class Onboarding extends StatefulWidget {
     this.full = DisclosurePage.parts,
   });
 
-  /// "I agree" (MP·8).
+  /// "I consent" (MP·67's first part; D119).
   final VoidCallback onAgreed;
 
   /// The parts each page shows: [firstPage], [secondPage] and the full
@@ -189,7 +190,6 @@ class _OnboardingState extends State<Onboarding> {
                   .push(MaterialPageRoute<void>(builder: (_) => DisclosurePage(shown: widget.full))),
             ),
           ),
-          reads(Lines.MP_59),
         ];
     }
   }
@@ -198,7 +198,7 @@ class _OnboardingState extends State<Onboarding> {
     _Step.underAge => null,
     _Step.consent => ButtonRow(
       left: PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _to(_Step.disclosure)),
-      right: PlainButton(Lines.MP_8.text(appLanguage), onPressed: widget.onAgreed),
+      right: PlainButton(Lines.MP_67.parts(appLanguage).first, onPressed: widget.onAgreed),
     ),
     _ => _one(PlainButton(Lines.MP_30.text(appLanguage), onPressed: _next)),
   };

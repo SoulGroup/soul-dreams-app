@@ -504,7 +504,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
     final dreamer = TypeRoles.voiceDreamer;
     // A pill: the corners half the height of one line of the field.
     final oneLine =
-        MediaQuery.textScalerOf(context).scale(dreamer.size) * dreamer.height + StandIns.fieldPadding.vertical;
+        MediaQuery.textScalerOf(context).scale(dreamer.size) * dreamer.height! + StandIns.fieldPadding.vertical;
     final edge = OutlineInputBorder(
       borderRadius: BorderRadius.circular(oneLine / 2),
       borderSide: BorderSide(color: p.fieldBorder),

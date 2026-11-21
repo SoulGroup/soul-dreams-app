@@ -27,14 +27,20 @@ from guardlib import (CSV, GENERATED, LINES, LIST_WORDS, LISTS, PENDING_CSV,  # 
 HEADER = ('handle', 'place', 'source', 'screen', 'also_on', 'moment', 'must', 'never',
           'length', 'status', 'draft', 'english', 'swedish', 'flag')
 # The statuses with a line, and whether the line is a stand-in (R1).
+# The owner, 2026-11-21 (C18-P's import, item 3): a place "to rewrite" is
+# built as written, a stand-in, until its new line is filed. A sentence
+# still owed in it, whole in braces and starting with a capital (C18-P),
+# is shown as written, braces and all, never filled as a slot.
 LINE = {'written': False, 'written, in its parts': False,
-        'composed (stand-in written)': True}
+        'composed (stand-in written)': True, 'to rewrite': True}
+REWRITE = 'to rewrite'
+OWED = re.compile(r'\{[^{}]*\}')
 # D36 Q2: this status may have both fields empty; its parts carry the text.
 IN_PARTS = 'written, in its parts'
 # Known statuses with no line. Waiting places show their handle; the
 # others have no constant at all (D32 Q6, Q7).
 # D109: "English written, Swedish to write" waits until both are filed.
-WAITING = ('to rewrite', 'to write', 'composed, no stand-in',
+WAITING = ('to write', 'composed, no stand-in',
            'English written, Swedish to write')
 WAITING_PREFIXES = ('paused:', 'blocked:')
 NO_LINE = ('retired', 'no line: by decision', 'no line: prohibition')
@@ -164,10 +170,18 @@ def parse_text(text, row, source=REGISTER):
     return parts
 
 
-def slots_of(parts, row):
+def owed_of(parts):
+    # The sentences still owed: a brace whose words start with a capital.
+    return [m for part in parts for m in OWED.findall(part) if m[1:2].isupper()]
+
+
+def slots_of(parts, row, owed=False):
     found = set()
     for part in parts:
         rest = part
+        if owed:
+            for m in owed_of([part]):
+                rest = rest.replace(m, '')
         for token, _, _ in SLOTS:
             if token in rest:
                 found.add(token)
@@ -200,7 +214,10 @@ def places_of(rows):
         en_parts, sv_parts = parse_text(en, row), parse_text(sv, row)
         if len(en_parts) != len(sv_parts):
             raise WordsError(REGISTER, 'parts-differ', row)
-        en_slots, sv_slots = slots_of(en_parts, row), slots_of(sv_parts, row)
+        owed = status == REWRITE
+        if owed and len(owed_of(en_parts)) != len(owed_of(sv_parts)):
+            raise WordsError(REGISTER, 'owed-differs', row)
+        en_slots, sv_slots = slots_of(en_parts, row, owed), slots_of(sv_parts, row, owed)
         if en_slots != sv_slots:
             raise WordsError(REGISTER, 'slots-differ', row)
         slots = tuple(s for s in SLOTS if s[0] in en_slots)

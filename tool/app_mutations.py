@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A441, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A443, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 460 run, 460 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 462 run, 462 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1383,8 +1383,8 @@ ROWS = [
      '[Lines.W27_14, Lines.W27_15, Lines.MP_57]',
      'test/onboarding/onboarding_test.dart', 'the two pages hold these parts, in order'),
     ('A291', 'lib/onboarding/onboarding.dart',
-     'right: PlainButton(Lines.MP_8.text(appLanguage), onPressed: widget.onAgreed),',
-     'right: PlainButton(Lines.MP_8.text(appLanguage), onPressed: () {}),',
+     'right: PlainButton(Lines.MP_67.parts(appLanguage).first, onPressed: widget.onAgreed),',
+     'right: PlainButton(Lines.MP_67.parts(appLanguage).first, onPressed: () {}),',
      'test/onboarding/onboarding_test.dart', 'I agree is told once'),
     ('A292', 'lib/onboarding/disclosure_page.dart',
      '    Lines.W27_6,\n',
@@ -1763,8 +1763,8 @@ ROWS = [
      '      button: false,\n      child: GestureDetector(\n        key: JournalPage.rowKey(night.id),',
      'test/journal/pages/journal_page_test.dart', "a row: the date over an unread night's gradient"),
     ('A380', 'lib/journal/pages/journal_page.dart',
-     'TypeRoles.h6.style(NightArt.over)',
-     'TypeRoles.h6.style(Palette.of(context).text)',
+     'TypeRoles.rowDate.style(NightArt.over)',
+     'TypeRoles.rowDate.style(Palette.of(context).text)',
      'test/journal/pages/journal_page_test.dart', "a row: the date over an unread night's gradient"),
     # D110: a night's header, its picture and date; a read night's jump buttons.
     ('A381', 'lib/journal/pages/night_page.dart',
@@ -1948,8 +1948,8 @@ ROWS = [
      'Widget build(BuildContext context) => child;',
      'test/journal/pages/date_shade_test.dart', 'header: every painting, the date reads at 4.5 to 1'),
     ('A425', 'lib/journal/pages/journal_page.dart',
-     'DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over))),',
-     'Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over)),',
+     'DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over))),',
+     'Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over)),',
      'test/journal/pages/journal_page_test.dart', "a read row shades its date; an unread one does not"),
     ('A426', 'lib/journal/pages/night_page.dart',
      'child: DateShade.over(\n                                    look,\n                                    Text(',
@@ -2018,6 +2018,16 @@ ROWS = [
      '      rowBorder: c(rowBorder, other.rowBorder),\n',
      '      rowBorder: rowBorder,\n',
      'test/design/palette_test.dart', 'the row border fades with the theme'),
+    # c18p-import (D118, D119): the row's date in type.row.date; the consent
+    # button MP·67's first part, in place of the retired MP·8.
+    ('A442', 'lib/journal/pages/journal_page.dart',
+     'style: TypeRoles.rowDate.style(NightArt.over))),',
+     'style: TypeRoles.h6.style(NightArt.over))),',
+     'test/journal/pages/journal_page_test.dart', "a row: the date over an unread night's gradient"),
+    ('A443', 'lib/onboarding/onboarding.dart',
+     'PlainButton(Lines.MP_67.parts(appLanguage).first, onPressed: widget.onAgreed)',
+     'PlainButton(Lines.MP_67.parts(appLanguage).last, onPressed: widget.onAgreed)',
+     'test/onboarding/onboarding_test.dart', '18 or over: the disclosure first page, then the consent'),
 ]
 
 

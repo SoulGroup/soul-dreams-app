@@ -12,7 +12,8 @@ never here. Kit item 7. Pillars: visual design, UI design, systems design, acces
 
 **Whose it is.** The founder's. He set every value here in Framer [RELAYED, Head of Product & Design, its messages 1
 and 2 to the Design Update chat, and its message 3 to it, carried at C11-P; Product messages 17 to 19 and Technology
-Message 22 item 3, carried at C17-P]. Framer holds design in progress; this document records the values when they are
+Message 22 item 3, carried at C17-P; the founder's rulings of 2026-11-20 and 2026-11-21, Technology Message 24 and
+Technology's Build worker, its Message 30, carried at C18-P]. Framer holds design in progress; this document records the values when they are
 filed. Where Framer and this document differ, Framer is the work in progress and this is the record until the next
 pass.
 
@@ -35,21 +36,26 @@ of the size; letter spacing is in em.
 | Role | Face | Weight | Size | Line | Letter | Used for |
 |---|---|---|---|---|---|---|
 | type.h1 | Tangerine | Regular | 77px | 1.2 | 0 | The wordmark, "SoulDreams", in onboarding only |
-| type.h2 | Sorts Mill Goudy | Regular | 33px | 1.2 | −0.02em | Page titles; a night's date or name |
-| type.h3 | Sorts Mill Goudy | Regular | 24px | 1.2 | −0.01em | An unnamed row's date |
+| type.h2 | Sorts Mill Goudy | Regular | 33px | 1.2 | −0.02em | Page titles; a night's date in its header |
+| type.h3 | Sorts Mill Goudy | Regular | 24px | 1.2 | −0.01em | None: a row's date is type.row.date (C18-P) |
 | type.h4 | Inter | Semibold | 24px | 1.4 | −0.02em | The month divider |
-| type.h5 | Sorts Mill Goudy | Regular | 20px | 1.2 | −0.01em | A named row's name |
+| type.h5 | Sorts Mill Goudy | Regular | 20px | 1.2 | −0.01em | None: naming a night is removed (C18-P) |
 | type.h6 | Inter | Semibold | 18px | 1.4 | −0.02em | None: it named a Help resource, and there is no Help page (C147-I; C153-I) |
-| type.voice.app | Sorts Mill Goudy | Regular | 18px | 1.5 | −0.02em | The app's lines; onboarding's text; the mirror until confirmed |
-| type.voice.dreamer | Nunito | Regular | 16px | 1.5 | 0 | The dreamer's words |
-| type.voice.readings | Habibi | Regular | 15px | 1.5 | 0 | The readings, the arc, the series question |
+| type.voice.app | Bellefair | Regular | 22px | 1.5 | −0.04em | The app's voice: the app's lines; onboarding's text; the mirror until confirmed |
+| type.voice.dreamer | Inter Display | Regular | 16px | 1.5 | 0.02em | The dreamer's voice: the dreamer's words |
+| type.voice.readings | Sorts Mill Goudy | Regular | 18px | 1.5 | −0.02em | The traditions' voice: the readings, the arc, the series question |
+| type.row.date | Inter Display | Semibold | 20px | [to set in Framer] | [to set in Framer] | A journal row's date, white, over the night's image |
 | type.button | Inter | Regular | 14px | 1.4 | −0.02em | Buttons, placeholders, instructions, section labels, the line above the input field, the date under a name, a row's summary |
 | type.button.small | Inter | Regular | 12px | 1.4 | −0.01em | Tradition labels, dream tags |
 
+**The three voices** (founder-ruled 2026-11-20 [RELAYED, Head of Product & Design]; C18-P): the app's voice Bellefair, the dreamer's
+voice Inter Display, the traditions' voice Sorts Mill Goudy. They replace Sorts Mill Goudy, Nunito and Habibi.
+
 **The italic.** Used only for the dreamer's own words quoted inside a reading or a reflection (How the AI Appears
-§2.3). It is the italic of the voice the words sit in. Where that face has no true italic, the dreamer voice's italic,
-Nunito Italic, is used instead. [ASSUMED] Habibi has no true italic; the founder checks it in Framer. A slanted
-regular face is never used.
+§2.3). Inside a reading it is Sorts Mill Goudy's true italic (founder-ruled 2026-11-20). Inside a reflection it is the
+italic of the voice the words sit in; where that face has no true italic, the dreamer voice's italic, Inter Display
+Italic, is used instead. [ASSUMED] Bellefair has no true italic; the founder checks it in Framer. A slanted regular face
+is never used.
 
 ---
 
@@ -67,12 +73,16 @@ regular face is never used.
 | color.text.summary (a row's summary) | #767676, only ever on white |
 | color.button | #FFFFFF, border 1px #CCCCCC, text #333333 |
 | color.button.filled (Submit) | #333333, text #FFFFFF |
-| color.record (the record button) | gradient #8F3D24 → #6B2B18, text #FFFFFF |
+| color.record (the record button) | gradient #8F3D24 → #6B2B18, text #FFFFFF [owed: unused since the round button is gone, C18-P] |
 | color.label.tradition | gradient #8F3D24 → #6B2B18, text #FFFFFF |
 | color.label.section | gradient #33691C → #1B3B0E, text #FFFFFF |
 | color.tag.dream | gradient #425DAD → #253873, text #FFFFFF |
 | color.destructive (Delete journal) | gradient #8F3D24 → #6B2B18, text #FFFFFF |
 | color.line.state (the line above the input field) | #333333 |
+| color.lifecontext.box (a kept sentence's box) | #FFFFFF, pure white |
+| color.lifecontext.date (the date under a kept sentence) | #767676, on the white box only |
+| color.lifecontext.delete (the delete icon) | #8F3D24 |
+| color.label.questions (the jump button "Questions") | brown [to try: read from the founder's screens] |
 
 ## 3. Colour: the dark theme
 
@@ -92,6 +102,11 @@ regular face is never used.
 | color.tag.dream | gradient #F5F5EC → #ABAB93, text #333333 |
 | color.destructive | as in the light theme |
 | color.line.state | #F5F5EC |
+| color.lifecontext.box | as color.surface |
+| color.lifecontext.text | #F5F5EC |
+| color.lifecontext.date | #ABAB93 |
+| color.lifecontext.delete | #D0775A [proposed by C18-P, for the founder to approve: #8F3D24 fails here] |
+| color.label.questions | [to try: read from the founder's screens] |
 
 **One colour shared by three roles.** The record button, the tradition labels and the destructive control share the
 terracotta gradient. Each is told apart by its shape, its place and its word, never by colour alone (How the AI
@@ -113,6 +128,16 @@ the page [RELAYED, Head of Product & Design, 2026-10-29; READ, the same computat
 boundary (SC 1.4.11) [RELAYED, not read this session], and the Principles set AA as the floor (§3). Boxes and bubbles
 keep #CCCCCC: they are not controls. Dark-theme fields need no border: the field itself stands at 11.85:1 against the
 page [READ, the same computation].
+
+**Life Context's page** [READ, the C18-P Filing chat's computation, 2026-11-21, WCAG 2.2 relative luminance]. Light: the
+date, #767676 on the pure white box, 4.54:1; the delete icon, #8F3D24 on white, 7.34:1, where an icon needs 3:1
+(SC 1.4.11). Dark: the date, #ABAB93, already the dark button's lighter end, on each end of the surface gradient,
+4.56:1 and 6.35:1. The delete icon #8F3D24 fails on the dark surface, 1.45:1 and 2.02:1; #D0775A passes, 3.28:1 and
+4.58:1, and is proposed, not ruled.
+
+**Words over a picture** (founder-ruled 2026-11-21 [RELAYED, Head of Product & Design]): white, with a soft dark shadow behind them, so they
+read on any painting. No ratio can be stated for a picture that changes; the shadow's size and strength are [to set in
+Framer], judged on the palest painting in the set.
 
 ---
 
@@ -136,11 +161,15 @@ page [READ, the same computation].
 
 | Control | Shape and size |
 |---|---|
-| control.record | A 120px circle, MP·11 in white inside it |
+| control.record | A 120px circle, MP·11 in white inside it [owed: unused since the round button is gone, C18-P] |
+| control.newdream | New Dream (MP·11), carrying a night-sky image the founder supplies; its shape [to set in Framer] |
 | control.back | A thin chevron in a round bordered button of about 41px |
-| control.row.chevron | A chevron at each journal row's trailing edge |
+| control.row.chevron | A chevron at each journal row's trailing edge [owed: unused with the new rows, C18-P] |
 | control.field.type | The typing field: a pill with the microphone inside it, growing as the dreamer types, capped at about 0.7 of the space above the buttons; never focused by itself |
 | divider.month | The month divider, centred |
+| journal.row | A rounded row carrying only the date (type.row.date), white, over the night's image; an unread night's row shows the painted gradient |
+| night.header | The night's image and its date; jump buttons (MP·77) under it, above "Dreams", drawn as section labels |
+| lifecontext.sentence | Each kept sentence in quotation marks in its box, its date beneath in small grey text |
 
 ---
 
@@ -151,10 +180,18 @@ page [READ, the same computation].
   seconds, ease-in-out; with Word Animation off or the phone's "Reduce motion" on, they change at once. The quick toggle at the top
   centre of the Settings page switches the theme; tapped while Automatic is set, it switches the mode to Manual.
 - **Onboarding** is always in the light theme.
-- **Word Animation.** On or Off; Off by default, everywhere (founder-ruled, Technology Message 22 item 3, dated
-  2026-11-20 [RELAYED, Head of Product & Design]). Off stops the app's own words appearing word by word, and the waiting
-  shimmer (How the AI Appears §4 and §5). The phone's "Reduce motion" does the same. When on, about one word every 60 ms.
-  Word by word, the founder's Cohort 0 trial, is seen only with the setting turned on, and so is the theme's fade.
+- **Above the greeting** (founder-ruled 2026-11-21, Technology's Build worker, its Message 30 [RELAYED, Head of Product & Design]): a sun by day
+  and a moon by night, switching with Night/Day mode at 21:00 and 08:00; images the founder supplies.
+- **The night's image.** Every night has one (C159-I item 4). The calm and Random paintings are a curated set of about
+  60, made by the founder and shipped inside the app; nothing is sent for them. Only Personal paintings go out, to
+  Google Vertex AI in an EU region (Technology Message 24, founder-ruled 2026-11-21 [RELAYED, Head of Product & Design]). A removed image
+  becomes a gradient (C159-I item 4).
+- **The painted gradient** (founder-ruled 2026-11-21 [RELAYED, Head of Product & Design]): a small set of gradient paintings the founder makes in
+  night-sky colours, with the curated paintings; a plain stand-in until then.
+- **Word Animation.** On or Off; On by default (founder-ruled 2026-11-20 [RELAYED, Head of Product & Design]; C18-P, replacing C17-P's
+  Off). Word by word is only for the app's responses to the dreamer: the questions, the bridge, the reflections. The
+  app's own lines appear whole. Off stops word by word and the waiting shimmer (How the AI Appears §4 and §5). The
+  phone's "Reduce motion" does the same. When on, about one word every 60 ms.
 - **The shimmer.** A highlight sweeping across a waiting label's text for five seconds at most; then the label stands
   still (How the AI Appears §5). Its speed, direction and curve: [to set in Framer].
 
@@ -165,5 +202,14 @@ page [READ, the same computation].
 The space below the journal's last row; the shimmer's speed, direction and curve; every motion curve but the theme's
 fade; and
 any value not named above. Each is added here at the next pass.
+
+---
+
+## 8. To try on the founder's phone
+
+Values the founder judges on his own phone before they are set (Technology's Build worker, its Message 30 [RELAYED, Head of Product & Design]):
+the journal rows' height, edge and width; the night's header, about 240px tall, scrolling away as the dreamer reads;
+the jump buttons' colours, read from the founder's screens: Dreams green as color.label.section, Questions brown (a new
+role, color.label.questions), Readings terracotta, Reflection blue, in both themes.
 
 *No matter where you are on your journey, the steps you take are equally important.*

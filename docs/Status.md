@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110, D112 to D115; the owner's by-eye review, then the merge, next), by Claude Code.
+Last updated: 2026-11-21, in branch `redesign-b` (C18-P imported, D118 and D119; the search plan amended to it; the owner's by-eye checks of the fonts next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,8 +14,8 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`redesign-a`: the journal and a night's page to the new design (D110, head's message 24; plan
-`docs/plans/redesign-a.md`). `c17p-import` is merged (`a2580db`).
+`redesign-b`: C18-P's import (D118, D119), then search (D110, D116, D117; plan `docs/plans/redesign-b.md`).
+`redesign-a` is merged (`e81f29c`); its Status was not updated at the merge (this entry records it).
 
 ## Road ahead
 
@@ -51,6 +51,10 @@ rulings given during each branch are listed in this file, one line each, under "
   `app/lib/design/tokens.g.dart` (`TypeRoles`, `LightColours`, `DarkColours`, `Spacing`), and G1 proves it. One value
   is unset in the source (`space.journal.end`) and has no constant. No prose of the Design System reaches the output:
   a comment carries the role name only (D52).
+- C18-P's voices (D118): Bellefair Regular (the app's voice) and Inter Bold (search's match) added, with
+  Bellefair's OFL, fingerprinted; Inter Bold's OFL is the Inter one already filed (checked byte for byte, and its
+  SemiBold is the installed file). "Inter Display" is built in Inter. Nunito and Habibi are now named by no type
+  role; they stay declared until a ruling removes them.
 - The fonts (D49 a): Tangerine, Sorts Mill Goudy, Inter (Regular and SemiBold, the 18pt statics), Nunito (Regular,
   Italic) and Habibi, static TTFs with their OFL licences in `app/assets/fonts/`, each listed in `fingerprints.txt`
   (G2), declared in `pubspec.yaml`. The owner's download; never fetched at run time (R10).
@@ -228,17 +232,21 @@ rulings given during each branch are listed in this file, one line each, under "
   stops the generator (`pending-filed`). Since C17-P none is pending: the file holds its header only, and nothing in
   `lib/` imports `pending.g.dart` (a test in `test/words/` keeps the Dev-only rule proved on a line built there).
 - Waiting statuses (D109): "English written, Swedish to write" (W12, W13) has no line, as "to write"; the readings
-  branch revisits them.
+  branch revisits them. "to rewrite" (D119) is built as written, a stand-in, until rewritten (W27·2, W27·6, MP·68,
+  MP·70, C125-I·3); a sentence still owed, whole in braces with a capital (MP·68, MP·70), shows as written.
 - Design values: `Spacing.pageSide` (30) and `Spacing.journalRow` (12) are filed at C17-P and replace the stand-ins
   `StandIns.pageSide` and `rowGap` (the same values). §5's second table, the controls, is prose and not generated.
+  At C18-P (D118): `TypeRoles.rowDate` (Inter SemiBold 20) carries a row's date; a line or letter "[to set in
+  Framer]" is null, the font's own; a colour "[to try ...]" or "[proposed ...]" has no constant
+  (`color.label.questions`, the dark `color.lifecontext.delete`), one "[owed: ...]" keeps its value.
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 577 tests, and 460 mutation checks (A1 to A441; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 577 tests, and 462 mutation checks (A1 to A443; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A313 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 460 run, 460 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 462 run, 462 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -324,7 +332,7 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Task
 - G1 also proves the pending lines against `pending-fingerprint.txt` and `pending.g.dart` against the generator; G2
   also proves every file in `docs/reference/screens/` against its `fingerprints.txt`; G0 knows those two
   fingerprint files by exact path (D57 Q11, D58).
-- Totals: 241 guard tests and 87 mutation checks.
+- Totals: 255 guard tests and 102 mutation checks (c18p-import: the generators' new forms, D118, D119).
 
 ## Banked
 
@@ -1148,21 +1156,32 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   the light theme, `#8A8A8A` in the dark, TO TRY); 100 pt more empty space above the sky mark and the greeting (140,
   was 40).
 
+## Rulings during redesign-b
+
+- D116 and D117 (owner): the search plan's brainstorm and its stop, listed in `docs/plans/redesign-b.md`.
+- D118 (founder): where the Design System names "Inter Display", the app uses Inter (already installed), at the same
+  sizes and spacing; the Build chat tells Product.
+- D119 (owner, on C18-P's import stop, `.scratch/for-build-chat/c18p-import-stop.md`), as leaned: (1) until the three
+  consents are built, onboarding's consent button is MP·67's first part, MP·59's line goes, EM·6 stays the decline;
+  (2) "to rewrite" is built as written, its braced owed sentences included, C125-I·3 too; (3) the microphone's
+  spoken name stays MP·11 until Product files a place for it; (4) the filed lines for the handles still on screen
+  (the greeting, New Dream, the jump buttons) are redesign-b's first task.
+
 ## Documents as last imported
 
-Imported by the owner at the documents repository's C17-P state (`d8d71c3`), in branch `c17p-import`; the nine
-unchanged since C16-P's import (`ff3b229`, commit `ca29414`). The ordinal
+Imported by the owner at the documents repository's `ac3a013`, in branch `redesign-b` (C18-P and C160-I); the
+others unchanged since C17-P's import (`d8d71c3`, branch `c17p-import`). The ordinal
 is the owning department's filing. Each line: path, ordinal, first 12 hex digits of the sha256, as in
 `docs/source/SOURCES`.
 
 - `app/assets/words/founder-lists-for-technology.md`, C13-P, `4326cfcc5cb8`
-- `app/assets/words/places-register.csv`, C17-P, `656051d0ae4d`
-- `docs/source/design-system.md`, C17-P, `ff2f7c905b60`
+- `app/assets/words/places-register.csv`, C18-P, `cd523e7d6959`
+- `docs/source/design-system.md`, C18-P, `1c41ff6b3b92`
 - `docs/source/experience-map.md`, C16-P, `3c8878f6f03b`
 - `docs/source/how-the-ai-appears.md`, C17-P, `80618ad95378`
-- `docs/source/interpretation-change-record.md`, C158-I, `cdb3dfa5445a`
+- `docs/source/interpretation-change-record.md`, C160-I, `57644c167efb`
 - `docs/source/main-path.md`, C16-P, `6d503665ef9e`
-- `docs/source/product-change-record.md`, C17-P, `7ce7e0b4e35b`
+- `docs/source/product-change-record.md`, C18-P, `2ff467173047`
 - `docs/source/product-principles.md`, C16-P, `1f8992a7ec51`
 - `docs/source/requirements-list.md`, C11-P, `22f742c740ab`
 - `docs/source/technical-answers.md`, C5-T, `c6b1d05a56a0`

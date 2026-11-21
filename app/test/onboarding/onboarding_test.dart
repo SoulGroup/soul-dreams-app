@@ -19,6 +19,10 @@ String w(Line line) => line.parts(appLanguage).join('\n');
 
 Finder said(Line line) => find.text(w(line));
 
+/// The consent button: MP·67's first part, in place of the retired MP·8
+/// (D119).
+Finder consent() => find.text(Lines.MP_67.parts(appLanguage).first);
+
 void main() {
   late int agreed;
 
@@ -116,17 +120,18 @@ void main() {
     for (final line in written(Onboarding.firstPage)) {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
-    expect(said(Lines.MP_8), findsNothing);
+    expect(consent(), findsNothing);
     await tap(tester, Lines.MP_30);
-    for (final line in written([Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57, Lines.MP_58, Lines.MP_59])) {
+    for (final line in written([Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57, Lines.MP_58])) {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
     expect(said(Lines.W27_1), findsNothing);
     expect(find.byType(ButtonRow), findsOneWidget);
-    expect(said(Lines.MP_8), findsOneWidget);
+    expect(consent(), findsOneWidget);
+    expect(find.text(Lines.MP_67.parts(appLanguage)[1]), findsNothing);
     expect(said(Lines.EM_6), findsOneWidget);
-    // EM·6 left, MP·8 right (the plan's question 6).
-    expect(tester.getCenter(said(Lines.EM_6)).dx, lessThan(tester.getCenter(said(Lines.MP_8)).dx));
+    // EM·6 left, the consent right (the plan's question 6; D119).
+    expect(tester.getCenter(said(Lines.EM_6)).dx, lessThan(tester.getCenter(consent()).dx));
   });
 
   testWidgets('the first layer only: no part of the full page alone', (tester) async {
@@ -288,7 +293,7 @@ void main() {
     await tap(tester, Lines.MP_30);
     await tap(tester, Lines.EM_6);
     expect(said(Lines.W27_1), findsOneWidget);
-    expect(said(Lines.MP_8), findsNothing);
+    expect(consent(), findsNothing);
     expect(agreed, 0);
   });
 
@@ -296,7 +301,8 @@ void main() {
     await start(tester);
     await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
-    await tap(tester, Lines.MP_8);
+    await tester.tap(consent());
+    await tester.pumpAndSettle();
     expect(agreed, 1);
   });
 
@@ -317,7 +323,7 @@ void main() {
     await tester.tap(find.byType(BackControl));
     await tester.pumpAndSettle();
     expect(find.byType(DisclosurePage), findsNothing);
-    expect(said(Lines.MP_8), findsOneWidget);
+    expect(consent(), findsOneWidget);
   });
 
   testWidgets('at the largest text, every step scrolls and nothing overflows', (tester) async {

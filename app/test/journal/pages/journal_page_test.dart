@@ -296,8 +296,10 @@ void main() {
       expect(tester.getCenter(date).dy, closeTo(tester.getCenter(row).dy, 1));
       final style = tester.widget<Text>(date).style!;
       expect(style.color, NightArt.over);
-      expect(style.fontFamily, TypeRoles.h6.family);
-      expect(style.fontSize, TypeRoles.h6.size);
+      // type.row.date (C18-P; D118: Inter, 20, semibold).
+      expect(style.fontFamily, 'Inter');
+      expect(style.fontWeight, FontWeight.w600);
+      expect(style.fontSize, 20);
       expect(tester.getSize(row).height, StandIns.rowHeight);
       final clip = tester.widget<ClipRRect>(find.descendant(of: row, matching: find.byType(ClipRRect)));
       expect(clip.borderRadius, BorderRadius.circular(Spacing.radius));

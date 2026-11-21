@@ -207,6 +207,61 @@ class Generate(unittest.TestCase):
                       '20px more space after the label, before the line, 30px'):
             self.refused(doc(spacing=[r('space.x', value)]), 'spacing-form')
 
+    def test_c18p_faces(self):
+        # C18-P's faces; D118: "Inter Display" is built in Inter.
+        t = text(doc(type_rows=[r('type.voice.app', 'Bellefair', 'Regular', '22px', '1.5', '%s0.04em' % MINUS, 'x'),
+                                r('type.voice.dreamer', 'Inter Display', 'Regular', '16px', '1.5', '0.02em', 'x')]))
+        self.assertIn("static const voiceApp = TypeRole('Bellefair', FontWeight.w400, 22, 1.5, -0.04);", t)
+        self.assertIn("static const voiceDreamer = TypeRole('Inter', FontWeight.w400, 16, 1.5, 0.02);", t)
+
+    def test_an_unset_line_or_letter_is_null(self):
+        unset = designgen.UNSET
+        t = text(doc(type_rows=[r('type.row.date', 'Inter', 'Semibold', '20px', unset, unset, 'x'),
+                                r('type.a', 'Inter', 'Regular', '9px', unset, '0', 'x'),
+                                r('type.b', 'Inter', 'Regular', '9px', '1', unset, 'x')]))
+        self.assertIn("static const rowDate = TypeRole('Inter', FontWeight.w600, 20, null, null);", t)
+        self.assertIn("static const a = TypeRole('Inter', FontWeight.w400, 9, null, 0);", t)
+        self.assertIn("static const b = TypeRole('Inter', FontWeight.w400, 9, 1, null);", t)
+        self.assertIn('final double? height;', t)
+        self.assertIn('double? get letterSpacing =>\n'
+                      + '      letterEm == null ? null : letterEm! * size;', t)
+        # The size and the face are never unset.
+        self.refused(doc(type_rows=[r('type.a', 'Inter', 'Regular', unset, '1', '0', 'x')]), 'type-form')
+
+    def test_a_bracketed_note(self):
+        light = LIGHT_ROWS + [r('color.old', '#8F3D24 [owed: unused since the zebra]'),
+                              r('color.lc.box', '#FFFFFF, pure white'),
+                              r('color.lc.date', '#767676, on the white box only'),
+                              r('color.brown', 'brown [to try: read from the quagga]')]
+        dark = DARK_ROWS + [r('color.lc.box', 'as color.surface'),
+                            r('color.lc.delete', '#D0775A [proposed by okapi, for gnu]'),
+                            r('color.brown', '[to try: read from the quagga]')]
+        data = doc(light=light, dark=dark)
+        t = text(data)
+        lt = t[t.index('abstract final class LightColours'):t.index('abstract final class DarkColours')]
+        dk = t[t.index('abstract final class DarkColours'):t.index('abstract final class Spacing')]
+        self.assertIn('static const old = ColourRole(colour: Color(0xFF8F3D24));', lt)
+        self.assertIn('static const lcBox = ColourRole(colour: Color(0xFFFFFFFF));', lt)
+        self.assertIn('static const lcDate = ColourRole(colour: Color(0xFF767676));', lt)
+        self.assertIn('static const lcBox = ColourRole(colour: Color(0xFF3D376E), colourEnd: Color(0xFF26214F), '
+                      'border: Color(0xFF26214F));', dk)
+        self.assertNotIn(' brown ', t)
+        self.assertNotIn('lcDelete', t)
+        self.assertIn('  // `color.brown`\n', lt)
+        self.assertIn('  // `color.lc.delete`\n  // `color.brown`\n', dk)
+        for word in ('zebra', 'quagga', 'okapi', 'gnu', 'D0775A'):
+            self.assertNotIn(word, t)
+        self.assertEqual(designgen.summary(data)[-1], 'designgen: unset 4')
+
+    def test_a_bracket_or_as_form_it_does_not_know_stops(self):
+        for value in ('#8F3D24 [ruled by a zebra]', '[owed: unused]', '#8F3D24 [owed: a] [owed: b]',
+                      '#FFFFFF, almost white'):
+            self.refused(doc(light=[r('color.page', value)]), 'colour-form')
+        # "as color.x": a role above it in the same theme only.
+        self.refused(doc(dark=[r('color.box', 'as color.page'), r('color.page', '#0F0D29')]), 'as-unknown')
+        self.refused(doc(dark=[r('color.page', '#0F0D29'), r('color.box', 'as color.surface')]), 'as-unknown')
+        self.refused(doc(light=LIGHT_ROWS + [r('color.page', '[to try: again]')]), 'role-repeated')
+
     def test_refusal_names_the_line(self):
         data = doc(light=[r('color.page', '#F5F5EC'), r('color.odd', '#12')])
         line = data.decode('utf-8').split('\n').index(r('color.odd', '#12')) + 1

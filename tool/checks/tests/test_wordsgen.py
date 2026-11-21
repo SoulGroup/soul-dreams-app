@@ -157,9 +157,31 @@ class Generator(unittest.TestCase):
         self.assertIn("static const A_2 = Line('A·2', ['a', 'b'], ['c', 'd']);", out)
         self.assertIn("static const A_3 = Line('A·3', ['e'], ['f'], standIn: true);", out)
 
+    def test_to_rewrite_is_built_as_written(self):
+        # The owner, 2026-11-21 (C18-P's import, item 3): a stand-in until
+        # rewritten. A sentence still owed stays as written, braces and all.
+        out = lines(row('A' + DOT + '1', 'to rewrite', 'en', 'sv'),
+                    row('A' + DOT + '2', 'to rewrite', 'a {Still owed.} b', 'c {Ännu inte.} d'),
+                    row('A' + DOT + '3', 'to rewrite', '{n} a {Owed.}', '{n} b {Skyldig.}'))
+        self.assertIn("static const A_1 = Line('A·1', ['en'], ['sv'], " + 'standIn: true);', out)
+        self.assertIn("static const A_2 = Line('A·2', ['a {Still owed.} b'], "
+                      + "['c {Ännu inte.} d'], standIn: true);", out)
+        self.assertIn("static const _A_3 = Line('A·3', ['{n} a {Owed.}'], "
+                      + "['{n} b {Skyldig.}'], standIn: true);", out)
+        self.assertIn('static Line A_3({required int n})', out)
+        self.refused('missing-language', register(row('A' + DOT + '1', 'to rewrite', 'x', '')))
+
+    def test_an_owed_sentence_only_in_to_rewrite(self):
+        self.refused('unknown-slot', register(row('A' + DOT + '1', 'written', 'a {Owed.}', 'b {Skyldig.}')))
+        self.refused('unknown-slot', register(row('A' + DOT + '1', 'composed (stand-in written)',
+                                                  '{Owed.}', '{Skyldig.}')))
+        self.refused('unknown-slot', register(row('A' + DOT + '1', 'to rewrite', '{name}', '{name}')))
+        self.refused('owed-differs', register(row('A' + DOT + '1', 'to rewrite', 'a {Owed.}', 'b')))
+        self.refused('slots-differ', register(row('A' + DOT + '1', 'to rewrite', '{n} {Owed.}', '{Skyldig.}')))
+
     def test_waiting_statuses_make_placeholders(self):
         # D109: "English written, Swedish to write" waits, as "to write" does.
-        for n, status in enumerate(('to rewrite', 'to write', 'composed, no stand-in',
+        for n, status in enumerate(('to write', 'composed, no stand-in',
                                     'English written, Swedish to write',
                                     'paused: some reason', 'blocked: other reason'), 1):
             out = lines(row('W' + DOT + str(n), status, 'draft', 'draft'))

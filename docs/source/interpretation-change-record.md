@@ -6843,3 +6843,254 @@ Draft 5 at fa23d0e8, all unchanged at filing. Filed by others and not read: C16-
   here; counsel, before Cohort 1.
 - **Interpretation.** Every document that read the law document at 4f83555e reads it at its new hash at the
   consolidated pass after Cohort 0 (C157-I item 1). Their pointers to §2 and §4 by number still resolve.
+
+---
+
+## C159-I — Product's message 29: the app knows what the dreamer has shared (Life Context); the night's image; no counsel before Cohort 1, and what stands in its place; no crisis page; both in the build before Cohort 0; two research notes filed
+
+**Filed 2026-11-20, by this machine. Founder-ruled 2026-11-20:** the items so marked, made in this department's head
+chat (opened 2026-11-11), and, where said, in the outgoing head's chat earlier the same day, relayed in the handover
+filed below and confirmed by the founder in the head chat ("It sounds right to me"). *Items marked as Head of
+Interpretation's are open to the founder.* Product & Design, its message 29 (verbatim in the handover filed below).
+
+**WHAT THIS IS.** The founder changes a founding rule. The Foundations §4.4, "The app never learns a dreamer", and the
+Shared Core's "Memory of the DREAMER is refused" give way to: the app knows what the dreamer has shared, in the
+dreamer's own words. His reason, in his words (message 29, Part A item 2): "If a dreamer shares something about
+themselves one night that relates to a dream and gives important context, then it will be frustrating if the following
+night they have a reading and the app acts as if it has no idea what that person is going through." Until The
+Foundations' block and the Shared Core pass are made, this entry governs, as C56-I did; where an earlier entry or
+document says otherwise on these subjects, this entry holds.
+
+**1. LIFE CONTEXT: WHAT IS KEPT, AND HOW** (founder-ruled; the feature's name in the app is the founder's).
+- **What.** The dreamer's own words from everything written or said in a night except the dream itself: the opening's
+  answers, what is said after it, the reflection, Waking Life. Nothing from a dream account carries. Word for word, each
+  sentence with its date and its night. The app writes nothing into what is kept: no summaries, themes, inferences,
+  labels or flags (outgoing head's M1, confirmed).
+- **Automatic.** The dreamer marks nothing (M2, confirmed).
+- **Two lists.** RECENT: every kept sentence from the nights inside the dreamer's window, nothing picked. The window is
+  2 weeks by default; 1 week, 1 month and 3 months are the other choices; no "everything" before counsel. KEPT LONGER:
+  a model picks, from all kept words, the sentences that state a lasting fact of the dreamer's life in the dreamer's own
+  words (a death, a move); never a feeling, a conclusion, or anything about who the dreamer is; never other people's
+  health or private matters. They stay past the window until the dreamer removes them [Head of Interpretation's reading
+  of the founder's "permanent things stay for longer"; open to the founder].
+- **Off.** The Life Context setting (the founder's, with Product & Design) turns it off. Off keeps nothing and deletes
+  what is kept. It is off until the dreamer consents (item 5).
+- **The page.** In Settings, exactly what readings can see now: both lists, each sentence shown inside its night, with
+  its date. Edit, delete one, delete a list, delete everything. Its name says what the dreamer has told the app, never
+  "the app's understanding of you" (founder, 2026-11-20, "The first"); the founder approves the words (M5).
+- **Where.** On the phone only, as the journal (C140-I item 2) (founder-ruled).
+- **In a reading.** Kept words appear only as the dreamer's own words, in quotation, with their date. Never "you told
+  me", never phrasing of the app remembering or knowing the dreamer. Never summarised or paraphrased (founder-ruled).
+- **Painful words carry.** Words about harm, loss or hurting oneself are kept like any other, and a reading may quote
+  them (founder-ruled: "its not ours to judge"). Head of Interpretation had proposed holding back words about wanting to
+  hurt oneself or end one's life; withdrawn on the ruling. The law document's limits govern how every reading speaks
+  (its §2): nothing presses toward distress. Tonight's silent holds stand (C156-I ruling 16).
+- **Other people.** A line, founder copy, where the dreamer writes about life and in the consent text: others by role,
+  not name; leave out their health and private matters.
+
+**2. WHAT DOES NOT CHANGE** (founder-ruled). How the app speaks to a dreamer, its tone, warmth and how far it presses,
+never changes with what it knows; only how accurate a reading can be (founder: "The emtional touch and how the app
+appears to a dreamer should not change"). §4.4's second paragraph stays (M6), and so does its "no familiarity ... no
+register that warms or sharpens with use". The questions stay about the dream; depth is never extracted (M7). No first
+name; W27·1 stands (M8). A journal and a knowledgeable guide through the world of dreams, never a companion, never
+described as therapist-like (M9). "This app is not therapy" (W27·15) stays (M10). The series is still never how the
+dreamer is changing (The Foundations, the 2026-10-07 block). C56-I item 4, the dreamer's own search, stands.
+
+**3. WHAT ITEM 1 CHANGES** (Head of Interpretation's reading of the rulings).
+- **C56-I item 1** now reads: refused is any record the APP writes about the dreamer, a picture of the dreamer:
+  summary, theme, inference, label, flag, trend or profile. The dreamer's own words kept under item 1 are not that
+  record. One judgement about the dreamer is accepted, openly, by the founder's ruling: which sentences state a lasting
+  fact (the kept-longer list), always visible on the page. Run A, filed below, found that this is a judgement; it is
+  recorded as one.
+- **C140-I item 1.** A typed night's words no longer leave the phone only to be read: kept words leave again with later
+  readings, and a pointed image's words leave for the image service. What testers are told changes.
+- **C156-I, its behaviour line 1** becomes: no line the app composed on an earlier night reaches a model (stands); the
+  dreamer's kept words do, and only those on the page. **Its line 4** ("a reading stands on the dream as told, never on
+  what the dreamer said about it") changes for kept words from earlier nights only; tonight's words about tonight's
+  dream are unchanged until ruled (item 10).
+- **Interpretation Framework v5**, its sentence carrying C56-I item 1, changes at the framework's next pass.
+- **The Foundations' block, owed** (signed by the founder alone, C130-I item 1): §4.4's heading and its sentence "A
+  dreamer's tenth session is read exactly as their first"; the sentence the 2026-09-30 block appended to §4.4 ("it
+  never holds a cross-session record about the dreamer"); the Was/Now row giving "The app never learns a dreamer" as a
+  reason; and the series line's pointer "refused at §4.4", which must still point at a refusal there: a picture of
+  the dreamer.
+- **The Shared Core pass, owed** (founder; all four projects; each change record): "The app never learns the dreamer,
+  never creates dependence" and "The app never learns a dreamer. Memory of DREAMS ... Memory of the DREAMER is
+  refused." "Never creates dependence" survives in some form: it is the guard against the companion M9 refuses.
+
+**4. THE NIGHT'S IMAGE** (founder-ruled). Every night has an image: a cover the dreamer remembers the night by, not a
+picture of the dream; Van Gogh's style, dreamlike, never fearful (I1, I2). A read night's pointed image is painted from
+the dreamer's own words for it, nothing added that carries meaning, and only those words go to the image service (I3).
+If it cannot be painted without menace (founder: "B as a first option, a if B is not possible"), or it is harm done to
+the dreamer or a fresh loss, or nothing or only a feeling was pointed at: a calm painting seeded by the night and drawn
+from none of its content; nothing says why (I4). An unread night shows the calm painting or the gradient, from none of
+its words, and its real painting once read (founder's answer to Product & Design). New at random or from a short prompt
+of the dreamer's, or removed; a removed image becomes a gradient (I5, I6). The image never stands in for the dream's
+text. Its prompt is reviewed here before it runs (C153-I item 4).
+
+**5. NO COUNSEL BEFORE COHORT 1** (founder-ruled; founder: "Lets not use a lawyer at the moment. Lets use it before
+public launch."). It replaces counsel before Cohort 1 wherever an entry required it (C141-I; C153-I item 2; C157-I item
+1; C158-I). The founder approves those texts before Cohort 1; counsel reads them before public launch. The founder,
+Ludvig, registered in Sweden, is responsible for the data for now; Sweden's authority (IMY) is the one testers are told
+of. In counsel's place, the founder's protections (founder: "this is clearly yes"), in the form Run B gives them: three
+separate consents (the reading, Life Context, the image), none pre-ticked, each refusable with nothing else changing; a
+consent record on the phone, no install identifier (C141-I item 1); withdrawal one tap each; withdrawing Life Context
+deletes kept words; deletion reaching every copy, with providers' retention stated; readings and images said to be made
+by AI, images machine-marked; the providers' terms read and processing agreements signed, paid tiers only; no one under
+18; the app truly optional at the retreat. Run B's status for all of this is [RELAYED - research]; it is not counsel and
+says so.
+
+**6. NO CRISIS PAGE** (founder-ruled: "i would prefer to keep it out in the beginning. if we have to because of law, we
+can bring it back."). C153-I item 1 stands. Run B found no statute requiring one for an app like this [RELAYED -
+research; "not found" is not "none exists"]. **Recorded beside the ruling:** Head of Interpretation advised a static page
+of crisis numbers, one tap from every reading, given that kept words carry and may be quoted, there is no counsel
+before Cohort 1, and Cohort 1 is at a retreat; and that the risk without it is the founder's. In its place, accepted by
+the founder: a named person at the retreat, not the founder, whom anyone may go to, and who receives nothing from the
+app.
+
+**7. THE RETREAT** (the founder's statements, 2026-11-20). The app is introduced as an optional bonus, by someone other
+than the founder; the founder never sees who uses it; written information a day before, separate from booking. The
+retreat includes nothing that alters participants' state of mind (founder: "no"), so consent may be asked there. Nothing
+in the app ties to the retreat or knows of it.
+
+**8. TIMING** (founder-ruled). Life Context and the image are in the build before Cohort 0 ("it should be done for before
+cohort 0 starts so i can judge the full experience"), and in the build Cohort 1 uses in January 2027. The next passes of
+Lens Practice, The Opening, The Close and Recurrence & the Series stay frozen until between Cohort 0 and Cohort 1
+(C157-I item 1, confirmed for them: "makes no sense to do it twice"). The written risk assessment (DPIA), the record of
+processing and the breach plan are due before Cohort 1 and are not started now (founder: focus on building).
+
+**9. CORRECTIONS.** The answer to message 29 (filed below, sent) said at its point 2 that C156-I is not reversed. Wrong:
+C156-I's behaviour line 1 read "No words from an earlier night reach a model", and Product's item 6b was right. The same
+error is in the handover, section 4 D5. Corrected in the message filed below. That answer's 6b bullets on relevance and
+on time are replaced by item 1.
+
+**10. OWED, AND TO WHOM.** Interpretation: reviews of the new model instructions (the kept-longer choice; readings' use
+of kept words; the image prompt); how tonight's words about tonight's dream sit beside kept words; "clearer guidance"
+(message 29 item 6a, founder-agreed: it needs no Life Context); before Cohort 1, the DPIA, the record of processing, the
+breach plan, the law document's changes (§2, §4) and the tester disclosure specification's next draft. The founder: The
+Foundations' block and the Shared Core pass (item 3). Before public launch: counsel; and Run A's question 7, whether
+living practitioners of each tradition consent to its being voiced by an app.
+
+**11. VOCABULARY** (Head of Interpretation's, open to the founder). LIFE CONTEXT is the founder's name for the feature.
+KEPT WORDS are the dreamer's own words kept under item 1. A PICTURE OF THE DREAMER is what stays refused. "Memory of the
+dreamer" names neither from this entry on; earlier text that uses it is read as a picture of the dreamer. CONTINUITY
+keeps the Shared Core's meaning only; message 29's "continuity of what the dreamer has shared" is read as Life Context.
+
+**12. FILED HERE.** In interpretation/:
+- research-what-the-dreamer-shares-run-a-2026-11-20.md (2c337cab): what each tradition reads a dream against, what
+  "relevant" could mean, and time. Its brief was not delivered to this chat and is not filed.
+- research-what-the-dreamer-shares-run-b-2026-11-20.md (4a4b6617): what the company must do and say before Cohort 1.
+- handover-to-head-of-interpretation-2026-11-20.md (81ad1fab): the outgoing head's note, with message 29 verbatim.
+- answer-to-product-message-29-2026-11-20.md (44ed1ca1): sent by the founder; filed as he pasted it to this chat.
+- message-to-product-2026-11-20.md (759f8fb1): the message carrying this entry to Product & Design. It replaces the
+  answer above where they differ.
+No dream material found in any of them [READ, this filing: each searched for the founder's name, the journal and
+restricted material; the handover, the answer and the message read whole; Run A read but for its Part 1, Run B but for
+parts of its sections 1 to 4 and its sources].
+
+**WHAT THIS FILING READ** [READ]. The repository at d8d71c3, tree clean (the founder's command output, 2026-11-20). The
+change record through C158-I (cdb3dfa5). The Foundations at 3db9dc4d. Interpretation Framework v5 at 77178b99. The law
+document at 208fd173. C56-I, C130-I, C140-I, C141-I, C153-I, C156-I and C157-I. Filed by others and not read: C17-P
+(d8d71c3), including the disclosure it wrote; to be read by the tester disclosure specification's next draft.
+
+**WHAT DEPENDED ON THIS.**
+- **Product & Design.** Everything in the message filed above: Life Context, its page and setting, the three consents,
+  the image and its fallbacks, the AI labels, the reporting control on Android, Part A item 5's removal of a night's name
+  (which touches The Opening).
+- **Technology.** C156-I's line 1 as changed; what leaves the phone; deletion and the consent record; the providers'
+  processing agreements, terms and tiers; image marking; three new model calls, each reviewed here before it runs.
+- **Organisation** (closed). The Shared Core pass reaches its project. That the founder is responsible for the data,
+  and counsel before public launch, are company matters it records when it reopens.
+- **Interpretation.** Item 10. The four frozen documents read this entry at the consolidated pass. The Requirements
+  List's next draft gains Life Context and the image.
+- **The founder.** The Foundations' block and the Shared Core pass (item 3); the texts of item 5 before Cohort 1.
+
+---
+
+## C160-I — The Foundations' dated block of 2026-11-21: the app knows what the dreamer has shared and never makes a picture of the dreamer; §6's crisis paragraph made true; the Shared Core pass
+
+**Filed 2026-11-21, by this machine. Signed by the founder alone, 2026-11-21** (C130-I item 1), in his word "signed", in
+Head of Interpretation's head chat, relayed by Head of Interpretation [RELAYED]. What he signed is the block put to him
+item by item in plain words by Head of Interpretation; he reads no text, by the house rule, and Item 7's text and the
+Shared Core's were written to what he signed. Written by the Foundation & Charter worker, "What the dreamer has shared".
+
+**1. THE BLOCK.** Appended to interpretation/the-foundations-draft-2.md: before 3db9dc4d, after 6a15524e. Seven items.
+(1) §4.4's heading: the app knows what the dreamer has shared, and never makes a picture of the dreamer. (2) §4.4's first
+paragraph: what is kept, consent first, all of it visible, editable, deletable, off; a reading draws on kept words only
+by showing them, quoted and dated; a present danger in them is never read as a symbol (§6); depth is how far a reading
+presses, never how much it may quote; a tenth session is spoken to exactly as a first. (3) The sentence the 2026-09-30
+block appended to §4.4: the app writes nothing about the dreamer; the one judgement, which sentences state a lasting
+fact, accepted openly, kept until the dreamer removes them; named as the one exception to any rule elsewhere that
+nothing computed across nights may describe the dreamer. (4) §5's second permanent: kept words are the other place the
+app may hold what the dreamer has forgotten, and are not called a moat. (5) The series line's pointer: a picture of the
+dreamer, refused at §4.4. (6) The Was/Now row's reason. (7) §6's founder-ruled paragraph: nothing detects distress, no
+crisis page, no help page, returning only by a new founder ruling; the commitments stand; C51-I's measurement goes,
+because with nothing detected there is nothing to count. The preamble reads "memory of the dreamer" above the block as
+"a picture of the dreamer" (C159-I item 11). Items 1, 2, 3, 5 and 6 are those C159-I item 3 lists as owed; §4.4's first
+sentence and Item 4 were found in the drafting and fall within its "at least"; Item 7 was added by Head of
+Interpretation to save a second signature.
+
+**2. THE FOUNDER'S ANSWERS** [RELAYED, Head of Interpretation, 2026-11-20]. Q1, yes: a kept-longer fact stays until the
+dreamer removes it (C159-I item 1, Head of Interpretation's reading, now ruled). Q2, yes: the Shared Core's word list
+gains KEPT WORDS and A PICTURE OF THE DREAMER (C159-I item 11, now ruled). Q3, yes: the new Shared Core goes into all
+four projects' instructions at the pass, Organisation's included. Q4 [RELAYED, 2026-11-21, within the signature]: yes,
+kept words may be quoted, but a present danger in them is never read as a symbol (§6's permanent stands unchanged).
+
+**3. THE SHARED CORE PASS.** SHARED-CORE.md: before 32038fbb, after 12faf20f. Three lines replaced.
+- What Soul Dreams is. Now: "The app knows only what the dreamer has shared, in their own words, never makes a picture
+  of them, never creates dependence, and treats a night where someone only records where they are as a whole use."
+- What we never do. Now: "The app never makes a picture of the dreamer. It knows only what the dreamer has shared, in
+  their own words, and writes nothing about them. Memory of DREAMS across nights — what returns — is the product."
+- How we keep from drifting. Now: "Five words, five meanings", adding: "KEPT WORDS are the dreamer's own words, kept as
+  written. A PICTURE OF THE DREAMER is anything the app would write about them, and is refused."
+The founder pastes SHARED-CORE.md at 12faf20f into all four projects' instructions in one pass. Product & Design and
+Technology each record the pass in their own change records; Organisation records it when it reopens.
+
+**4. WHAT STILL STATES THE OLD RULE. A list, not edits** [READ, a repository search at 3a5f080 for: never learns,
+learns a or the dreamer, memory of the dreamer, cross-session, picture of the dreamer, §4.4, profile, familiar;
+restricted/ excluded]. Records and archive/ are append-only and owe nothing. Each is read under C159-I until its owner
+changes it. Hash, lines, owner, when owed:
+- interpretation-framework-v5 (77178b99) 95-96, Interpretation: its next pass (C159-I item 3).
+- requirements-list (22f742c7) 820-835, X7; 338-340 still true. Interpretation: its next draft, which gains Life Context.
+- adaptive-scaffolding-v3 (b7008848) 34, 129. Interpretation: its next pass.
+- the-opening-draft-8 (d2613ac8) 482; lens-practice (6c77a323) 144-145, 1240-1243, 1368, 1399-1405, 2075 (D9);
+  recurrence-and-the-series-draft-4 (7dec55e9) 46, 131-138, 243, 592, 749, 817, 1180-1209; the-close-draft-5 (fa23d0e8)
+  225-227. Interpretation: the consolidated pass between Cohort 0 and Cohort 1 (C157-I item 1). A tension, not only
+  wording: recurrence 339 and the-close 929-944 call the waking-life answer, kept across nights, the shortest path to a
+  profile. Life Context keeps it, in the dreamer's own words. Decided by those passes under C159-I, not here.
+- The Lens Register, Interpretation, its next pass, frozen until between Cohort 0 and Cohort 1 (C157-I item 1): lens
+  files aboriginal-australian (fa373040) 170, adlerian (98e765db) 164-184, advaita (b67d1fcb) 227, artemidorus (60c29191)
+  202, asclepian (d915cd46) 241-247, biblical (5fcb9a45) 285, egyptian (da2d68c5) 207, existential-phenomenological
+  (1848a693) 169-170, gestalt (87dc98f1) 185-198, islamic-tabir (b011e37b) 239, jungian (b518fbf0) 157, sami (8d8233cf)
+  166-167, sufi (c8494e2b) 211, talmudic (5903c38c) 202, tibetan-dream-yoga (34e48d8e) 228-230, zhuangzi-liezi
+  (8efb0e5c) 244-248; lens-register-findings (558fd81a) 89-127, W2-2; register-read (db3c58b1) 269;
+  lens-practice-blocks-register-read (22f1f5e2) 124. The tension: what a lens file calls never knowable across sessions,
+  a dreamer's station, occupation or history, may now be in kept words. Nothing about it is decided here.
+- head-of-interpretation-briefing (2d77cc41) 124. Head of Interpretation: at the next head recreation.
+- core-commitments (f1e71c26) 305; 841-842; 855; 56. Organisation, when it reopens. 855 is a conflict, not wording: its
+  list of figures never computed includes anything computed across nights that describes the dreamer, and the
+  kept-longer judgement is one. Core Commitments defers to The Foundations on the dreamer; Item 3 names the exception.
+  Its 836, "changes only with both founders", is superseded by C130-I, owed at the same reopening.
+- product-and-design-principles (1f8992a7) 164. Product & Design: its next pass.
+- technology/stack-research (db0130d5) 85, a research note. Technology: noted, nothing owed unless it is revised.
+- tester-disclosure-specification (f28b64e1): no hit, but what testers are told changes (C159-I items 3 and 10). Owed
+  at its next draft, before Cohort 1.
+- Not owed: organisation/decision-record 489-490 (a record); privacy-ethics-safety 84-88, which governs a profile
+  across Soul Dreams, Soul Clinic and Soulsound, not kept words.
+
+**WHAT THIS FILING READ** [READ]. The repository at 3a5f080, tree clean (the founder's command output, 2026-11-20).
+C159-I whole. The change record up to the end of C159-I, asserted unchanged at filing by hash (7b7226a2). The
+Foundations at 3db9dc4d and SHARED-CORE.md at 32038fbb, both asserted unchanged at filing. C44-I, C51-I, C56-I, C130-I,
+C147-I, C153-I and C157-I from the project mirror (cdb3dfa5), which holds them as filed. Filed since C159-I and not
+read, to be read at the next filing: none.
+
+**WHAT DEPENDED ON THIS.**
+- **Interpretation.** Every line in item 4 above. The framework's next pass carries C56-I item 1 as C159-I item 3
+  reads it, and the §4.4 heading's new words.
+- **Product & Design.** The Shared Core pass, recorded in its change record. The Product Principles' line 164. The
+  consent and Life Context texts say nothing this block forbids: no app remembering or knowing the dreamer.
+- **Technology.** The Shared Core pass, recorded in its change record. Nothing in the build changes: C159-I governed
+  already.
+- **Organisation** (closed). The Shared Core pass reaches its instructions now; its change record, Core Commitments'
+  305, 836, 841-842 and 855, and its decision record's reading of C56-I, when it reopens.
+- **The founder.** Pastes SHARED-CORE.md into all four projects' instructions in one pass.
