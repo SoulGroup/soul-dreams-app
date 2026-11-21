@@ -263,6 +263,20 @@ void main() {
   // D110: a rounded row, the date centred over the night's picture: an
   // unread night's the painted gradient; 30 from the screen's sides, 12
   // apart; heard as a button named by its date.
+  // D113: a soft dark shade behind the date over a painting, none over the
+  // painted gradient.
+  testWidgets("a read row shades its date; an unread one does not", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal, read: allRead));
+    final row = find.byKey(JournalPage.rowKey(n.id));
+    expect(find.descendant(of: row, matching: find.byType(DateShade)), findsOneWidget);
+    expect(find.descendant(of: find.byType(DateShade), matching: find.text(shownDate(n.date))), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(find.byType(DateShade), findsNothing);
+  });
+
   testWidgets("a row: the date over an unread night's gradient", (tester) async {
     final h = await Harness.make();
     final older = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));

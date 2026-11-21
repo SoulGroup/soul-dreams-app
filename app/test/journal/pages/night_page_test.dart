@@ -7,9 +7,10 @@
 // MP·39, and above it the item an entry point gives (D107 item 1); one confirmation, Cancel first, Delete destructive; deleting
 // leaves nothing.
 import 'dart:async';
-import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show Theme;
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
@@ -80,6 +81,8 @@ void main() {
     ReadCheck read = noneRead,
     String key = 'two-dreams-en',
     bool wide = false,
+    int hour = 12,
+    bool unread = false,
   }) async {
     // The test's own 800 by 600, where the foot's two buttons do not fill
     // the row, or a phone.
@@ -99,7 +102,10 @@ void main() {
       );
       await h.store.save(n);
     }
-    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read)));
+    // A first read that fails leaves the page blank, with no picture.
+    if (unread) files!.failReads = true;
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read)),
+        hour: hour);
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
   }
@@ -632,6 +638,42 @@ void main() {
     final item = tester.getRect(find.byType(CupertinoMenuItem));
     expect(item.top - look.bottom, closeTo(8, 0.5));
     expect(look.right - item.right, closeTo(0, 0.5));
+  });
+
+  // D113: a soft dark shade behind the date over a painting, none over the
+  // painted gradient.
+  testWidgets("a read header shades its date; an unread one does not", (tester) async {
+    await open(tester, read: (_) => true);
+    expect(find.descendant(of: find.byType(DateShade), matching: find.text(shownDate(n.date))), findsOneWidget);
+    await tester.pumpWidget(const SizedBox());
+    await open(tester);
+    expect(find.byType(DateShade), findsNothing);
+  });
+
+  // D113: over a night's header the status bar's time and battery are light,
+  // in both themes; while the page is blank, they follow the theme.
+  testWidgets('light status-bar text over the header, in both themes', (tester) async {
+    for (final hour in [12, 22]) {
+      await tester.pumpWidget(const SizedBox());
+      await open(tester, hour: hour);
+      final theme = Theme.of(tester.element(find.byType(NightPage))).brightness;
+      expect(theme, hour == 12 ? Brightness.light : Brightness.dark);
+      final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+          find.descendant(of: find.byType(NightPage), matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>)));
+      expect(region.value.statusBarBrightness, Brightness.dark);
+      expect(region.value.statusBarIconBrightness, Brightness.light);
+    }
+  });
+
+  testWidgets('while the page is blank, the status bar follows the theme', (tester) async {
+    for (final hour in [12, 22]) {
+      await tester.pumpWidget(const SizedBox());
+      await open(tester, files: UnsteadyFiles(), hour: hour, unread: true);
+      expect(find.byType(NightArt), findsNothing);
+      final region = tester.widget<AnnotatedRegion<SystemUiOverlayStyle>>(
+          find.descendant(of: find.byType(NightPage), matching: find.byType(AnnotatedRegion<SystemUiOverlayStyle>)));
+      expect(region.value.statusBarBrightness, hour == 12 ? Brightness.light : Brightness.dark);
+    }
   });
 
   // D110: the picture runs from the screen's top and the header is 240 below

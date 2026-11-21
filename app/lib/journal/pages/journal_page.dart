@@ -337,7 +337,7 @@ class _Row extends StatelessWidget {
               child: Center(
                 child: Padding(
                   padding: StandIns.labelPadding,
-                  child: Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over)),
+                  child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over))),
                 ),
               ),
             ),

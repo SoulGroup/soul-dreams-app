@@ -39,9 +39,10 @@ final class Harness {
 
   Future<List<Night>> nights() => journal.newestFirst();
 
-  /// The app at noon, so in the light theme, opening on [home].
-  Future<void> pump(WidgetTester tester, Widget home) async {
-    await tester.pumpWidget(SoulDreamsApp(home: home, clock: () => DateTime(2026, 6, 10, 12)));
+  /// The app at noon, so in the light theme, or at [hour] on the phone's
+  /// clock, opening on [home].
+  Future<void> pump(WidgetTester tester, Widget home, {int hour = 12}) async {
+    await tester.pumpWidget(SoulDreamsApp(home: home, clock: () => DateTime(2026, 6, 10, hour)));
     await tester.pumpAndSettle();
   }
 }

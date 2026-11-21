@@ -26,6 +26,7 @@
 // with its field.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/app_line.dart';
 import '../../core/language.dart';
@@ -299,6 +300,12 @@ class _NightPageState extends State<NightPage> {
     const side = EdgeInsets.symmetric(horizontal: Spacing.pageSide);
     final top = MediaQuery.paddingOf(context).top;
     final read = n != null && widget.read(n);
+    final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings);
+    // Light time and battery over the header's picture, in both themes; while
+    // the page is blank, they follow the theme (D113).
+    final overlay = look != null || Theme.of(context).brightness == Brightness.dark
+        ? SystemUiOverlayStyle.light
+        : SystemUiOverlayStyle.dark;
     final controls = Padding(
       padding: side,
       child: Row(
@@ -310,100 +317,106 @@ class _NightPageState extends State<NightPage> {
         ],
       ),
     );
-    return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // The header: the picture from the screen's top, the controls
-          // under the status bar, the date at its foot (D110).
-          SizedBox(
-            height: top + StandIns.headerHeight,
-            child: n == null
-                ? Padding(padding: EdgeInsets.only(top: top), child: Align(alignment: Alignment.topCenter, child: controls))
-                : NightArt(
-                    lookOf(n, read: read, paintings: NightArt.paintings),
-                    child: Padding(
-                      padding: EdgeInsets.only(top: top),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          controls,
-                          const Spacer(),
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: Spacing.pageSide,
-                              right: Spacing.pageSide,
-                              bottom: Spacing.nightHeader.bottom,
-                            ),
-                            child: Semantics(
-                              header: true,
-                              child: Text(
-                                shownDate(n.date),
-                                textAlign: TextAlign.center,
-                                style: TypeRoles.h2.style(NightArt.over),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: overlay,
+      child: Scaffold(
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // The header: the picture from the screen's top, the controls
+            // under the status bar, the date at its foot (D110).
+            SizedBox(
+              height: top + StandIns.headerHeight,
+              child: n == null
+                  ? Padding(padding: EdgeInsets.only(top: top), child: Align(alignment: Alignment.topCenter, child: controls))
+                  : NightArt(
+                      look!,
+                      child: Padding(
+                        padding: EdgeInsets.only(top: top),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            controls,
+                            const Spacer(),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: Spacing.pageSide,
+                                right: Spacing.pageSide,
+                                bottom: Spacing.nightHeader.bottom,
+                              ),
+                              child: Semantics(
+                                header: true,
+                                child: DateShade.over(
+                                  look,
+                                  Text(
+                                    shownDate(n.date),
+                                    textAlign: TextAlign.center,
+                                    style: TypeRoles.h2.style(NightArt.over),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-          ),
-          if (n != null) ...[
-            Expanded(
-              // The bubbles keep their own margins from the screen's edges
-              // (design-system.md §5); everything else keeps the page's.
-              child: ListView(
-                padding: EdgeInsets.only(top: Spacing.nightHeader.top),
-                children: [
-                  // A read night's jump buttons head the part that scrolls.
-                  if (read) ...[_jumps(p), const SizedBox(height: StandIns.gap)],
-                  Padding(
-                    key: NightPage.dreamsKey,
-                    padding: side,
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: SectionLabel(key: _dreamsLabel, Lines.MP_38.text(appLanguage)),
-                    ),
-                  ),
-                  const SizedBox(height: StandIns.gap),
-                  for (final (i, d) in n.entries.indexed)
-                    if (d case Told(:final text)) ...[
-                      DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
-                      const SizedBox(height: StandIns.bubbleGap),
-                    ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
-                      Padding(
-                        padding: side,
-                        child: Semantics(
-                          key: NightPage.transcribingKey,
-                          liveRegion: true,
-                          child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: StandIns.bubbleGap),
-                    ],
-                ],
-              ),
+                    ),
             ),
-            SafeArea(
-              top: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
-                child: ButtonRow(
-                  left: KeyedSubtree(
-                    key: NightPage.addKey,
-                    child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
-                  ),
-                  right: KeyedSubtree(
-                    key: NightPage.startKey,
-                    // Nothing to start yet: the readings come later (P3, as D71 Q3).
-                    child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
+            if (n != null) ...[
+              Expanded(
+                // The bubbles keep their own margins from the screen's edges
+                // (design-system.md §5); everything else keeps the page's.
+                child: ListView(
+                  padding: EdgeInsets.only(top: Spacing.nightHeader.top),
+                  children: [
+                    // A read night's jump buttons head the part that scrolls.
+                    if (read) ...[_jumps(p), const SizedBox(height: StandIns.gap)],
+                    Padding(
+                      key: NightPage.dreamsKey,
+                      padding: side,
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: SectionLabel(key: _dreamsLabel, Lines.MP_38.text(appLanguage)),
+                      ),
+                    ),
+                    const SizedBox(height: StandIns.gap),
+                    for (final (i, d) in n.entries.indexed)
+                      if (d case Told(:final text)) ...[
+                        DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
+                        const SizedBox(height: StandIns.bubbleGap),
+                      ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
+                        Padding(
+                          padding: side,
+                          child: Semantics(
+                            key: NightPage.transcribingKey,
+                            liveRegion: true,
+                            child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                          ),
+                        ),
+                        const SizedBox(height: StandIns.bubbleGap),
+                      ],
+                  ],
+                ),
+              ),
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
+                  child: ButtonRow(
+                    left: KeyedSubtree(
+                      key: NightPage.addKey,
+                      child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
+                    ),
+                    right: KeyedSubtree(
+                      key: NightPage.startKey,
+                      // Nothing to start yet: the readings come later (P3, as D71 Q3).
+                      child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

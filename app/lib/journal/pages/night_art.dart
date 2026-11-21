@@ -53,9 +53,57 @@ class NightArt extends StatelessWidget {
 
   // A painter adds nothing a screen reader hears; what stands over it is
   // heard as itself.
+  // What stands over the picture is clipped to it, so a soft edge (the
+  // date's shade) never runs past the picture's own.
   @override
   Widget build(BuildContext context) =>
-      CustomPaint(painter: _ArtPainter(look), child: child ?? const SizedBox.expand());
+      ClipRect(child: CustomPaint(painter: _ArtPainter(look), child: child ?? const SizedBox.expand()));
+}
+
+/// A soft dark shade behind a night's date over a painting (D113), so the
+/// date reads at 4.5 to 1 or better over any of them: a blurred rounded
+/// shape a little larger than the date, painted around it and adding no
+/// room. The painted gradient needs none. A stand-in until the founder's set
+/// is in, and re-proved with it (the test measures real pixels).
+class DateShade extends StatelessWidget {
+  const DateShade({super.key, required this.child});
+
+  final Widget child;
+
+  /// The date with its shade over a painting, or the date alone over the
+  /// painted gradient.
+  static Widget over(NightLook look, Widget date) => look is Painting ? DateShade(child: date) : date;
+
+  /// The shade's colour and strength, how far its centre extends past the
+  /// date, and how soft its edge is (the shade is full where the date stands
+  /// when the reach is at least two and a half times the softness).
+  static const colour = Color(0xFF0B0820);
+  static const double alpha = 0.66;
+  static const double reach = 22;
+  static const double softness = 8;
+
+  // Heard as nothing; the date is.
+  @override
+  Widget build(BuildContext context) => CustomPaint(painter: _ShadePainter(), child: child);
+}
+
+class _ShadePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final shade = RRect.fromRectAndRadius(
+      (Offset.zero & size).inflate(DateShade.reach),
+      const Radius.circular(DateShade.reach),
+    );
+    canvas.drawRRect(
+      shade,
+      Paint()
+        ..color = DateShade.colour.withValues(alpha: DateShade.alpha)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, DateShade.softness),
+    );
+  }
+
+  @override
+  bool shouldRepaint(_ShadePainter old) => false;
 }
 
 /// New Dream's night sky (D112): the painted gradient with a few stars, a
