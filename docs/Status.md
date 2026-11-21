@@ -250,18 +250,19 @@ rulings given during each branch are listed in this file, one line each, under "
   then only the matching nights' rows, newest first, under their month dividers, each with a context line under it:
   up to three words before the match (an ellipsis when words were left off), the match in Inter Bold, then the
   rest, one line, the button type in `color.text.summary`. The matcher (`journal/search.dart`, `firstMatch`, one
-  function for recurring images later): each character folded by itself (Dart's own folding), marks kept, the typed
-  characters at the start of a word (D117 Q4), the told dreams in order, never a name, the first place. A result
+  function for recurring images later): each character folded by itself (Dart's own folding), marks kept, the curly
+  quotes and the en and em dash folded to the straight ones (D120), the typed characters at the start of a word
+  (D117 Q4), the told dreams in order, never a name, the first place. A result
   opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
   goes. The query is never kept or logged (R3).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 607 tests, and 501 mutation checks (A1 to A483; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 613 tests, and 514 mutation checks (A1 to A496; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A313, A363 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 501 run, 501 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 514 run, 514 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -862,6 +863,12 @@ Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D11
      for the microphone's own spoken name. The typing screen's microphone is heard as MP·11 (`typing_page.dart`),
      which is now New Dream's word, so a screen reader says "New Dream" for the microphone. It stays MP·11 until
      Product files a place for it; nothing is built for it before then (as banked item 145).
+151. The search review's notes still open (D120): the context line's three words before the match are not shortened,
+     so at the largest text the match may fall past the ellipsis (waits for the owner's by-eye item 16, D120 item 2);
+     the field keeps focus when a night opens and closes, so the keyboard may return over the results (to look for
+     in item 14; unconfirmed). A fold-length test cannot be written while Dart folds every character to one
+     (item 147). `recording_test.dart`, "a stream not open in time: the stop ends, holding nothing", failed once in
+     a full run under load and passed on every rerun, alone and with the whole suite: a timing flake, not looked into.
 
 ## Before Cohort 1
 
@@ -1221,6 +1228,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   (2) "to rewrite" is built as written, its braced owed sentences included, C125-I·3 too; (3) the microphone's
   spoken name stays MP·11 until Product files a place for it; (4) the filed lines for the handles still on screen
   (the greeting, New Dream, the jump buttons) are redesign-b's first task.
+- D120 (owner, on the redesign-b report): (1) smart punctuation stays on in the search field; the matcher folds ’ ‘
+  to ', “ ” to " and – — to -, in the typed query and in the night's text (`search.dart`, `_straight`; rows A484 to
+  A491), the span still on the text's own characters; (2) the large-text context line waits for the owner's item
+  16; (3) the search review's test gaps and the stale comment are fixed (the months' dividers, the silent
+  magnifier, smart punctuation; rows A492 to A496). A451 followed the code (D67). The widget test for the fold
+  derives its night from `two-dreams-en` with a few words changed, since `fixtures/invented-nights.json` could not
+  be written to in this session.
 
 ## Documents as last imported
 

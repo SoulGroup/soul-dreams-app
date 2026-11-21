@@ -59,8 +59,36 @@ void main() {
     expect(firstMatch('ab \u{10400}x', '\u{10428}X'), (start: 3, end: 6));
     // A letter outside the basic plane is a word's letter.
     expect(firstMatch('ab \u{10428}x', 'x'), isNull);
-    // A mark that is no letter is not.
+    // A symbol is no letter, so a word can start right after it.
     expect(firstMatch('ab \u{1F319}xy', 'xy'), (start: 5, end: 7));
+  });
+
+  test('curly quotes and dashes fold to straight ones, in both texts', () {
+    // Typed curly, written straight.
+    expect(firstMatch("it's here", 'it\u2019s'), (start: 0, end: 4));
+    expect(firstMatch("it's here", 'IT\u2018S'), (start: 0, end: 4));
+    expect(firstMatch('say "hi" now', '\u201chi\u201d'), (start: 4, end: 8));
+    expect(firstMatch('one-two', 'one\u2013two'), (start: 0, end: 7));
+    expect(firstMatch('one-two', 'one\u2014two'), (start: 0, end: 7));
+    // Typed straight, written curly: the span is the text's own marks.
+    expect(firstMatch('it\u2019s here', "it's"), (start: 0, end: 4));
+    expect(firstMatch('it\u2018s here', "it's"), (start: 0, end: 4));
+    expect(firstMatch('say \u201chi\u201d now', '"hi"'), (start: 4, end: 8));
+    expect(firstMatch('one\u2013two', 'one-two'), (start: 0, end: 7));
+    expect(firstMatch('one\u2014two', 'one-two'), (start: 0, end: 7));
+    // Written curly and typed curly, the other way round.
+    expect(firstMatch('it\u2019s here', 'it\u2018s'), (start: 0, end: 4));
+    expect(firstMatch('one\u2013two', 'one\u2014two'), (start: 0, end: 7));
+    // A quote is no letter: a word starts right after it.
+    expect(firstMatch('say \u201chi\u201d now', 'hi'), (start: 5, end: 7));
+  });
+
+  test('only those marks fold, the others stay apart', () {
+    expect(firstMatch("it's", 'it"s'), isNull);
+    expect(firstMatch('it\u201cs', "it's"), isNull);
+    expect(firstMatch("it's", 'it`s'), isNull);
+    expect(firstMatch('one-two', 'one\u2212two'), isNull);
+    expect(firstMatch('one-two', 'one_two'), isNull);
   });
 
   test('a night: its told dreams in order, never its name', () {

@@ -7,6 +7,8 @@
 //   folded by itself, Unicode-aware, and a letter with a mark stays its
 //   own (D116 item 2). The span maps back to the text's own characters,
 //   whatever length a character folds to.
+// - The phone's smart punctuation is not a different word (D120): ’ and ‘
+//   fold to ', “ and ” to ", and – and — to -, in the query and the text.
 // - The typed characters at the start of a word (D117 Q4): so the same
 //   word with another ending is found, and a word's middle never is.
 // - The dreams' text only, told dreams in order, never a name (D116 item 1);
@@ -36,6 +38,17 @@ const int contextWordsBefore = 3;
 /// Marks words left off before a match (D117 Q8: punctuation, not a word).
 const String cut = '…';
 
+/// The marks that fold to a straight one (D120), each one code unit: the
+/// single curly quotes, the double curly quotes, the en and the em dash.
+const _straight = {
+  0x2018: "'",
+  0x2019: "'",
+  0x201C: '"',
+  0x201D: '"',
+  0x2013: '-',
+  0x2014: '-',
+};
+
 final _wordChar = RegExp(r'[\p{L}\p{N}\p{M}]', unicode: true);
 final _space = RegExp(r'\s+');
 final _word = RegExp(r'\S+');
@@ -54,7 +67,7 @@ final class _Folded {
     var at = 0;
     for (final r in text.runes) {
       final width = r > 0xFFFF ? 2 : 1;
-      final f = String.fromCharCode(r).toLowerCase();
+      final f = _straight[r] ?? String.fromCharCode(r).toLowerCase();
       for (var k = 0; k < f.length; k++) {
         from.add(at);
         to.add(at + width);

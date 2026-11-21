@@ -8,6 +8,7 @@ import 'package:souldreams/design/palette.dart';
 import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/night.dart';
+import 'package:souldreams/journal/night_rules.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/sky_mark.dart';
@@ -15,6 +16,7 @@ import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/journal/search.dart';
 import 'package:souldreams/words/lines.g.dart';
 
+import '../../fixtures.dart';
 import '../zones.dart';
 import 'harness.dart';
 
@@ -30,6 +32,18 @@ Future<void> type(WidgetTester tester, String words) async {
 }
 
 Finder row(Night n) => find.byKey(JournalPage.rowKey(n.id));
+
+/// The invented night 'two-dreams-en' with three marks written into its
+/// first dream: a straight apostrophe, curly double quotes and an en dash
+/// (D120). Its words are the fixture's, a few of them changed.
+Future<Night> keepMarked(Harness h, DateTime at) async {
+  final text = invented('two-dreams-en').dreams.first
+      .replaceFirst('lighthouse', "lighthouse's")
+      .replaceFirst('wheat', '\u201cwheat\u201d')
+      .replaceFirst('even though', 'even \u2013 though');
+  await h.journal.addDream(NewNight(at), text, Lang.en);
+  return (await h.nights()).firstWhere((x) => x.firstRecorded == at);
+}
 
 /// A phone's screen, 390 by 844, tall enough that every row is built, so a
 /// row left out is truly left out.
@@ -63,6 +77,77 @@ void main() {
     expect(f.enableSuggestions, isFalse);
     expect(f.textInputAction, TextInputAction.search);
     expect(f.decoration!.hintText, Lines.EM_4.text(Lang.en));
+  });
+
+  testWidgets('smart quotes and dashes stay on; the matcher folds them (D120)', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final f = tester.widget<TextField>(find.byKey(JournalPage.searchKey));
+    expect(f.smartQuotesType, isNot(SmartQuotesType.disabled));
+    expect(f.smartDashesType, isNot(SmartDashesType.disabled));
+  });
+
+  testWidgets('the magnifier is heard as nothing', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final magnifier = find.byWidgetPredicate(
+      (w) => w is CustomPaint && w.painter.runtimeType.toString() == '_Magnifier',
+    );
+    expect(magnifier, findsOneWidget);
+    final silent = find.byWidgetPredicate((w) => w is ExcludeSemantics && w.excluding && w.child is SizedBox);
+    expect(find.descendant(of: silent, matching: magnifier), findsOneWidget);
+  });
+
+  testWidgets('a typed curly mark finds a straight one, and the reverse', (tester) async {
+    phone(tester);
+    final h = await Harness.make();
+    final marked = await keepMarked(h, stockholm(2026, 6, 2, 23));
+    final sv = await keep(h, 'one-dream-sv', stockholm(2026, 6, 4, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    // Typed curly, written straight.
+    await type(tester, 'lighthouse\u2019s');
+    expect(row(marked), findsOneWidget);
+    expect(row(sv), findsNothing);
+    final line = tester.widget<Text>(find.byKey(JournalPage.contextKey(marked.id)));
+    final parts = (line.textSpan! as TextSpan).children!.cast<TextSpan>();
+    expect(parts[1].text, "lighthouse's");
+    // Typed straight, written curly: the bold is the text's own marks.
+    await type(tester, '"wheat"');
+    expect(row(marked), findsOneWidget);
+    final curly = tester.widget<Text>(find.byKey(JournalPage.contextKey(marked.id)));
+    expect(((curly.textSpan! as TextSpan).children!.cast<TextSpan>())[1].text, '\u201cwheat\u201d');
+    // Typed straight, written as an en dash.
+    await type(tester, 'even - though');
+    expect(row(marked), findsOneWidget);
+    // A different mark is a different word.
+    await type(tester, 'lighthouse\u201cs');
+    expect(row(marked), findsNothing);
+    expect(find.text(Lines.W25.text(Lang.en)), findsOneWidget);
+  });
+
+  testWidgets('only the months with a match keep their divider', (tester) async {
+    phone(tester);
+    final h = await Harness.make();
+    final en = await keep(h, 'two-dreams-en', stockholm(2026, 5, 20, 23));
+    final sv = await keep(h, 'one-dream-sv', stockholm(2026, 6, 4, 23));
+    final named = await keep(h, 'named-three-dreams-sv', stockholm(2026, 7, 6, 23));
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final year = h.journal.zone.wall(h.journal.now()).year;
+    Finder month(int m) => find.text(monthDivider(2026, m, year, Lang.en));
+    for (final m in [5, 6, 7]) {
+      expect(month(m), findsOneWidget);
+    }
+    await type(tester, 'glas');
+    expect(month(5), findsNothing);
+    expect(month(6), findsOneWidget);
+    expect(month(7), findsOneWidget);
+    expect(row(en), findsNothing);
+    expect(row(sv), findsOneWidget);
+    expect(row(named), findsOneWidget);
+    await type(tester, 'lighth');
+    expect(month(5), findsOneWidget);
+    expect(month(6), findsNothing);
+    expect(month(7), findsNothing);
   });
 
   testWidgets('under three characters, every night as before', (tester) async {
