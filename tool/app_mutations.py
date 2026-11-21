@@ -2173,6 +2173,23 @@ ROWS = [
      '          query: query,\n',
      '          query: _search.text,\n',
      'test/journal/pages/journal_search_test.dart', 'a row opened with no search hands no query'),
+    # D119 item 2 (the owner's addition): no shown line holds an unfilled braced sentence
+    ('A480', 'lib/onboarding/disclosure_page.dart',
+     '    Lines.W27_6,\n',
+     '    Lines.MP_68,\n',
+     'test/words/shown_lines_test.dart', 'no shown place has a braced sentence, in either language'),
+    ('A481', 'test/words/shown_lines_test.dart',
+     "    rest = rest.replaceAll(slot, '');\n",
+     '',
+     'test/words/shown_lines_test.dart', 'a brace outside the slots is caught, a slot is not'),
+    ('A482', 'test/words/shown_lines_test.dart',
+     "    if (!path.endsWith('.dart') || path.contains('lib/words/')) continue;\n",
+     "    if (path.isNotEmpty) continue;\n",
+     'test/words/shown_lines_test.dart', 'the scan sees the places the screens use'),
+    ('A483', 'test/words/shown_lines_test.dart',
+     "  return rest.contains('{') || rest.contains('}');\n",
+     "  return rest.contains('{');\n",
+     'test/words/shown_lines_test.dart', 'a brace outside the slots is caught, a slot is not'),
 ]
 
 

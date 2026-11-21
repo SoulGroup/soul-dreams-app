@@ -257,11 +257,11 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 603 tests, and 497 mutation checks (A1 to A479; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 607 tests, and 501 mutation checks (A1 to A483; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A313, A363 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 497 run, 497 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 501 run, 501 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -858,6 +858,10 @@ Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D11
      words quoted in a reflection take "Inter Display Italic" (§1), which the app does not have (no Inter Italic
      file): for the readings' branch.
 149. `opening()` (`row_text.dart`) stays unused: D116 item 3's context replaced it for search (banked item 136).
+150. For Product's next filing, through the head (D119 item 3, the owner's task of 2026-11-21): a place in the register
+     for the microphone's own spoken name. The typing screen's microphone is heard as MP·11 (`typing_page.dart`),
+     which is now New Dream's word, so a screen reader says "New Dream" for the microphone. It stays MP·11 until
+     Product files a place for it; nothing is built for it before then (as banked item 145).
 
 ## Before Cohort 1
 
@@ -867,6 +871,12 @@ Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D11
 3. No tester or founder build while any disclosure part shown in onboarding or on the full disclosure page lacks a
    line: none since C17-P (D106 3). `Onboarding.missing` lists them (every part shown, MP·57 included), and a test in
    `dev_only_test.dart` fails if either entry point reaches `lib/onboarding/` while it is not empty.
+4. No shown line may contain an unfilled braced sentence (D119 item 2: a place "to rewrite" is built as written, and
+   a sentence still owed in it stays whole in braces, as MP·68 and MP·70 do; neither is shown by any screen yet).
+   `test/words/shown_lines_test.dart` fails if any file in `lib/` outside `lib/words/` names a place whose line, in
+   either language, holds a `{` or `}` that is not one of the four slots (`{n}`, `{pointed image}`, `{tradition}`,
+   `{read image}`). The branch that first shows MP·68 or MP·70 (the consents' controls) meets this test: it passes
+   only once Product has filed the sentence.
 
 Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
 (questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY; questions 1, 3, 4, 5, 7, 9 to 13 by head's
@@ -1191,6 +1201,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 ## Rulings during redesign-b
 
 - `redesign-a` merged by the owner (`e81f29c`).
+- The owner's task for this branch (2026-11-21) added to the plan: Before Cohort 1 item 4 with its test (D119 item 2),
+  and banked item 150 (D119 item 3).
 - D116 (owner, the brainstorm): (1) search covers the dreams' text in every night (no readings or Life Context
   yet); (2) matching ignores case, Unicode-aware, and keeps letters with marks distinct; (3) the context line is a
   short stretch around the first match, the matched characters in bold; (4) the count lines and "No matches" as
