@@ -111,7 +111,7 @@ void main() {
 
   testWidgets('the header, the label "Dreams", the dreams in order', (tester) async {
     await open(tester);
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(find.text(shownDate(n.date)), findsOneWidget);
     expect(find.text(Lines.MP_38.text(Lang.en)), findsOneWidget);
     final first = tester.getTopLeft(find.text(n.dreams[0]));
     final second = tester.getTopLeft(find.text(n.dreams[1]));
@@ -465,7 +465,7 @@ void main() {
   // painted gradient; the date centred over its foot in h2.
   testWidgets("the header: the date centred over an unread night's gradient", (tester) async {
     await open(tester);
-    final date = find.text(dayDigits(n.date));
+    final date = find.text(shownDate(n.date));
     expect(tester.widget<Text>(date).textAlign, TextAlign.center);
     final width = tester.getSize(find.byType(NightPage)).width;
     expect(tester.getCenter(date).dx, closeTo(width / 2, 1));
@@ -484,7 +484,7 @@ void main() {
   testWidgets('a named night shows only its date', (tester) async {
     await open(tester, name: 'Night by the harbour');
     expect(find.text('Night by the harbour'), findsNothing);
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(find.text(shownDate(n.date)), findsOneWidget);
   });
 
   testWidgets('an unread night has no jump buttons', (tester) async {
@@ -556,6 +556,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, closeTo(list.top, 1));
     expect(label, findsOneWidget);
+  });
+
+  // D112: the "Dreams" label stands centred.
+  testWidgets('the "Dreams" label is centred', (tester) async {
+    await open(tester);
+    final width = tester.getSize(find.byType(NightPage)).width;
+    expect(tester.getCenter(find.text(Lines.MP_38.text(Lang.en))).dx, closeTo(width / 2, 1));
   });
 
   testWidgets('the three other jumps do nothing yet', (tester) async {
@@ -694,7 +701,7 @@ void main() {
   testWidgets('the date is heard as a heading', (tester) async {
     final handle = tester.ensureSemantics();
     await open(tester);
-    expect(tester.getSemantics(find.text(dayDigits(n.date))).flagsCollection.isHeader, isTrue);
+    expect(tester.getSemantics(find.text(shownDate(n.date))).flagsCollection.isHeader, isTrue);
     handle.dispose();
   });
 

@@ -58,6 +58,55 @@ class NightArt extends StatelessWidget {
       CustomPaint(painter: _ArtPainter(look), child: child ?? const SizedBox.expand());
 }
 
+/// New Dream's night sky (D112): the painted gradient with a few stars, a
+/// stand-in drawn in code until the founder supplies the image. The stars
+/// stand in the pill's own padding, above and below the words, never behind
+/// them. Heard as nothing, like the picture.
+class NightSky extends StatelessWidget {
+  const NightSky({super.key, this.child});
+
+  /// What stands over the sky (New Dream's words).
+  final Widget? child;
+
+  /// How bright a star is.
+  static const double starAlpha = 0.85;
+
+  /// A star: [x] across as a share of the width, [dy] down from the top edge
+  /// (or, when negative, up from the foot) in logical pixels, radius [r].
+  static const stars = <({double x, double dy, double r})>[
+    (x: 0.06, dy: 7, r: 1.2),
+    (x: 0.17, dy: -6, r: 1.0),
+    (x: 0.26, dy: 5, r: 0.9),
+    (x: 0.38, dy: -8, r: 1.4),
+    (x: 0.49, dy: 6, r: 1.0),
+    (x: 0.58, dy: -5, r: 0.9),
+    (x: 0.69, dy: 8, r: 1.3),
+    (x: 0.78, dy: -7, r: 1.0),
+    (x: 0.88, dy: 5, r: 1.1),
+    (x: 0.95, dy: -6, r: 1.2),
+  ];
+
+  @override
+  Widget build(BuildContext context) =>
+      CustomPaint(painter: _SkyPainter(), child: child ?? const SizedBox.expand());
+}
+
+class _SkyPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final box = Offset.zero & size;
+    canvas.drawRect(box, Paint()..shader = _ArtPainter._vertical(box, NightArt.gradient));
+    final star = Paint()..color = NightArt.over.withValues(alpha: NightSky.starAlpha);
+    for (final s in NightSky.stars) {
+      final y = s.dy >= 0 ? s.dy : size.height + s.dy;
+      canvas.drawCircle(Offset(size.width * s.x, y), s.r, star);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_SkyPainter old) => false;
+}
+
 class _ArtPainter extends CustomPainter {
   _ArtPainter(this.look);
 

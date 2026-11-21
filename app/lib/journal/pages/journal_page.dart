@@ -1,6 +1,6 @@
 // The journal list, the app's home (main-path.md, The Journal; C131-I
-// items 1, 2; S5; D110, head's message 24): a greeting by the part of the
-// day; New Dream, opening the typing screen (the round record button is
+// items 1, 2; S5; D110, head's message 24; D112): a sun or a moon above a
+// greeting by the part of the day; New Dream, opening the typing screen (the round record button is
 // gone); one rounded row per night, newest first, carrying only its date
 // over the night's picture (an unread night's the painted gradient), never
 // a time; a month divider over each month with nights; C4-P·5 when there is
@@ -29,8 +29,10 @@ import '../night_look.dart';
 import '../night_rules.dart';
 import '../owed.dart';
 import '../row_text.dart';
+import '../sky.dart';
 import 'night_art.dart';
 import 'night_page.dart';
+import 'sky_mark.dart';
 import 'typing_page.dart';
 
 class JournalPage extends StatefulWidget {
@@ -72,9 +74,11 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   List<Night>? _nights;
   late bool _first = widget.firstTime;
   late Daypart _daypart = _daypartNow();
+  late Sky _sky = _skyNow();
   late final Timer _clock;
 
   Daypart _daypartNow() => daypartAt(widget.journal.zone.wall(widget.journal.now()).hour);
+  Sky _skyNow() => skyAt(widget.journal.zone.wall(widget.journal.now()).hour);
 
   @override
   void initState() {
@@ -82,10 +86,16 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     _load();
     widget.recording?.retries?.addListener(_load);
-    // The greeting follows the clock while the page is open.
+    // The greeting and the sky mark follow the clock while the page is open.
     _clock = Timer.periodic(const Duration(minutes: 1), (_) {
       final now = _daypartNow();
-      if (now != _daypart) setState(() => _daypart = now);
+      final sky = _skyNow();
+      if (now != _daypart || sky != _sky) {
+        setState(() {
+          _daypart = now;
+          _sky = sky;
+        });
+      }
     });
   }
 
@@ -116,6 +126,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     setState(() {
       _nights = nights;
       _daypart = _daypartNow();
+      _sky = _skyNow();
       // Shown once: a night there ends it, even one deleted later.
       if (nights.isNotEmpty) _first = false;
     });
@@ -159,6 +170,9 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.greetingAbove, Spacing.pageSide, StandIns.journalEnd),
           children: [
+            // The sun by day, the moon by night, then the greeting (D112).
+            Center(child: SkyMark(_sky)),
+            const SizedBox(height: StandIns.skyGap),
             // Centred in h2, heard as a heading (D110).
             Semantics(
               header: true,
@@ -207,7 +221,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   }
 }
 
-/// New Dream (D110): a pill on the painted gradient, its words in the button
+/// New Dream (D110, D112): a pill on a night sky, its words in the button
 /// type over it, opening the typing screen; heard as a button.
 class _NewDream extends StatelessWidget {
   const _NewDream({required this.onPressed});
@@ -222,8 +236,7 @@ class _NewDream extends StatelessWidget {
       onTap: onPressed,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(Spacing.radius),
-        child: NightArt(
-          const PaintedGradient(),
+        child: NightSky(
           child: Padding(
             padding: StandIns.buttonPadding,
             child: Text(OwedLines.newDream.text, style: TypeRoles.button.style(NightArt.over)),
@@ -324,7 +337,7 @@ class _Row extends StatelessWidget {
               child: Center(
                 child: Padding(
                   padding: StandIns.labelPadding,
-                  child: Text(dayDigits(night.date), style: TypeRoles.h6.style(NightArt.over)),
+                  child: Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over)),
                 ),
               ),
             ),

@@ -82,6 +82,15 @@ void main() {
     expect(dayDigits((year: 2009, month: 1, day: 2)), '02/01/2009');
   });
 
+  // D112: wherever a night's date is shown, the year has two digits; the
+  // founder's export keeps the four-digit form (dayDigits).
+  test('the date shown: day/month/yy, with no time', () {
+    expect(shownDate((year: 2026, month: 3, day: 5)), '05/03/26');
+    expect(shownDate((year: 2026, month: 12, day: 31)), '31/12/26');
+    expect(shownDate((year: 2009, month: 1, day: 2)), '02/01/09');
+    expect(shownDate((year: 2100, month: 1, day: 1)), '01/01/00');
+  });
+
   test('a divider: the month alone this year, month and year before', () {
     for (final lang in Lang.values) {
       final own = DateFormat.LLLL(lang.name).format(DateTime(2026, 10));

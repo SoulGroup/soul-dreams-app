@@ -19,6 +19,14 @@ abstract final class StandIns {
   static const double listAbove = 40;
   static const double rowHeight = 64;
 
+  /// The sky mark above the greeting (D112): its size, the space below it,
+  /// and the colours of the sun and the moon, stand-ins drawn in code until
+  /// the founder supplies the images.
+  static const skyMark = Size(48, 48);
+  static const double skyGap = 12;
+  static const sunColour = Color(0xFFD68F1A);
+  static const moonColour = Color(0xFFD9D6EA);
+
   /// space.journal.end: below the last row.
   static const double journalEnd = 40;
 

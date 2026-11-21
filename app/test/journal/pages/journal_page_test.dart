@@ -21,8 +21,10 @@ import 'package:souldreams/journal/pages/night_art.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
+import 'package:souldreams/journal/pages/sky_mark.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
+import 'package:souldreams/journal/sky.dart';
 import 'package:souldreams/words/lines.g.dart';
 
 import '../../fixtures.dart';
@@ -110,15 +112,54 @@ void main() {
     expect(find.text(OwedLines.greetingAfternoon.text), findsNothing);
   });
 
-  // D110: New Dream, centred, the painted gradient behind its words, heard
-  // as a button.
-  testWidgets('New Dream: centred, on the painted gradient, a button', (tester) async {
+  // D112: above the greeting, a sun from 08:00 to 21:00 and a moon from 21:00
+  // to 08:00, drawn in code, heard as nothing; it follows the clock as the
+  // greeting does.
+  testWidgets('the sun above the greeting by day, centred', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    final mark = find.byType(SkyMark);
+    expect(tester.widget<SkyMark>(mark).sky, Sky.sun);
+    expect(tester.getSize(mark), StandIns.skyMark);
+    expect(tester.getCenter(mark).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
+    final greeting = tester.getRect(find.text(OwedLines.greetingAfternoon.text));
+    expect(greeting.top - tester.getRect(mark).bottom, closeTo(StandIns.skyGap, 1));
+  });
+
+  testWidgets('the moon at night, and the mark follows the clock', (tester) async {
+    final h = await Harness.make();
+    // 07:00 and 08:00 are both morning to the greeting: the mark alone moves.
+    Harness.clock = stockholm(2026, 6, 10, 7);
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
+    Harness.clock = stockholm(2026, 6, 10, 8);
+    await tester.pump(const Duration(minutes: 1));
+    expect(find.text(OwedLines.greetingMorning.text), findsOneWidget);
+    expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.sun);
+    Harness.clock = stockholm(2026, 6, 10, 21);
+    await tester.pump(const Duration(minutes: 1));
+    expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
+  });
+
+  testWidgets('the mark follows the clock on returning', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    Harness.clock = stockholm(2026, 6, 10, 21);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
+  });
+
+  // D112: a night sky inside the pill, drawn in code until the founder's image.
+  testWidgets('New Dream: centred, on a night sky, a button', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
     final button = find.byKey(JournalPage.newDreamKey);
     expect(tester.getCenter(button).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
-    final art = tester.widget<NightArt>(find.descendant(of: button, matching: find.byType(NightArt)));
-    expect(art.look, const PaintedGradient());
+    expect(find.descendant(of: button, matching: find.byType(NightSky)), findsOneWidget);
+    expect(find.descendant(of: button, matching: find.byType(NightArt)), findsNothing);
     final words = tester.widget<Text>(find.text(OwedLines.newDream.text));
     expect(words.style!.color, NightArt.over);
     expect(words.style!.fontFamily, TypeRoles.button.family);
@@ -185,8 +226,8 @@ void main() {
     final older = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     final newer = await keep(h, 'framed-opening-en', stockholm(2026, 6, 9, 23));
     await h.pump(tester, JournalPage(journal: h.journal));
-    final newDate = tester.getTopLeft(find.text(dayDigits(newer.date)));
-    final oldDate = tester.getTopLeft(find.text(dayDigits(older.date)));
+    final newDate = tester.getTopLeft(find.text(shownDate(newer.date)));
+    final oldDate = tester.getTopLeft(find.text(shownDate(older.date)));
     expect(newDate.dy, lessThan(oldDate.dy));
     // No opening, no chevron (D110).
     expect(find.text(opening(newer)), findsNothing);
@@ -228,10 +269,10 @@ void main() {
     final newer = await keep(h, 'one-dream-sv', stockholm(2026, 6, 3, 23));
     await h.pump(tester, JournalPage(journal: h.journal));
     final arts = find.descendant(of: find.byType(ListView), matching: find.byType(NightArt));
-    // New Dream's, and one per row.
-    expect(arts, findsNWidgets(3));
+    // One per row; New Dream's is the night sky.
+    expect(arts, findsNWidgets(2));
     for (final n in [older, newer]) {
-      final date = find.text(dayDigits(n.date));
+      final date = find.text(shownDate(n.date));
       final row = find.ancestor(of: date, matching: find.byKey(JournalPage.rowKey(n.id)));
       final art = find.descendant(of: row, matching: find.byType(NightArt));
       expect(tester.widget<NightArt>(art).look, const PaintedGradient());
@@ -255,7 +296,7 @@ void main() {
     final handle = tester.ensureSemantics();
     expect(
       tester.getSemantics(find.byKey(JournalPage.rowKey(older.id))),
-      matchesSemantics(label: dayDigits(older.date), isButton: true, hasTapAction: true),
+      matchesSemantics(label: shownDate(older.date), isButton: true, hasTapAction: true),
     );
     handle.dispose();
   });
@@ -267,7 +308,7 @@ void main() {
     final row = find.byKey(JournalPage.rowKey(n.id));
     final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
     expect(art.look, Painting(paintingFor(n.id, NightArt.paintings)));
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(find.text(shownDate(n.date)), findsOneWidget);
   });
 
   // D110: naming a night is removed; a name kept from before is not shown.
@@ -289,7 +330,7 @@ void main() {
     );
     await h.pump(tester, JournalPage(journal: h.journal));
     expect(find.text(name), findsNothing);
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(find.text(shownDate(n.date)), findsOneWidget);
   });
 
   testWidgets('New Dream opens typing; a Save adds a row', (tester) async {
@@ -303,7 +344,7 @@ void main() {
     await tester.tap(find.byKey(TypingPage.saveKey));
     await tester.pumpAndSettle();
     final n = (await h.nights()).single;
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(find.text(shownDate(n.date)), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsNothing);
   });
 
@@ -311,7 +352,7 @@ void main() {
     final h = await Harness.make();
     final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     await h.pump(tester, JournalPage(journal: h.journal));
-    await tester.tap(find.text(dayDigits(n.date)));
+    await tester.tap(find.text(shownDate(n.date)));
     await tester.pumpAndSettle();
     expect(find.byType(NightPage), findsOneWidget);
     expect(find.text(n.dreams[1]), findsOneWidget);
@@ -322,7 +363,7 @@ void main() {
     final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     bool read(Night night) => night.id == n.id;
     await h.pump(tester, JournalPage(journal: h.journal, read: read));
-    await tester.tap(find.text(dayDigits(n.date)));
+    await tester.tap(find.text(shownDate(n.date)));
     await tester.pumpAndSettle();
     expect(tester.widget<NightPage>(find.byType(NightPage)).read, same(read));
   });
@@ -332,7 +373,7 @@ void main() {
     final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     final action = NightAction(label: Lines.MP_65.text(Lang.en), run: (_) async {});
     await h.pump(tester, JournalPage(journal: h.journal, nightAction: action));
-    await tester.tap(find.text(dayDigits(n.date)));
+    await tester.tap(find.text(shownDate(n.date)));
     await tester.pumpAndSettle();
     expect(tester.widget<NightPage>(find.byType(NightPage)).action, same(action));
   });
@@ -389,7 +430,7 @@ void main() {
     files.broken = true;
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
+    expect(find.text(shownDate(n.date)), findsOneWidget);
     expect(lines, ['journalListFailed']);
   });
 

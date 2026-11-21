@@ -3,7 +3,8 @@
 // - The opening: the first dream as told, with TECH·1's framing trimmed
 //   from its very start only, matched as a whole word or phrase and
 //   ignoring case, the longest first. When unsure, nothing is trimmed.
-// - The date: day/month/year, never a time.
+// - The date: day/month/year, never a time; shown with a two-digit year
+//   (D112), the founder's export keeping all four.
 // - The month divider: the phone's own month name for the language
 //   (Flutter's localization data), the first letter capitalised; the month
 //   alone in the current year, month and year in an earlier one.
@@ -35,8 +36,16 @@ String opening(Night night) {
 
 String _two(int n) => n.toString().padLeft(2, '0');
 
-/// The night's date: day/month/year (main-path.md, Every Screen; MP·27).
+/// The night's date: day/month/year (main-path.md, Every Screen; MP·27). The
+/// founder's export writes this one; a screen shows [shownDate].
 String dayDigits(NightDate d) => '${_two(d.day)}/${_two(d.month)}/${d.year}';
+
+/// The night's date as a screen shows it: day/month/yy (D112, the founder's
+/// ruling, over MP·27's four digits).
+String shownDate(NightDate d) {
+  final yy = d.year % 100;
+  return '${_two(d.day)}/${_two(d.month)}/${_two(yy)}';
+}
 
 /// The month divider's words, in [lang].
 String monthDivider(int year, int month, int currentYear, Lang lang) {

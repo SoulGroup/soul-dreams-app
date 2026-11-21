@@ -338,7 +338,7 @@ class _NightPageState extends State<NightPage> {
                             child: Semantics(
                               header: true,
                               child: Text(
-                                dayDigits(n.date),
+                                shownDate(n.date),
                                 textAlign: TextAlign.center,
                                 style: TypeRoles.h2.style(NightArt.over),
                               ),
@@ -362,7 +362,7 @@ class _NightPageState extends State<NightPage> {
                     key: NightPage.dreamsKey,
                     padding: side,
                     child: Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: Alignment.center,
                       child: SectionLabel(key: _dreamsLabel, Lines.MP_38.text(appLanguage)),
                     ),
                   ),
