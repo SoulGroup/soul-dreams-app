@@ -20,7 +20,6 @@ import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_action.dart';
 import 'package:souldreams/journal/night_look.dart';
-import 'package:souldreams/journal/owed.dart';
 import 'package:souldreams/journal/pages/night_art.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
@@ -500,8 +499,22 @@ void main() {
 
   testWidgets('an unread night has no jump buttons', (tester) async {
     await open(tester);
-    for (final o in [OwedLines.jumpDreams, OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection]) {
-      expect(find.text(o.text), findsNothing);
+    // By key: MP·77's "Dreams" is MP·38's word too, which stands.
+    for (final o in Jump.values) {
+      expect(find.byKey(NightPage.jumpKey(o)), findsNothing);
+    }
+    expect(find.text(Lines.MP_77.parts(Lang.en)[1]), findsNothing);
+  });
+
+  // C18-P (D119 item 4): the jump buttons' words are MP·77's four parts, in
+  // order, each on its own button.
+  testWidgets("the jump buttons' words: MP·77, in order", (tester) async {
+    await open(tester, read: (_) => true);
+    expect([for (final o in Jump.values) o.text(Lang.en)], Lines.MP_77.parts(Lang.en));
+    expect([for (final o in Jump.values) o.text(Lang.sv)], Lines.MP_77.parts(Lang.sv));
+    for (final o in Jump.values) {
+      final words = find.descendant(of: find.byKey(NightPage.jumpKey(o)), matching: find.byType(Text));
+      expect(tester.widget<Text>(words).data, Lines.MP_77.parts(Lang.en)[o.index]);
     }
   });
 
@@ -513,13 +526,13 @@ void main() {
     final art = tester.widget<NightArt>(find.byType(NightArt));
     expect(art.look, Painting(paintingFor(n.id, NightArt.paintings)));
     final header = tester.getRect(find.byType(NightArt));
-    final jumps = [OwedLines.jumpDreams, OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection];
+    final jumps = Jump.values;
     final boxes = [for (final o in jumps) tester.getRect(find.byKey(NightPage.jumpKey(o)))];
     for (final (i, b) in boxes.indexed) {
       expect(b.top, greaterThan(header.bottom));
-      expect(b.bottom, lessThan(tester.getTopLeft(find.text(Lines.MP_38.text(Lang.en))).dy));
+      expect(b.bottom, lessThan(tester.getTopLeft(find.byKey(NightPage.dreamsKey)).dy));
       expect(tester.getSemantics(find.byKey(NightPage.jumpKey(jumps[i]))), matchesSemantics(
-        label: jumps[i].text, isButton: true, hasTapAction: true));
+        label: jumps[i].text(Lang.en), isButton: true, hasTapAction: true));
       if (i > 0) expect(b.left > boxes[i - 1].right || b.top > boxes[i - 1].bottom, isTrue);
     }
     // Each row of them centred.
@@ -535,17 +548,17 @@ void main() {
   // brown, the tradition label's terracotta and the dream tag's blue.
   testWidgets('the jump buttons: green, brown, terracotta, blue', (tester) async {
     await open(tester, read: (_) => true);
-    List<Color> colours(Owed o) {
+    List<Color> colours(Jump o) {
       final box = tester.widget<DecoratedBox>(
         find.descendant(of: find.byKey(NightPage.jumpKey(o)), matching: find.byType(DecoratedBox)),
       );
       return ((box.decoration as BoxDecoration).gradient! as LinearGradient).colors;
     }
 
-    expect(colours(OwedLines.jumpDreams), [LightColours.labelSection.colour, LightColours.labelSection.colourEnd]);
-    expect(colours(OwedLines.jumpQuestions), StandIns.jumpQuestions);
-    expect(colours(OwedLines.jumpReadings), [LightColours.labelTradition.colour, LightColours.labelTradition.colourEnd]);
-    expect(colours(OwedLines.jumpReflection), [LightColours.tagDream.colour, LightColours.tagDream.colourEnd]);
+    expect(colours(Jump.dreams), [LightColours.labelSection.colour, LightColours.labelSection.colourEnd]);
+    expect(colours(Jump.questions), StandIns.jumpQuestions);
+    expect(colours(Jump.readings), [LightColours.labelTradition.colour, LightColours.labelTradition.colourEnd]);
+    expect(colours(Jump.reflection), [LightColours.tagDream.colour, LightColours.tagDream.colourEnd]);
   });
 
   // The jump buttons stand at the top of the scrolling part, so they scroll
@@ -553,9 +566,9 @@ void main() {
   testWidgets('the Dreams jump brings "Dreams" to the top', (tester) async {
     await open(tester, read: (_) => true, key: 'long-dream-en');
     final list = tester.getRect(find.byType(ListView));
-    final jump = find.byKey(NightPage.jumpKey(OwedLines.jumpDreams));
+    final jump = find.byKey(NightPage.jumpKey(Jump.dreams));
     expect(find.descendant(of: find.byType(ListView), matching: jump), findsOneWidget);
-    final label = find.text(Lines.MP_38.text(Lang.en));
+    final label = find.descendant(of: find.byKey(NightPage.dreamsKey), matching: find.text(Lines.MP_38.text(Lang.en)));
     expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, greaterThan(list.top + 10));
     await tester.tap(jump);
     await tester.pump();
@@ -579,7 +592,7 @@ void main() {
   testWidgets('the three other jumps do nothing yet', (tester) async {
     await open(tester, read: (_) => true, key: 'long-dream-en');
     final at = tester.getRect(find.byKey(NightPage.dreamsKey));
-    for (final o in [OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection]) {
+    for (final o in [Jump.questions, Jump.readings, Jump.reflection]) {
       await tester.tap(find.byKey(NightPage.jumpKey(o)));
       await tester.pumpAndSettle();
       expect(tester.getRect(find.byKey(NightPage.dreamsKey)), at);

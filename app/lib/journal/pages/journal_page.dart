@@ -1,6 +1,7 @@
 // The journal list, the app's home (main-path.md, The Journal; C131-I
 // items 1, 2; S5; D110, head's message 24; D112): a sun or a moon above a
-// greeting by the part of the day; New Dream, opening the typing screen (the round record button is
+// greeting by the part of the day (MP·72 to MP·75, one line a day; D119);
+// New Dream (MP·11), opening the typing screen (the round record button is
 // gone); one rounded row per night, newest first, carrying only its date
 // over the night's picture (an unread night's the painted gradient), never
 // a time; a month divider over each month with nights; C4-P·5 when there is
@@ -27,7 +28,6 @@ import '../night.dart';
 import '../night_action.dart';
 import '../night_look.dart';
 import '../night_rules.dart';
-import '../owed.dart';
 import '../row_text.dart';
 import '../sky.dart';
 import 'night_art.dart';
@@ -73,11 +73,11 @@ class JournalPage extends StatefulWidget {
 class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   List<Night>? _nights;
   late bool _first = widget.firstTime;
-  late Daypart _daypart = _daypartNow();
+  late Greeting _greeting = _greetingNow();
   late Sky _sky = _skyNow();
   late final Timer _clock;
 
-  Daypart _daypartNow() => daypartAt(widget.journal.zone.wall(widget.journal.now()).hour);
+  Greeting _greetingNow() => greetingAt(widget.journal.zone.wall(widget.journal.now()));
   Sky _skyNow() => skyAt(widget.journal.zone.wall(widget.journal.now()).hour);
 
   @override
@@ -88,11 +88,11 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     widget.recording?.retries?.addListener(_load);
     // The greeting and the sky mark follow the clock while the page is open.
     _clock = Timer.periodic(const Duration(minutes: 1), (_) {
-      final now = _daypartNow();
+      final now = _greetingNow();
       final sky = _skyNow();
-      if (now != _daypart || sky != _sky) {
+      if (now != _greeting || sky != _sky) {
         setState(() {
-          _daypart = now;
+          _greeting = now;
           _sky = sky;
         });
       }
@@ -125,7 +125,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     if (!mounted) return;
     setState(() {
       _nights = nights;
-      _daypart = _daypartNow();
+      _greeting = _greetingNow();
       _sky = _skyNow();
       // Shown once: a night there ends it, even one deleted later.
       if (nights.isNotEmpty) _first = false;
@@ -177,7 +177,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
             Semantics(
               header: true,
               child: Text(
-                greetingFor(_daypart).text,
+                greetingText(_greeting, appLanguage),
                 textAlign: TextAlign.center,
                 style: TypeRoles.h2.style(p.text),
               ),
@@ -239,7 +239,7 @@ class _NewDream extends StatelessWidget {
         child: NightSky(
           child: Padding(
             padding: StandIns.buttonPadding,
-            child: Text(OwedLines.newDream.text, style: TypeRoles.button.style(NightArt.over)),
+            child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),
           ),
         ),
       ),

@@ -17,7 +17,6 @@ import 'package:souldreams/journal/greeting.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_action.dart';
 import 'package:souldreams/journal/night_look.dart';
-import 'package:souldreams/journal/owed.dart';
 import 'package:souldreams/journal/pages/night_art.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
@@ -63,15 +62,19 @@ final class BrokenFiles extends MemoryJournalFiles {
   }
 }
 
+/// The greeting's words at Stockholm's wall [hour] on [day] June 2026.
+String greeted(int hour, {int day = 10}) =>
+    greetingText(greetingAt((year: 2026, month: 6, day: day, hour: hour)), Lang.en);
+
 void main() {
   testWidgets('the empty journal: the greeting, New Dream and C4-P·5', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
-    expect(find.text(OwedLines.greetingAfternoon.text), findsOneWidget);
-    expect(find.text(OwedLines.newDream.text), findsOneWidget);
+    expect(find.text(greeted(12)), findsOneWidget);
+    // MP·11 is New Dream's (C18-P), shown once: the round record button is
+    // gone (D110).
+    expect(find.text(Lines.MP_11.text(Lang.en)), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
-    // The round record button is gone (D110).
-    expect(find.text(Lines.MP_11.text(Lang.en)), findsNothing);
     // No Settings entry and no search: later branches.
     expect(find.text(Lines.MP_25.text(Lang.en)), findsNothing);
     expect(find.byType(TextField), findsNothing);
@@ -82,7 +85,7 @@ void main() {
   testWidgets('the greeting: by the clock, centred, a heading, above New Dream', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
-    final greeting = find.text(OwedLines.greetingAfternoon.text);
+    final greeting = find.text(greeted(12));
     final text = tester.widget<Text>(greeting);
     expect(text.style!.fontFamily, TypeRoles.h2.family);
     expect(text.style!.fontSize, TypeRoles.h2.size);
@@ -90,12 +93,24 @@ void main() {
     expect(tester.getCenter(greeting).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
     expect(tester.getRect(greeting).bottom, lessThan(tester.getRect(find.byKey(JournalPage.newDreamKey)).top));
     final handle = tester.ensureSemantics();
-    expect(tester.getSemantics(greeting), matchesSemantics(label: OwedLines.greetingAfternoon.text, isHeader: true));
+    expect(tester.getSemantics(greeting), matchesSemantics(label: greeted(12), isHeader: true));
     handle.dispose();
     Harness.clock = stockholm(2026, 6, 10, 17);
     await tester.pump(const Duration(minutes: 1));
-    expect(find.text(OwedLines.greetingEvening.text), findsOneWidget);
-    expect(greetingFor(Daypart.evening), OwedLines.greetingEvening);
+    expect(find.text(greeted(17)), findsOneWidget);
+  });
+
+  // D119 item 4: one line a day, the four in turn; the next day at the same
+  // hour, the next line of the same place.
+  testWidgets('the greeting: the next day, the next line', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(find.text(greeted(12)), findsOneWidget);
+    Harness.clock = stockholm(2026, 6, 11, 12);
+    await tester.pump(const Duration(minutes: 1));
+    expect(greeted(12, day: 11), isNot(greeted(12)));
+    expect(find.text(greeted(12, day: 11)), findsOneWidget);
+    expect(Lines.MP_73.parts(Lang.en), contains(greeted(12, day: 11)));
   });
 
   // D110: on returning, the greeting follows the clock at once, without
@@ -103,14 +118,14 @@ void main() {
   testWidgets('the greeting follows the clock on returning', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
-    expect(find.text(OwedLines.greetingAfternoon.text), findsOneWidget);
+    expect(find.text(greeted(12)), findsOneWidget);
     Harness.clock = stockholm(2026, 6, 10, 17);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text(OwedLines.greetingEvening.text), findsOneWidget);
-    expect(find.text(OwedLines.greetingAfternoon.text), findsNothing);
+    expect(find.text(greeted(17)), findsOneWidget);
+    expect(find.text(greeted(12)), findsNothing);
   });
 
   // D112: above the greeting, a sun from 08:00 to 21:00 and a moon from 21:00
@@ -123,7 +138,7 @@ void main() {
     expect(tester.widget<SkyMark>(mark).sky, Sky.sun);
     expect(tester.getSize(mark), StandIns.skyMark);
     expect(tester.getCenter(mark).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
-    final greeting = tester.getRect(find.text(OwedLines.greetingAfternoon.text));
+    final greeting = tester.getRect(find.text(greeted(12)));
     expect(greeting.top - tester.getRect(mark).bottom, closeTo(StandIns.skyGap, 1));
   });
 
@@ -135,7 +150,7 @@ void main() {
     expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
     Harness.clock = stockholm(2026, 6, 10, 8);
     await tester.pump(const Duration(minutes: 1));
-    expect(find.text(OwedLines.greetingMorning.text), findsOneWidget);
+    expect(find.text(greeted(8)), findsOneWidget);
     expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.sun);
     Harness.clock = stockholm(2026, 6, 10, 21);
     await tester.pump(const Duration(minutes: 1));
@@ -161,11 +176,11 @@ void main() {
     expect(tester.getCenter(button).dx, closeTo(tester.getSize(find.byType(JournalPage)).width / 2, 1));
     expect(find.descendant(of: button, matching: find.byType(NightSky)), findsOneWidget);
     expect(find.descendant(of: button, matching: find.byType(NightArt)), findsNothing);
-    final words = tester.widget<Text>(find.text(OwedLines.newDream.text));
+    final words = tester.widget<Text>(find.text(Lines.MP_11.text(Lang.en)));
     expect(words.style!.color, NightArt.over);
     expect(words.style!.fontFamily, TypeRoles.button.family);
     final handle = tester.ensureSemantics();
-    expect(tester.getSemantics(button), matchesSemantics(label: OwedLines.newDream.text, isButton: true, hasTapAction: true));
+    expect(tester.getSemantics(button), matchesSemantics(label: Lines.MP_11.text(Lang.en), isButton: true, hasTapAction: true));
     handle.dispose();
   });
 

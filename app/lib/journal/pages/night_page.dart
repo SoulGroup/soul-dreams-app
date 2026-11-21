@@ -21,8 +21,8 @@
 // tapped; while it is being turned into text, AI·6 shows in its place,
 // heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
 // When its words come, the page shows them. On a read night, under the
-// header, four jump buttons (Dreams, Questions, Readings, Reflection; their
-// words owed, shown as handles); Dreams brings "Dreams" into view, the
+// header, four jump buttons (MP·77: Dreams, Questions, Readings,
+// Reflection; D119 item 4); Dreams brings "Dreams" into view, the
 // other three do nothing until their sections come with the readings. No
 // night is read yet. Not built: reading, and the space below the dreams
 // with its field.
@@ -44,11 +44,21 @@ import '../night.dart';
 import '../night_action.dart';
 import '../night_look.dart';
 import '../night_rules.dart';
-import '../owed.dart';
 import '../row_text.dart';
 import 'night_art.dart';
 import 'parts.dart';
 import 'typing_page.dart';
+
+/// A read night's jump buttons, in MP·77's order (C18-P; D119 item 4).
+enum Jump {
+  dreams,
+  questions,
+  readings,
+  reflection;
+
+  /// Its words: MP·77's part at this button's place.
+  String text(Lang lang) => Lines.MP_77.parts(lang)[index];
+}
 
 class NightPage extends StatefulWidget {
   const NightPage({super.key, required this.journal, required this.id, this.recording, this.action, this.read = noneRead});
@@ -62,7 +72,7 @@ class NightPage extends StatefulWidget {
   static const dreamsKey = Key('night-dreams');
 
   /// A read night's jump button.
-  static Key jumpKey(Owed label) => ValueKey('jump-${label.handle}');
+  static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');
 
   final Journal journal;
   final String id;
@@ -261,7 +271,7 @@ class _NightPageState extends State<NightPage> {
 
   // A read night's four jump buttons, centred, wrapping at large text.
   Widget _jumps(Palette p) {
-    Widget jump(Owed label, List<Color> colours, GlobalKey? section) => Semantics(
+    Widget jump(Jump label, List<Color> colours, GlobalKey? section) => Semantics(
       button: true,
       child: GestureDetector(
         key: NightPage.jumpKey(label),
@@ -273,7 +283,7 @@ class _NightPageState extends State<NightPage> {
           ),
           child: Padding(
             padding: StandIns.labelPadding,
-            child: Text(label.text, style: TypeRoles.button.style(p.sectionText)),
+            child: Text(label.text(appLanguage), style: TypeRoles.button.style(p.sectionText)),
           ),
         ),
       ),
@@ -287,10 +297,10 @@ class _NightPageState extends State<NightPage> {
         spacing: StandIns.jumpGap,
         runSpacing: StandIns.jumpGap,
         children: [
-          jump(OwedLines.jumpDreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
-          jump(OwedLines.jumpQuestions, StandIns.jumpQuestions, null),
-          jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], null),
-          jump(OwedLines.jumpReflection, [tag.colour!, tag.colourEnd!], null),
+          jump(Jump.dreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
+          jump(Jump.questions, StandIns.jumpQuestions, null),
+          jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], null),
+          jump(Jump.reflection, [tag.colour!, tag.colourEnd!], null),
         ],
       ),
     );

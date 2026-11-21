@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A443, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A450, A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 462 run, 462 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 468 run, 468 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -1691,15 +1691,11 @@ ROWS = [
     ('A361', 'lib/journal/greeting.dart',
      '>= 17 && < 21 => Daypart.evening',
      '>= 17 && < 22 => Daypart.evening',
-     'test/journal/greeting_test.dart', 'the parts of the day: from 05, 12, 17, 21'),
+     'test/journal/greeting_test.dart', 'the parts of the day: from 05, 11, 17, 21'),
     ('A362', 'lib/journal/greeting.dart',
-     'Daypart.night => OwedLines.greetingNight,',
-     'Daypart.night => OwedLines.greetingEvening,',
-     'test/journal/greeting_test.dart', 'each part of the day has its own greeting'),
-    ('A363', 'lib/journal/owed.dart',
-     "String get text => '[$handle]';",
-     'String get text => handle;',
-     'test/journal/owed_test.dart', 'an owed place shows its handle in square brackets'),
+     'Daypart.night => Lines.MP_75,',
+     'Daypart.night => Lines.MP_74,',
+     'test/journal/greeting_test.dart', 'each part has its filed place, four lines each'),
     ('A364', 'lib/journal/night_look.dart',
      'read && paintings > 0 ?',
      'paintings > 0 ?',
@@ -1739,11 +1735,11 @@ ROWS = [
      'test/journal/pages/night_art_test.dart', 'a few placeholder paintings stand in the set'),
     # D110: the journal's greeting, New Dream and rows.
     ('A373', 'lib/journal/pages/journal_page.dart',
-     '              header: true,\n              child: Text(\n                greetingFor(_daypart).text,',
-     '              header: false,\n              child: Text(\n                greetingFor(_daypart).text,',
+     '              header: true,\n              child: Text(\n                greetingText(_greeting, appLanguage),',
+     '              header: false,\n              child: Text(\n                greetingText(_greeting, appLanguage),',
      'test/journal/pages/journal_page_test.dart', 'the greeting: by the clock, centred, a heading, above New Dream'),
     ('A374', 'lib/journal/pages/journal_page.dart',
-     '          _daypart = now;\n          _sky = sky;\n',
+     '          _greeting = now;\n          _sky = sky;\n',
      '          _sky = sky;\n',
      'test/journal/pages/journal_page_test.dart', 'the greeting: by the clock, centred, a heading, above New Dream'),
     ('A376', 'lib/journal/pages/journal_page.dart',
@@ -1784,12 +1780,12 @@ ROWS = [
      '',
      'test/journal/pages/night_page_test.dart', 'the Dreams jump brings "Dreams" to the top'),
     ('A385', 'lib/journal/pages/night_page.dart',
-     'jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], null),',
-     'jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], _dreamsLabel),',
+     'jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], null),',
+     'jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], _dreamsLabel),',
      'test/journal/pages/night_page_test.dart', 'the three other jumps do nothing yet'),
     ('A386', 'lib/journal/pages/night_page.dart',
-     'jump(OwedLines.jumpReflection, [tag.colour!, tag.colourEnd!], null),',
-     'jump(OwedLines.jumpReflection, [tag.colourEnd!, tag.colour!], null),',
+     'jump(Jump.reflection, [tag.colour!, tag.colourEnd!], null),',
+     'jump(Jump.reflection, [tag.colourEnd!, tag.colour!], null),',
      'test/journal/pages/night_page_test.dart', 'the jump buttons: green, brown, terracotta, blue'),
     ('A387', 'lib/journal/pages/night_page.dart',
      'style: TypeRoles.h2.style(NightArt.over),',
@@ -1822,7 +1818,7 @@ ROWS = [
      'test/journal/pages/journal_home_test.dart', 'by default no night is read'),
     # redesign-a's final review (D91): the greeting on returning, the status bar's room, the jump's time.
     ('A394', 'lib/journal/pages/journal_page.dart',
-     '      _nights = nights;\n      _daypart = _daypartNow();\n',
+     '      _nights = nights;\n      _greeting = _greetingNow();\n',
      '      _nights = nights;\n',
      'test/journal/pages/journal_page_test.dart', 'the greeting follows the clock on returning'),
     ('A395', 'lib/journal/pages/night_page.dart',
@@ -1867,8 +1863,8 @@ ROWS = [
      '      // Shown once',
      'test/journal/pages/journal_page_test.dart', 'the mark follows the clock on returning'),
     ('A405', 'lib/journal/pages/journal_page.dart',
-     'if (now != _daypart || sky != _sky) {',
-     'if (now != _daypart) {',
+     'if (now != _greeting || sky != _sky) {',
+     'if (now != _greeting) {',
      'test/journal/pages/journal_page_test.dart', 'the moon at night, and the mark follows the clock'),
     ('A406', 'lib/journal/pages/journal_page.dart',
      'Center(child: SkyMark(_sky)),',
@@ -2028,6 +2024,36 @@ ROWS = [
      'PlainButton(Lines.MP_67.parts(appLanguage).first, onPressed: widget.onAgreed)',
      'PlainButton(Lines.MP_67.parts(appLanguage).last, onPressed: widget.onAgreed)',
      'test/onboarding/onboarding_test.dart', '18 or over: the disclosure first page, then the consent'),
+    # redesign-b, Task 1 (D119 item 4): the greeting, New Dream and the jump
+    # buttons take their filed lines.
+    ('A444', 'lib/journal/greeting.dart',
+     '  >= 5 && < 11 => Daypart.morning,',
+     '  >= 5 && < 12 => Daypart.morning,',
+     'test/journal/greeting_test.dart', 'the parts of the day: from 05, 11, 17, 21'),
+    ('A445', 'lib/journal/greeting.dart',
+     '  return lines[g.day % lines.length];',
+     '  return lines[0];',
+     'test/journal/greeting_test.dart', 'one line a day, the four in turn'),
+    ('A446', 'lib/journal/greeting.dart',
+     '  final back = wall.hour < 5 ? 1 : 0;',
+     '  final back = 0;',
+     'test/journal/greeting_test.dart', 'after midnight, the line of the evening it began on'),
+    ('A447', 'lib/journal/pages/journal_page.dart',
+     '                greetingText(_greeting, appLanguage),',
+     '                greetingText((part: _greeting.part, day: 0), appLanguage),',
+     'test/journal/pages/journal_page_test.dart', 'the greeting: the next day, the next line'),
+    ('A448', 'lib/journal/pages/journal_page.dart',
+     'child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),',
+     'child: Text(Lines.MP_9.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),',
+     'test/journal/pages/journal_page_test.dart', 'the empty journal: the greeting, New Dream and C4-P·5'),
+    ('A449', 'lib/journal/pages/night_page.dart',
+     '  String text(Lang lang) => Lines.MP_77.parts(lang)[index];',
+     '  String text(Lang lang) => Lines.MP_77.parts(lang)[0];',
+     'test/journal/pages/night_page_test.dart', "the jump buttons' words: MP·77, in order"),
+    ('A450', 'lib/journal/pages/night_page.dart',
+     "  static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');",
+     "  static Key jumpKey(Jump jump) => const ValueKey('jump');",
+     'test/journal/pages/night_page_test.dart', 'a read night: its painting, then four jump buttons'),
 ]
 
 
