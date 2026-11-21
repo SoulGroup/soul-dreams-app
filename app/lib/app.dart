@@ -6,6 +6,7 @@ import 'core/always_light.dart';
 import 'core/language.dart';
 import 'core/night_day.dart';
 import 'core/privacy_cover.dart';
+import 'core/status_bar.dart';
 import 'design/palette.dart';
 
 /// The app, under the cover (D50 2) on every page, in the theme Night/Day
@@ -67,14 +68,13 @@ class _SoulDreamsAppState extends State<SoulDreamsApp> {
     locale: Locale(appLanguage.name),
     supportedLocales: const [Locale('en'), Locale('sv')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    // The phone's own status bar style, as iOS gives it when the app sets
-    // none, held under every page: a page that sets its own (a night's
-    // header) is overridden only while it is shown, since Flutter leaves the
-    // last style in place when a frame has none.
+    // The status bar follows the app's own theme, held under every page (D114):
+    // a page that sets its own (a night's header) is overridden only while it
+    // is shown, since Flutter leaves the last style in place when a frame has
+    // none. The builder stands inside the theme, so a held-light page (and
+    // the five-second fade) are followed.
     builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
-      value: MediaQuery.platformBrightnessOf(context) == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      value: statusBarFor(Theme.of(context).brightness),
       child: PrivacyCover(child: child!),
     ),
     home: widget.home ?? const Scaffold(),

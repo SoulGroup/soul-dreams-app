@@ -34,6 +34,7 @@ import '../../recording/fakes.dart';
 import '../memory_journal_files.dart';
 import '../zones.dart';
 import 'harness.dart';
+import '../../core/status_bar_recorder.dart';
 
 /// A folder that can fail a delete or a read, or hold a delete open.
 final class UnsteadyFiles extends MemoryJournalFiles {
@@ -640,32 +641,32 @@ void main() {
     expect(look.right - item.right, closeTo(0, 0.5));
   });
 
-  // D113 (the review): the light status-bar text is for the header alone.
-  // Without a region over the page left behind, Flutter leaves the last
-  // style in place, so the app holds the phone's own style (light text on a
-  // dark phone) and the night page overrides it.
-  testWidgets("leaving a night gives back the phone's own status bar", (tester) async {
-    final calls = <String>[];
-    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
-      if (call.method == 'SystemChrome.setSystemUIOverlayStyle') {
-        calls.add((call.arguments as Map)['statusBarBrightness'] as String);
-      }
-      return null;
-    });
-    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+  // D113, D114: the light status-bar text is for the header alone. Flutter
+  // leaves the last style in place when a frame has none, so the app holds
+  // the style of its own theme under every page and the night page overrides
+  // it while its picture shows.
+  testWidgets("leaving a night gives back the app's own status bar", (tester) async {
+    final calls = recordStatusBar(tester);
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
-    for (final phone in [Brightness.light, Brightness.dark]) {
+    // The phone's own setting plays no part: noon is the light theme, 22:00
+    // the dark, whichever the phone says.
+    for (final (hour, phone) in [
+      (12, Brightness.light),
+      (12, Brightness.dark),
+      (22, Brightness.light),
+      (22, Brightness.dark),
+    ]) {
       tester.platformDispatcher.platformBrightnessTestValue = phone;
       await tester.pumpWidget(const SizedBox());
-      calls.clear();
-      await open(tester);
+      await forceChange(tester, calls);
+      await open(tester, hour: hour);
       expect(calls.last, 'Brightness.dark', reason: 'over the header, light text');
       await tester.tap(find.byKey(BackControl.buttonKey));
       await tester.pumpAndSettle();
       expect(find.byType(NightPage), findsNothing);
-      // Dark brightness is light text: the dark phone keeps it, the light
-      // phone has dark text again.
-      expect(calls.last, phone == Brightness.light ? 'Brightness.light' : 'Brightness.dark', reason: '$phone');
+      // Over the light theme, dark text again (`light`); over the dark theme
+      // it stays light text (`dark`).
+      expect(calls.last, hour == 12 ? 'Brightness.light' : 'Brightness.dark', reason: 'hour $hour, phone $phone');
     }
   });
 

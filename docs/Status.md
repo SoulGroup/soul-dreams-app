@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110, D112, D113; the owner's by-eye review, then the merge, next), by Claude Code.
+Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110, D112, D113, D114; the owner's by-eye review, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -182,7 +182,7 @@ rulings given during each branch are listed in this file, one line each, under "
   with every type Apple names excluded but AirDrop (and the people row on iOS 18 and later), gives the file to AirDrop
   alone (any other target receives nothing), and deletes it when the share closes; the folder is also emptied before
   each share and at launch. A failure shows nothing and logs `exportFailed`. No package.
-- The redesign A (D110, D112, D113; `redesign-a`; TO TRY where a stand-in): the journal opens on a sun (08:00 to
+- The redesign A (D110, D112, D113, D114; `redesign-a`; TO TRY where a stand-in): the journal opens on a sun (08:00 to
   21:00) or a moon (21:00 to 08:00, the Night/Day hours; `journal/sky.dart`, `pages/sky_mark.dart`, drawn in code,
   silent), then a greeting by the part of the day (05, 12, 17, 21 by the wall clock; `journal/greeting.dart`),
   centred in h2, then New Dream (a pill on a night sky drawn in code, `NightSky`) opening the typing screen as the record button did, which is gone; each night a rounded row of
@@ -191,8 +191,10 @@ rulings given during each branch are listed in this file, one line each, under "
   painted gradient (`DateShade`, D113; measured on real pixels: 7.2 to 1 at the lowest over the five paintings); month dividers and C4-P·5 as before; the first
   empty journal's MP·9 under New Dream, its arrow pointing up. A night's page: a header 240 below the status bar,
   the night's picture from the screen's top with the back control and the menu over it and the date (h2) at its
-  foot (the same shade over a painting), "Dreams" centred, light status-bar text over the header in both themes (the
-  app holds the phone's own style under every page, since Flutter keeps the last style when a frame has none);
+  foot (the same shade over a painting), "Dreams" centred, light status-bar text over the header in both themes, and
+  everywhere else the status bar follows the app's own theme (D114: light text over the dark theme, dark text over
+  the light, whatever the phone's setting is; `core/status_bar.dart`, held under every page in `app.dart`, since
+  Flutter keeps the last style when a frame has none);
   on a read night, four jump buttons at the top of the scrolling part (Dreams brings "Dreams" to the top; the
   other three do nothing until the readings); everything below as before. Naming is removed: a name kept in a file
   is not shown (the store's field stays; the export still writes it). A night's picture (`journal/night_look.dart`,
@@ -231,11 +233,11 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 569 tests, and 448 mutation checks (A1 to A429; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 572 tests, and 450 mutation checks (A1 to A431; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A313 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 448 run, 448 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 450 run, 450 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -803,11 +805,9 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
 141. The preview's placeholder paintings: the date over them was low contrast in places (about 1.2 to 4.0 to 1);
      answered by D113's shade (7.2 to 1 at the lowest, measured). The shade's values (`DateShade`: colour, 0.66,
      reach 22, softness 8) are stand-ins, re-proved with the founder's set by the same pixel test.
-142. The status bar over a night's header: answered by D113 (light text, both themes). The app holds the phone's own
-     style under every page (the review of D113). Open question for the owner: that style follows the phone's light
-     or dark setting, but the app's theme follows the clock (21:00, 08:00), so a phone in light mode after 21:00 has
-     dark time and battery on a dark page, as before the branch; and a blank night page (a failed first read)
-     follows the app's theme instead. Whether the status bar should follow the app's theme everywhere is his.
+142. The status bar: D113 (light text over a night's header, both themes), then D114 (everywhere else it follows the
+     app's own theme, not the phone's setting, which differs after 21:00 on a phone in light mode). A held-light page
+     (onboarding) at night has dark text. Answered; nothing open.
 143. From the Opus reviews of D112 and D113 (D91): fixed, with rows A427 to A429, the light text staying on after
      Back and the header's shade being a band across the page. Banked, none a defect: the sky mark has its own
      minute timer, so for up to a minute around 08:00 and 21:00 it and the theme can differ; on returning, the mark
@@ -1140,6 +1140,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D113 (founder, 2026-11-21), on the two questions of the review: light status-bar text (time, battery) over a night's
   header, in both themes; a soft dark shade behind the date over any night's picture (rows and header), so the date
   reads at 4.5 to 1 or better over any painting, the gradient rows unchanged.
+- D114 (founder, 2026-11-21): the status bar follows the app's own theme everywhere (light text over the dark theme,
+  dark text over the light), with a night's header keeping D113's light text. (Answers banked item 142's question.)
 
 ## Documents as last imported
 

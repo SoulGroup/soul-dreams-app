@@ -4,7 +4,7 @@
 // unread night's the painted gradient, a read night's its painting) with
 // its date centred over its foot, with a soft dark shade behind it over a
 // painting (D113), and light status-bar text over the header, in both themes
-// (D113; the app holds the phone's own style under the other pages); a name
+// (D113; the app holds the style of its own theme under the other pages, D114); a name
 // kept from before naming was removed is not shown. Over the header, the back control top left and the
 // "⋯" menu top right, a bordered pill opening the phone's menu, spoken as
 // MP·39,
@@ -33,6 +33,7 @@ import 'package:flutter/services.dart';
 import '../../core/app_line.dart';
 import '../../core/language.dart';
 import '../../core/safe_log.dart';
+import '../../core/status_bar.dart';
 import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
@@ -303,11 +304,9 @@ class _NightPageState extends State<NightPage> {
     final top = MediaQuery.paddingOf(context).top;
     final read = n != null && widget.read(n);
     final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings);
-    // Light time and battery over the header's picture, in both themes; while
-    // the page is blank, they follow the theme (D113).
-    final overlay = look != null || Theme.of(context).brightness == Brightness.dark
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
+    // Light time and battery over the header's picture, in both themes (D113);
+    // while the page is blank, the app's own theme (D114).
+    final overlay = look != null ? SystemUiOverlayStyle.light : statusBarFor(Theme.of(context).brightness);
     final controls = Padding(
       padding: side,
       child: Row(
