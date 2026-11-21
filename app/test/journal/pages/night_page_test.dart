@@ -1,5 +1,7 @@
 // A night's page (P1, P6, P7; D58 Q1, Q3, Q4, Q8; head's message 20,
-// items 10 to 12): header, "Dreams", the dreams; editing through the
+// items 10 to 12; D110): the header, its picture and date, the back control
+// and the menu over it; on a read night, the jump buttons; "Dreams", the
+// dreams; editing through the
 // typing screen; Add dreams and Start Interpretation at the foot; the menu,
 // a bordered pill opening the phone's menu, holding delete, spoken as
 // MP·39, and above it the item an entry point gives (D107 item 1); one confirmation, Cancel first, Delete destructive; deleting
@@ -16,6 +18,9 @@ import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/journal_audio.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_action.dart';
+import 'package:souldreams/journal/night_look.dart';
+import 'package:souldreams/journal/owed.dart';
+import 'package:souldreams/journal/pages/night_art.dart';
 import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
@@ -56,13 +61,31 @@ final class UnsteadyFiles extends MemoryJournalFiles {
   }
 }
 
+/// A phone's screen, 390 by 844 (D110: the header takes 240 of it).
+void phone(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1170, 2532);
+  tester.view.devicePixelRatio = 3;
+  addTearDown(tester.view.reset);
+}
+
 void main() {
   late Harness h;
   late Night n;
 
-  Future<void> open(WidgetTester tester, {UnsteadyFiles? files, String? name, NightAction? action}) async {
+  Future<void> open(
+    WidgetTester tester, {
+    UnsteadyFiles? files,
+    String? name,
+    NightAction? action,
+    ReadCheck read = noneRead,
+    String key = 'two-dreams-en',
+    bool wide = false,
+  }) async {
+    // The test's own 800 by 600, where the foot's two buttons do not fill
+    // the row, or a phone.
+    if (!wide) phone(tester);
     h = await Harness.make(files: files);
-    n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    n = await keep(h, key, stockholm(2026, 6, 2, 23));
     if (name != null) {
       // An invented name, added here and not in the fixture (D64).
       n = Night(
@@ -76,7 +99,7 @@ void main() {
       );
       await h.store.save(n);
     }
-    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action)));
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read)));
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
   }
@@ -141,6 +164,7 @@ void main() {
   // D93 Q3: while a waiting recording is turned into words, AI·6 shows in
   // its place, heard by a screen reader; then its words, as its own dream.
   testWidgets('AI·6 shows in its place while it is transcribed', (tester) async {
+    phone(tester);
     h = await Harness.make();
     n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
     final x = '1' * 32;
@@ -351,6 +375,13 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('a read night, text at twice the size: no overflow', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await open(tester, read: (_) => true);
+    expect(tester.takeException(), isNull);
+  });
+
   // D64 (the review of Task 10): failures, a delete in flight, semantics.
   Future<List<String>> logged() async {
     final lines = <String>[];
@@ -430,18 +461,111 @@ void main() {
     handle.dispose();
   });
 
-  // Head's message 20, item 10: the date or the name centred.
-  testWidgets('the header is centred, the date or the name and date', (tester) async {
+  // D110: the header, the screen's width from its top, an unread night's
+  // painted gradient; the date centred over its foot in h2.
+  testWidgets("the header: the date centred over an unread night's gradient", (tester) async {
     await open(tester);
-    expect(tester.widget<Text>(find.text(dayDigits(n.date))).textAlign, TextAlign.center);
+    final date = find.text(dayDigits(n.date));
+    expect(tester.widget<Text>(date).textAlign, TextAlign.center);
     final width = tester.getSize(find.byType(NightPage)).width;
-    expect(tester.getCenter(find.text(dayDigits(n.date))).dx, closeTo(width / 2, 1));
+    expect(tester.getCenter(date).dx, closeTo(width / 2, 1));
+    final style = tester.widget<Text>(date).style!;
+    expect(style.color, NightArt.over);
+    expect(style.fontFamily, TypeRoles.h2.family);
+    final art = find.byType(NightArt);
+    expect(tester.widget<NightArt>(art).look, const PaintedGradient());
+    final box = tester.getRect(art);
+    expect(box, Rect.fromLTWH(0, 0, width, StandIns.headerHeight));
+    expect(box.bottom - tester.getRect(date).bottom, closeTo(Spacing.nightHeader.bottom, 1));
+    expect(tester.getTopLeft(find.text(Lines.MP_38.text(Lang.en))).dy, greaterThan(box.bottom));
   });
 
-  testWidgets('a named night: the name and the date both centred', (tester) async {
+  // D110: naming is removed; a name kept from before is not shown.
+  testWidgets('a named night shows only its date', (tester) async {
     await open(tester, name: 'Night by the harbour');
-    expect(tester.widget<Text>(find.text('Night by the harbour')).textAlign, TextAlign.center);
-    expect(tester.widget<Text>(find.text(dayDigits(n.date))).textAlign, TextAlign.center);
+    expect(find.text('Night by the harbour'), findsNothing);
+    expect(find.text(dayDigits(n.date)), findsOneWidget);
+  });
+
+  testWidgets('an unread night has no jump buttons', (tester) async {
+    await open(tester);
+    for (final o in [OwedLines.jumpDreams, OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection]) {
+      expect(find.text(o.text), findsNothing);
+    }
+  });
+
+  // D110: a read night shows its painting, and the four jump buttons in
+  // order, centred under the header, each heard as a button.
+  testWidgets('a read night: its painting, then four jump buttons', (tester) async {
+    final handle = tester.ensureSemantics();
+    await open(tester, read: (_) => true);
+    final art = tester.widget<NightArt>(find.byType(NightArt));
+    expect(art.look, Painting(paintingFor(n.id, NightArt.paintings)));
+    final header = tester.getRect(find.byType(NightArt));
+    final jumps = [OwedLines.jumpDreams, OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection];
+    final boxes = [for (final o in jumps) tester.getRect(find.byKey(NightPage.jumpKey(o)))];
+    for (final (i, b) in boxes.indexed) {
+      expect(b.top, greaterThan(header.bottom));
+      expect(b.bottom, lessThan(tester.getTopLeft(find.text(Lines.MP_38.text(Lang.en))).dy));
+      expect(tester.getSemantics(find.byKey(NightPage.jumpKey(jumps[i]))), matchesSemantics(
+        label: jumps[i].text, isButton: true, hasTapAction: true));
+      if (i > 0) expect(b.left > boxes[i - 1].right || b.top > boxes[i - 1].bottom, isTrue);
+    }
+    // Each row of them centred.
+    final width = tester.getSize(find.byType(NightPage)).width;
+    for (final top in {for (final b in boxes) b.top}) {
+      final row = boxes.where((b) => b.top == top);
+      expect((row.first.left + row.last.right) / 2, closeTo(width / 2, 1));
+    }
+    handle.dispose();
+  });
+
+  // The jump buttons' gradients: the section label's green, a stand-in
+  // brown, the tradition label's terracotta and the dream tag's blue.
+  testWidgets('the jump buttons: green, brown, terracotta, blue', (tester) async {
+    await open(tester, read: (_) => true);
+    List<Color> colours(Owed o) {
+      final box = tester.widget<DecoratedBox>(
+        find.descendant(of: find.byKey(NightPage.jumpKey(o)), matching: find.byType(DecoratedBox)),
+      );
+      return ((box.decoration as BoxDecoration).gradient! as LinearGradient).colors;
+    }
+
+    expect(colours(OwedLines.jumpDreams), [LightColours.labelSection.colour, LightColours.labelSection.colourEnd]);
+    expect(colours(OwedLines.jumpQuestions), StandIns.jumpQuestions);
+    expect(colours(OwedLines.jumpReadings), [LightColours.labelTradition.colour, LightColours.labelTradition.colourEnd]);
+    expect(colours(OwedLines.jumpReflection), [LightColours.tagDream.colour, LightColours.tagDream.colourEnd]);
+  });
+
+  // The jump buttons stand at the top of the scrolling part, so they scroll
+  // away with it; Dreams brings its label to the top of that part.
+  testWidgets('the Dreams jump brings "Dreams" to the top', (tester) async {
+    await open(tester, read: (_) => true, key: 'long-dream-en');
+    final list = tester.getRect(find.byType(ListView));
+    final jump = find.byKey(NightPage.jumpKey(OwedLines.jumpDreams));
+    expect(find.descendant(of: find.byType(ListView), matching: jump), findsOneWidget);
+    final label = find.text(Lines.MP_38.text(Lang.en));
+    expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, greaterThan(list.top + 10));
+    await tester.tap(jump);
+    await tester.pump();
+    await tester.pump(StandIns.jumpTime ~/ 2);
+    expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, greaterThan(list.top));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, closeTo(list.top, 1));
+    expect(label, findsOneWidget);
+  });
+
+  testWidgets('the three other jumps do nothing yet', (tester) async {
+    await open(tester, read: (_) => true, key: 'long-dream-en');
+    final at = tester.getRect(find.byKey(NightPage.dreamsKey));
+    for (final o in [OwedLines.jumpQuestions, OwedLines.jumpReadings, OwedLines.jumpReflection]) {
+      await tester.tap(find.byKey(NightPage.jumpKey(o)));
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.byKey(NightPage.dreamsKey)), at);
+      expect(find.byType(NightPage), findsOneWidget);
+      expect(find.byType(TypingPage), findsNothing);
+    }
+    expect(tester.takeException(), isNull);
   });
 
   // Item 10: the menu a bordered pill top right, on the page's margin.
@@ -500,14 +624,17 @@ void main() {
     expect(look.right - item.right, closeTo(0, 0.5));
   });
 
-  testWidgets('the back control and the pill: nothing moved', (tester) async {
+  // D110: the back control and the pill stand over the header, at its top.
+  testWidgets('the back control and the pill over the header', (tester) async {
     await open(tester);
     final back = find.byKey(BackControl.buttonKey);
     expect(tester.getSize(back), const Size(StandIns.backSize, StandIns.backSize));
     expect(tester.getSize(find.byKey(NightPage.menuKey)).height, StandIns.backSize);
     final top = tester.getTopLeft(back).dy;
+    expect(top, 0);
     expect(tester.getTopLeft(find.byKey(NightPage.menuKey)).dy, top);
-    expect(tester.getTopLeft(find.text(dayDigits(n.date))).dy, closeTo(top + StandIns.backSize + Spacing.nightHeader.top, 1));
+    expect(find.descendant(of: find.byType(NightArt), matching: back), findsOneWidget);
+    expect(find.descendant(of: find.byType(NightArt), matching: find.byKey(NightPage.menuKey)), findsOneWidget);
     await tester.tapAt(tester.getTopLeft(back) + const Offset(20, StandIns.hitMin - 1));
     await tester.pumpAndSettle();
     expect(find.byType(NightPage), findsNothing);
@@ -529,7 +656,7 @@ void main() {
   // the right, which does nothing yet (P3, as D71 Q3).
   testWidgets('Add dreams bottom left, Start Interpretation bottom right', (tester) async {
     final handle = tester.ensureSemantics();
-    await open(tester);
+    await open(tester, wide: true);
     expect(tester.getSemantics(find.byKey(NightPage.startKey)).flagsCollection.isButton, isTrue);
     final size = tester.getSize(find.byType(NightPage));
     final add = tester.getRect(find.byKey(NightPage.addKey));
@@ -551,19 +678,6 @@ void main() {
     final handle = tester.ensureSemantics();
     await open(tester);
     expect(tester.getSemantics(find.text(dayDigits(n.date))).flagsCollection.isHeader, isTrue);
-    handle.dispose();
-  });
-
-  testWidgets('a named night shows name over date, as a heading', (tester) async {
-    final handle = tester.ensureSemantics();
-    await open(tester, name: 'Night by the harbour');
-    expect(find.text('Night by the harbour'), findsOneWidget);
-    expect(find.text(dayDigits(n.date)), findsOneWidget);
-    expect(
-      tester.getTopLeft(find.text('Night by the harbour')).dy,
-      lessThan(tester.getTopLeft(find.text(dayDigits(n.date))).dy),
-    );
-    expect(tester.getSemantics(find.text('Night by the harbour')).flagsCollection.isHeader, isTrue);
     handle.dispose();
   });
 

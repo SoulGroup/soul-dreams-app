@@ -1,7 +1,11 @@
-// Inside a night, not yet read (main-path.md, The Journal, designs 2 and
-// 3; P1, P6, P7; D58 Q1, Q4, Q8; head's message 20, items 10 to 12): the
-// header centred (the date, or the name and the date); the "⋯" menu top
-// right, a bordered pill opening the phone's menu, spoken as MP·39,
+// Inside a night (main-path.md, The Journal, designs 2 and 3; P1, P6, P7;
+// D58 Q1, Q4, Q8; head's message 20, items 10 to 12; D110, head's message
+// 24): the header, the screen's width from its top, the night's picture (an
+// unread night's the painted gradient, a read night's its painting) with
+// its date centred over its foot; a name kept from before naming was
+// removed is not shown. Over the header, the back control top left and the
+// "⋯" menu top right, a bordered pill opening the phone's menu, spoken as
+// MP·39,
 // holding "delete this night" (EM·11's second part), plain, and above it
 // the item the entry point gives, if any (D107 item 1: the founder's
 // export, in SoulDreams Dev; R8); one
@@ -14,8 +18,12 @@
 // waits to be turned into text shows nothing in its place and cannot be
 // tapped; while it is being turned into text, AI·6 shows in its place,
 // heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
-// When its words come, the page shows them. Not built: naming, reading,
-// and the space below the dreams with its field.
+// When its words come, the page shows them. On a read night, under the
+// header, four jump buttons (Dreams, Questions, Readings, Reflection; their
+// words owed, shown as handles); Dreams brings "Dreams" into view, the
+// other three do nothing until their sections come with the readings. No
+// night is read yet. Not built: reading, and the space below the dreams
+// with its field.
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -32,7 +40,9 @@ import '../night.dart';
 import '../night_action.dart';
 import '../night_look.dart';
 import '../night_rules.dart';
+import '../owed.dart';
 import '../row_text.dart';
+import 'night_art.dart';
 import 'parts.dart';
 import 'typing_page.dart';
 
@@ -45,6 +55,10 @@ class NightPage extends StatefulWidget {
   static const addKey = Key('night-add');
   static const startKey = Key('night-start');
   static const transcribingKey = Key('night-transcribing');
+  static const dreamsKey = Key('night-dreams');
+
+  /// A read night's jump button.
+  static Key jumpKey(Owed label) => ValueKey('jump-${label.handle}');
 
   final Journal journal;
   final String id;
@@ -67,6 +81,9 @@ class _NightPageState extends State<NightPage> {
 
   // A delete is in flight: the menu, Add dreams and the dreams wait (D64).
   bool _busy = false;
+
+  // The "Dreams" label, which its jump button brings into view.
+  final _dreamsLabel = GlobalKey();
 
   @override
   void initState() {
@@ -231,77 +248,146 @@ class _NightPageState extends State<NightPage> {
     ),
   );
 
+  // Brings a section into view: only "Dreams" is built (D110).
+  void _jump(GlobalKey? section) {
+    final at = section?.currentContext;
+    if (at == null) return;
+    Scrollable.ensureVisible(at, duration: StandIns.jumpTime, curve: Curves.easeInOut);
+  }
+
+  // A read night's four jump buttons, centred, wrapping at large text.
+  Widget _jumps(Palette p) {
+    Widget jump(Owed label, List<Color> colours, GlobalKey? section) => Semantics(
+      button: true,
+      child: GestureDetector(
+        key: NightPage.jumpKey(label),
+        onTap: () => _jump(section),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: colours),
+            borderRadius: BorderRadius.circular(Spacing.radius),
+          ),
+          child: Padding(
+            padding: StandIns.labelPadding,
+            child: Text(label.text, style: TypeRoles.button.style(p.sectionText)),
+          ),
+        ),
+      ),
+    );
+    final tradition = LightColours.labelTradition;
+    final tag = LightColours.tagDream;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: Spacing.pageSide),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: StandIns.jumpGap,
+        runSpacing: StandIns.jumpGap,
+        children: [
+          jump(OwedLines.jumpDreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
+          jump(OwedLines.jumpQuestions, StandIns.jumpQuestions, null),
+          jump(OwedLines.jumpReadings, [tradition.colour!, tradition.colourEnd!], null),
+          jump(OwedLines.jumpReflection, [tag.colour!, tag.colourEnd!], null),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     final n = _night;
     const side = EdgeInsets.symmetric(horizontal: Spacing.pageSide);
+    final top = MediaQuery.paddingOf(context).top;
+    final read = n != null && widget.read(n);
+    final controls = Padding(
+      padding: side,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BackControl(onPressed: () => Navigator.of(context).pop()),
+          const Spacer(),
+          _menu(p),
+        ],
+      ),
+    );
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: side,
-              child: Row(
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // The header: the picture from the screen's top, the controls
+          // under the status bar, the date at its foot (D110).
+          SizedBox(
+            height: top + StandIns.headerHeight,
+            child: n == null
+                ? Padding(padding: EdgeInsets.only(top: top), child: Align(alignment: Alignment.topCenter, child: controls))
+                : NightArt(
+                    lookOf(n, read: read, paintings: NightArt.paintings),
+                    child: Padding(
+                      padding: EdgeInsets.only(top: top),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          controls,
+                          const Spacer(),
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: Spacing.pageSide,
+                              right: Spacing.pageSide,
+                              bottom: Spacing.nightHeader.bottom,
+                            ),
+                            child: Semantics(
+                              header: true,
+                              child: Text(
+                                dayDigits(n.date),
+                                textAlign: TextAlign.center,
+                                style: TypeRoles.h2.style(NightArt.over),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+          ),
+          if (n != null) ...[
+            Expanded(
+              // The bubbles keep their own margins from the screen's edges
+              // (design-system.md §5); everything else keeps the page's.
+              child: ListView(
+                padding: EdgeInsets.only(top: Spacing.nightHeader.top),
                 children: [
-                  BackControl(onPressed: () => Navigator.of(context).pop()),
-                  const Spacer(),
-                  _menu(p),
+                  // A read night's jump buttons head the part that scrolls.
+                  if (read) ...[_jumps(p), const SizedBox(height: StandIns.gap)],
+                  Padding(
+                    key: NightPage.dreamsKey,
+                    padding: side,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: SectionLabel(key: _dreamsLabel, Lines.MP_38.text(appLanguage)),
+                    ),
+                  ),
+                  const SizedBox(height: StandIns.gap),
+                  for (final (i, d) in n.entries.indexed)
+                    if (d case Told(:final text)) ...[
+                      DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
+                      const SizedBox(height: StandIns.bubbleGap),
+                    ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
+                      Padding(
+                        padding: side,
+                        child: Semantics(
+                          key: NightPage.transcribingKey,
+                          liveRegion: true,
+                          child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                        ),
+                      ),
+                      const SizedBox(height: StandIns.bubbleGap),
+                    ],
                 ],
               ),
             ),
-            if (n != null) ...[
-              Expanded(
-                // The bubbles keep their own margins from the screen's edges
-                // (design-system.md §5); everything else keeps the page's.
-                child: BelowTapBox(
-                  child: ListView(
-                    children: [
-                      Padding(
-                        padding: Spacing.nightHeader.add(side),
-                        child: Semantics(
-                          header: true,
-                          child: n.name == null
-                              ? Text(dayDigits(n.date), textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text))
-                              : Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    Text(n.name!, textAlign: TextAlign.center, style: TypeRoles.h2.style(p.text)),
-                                    Text(
-                                      dayDigits(n.date),
-                                      textAlign: TextAlign.center,
-                                      style: TypeRoles.button.style(p.text),
-                                    ),
-                                  ],
-                                ),
-                        ),
-                      ),
-                      Padding(
-                        padding: side,
-                        child: Align(alignment: Alignment.centerLeft, child: SectionLabel(Lines.MP_38.text(appLanguage))),
-                      ),
-                      const SizedBox(height: StandIns.gap),
-                      for (final (i, d) in n.entries.indexed)
-                        if (d case Told(:final text)) ...[
-                          DreamBubble(text, onTap: () => _type((id: n.id, index: i, text: text))),
-                          const SizedBox(height: StandIns.bubbleGap),
-                        ] else if (d case Waiting(:final audio) when _transcribing == audio) ...[
-                          Padding(
-                            padding: side,
-                            child: Semantics(
-                              key: NightPage.transcribingKey,
-                              liveRegion: true,
-                              child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
-                            ),
-                          ),
-                          const SizedBox(height: StandIns.bubbleGap),
-                        ],
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
+            SafeArea(
+              top: false,
+              child: Padding(
                 padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
                 child: ButtonRow(
                   left: KeyedSubtree(
@@ -315,9 +401,9 @@ class _NightPageState extends State<NightPage> {
                   ),
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }

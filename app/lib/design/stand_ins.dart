@@ -41,6 +41,17 @@ abstract final class StandIns {
   /// (head's message 20, item 10).
   static const double menuWidth = 55;
 
+  /// A night's header, below the status bar (D110).
+  static const double headerHeight = 240;
+
+  /// A read night's jump buttons (D110): the space between two, how long a
+  /// jump scrolls, and the Questions button's gradient (no role is filed
+  /// for it; the others take the section label's, the tradition label's and
+  /// the dream tag's).
+  static const double jumpGap = 8;
+  static const jumpTime = Duration(milliseconds: 300);
+  static const jumpQuestions = [Color(0xFF8A5A1E), Color(0xFF5E3C12)];
+
   /// The first empty journal's arrow up to New Dream (main-path.md,
   /// Onboarding, 5): its size, and the space above and below it.
   static const firstArrow = Size(12, 32);
