@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-19, in branch `c17p-import` (the import and its follow-through; the owner's checks, then the merge, next), by Claude Code.
+Last updated: 2026-11-21, in branch `redesign-a` (the journal and a night's page to the new design, D110; the owner's by-eye review, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,12 +14,15 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`c17p-import`: Product's C17-P filing and Interpretation's record at C158-I (head's message 23), imported; the words,
-the pending lines (now none) and the design values follow it (D109). No plan: the head's task list.
+`redesign-a`: the journal and a night's page to the new design (D110, head's message 24; plan
+`docs/plans/redesign-a.md`). `c17p-import` is merged (`a2580db`).
 
 ## Road ahead
 
-- `c17p-import`: the owner's checks, then the merge.
+- `redesign-a`: the owner's by-eye review (the plan's Task 9), then the merge.
+- Redesign B and C (D110): search, Settings (with Word Animation's setting) and the consent's controls; then Life
+  Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
+  replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
   C17-P (and, for the founder app, with his export).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
@@ -179,17 +182,30 @@ the pending lines (now none) and the design values follow it (D109). No plan: th
   with every type Apple names excluded but AirDrop (and the people row on iOS 18 and later), gives the file to AirDrop
   alone (any other target receives nothing), and deletes it when the share closes; the folder is also emptied before
   each share and at launch. A failure shows nothing and logs `exportFailed`. No package.
-- The record button is a circle (Task 15a, the owner's correction, P13): `StandIns.recordWidth` and `recordHeight`
-  both 120, the radius half the height; large text shrinks its words, never the circle.
+- The redesign A (D110; `redesign-a`; TO TRY where a stand-in): the journal opens on a greeting by the part of the
+  day (05, 12, 17, 21 by the wall clock; `journal/greeting.dart`), centred in h2, then New Dream (a pill on the
+  painted gradient) opening the typing screen as the record button did, which is gone; each night a rounded row of
+  at least 64 carrying only its date (h6) over the night's picture; month dividers and C4-P·5 as before; the first
+  empty journal's MP·9 under New Dream, its arrow pointing up. A night's page: a header 240 below the status bar,
+  the night's picture from the screen's top with the back control and the menu over it and the date (h2) at its
+  foot; on a read night, four jump buttons at the top of the scrolling part (Dreams brings "Dreams" to the top; the
+  other three do nothing until the readings); everything below as before. Naming is removed: a name kept in a file
+  is not shown (the store's field stays; the export still writes it). A night's picture (`journal/night_look.dart`,
+  `pages/night_art.dart`): a read night's painting chosen from its id alone, nothing stored; an unread night's the
+  painted gradient (the dark theme's bubble gradient, both themes); no night is read yet (`noneRead`), and
+  SoulDreams Dev built with `--dart-define=PREVIEW_READ=true` shows every night as read, for the owner's review.
+  Five placeholder paintings, drawn in code, stand in the curated set. The words Product owes show as provisional
+  handles, `[owed·…]` (`journal/owed.dart`): four greetings, New Dream, the four jump buttons.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
   first 21:00 after its first recording in the zone then in force (format version 1, D57 Q14); the typing screen's
   target is fixed when it opens; an empty Save keeps nothing; an emptied dream disappears; a night with no dream left
   is deleted (D58 Q2, Q3; P9, P10).
 - Night/Day automatic (`app/lib/core/night_day.dart`): dark 21:00 to 08:00 by the phone's clock, a five-second
   ease-in-out fade while the app is open (head's message 20, item 13), instant with Reduce Motion (read from the platform's own flag, which iOS does not put
-  in `MediaQuery`), at start and on returning (D57 Q15). The app's own lines appear whole: Word Animation is off
-  everywhere by default (D106 2; `wordAnimation` in `app/lib/core/app_line.dart`, which a test alone turns on until
-  Settings; with it on, a word every 60 ms, D58 Q17, and whole with Reduce Motion). The palette (`app/lib/design/palette.dart`) fades with the
+  in `MediaQuery`), at start and on returning (D57 Q15). Word Animation is on by default, and only the app's
+  responses appear word by word (D110, superseding D106 2's "off everywhere"; `AppLine(response: true)`, used by none
+  yet); every other line appears whole, and a response too with the setting off or Reduce Motion on (a word every
+  60 ms, D58 Q17; the setting comes with Settings). The palette (`app/lib/design/palette.dart`) fades with the
   theme. The app shows English only (D57 Q12; `app/lib/core/language.dart`).
 - Packages: `flutter_localizations` (SDK) and `intl` 0.20.3, the owner's pub add (D57 Q9): the month names, and
   Flutter's own framework words, which are not ours under R1. `record` 7.1.2, exactly, the owner's pub add (D71
@@ -210,10 +226,11 @@ the pending lines (now none) and the design values follow it (D109). No plan: th
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 509 tests, and 383 mutation checks (A1 to A354; A55, A73, A80 to A83, A86 to A88, A94, A99,
-  A128 to A130, A142, A207, A213 and A223 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
+- The app's analyzer baseline: `No issues found!`. The app has 539 tests, and 413 mutation checks (A1 to A393; A24ah,
+  A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270
+  and A313 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 383 run, 383 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 413 run, 413 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -761,6 +778,18 @@ Banked in c17p-import (D91; none changes what the dreamer sees beyond D109 and t
 135. §6 at C17-P (Word Animation off by default, about one word every 60 ms when on, the theme's fade ease-in-out
      over five seconds) was already built as filed; no value moved.
 
+Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the plan's Part 4 holds the questions):
+
+136. `opening()` in `row_text.dart` (the first dream with TECH·1's framing trimmed) is no longer shown; it stays,
+     tested, for search (a later branch). `Palette.summary` and the record colours are unused; `color.record` stays
+     in the tokens as filed.
+137. MP·39, the menu's spoken name, still names naming (as banked item 76); its words are Product's.
+138. The jump buttons' colours: the section label's green, the tradition label's terracotta, the light theme's dream
+     tag's blue (in both themes) and a stand-in brown for Questions, after the founder's screen; the header's height,
+     the rows' height and the greeting's places are stand-ins (`stand_ins.dart`), for the founder's look.
+139. A night's header does not scroll; on a short phone at large text the dreams have less room (the tests' phone,
+     390 by 844, has room at twice the size).
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -1061,6 +1090,20 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - D109 (owner): "English written, Swedish to write" is a waiting status with no line, as "to write" (W12, W13); the
   readings branch revisits them (Cohort 0 is English only). C125-I·3 to rewrite: noted, unused, nothing to do.
+
+## Rulings during redesign-a
+
+- `c17p-import` merged by the owner (`a2580db`); its Status was not updated at the merge (this entry records it).
+- D110 (founder, 2026-11-20; head's message 24, with message 25 on the night's image): the redesign. The journal: a
+  greeting by time of day; New Dream opening the typing screen; the round record button removed; rounded rows
+  carrying only the date over the night's image, an unread night's the painted gradient; naming a night removed
+  (MP·28 and the menu's naming). A night's page: a header with its image and date; on read nights, jump buttons to
+  Dreams, Questions, Readings and Reflection; an unread night, the gradient header and no jump buttons. Word by word
+  only for the app's responses, on by default (supersedes D106 2's "off everywhere"). The night's image: a curated
+  set shipped in the app, placeholders until the founder's (about 60); the gradient where there is no image. Owed
+  words show as handles. Where it differs from the C17-P copies (the record button, naming, Word Animation's
+  default), D110 governs, listed for Product's next filing. Search, Settings, consent, Life Context and "Made by
+  AI" are later branches. D91 and D95 apply.
 
 ## Documents as last imported
 
