@@ -6,7 +6,8 @@
 // `paintings` and the placeholders; nothing else changes. The gradient's
 // colours and the text over a picture are stand-ins until Product sets them
 // (P13): the dark theme's bubble gradient and text, in both themes. Heard
-// as nothing: decoration.
+// as nothing: decoration. Also here: the night sky inside New Dream (D112)
+// and the soft shade behind a date over a painting (D113), both stand-ins.
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';

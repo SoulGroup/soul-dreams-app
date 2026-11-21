@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'core/always_light.dart';
@@ -66,7 +67,16 @@ class _SoulDreamsAppState extends State<SoulDreamsApp> {
     locale: Locale(appLanguage.name),
     supportedLocales: const [Locale('en'), Locale('sv')],
     localizationsDelegates: GlobalMaterialLocalizations.delegates,
-    builder: (context, child) => PrivacyCover(child: child!),
+    // The phone's own status bar style, as iOS gives it when the app sets
+    // none, held under every page: a page that sets its own (a night's
+    // header) is overridden only while it is shown, since Flutter leaves the
+    // last style in place when a frame has none.
+    builder: (context, child) => AnnotatedRegion<SystemUiOverlayStyle>(
+      value: MediaQuery.platformBrightnessOf(context) == Brightness.dark
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
+      child: PrivacyCover(child: child!),
+    ),
     home: widget.home ?? const Scaffold(),
   );
 }

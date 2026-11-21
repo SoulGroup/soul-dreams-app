@@ -1,9 +1,9 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A426, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
+# Expected: every row "caught" (A1 to A429, A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 445 run, 445 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 448 run, 448 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -72,8 +72,8 @@ ROWS = [
      'LightColours.page',
      'test/core/privacy_cover_test.dart', 'the dark theme gets the dark page colour'),
     ('A12', 'lib/app.dart',
-     'builder: (context, child) => PrivacyCover(child: child!),',
-     'builder: (context, child) => child!,',
+     'child: PrivacyCover(child: child!),',
+     'child: child!,',
      'test/app_test.dart', 'every page of the app is under the cover'),
     ('A13', 'ios/Runner/AppDelegate.swift',
      'return extensionPointIdentifier != .keyboard',
@@ -1267,8 +1267,8 @@ ROWS = [
      '        button: false,\n        child: GestureDetector(\n          behavior',
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A261', 'lib/journal/pages/night_page.dart',
-     '                                    textAlign: TextAlign.center,\n                                    style: TypeRoles.h2.style(NightArt.over),',
-     '                                    style: TypeRoles.h2.style(NightArt.over),',
+     '                                      textAlign: TextAlign.center,\n                                      style: TypeRoles.h2.style(NightArt.over),',
+     '                                      style: TypeRoles.h2.style(NightArt.over),',
      'test/journal/pages/night_page_test.dart', "the header: the date centred over an unread night's gradient"),
     ('A262', 'lib/journal/pages/night_page.dart',
      '                    border: Border.all(color: p.buttonBorder),\n                  ),\n                  child: Icon(',
@@ -1884,7 +1884,7 @@ ROWS = [
      'test/journal/pages/journal_page_test.dart', 'New Dream: centred, on a night sky, a button'),
     ('A409', 'lib/journal/pages/night_art.dart',
      '(x: 0.06, dy: 7, r: 1.2),',
-     '(x: 0.06, dy: 30, r: 1.2),',
+     '(x: 0.06, dy: 20, r: 1.2),',
      'test/journal/pages/night_art_test.dart', "stars stand in the pill's own padding, clear of the words"),
     ('A410', 'lib/journal/pages/night_art.dart',
      '      canvas.drawCircle(Offset(size.width * s.x, y), s.r, star);\n',
@@ -1952,9 +1952,22 @@ ROWS = [
      'Text(shownDate(night.date), style: TypeRoles.h6.style(NightArt.over)),',
      'test/journal/pages/journal_page_test.dart', "a read row shades its date; an unread one does not"),
     ('A426', 'lib/journal/pages/night_page.dart',
-     'child: DateShade.over(\n                                  look,\n                                  Text(',
-     'child: DateShade.over(\n                                  const PaintedGradient(),\n                                  Text(',
+     'child: DateShade.over(\n                                    look,\n                                    Text(',
+     'child: DateShade.over(\n                                    const PaintedGradient(),\n                                    Text(',
      'test/journal/pages/night_page_test.dart', "a read header shades its date; an unread one does not"),
+    # D113's review: the phone's own status bar under every page; the header's shade as wide as the date.
+    ('A427', 'lib/app.dart',
+     'platformBrightnessOf(context) == Brightness.dark',
+     'platformBrightnessOf(context) == Brightness.light',
+     'test/journal/pages/night_page_test.dart', "leaving a night gives back the phone's own status bar"),
+    ('A428', 'lib/app.dart',
+     '          : SystemUiOverlayStyle.dark,',
+     '          : SystemUiOverlayStyle.light,',
+     'test/journal/pages/night_page_test.dart', "leaving a night gives back the phone's own status bar"),
+    ('A429', 'lib/journal/pages/night_page.dart',
+     'child: Center(\n                                  child: DateShade.over(',
+     'child: Container(\n                                  child: DateShade.over(',
+     'test/journal/pages/night_page_test.dart', "the header's shade is as wide as the date"),
 ]
 
 

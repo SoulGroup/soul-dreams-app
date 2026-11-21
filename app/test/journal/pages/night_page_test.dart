@@ -640,6 +640,46 @@ void main() {
     expect(look.right - item.right, closeTo(0, 0.5));
   });
 
+  // D113 (the review): the light status-bar text is for the header alone.
+  // Without a region over the page left behind, Flutter leaves the last
+  // style in place, so the app holds the phone's own style (light text on a
+  // dark phone) and the night page overrides it.
+  testWidgets("leaving a night gives back the phone's own status bar", (tester) async {
+    final calls = <String>[];
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'SystemChrome.setSystemUIOverlayStyle') {
+        calls.add((call.arguments as Map)['statusBarBrightness'] as String);
+      }
+      return null;
+    });
+    addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null));
+    addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    for (final phone in [Brightness.light, Brightness.dark]) {
+      tester.platformDispatcher.platformBrightnessTestValue = phone;
+      await tester.pumpWidget(const SizedBox());
+      calls.clear();
+      await open(tester);
+      expect(calls.last, 'Brightness.dark', reason: 'over the header, light text');
+      await tester.tap(find.byKey(BackControl.buttonKey));
+      await tester.pumpAndSettle();
+      expect(find.byType(NightPage), findsNothing);
+      // Dark brightness is light text: the dark phone keeps it, the light
+      // phone has dark text again.
+      expect(calls.last, phone == Brightness.light ? 'Brightness.light' : 'Brightness.dark', reason: '$phone');
+    }
+  });
+
+  // D113 (the review): the shade is behind the date, as wide as its words,
+  // not a band across the header.
+  testWidgets("the header's shade is as wide as the date", (tester) async {
+    await open(tester, read: (_) => true);
+    final shade = tester.getSize(find.byType(DateShade));
+    final text = tester.getSize(find.text(shownDate(n.date)));
+    expect(shade, text);
+    // Not the page's whole content width, which a stretched date would have.
+    expect(shade.width, lessThan(tester.getSize(find.byType(NightPage)).width - 2 * Spacing.pageSide));
+  });
+
   // D113: a soft dark shade behind the date over a painting, none over the
   // painted gradient.
   testWidgets("a read header shades its date; an unread one does not", (tester) async {

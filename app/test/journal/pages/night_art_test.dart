@@ -80,7 +80,9 @@ void main() {
       expect(NightSky.stars.length, greaterThanOrEqualTo(8));
       for (final s in NightSky.stars) {
         expect(s.x, inInclusiveRange(0, 1));
-        expect(s.dy.abs() + s.r, lessThan(StandIns.buttonPadding.vertical));
+        // Within the one side's padding: the top for a star from the top.
+        final side = s.dy >= 0 ? StandIns.buttonPadding.top : StandIns.buttonPadding.bottom;
+        expect(s.dy.abs() + s.r, lessThan(side));
       }
       // Some at the top and some at the foot.
       expect(NightSky.stars.any((s) => s.dy >= 0), isTrue);

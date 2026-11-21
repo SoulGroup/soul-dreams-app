@@ -2,8 +2,10 @@
 // D58 Q1, Q4, Q8; head's message 20, items 10 to 12; D110, head's message
 // 24): the header, the screen's width from its top, the night's picture (an
 // unread night's the painted gradient, a read night's its painting) with
-// its date centred over its foot; a name kept from before naming was
-// removed is not shown. Over the header, the back control top left and the
+// its date centred over its foot, with a soft dark shade behind it over a
+// painting (D113), and light status-bar text over the header, in both themes
+// (D113; the app holds the phone's own style under the other pages); a name
+// kept from before naming was removed is not shown. Over the header, the back control top left and the
 // "⋯" menu top right, a bordered pill opening the phone's menu, spoken as
 // MP·39,
 // holding "delete this night" (EM·11's second part), plain, and above it
@@ -11,7 +13,7 @@
 // export, in SoulDreams Dev; R8); one
 // confirmation, the phone's standard dialog, Cancel first and Delete
 // destructive (MP·61, MP·60, pending lines); the dreams under "Dreams"
-// (MP·38), in bubbles 30 from the screen's left edge and 10 from its
+// (MP·38, centred, D112), in bubbles 30 from the screen's left edge and 10 from its
 // right (Spacing.bubbleDreamer), each opening the typing screen to edit
 // it; at the foot, "Add dreams" (MP·29) left and Start Interpretation
 // (EM·1) right, which does nothing yet (P3, as D71 Q3). A recording that
@@ -346,12 +348,16 @@ class _NightPageState extends State<NightPage> {
                               ),
                               child: Semantics(
                                 header: true,
-                                child: DateShade.over(
-                                  look,
-                                  Text(
-                                    shownDate(n.date),
-                                    textAlign: TextAlign.center,
-                                    style: TypeRoles.h2.style(NightArt.over),
+                                // As wide as its words, so the shade stands
+                                // behind the date and not across the header.
+                                child: Center(
+                                  child: DateShade.over(
+                                    look,
+                                    Text(
+                                      shownDate(n.date),
+                                      textAlign: TextAlign.center,
+                                      style: TypeRoles.h2.style(NightArt.over),
+                                    ),
                                   ),
                                 ),
                               ),
