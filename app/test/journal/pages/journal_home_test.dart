@@ -19,6 +19,7 @@ import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/onboarding/onboarding.dart';
 import 'package:souldreams/recording/recording.dart';
+import 'package:souldreams/settings/consents.dart';
 import 'package:souldreams/words/lines.g.dart';
 
 import '../../fixtures.dart';
@@ -52,7 +53,8 @@ final class NoConsentRead extends MemoryJournalFiles {
       name == JournalStore.consentFile ? throw StateError('journal-io') : super.read(name);
 }
 
-/// [files] holding the consent, as "I agree" keeps it (D103).
+/// [files] holding D103's one consent, version 1, which still reads as (a)
+/// given (D122).
 T agreed<T extends MemoryJournalFiles>(T files) {
   files.files[JournalStore.consentFile] = Uint8List.fromList(utf8.encode('{"version":1,"over18":true}'));
   return files;
@@ -266,7 +268,8 @@ void main() {
     expect(files.files.keys, isNot(contains(JournalStore.consentFile)));
   });
 
-  // D103 items 2 and 4: "I agree" keeps the consent, lets the theme go and
+  // D103 item 2; D122: "I consent" keeps the consents, (a) given and (b)
+  // and (c) not (until onboarding asks the three), lets the theme go and
   // opens the first empty journal (main-path.md, Onboarding, 5); only then
   // may a recording waiting be retried.
   testWidgets('I agree keeps the consent, then the journal and its retries', (tester) async {
@@ -286,7 +289,11 @@ void main() {
     expect(find.byType(JournalPage), findsOneWidget);
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).firstTime, isTrue);
     expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
-    expect(utf8.decode(files.files[JournalStore.consentFile]!), '{"version":1,"over18":true}');
+    final kept = jsonDecode(utf8.decode(files.files[JournalStore.consentFile]!)) as Map<String, dynamic>;
+    expect(kept.keys, ['version', 'over18', 'readings', 'lifeContext', 'images']);
+    expect([kept['version'], kept['over18']], [2, true]);
+    expect([for (final c in ['readings', 'lifeContext', 'images']) kept[c]['given']], [true, false, false]);
+    expect(kept['readings']['day'], dayOf(DateTime.now()));
     expect(links, hasLength(1));
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 11));
@@ -319,7 +326,7 @@ void main() {
 
   // The fix above keeps the guard set once agreed; the start-over resets it,
   // so the next onboarding can agree again.
-  testWidgets('after the consent goes, a new I agree opens the journal', (tester) async {
+  testWidgets('after the journal is deleted, a new I consent opens it', (tester) async {
     JournalStore.newQueueForTests();
     final files = MemoryJournalFiles();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
@@ -327,7 +334,7 @@ void main() {
     tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
-    await tester.widget<JournalPage>(find.byType(JournalPage)).journal.withdrawConsent();
+    await tester.widget<JournalPage>(find.byType(JournalPage)).journal.deleteAll();
     await tester.pumpAndSettle();
     expect(find.byType(Onboarding), findsOneWidget);
     tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
@@ -364,10 +371,9 @@ void main() {
     expect(lines, ['consentReadFailed']);
   });
 
-  // D103 item 4: the consent gone, withdrawn or deleted with the journal,
-  // returns the app to its start, whatever page is open, held light again.
+  // D110: the journal deleted, the consents with it, returns the app to its
+  // start, whatever page is open, held light again.
   for (final (how, go) in <(String, Future<void> Function(Journal))>[
-    ('withdrawn', (j) => j.withdrawConsent()),
     ('deleted with the journal', (j) => j.deleteAll()),
   ]) {
     testWidgets('the consent $how: back to the start', (tester) async {
@@ -393,9 +399,9 @@ void main() {
     });
   }
 
-  // D103 item 4: back at the start, nothing is retried until the consent
-  // is given again.
-  testWidgets('the consent withdrawn: the retry cut, none after', (tester) async {
+  // D110: back at the start, nothing is retried until the consent is given
+  // again.
+  testWidgets('the journal deleted: the retry cut, none after', (tester) async {
     JournalStore.newQueueForTests();
     final files = agreed(MemoryJournalFiles());
     await waiting(files);
@@ -404,7 +410,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(links, hasLength(1));
-    await tester.widget<JournalPage>(find.byType(JournalPage)).journal.withdrawConsent();
+    await tester.widget<JournalPage>(find.byType(JournalPage)).journal.deleteAll();
     await tester.pump(const Duration(milliseconds: 150));
     expect(find.byType(Onboarding), findsOneWidget);
     expect(links.single.closed, isTrue);

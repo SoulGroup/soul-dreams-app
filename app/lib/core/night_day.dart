@@ -11,6 +11,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+/// Night/Day mode (MP·44): Automatic, or Manual, Day or Night
+/// (main-path.md, Settings).
+enum NightDayMode { automatic, day, night }
+
 /// Dark from 21:00 to 08:00, by the wall clock.
 bool isNightAt(DateTime local) => local.hour >= 21 || local.hour < 8;
 

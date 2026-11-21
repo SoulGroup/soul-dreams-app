@@ -6,9 +6,10 @@
 // - An edit replaces a dream's text. An emptied dream disappears and the
 //   night's other dreams remain (D58 Q3); a night left with no dream is
 //   deleted, as a deletion deletes it (P10).
-// - The consent (D103) is kept, read and withdrawn here; when it goes,
-//   withdrawn or deleted with the journal, `consentGone` tells the app,
-//   which returns to its start (D103 item 4).
+// - The three consents and the settings (D103; D122) are kept and read
+//   here. When the journal is deleted, they go with it, and `consentGone`
+//   tells the app, which returns to its start (D110). A consent withdrawn
+//   is an answer kept, and the app stays (D121 item 5).
 // - A dream is told in words or waits as a recording (D93 Q2); a dream's
 //   index counts both, and a waiting one is never edited. A Save puts the
 //   recordings its screen left waiting after its words, in order; a Save
@@ -17,6 +18,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier, listEquals;
 
+import '../settings/consents.dart';
+import '../settings/settings.dart';
 import '../words/lines.g.dart' show Lang;
 import 'journal_store.dart';
 import 'night.dart';
@@ -121,26 +124,25 @@ final class Journal {
 
   Future<void> markFirstUseSeen() => _store.markFirstUseSeen();
 
-  /// Whether the dreamer has agreed to the disclosure, as one 18 or over.
-  Future<bool> consented() => _store.consented();
+  /// The consents answered in onboarding, or null when none is kept.
+  Future<Consents?> consents() => _store.consents();
 
-  /// Keeps the consent given in onboarding (D103).
-  Future<void> keepConsent() => _store.keepConsent();
+  /// Keeps the consents (D122).
+  Future<void> keepConsents(Consents consents) => _store.keepConsents(consents);
 
-  /// Moves on each time the consent goes, withdrawn or deleted with the
-  /// journal: the app returns to its start (D103 item 4).
+  /// The settings kept, or null when none is.
+  Future<Settings?> settings() => _store.settings();
+
+  /// Keeps the settings (D122).
+  Future<void> keepSettings(Settings settings) => _store.keepSettings(settings);
+
+  /// Moves on each time the journal is deleted, the consents with it: the
+  /// app returns to its start (D110).
   ValueListenable<int> get consentGone => _consentGone;
   final _consentGone = ValueNotifier<int>(0);
 
-  /// Withdraws the consent; the nights stay. Then the app returns to its
-  /// start (D103 item 4).
-  Future<void> withdrawConsent() async {
-    await _store.withdrawConsent();
-    _consentGone.value++;
-  }
-
-  /// Deletes the whole journal, the consent and the first-use flag with it
-  /// (X11; D54). Then the app returns to its start (D103 item 4).
+  /// Deletes the whole journal, the consents, the settings and the first-use
+  /// flag with it (X11; D54). Then the app returns to its start (D110).
   Future<void> deleteAll() async {
     await _store.deleteAll();
     _consentGone.value++;

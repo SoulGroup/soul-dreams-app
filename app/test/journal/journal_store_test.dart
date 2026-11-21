@@ -9,9 +9,12 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/core/night_day.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/night.dart';
+import 'package:souldreams/settings/consents.dart';
+import 'package:souldreams/settings/settings.dart';
 
 import '../fixtures.dart';
 import 'io_journal_files.dart';
@@ -421,10 +424,12 @@ void main() {
     expect(await store.firstUseSeen(), isFalse);
   });
 
-  // D103; docs/workflow.md (c): the consent sits beside the nights, holds
-  // only that the dreamer is 18 or over (C146-I item 1), changes no night,
-  // the first-use flag or any audio, and survives the sweep at open.
-  test('the consent is kept beside the nights, changing none of them', () async {
+  // D103; D122; docs/workflow.md (c): the consents sit beside the nights,
+  // hold only that the dreamer is 18 or over (C146-I item 1) and the three
+  // answers, change no night, the first-use flag or any audio, and survive
+  // the sweep at open. The version 1 file (D103) reads as (a) given, (b) and
+  // (c) not given; keeping version 2 over it loses no night.
+  test('version 1 reads; version 2 replaces it, changing no night', () async {
     final store = await JournalStore.open(files);
     final nights = nightsFromFixtures();
     for (final n in nights) {
@@ -434,22 +439,38 @@ void main() {
     await store.save(nights.first.withEntries([...nights.first.entries, Waiting(x)]));
     await store.appendAudio(x, sound(64));
     await store.markFirstUseSeen();
+    expect(await store.consents(), isNull);
+    await files.write(JournalStore.consentFile, utf8.encode('{"version":1,"over18":true}'));
     final before = files.everything();
-    expect(await store.consented(), isFalse);
-    await store.keepConsent();
-    expect(await store.consented(), isTrue);
+    final old = await store.consents();
+    expect(old!.given(Consent.readings), isTrue);
+    expect(old.given(Consent.lifeContext), isFalse);
+    expect(old.given(Consent.images), isFalse);
+    expect(old.answers[Consent.readings]!.day, isNull);
+    final now = DateTime.utc(2026, 11, 21, 22, 30);
+    final next = old.withAnswer(Consent.images, true, now);
+    await store.keepConsents(next);
     final reopened = await JournalStore.open(files);
-    expect(await reopened.consented(), isTrue);
+    expect(await reopened.consents(), next);
     final after = files.everything();
-    expect(after.keys.toSet(), {...before.keys, JournalStore.consentFile});
-    before.forEach((name, bytes) => expect(listEquals(after[name], bytes), isTrue, reason: name));
-    expect(jsonDecode(utf8.decode(after[JournalStore.consentFile]!)), {'version': 1, 'over18': true});
+    expect(after.keys.toSet(), before.keys.toSet());
+    for (final name in before.keys.where((n) => n != JournalStore.consentFile)) {
+      expect(listEquals(after[name], before[name]), isTrue, reason: name);
+    }
+    expect(jsonDecode(utf8.decode(after[JournalStore.consentFile]!)), {
+      'version': 2,
+      'over18': true,
+      'readings': {'given': true},
+      'lifeContext': {'given': false},
+      'images': {'given': true, 'day': '2026-11-21'},
+    });
     expect((await reopened.nights()).length, nights.length);
     expect(lines, isEmpty);
   });
 
-  test('an unreadable consent file is no consent; agreeing replaces it', () async {
+  test('a consents file that does not read exactly is none', () async {
     final store = await JournalStore.open(files);
+    const a = '"readings":{"given":true},"lifeContext":{"given":false},"images":{"given":false}';
     for (final bad in [
       '',
       'x',
@@ -458,49 +479,105 @@ void main() {
       '{"version":1}',
       '{"over18":true}',
       '{"version":1,"over18":false}',
-      '{"version":2,"over18":true}',
+      '{"version":3,"over18":true}',
       '{"version":1,"over18":true,"x":1}',
+      '{"version":2,"over18":true}',
+      '{"version":2,"over18":false,$a}',
+      '{"version":2,$a}',
+      '{"version":2,"over18":true,$a,"x":1}',
+      '{"version":2,"over18":true,"readings":{"given":true},"lifeContext":{"given":false}}',
+      '{"version":2,"over18":true,"readings":{"given":1},"lifeContext":{"given":false},"images":{"given":false}}',
+      '{"version":2,"over18":true,"readings":{},"lifeContext":{"given":false},"images":{"given":false}}',
+      '{"version":2,"over18":true,"readings":{"given":true,"x":1},"lifeContext":{"given":false},"images":{"given":false}}',
+      '{"version":2,"over18":true,"readings":{"given":true,"day":"21/11/26"},"lifeContext":{"given":false},"images":{"given":false}}',
+      '{"version":2,"over18":true,"readings":{"given":true,"day":7},"lifeContext":{"given":false},"images":{"given":false}}',
     ]) {
       await files.write(JournalStore.consentFile, utf8.encode(bad));
-      expect(await store.consented(), isFalse, reason: bad);
+      expect(await store.consents(), isNull, reason: bad);
     }
     await files.write(JournalStore.consentFile, Uint8List.fromList([0xff, 0xfe]));
-    expect(await store.consented(), isFalse);
-    await store.keepConsent();
-    expect(await store.consented(), isTrue);
+    expect(await store.consents(), isNull);
+    await files.write(JournalStore.consentFile, utf8.encode('{"version":2,"over18":true,$a}'));
+    expect((await store.consents())!.given(Consent.readings), isTrue);
+    final c = Consents.answered({Consent.lifeContext: true}, DateTime.utc(2026, 1, 2));
+    await store.keepConsents(c);
+    expect(await store.consents(), c);
   });
 
-  test('a consent cut short leaves no consent and no temporary file', () async {
+  test('consents cut short leave none and no temporary file', () async {
     final store = await JournalStore.open(BrokenRename(files.dir));
-    await expectLater(store.keepConsent(), throwsA(isA<FileSystemException>()));
+    await expectLater(
+      store.keepConsents(Consents.answered({}, DateTime.utc(2026))),
+      throwsA(isA<FileSystemException>()),
+    );
     expect(files.everything(), isEmpty);
-    expect(await store.consented(), isFalse);
+    expect(await store.consents(), isNull);
   });
 
-  // D103 item 4: withdrawing removes the consent alone; deleting the journal
-  // takes it with everything else.
-  test('withdrawing the consent removes it alone', () async {
+  // D122; docs/workflow.md (c): the settings sit beside the nights, change
+  // none of them, and read back exactly; a file that does not read is none,
+  // and the defaults stand.
+  test('the settings are kept beside the nights, changing none of them', () async {
     final store = await JournalStore.open(files);
     for (final n in nightsFromFixtures()) {
       await store.save(n);
     }
-    await store.markFirstUseSeen();
+    await store.keepConsents(Consents.answered({Consent.readings: true}, DateTime.utc(2026)));
     final before = files.everything();
-    await store.keepConsent();
-    await files.write('${JournalStore.tempPrefix}${JournalStore.consentFile}', utf8.encode('x'));
-    await store.withdrawConsent();
-    expect(await store.consented(), isFalse);
+    expect(await store.settings(), isNull);
+    const s = Settings(wordAnimation: false, nightDay: NightDayMode.night, images: NightImages.random, length: LifeContextLength.threeMonths);
+    await store.keepSettings(s);
+    expect(await (await JournalStore.open(files)).settings(), s);
     final after = files.everything();
-    expect(after.keys.toSet(), before.keys.toSet());
+    expect(after.keys.toSet(), {...before.keys, JournalStore.settingsFile});
     before.forEach((name, bytes) => expect(listEquals(after[name], bytes), isTrue, reason: name));
+    expect(jsonDecode(utf8.decode(after[JournalStore.settingsFile]!)), {
+      'version': 1,
+      'wordAnimation': false,
+      'nightDay': 'night',
+      'images': 'random',
+      'length': 'threeMonths',
+    });
+    expect(lines, isEmpty);
   });
 
-  test('deleting the journal takes the consent', () async {
+  test('a settings file that does not read exactly is none', () async {
+    final store = await JournalStore.open(files);
+    const good = '"wordAnimation":true,"nightDay":"automatic","images":"personal","length":"twoWeeks"';
+    for (final bad in [
+      '',
+      '[]',
+      '{"version":1}',
+      '{"version":2,$good}',
+      '{"version":1,$good,"x":1}',
+      '{"version":1,"wordAnimation":1,"nightDay":"automatic","images":"personal","length":"twoWeeks"}',
+      '{"version":1,"wordAnimation":true,"nightDay":"manual","images":"personal","length":"twoWeeks"}',
+      '{"version":1,"wordAnimation":true,"nightDay":"automatic","images":"off","length":"twoWeeks"}',
+      '{"version":1,"wordAnimation":true,"nightDay":"automatic","images":"personal","length":"forever"}',
+    ]) {
+      await files.write(JournalStore.settingsFile, utf8.encode(bad));
+      expect(await store.settings(), isNull, reason: bad);
+    }
+    await files.write(JournalStore.settingsFile, utf8.encode('{"version":1,$good}'));
+    expect(await store.settings(), const Settings());
+  });
+
+  test('settings cut short leave none and no temporary file', () async {
+    final store = await JournalStore.open(BrokenRename(files.dir));
+    await expectLater(store.keepSettings(const Settings()), throwsA(isA<FileSystemException>()));
+    expect(files.everything(), isEmpty);
+  });
+
+  // X11; D54; D110: deleting the journal takes the consents and the
+  // settings with everything else.
+  test('deleting the journal takes the consents and the settings', () async {
     final store = await JournalStore.open(files);
     await store.save(nightsFromFixtures().first);
-    await store.keepConsent();
+    await store.keepConsents(Consents.answered({Consent.readings: true}, DateTime.utc(2026)));
+    await store.keepSettings(const Settings(wordAnimation: false));
     await store.deleteAll();
-    expect(await store.consented(), isFalse);
+    expect(await store.consents(), isNull);
+    expect(await store.settings(), isNull);
     expect(files.everything(), isEmpty);
   });
 

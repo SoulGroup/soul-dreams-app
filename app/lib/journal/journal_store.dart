@@ -20,16 +20,20 @@
 // open, audio no night names is deleted, and so is an older copy left by
 // a cut that did not finish.
 //
-// The dreamer's consent (D103) is kept here too, once given in onboarding:
-// one small file saying only that the dreamer agreed and is 18 or over,
-// never the age band (C146-I item 1). Deleting the journal takes it, and
-// so does a withdrawal, and either returns the app to its start.
+// The dreamer's three consents (D103; C159-I item 5; D122) are kept here
+// too, once answered in onboarding: one small file holding each answer and
+// the day it last changed, and that the dreamer is 18 or over, never the
+// age band (C146-I item 1) (`settings/consents.dart`). So are the settings
+// (`settings/settings.dart`). Deleting the journal takes both, and returns
+// the app to its start; a consent withdrawn is an answer, kept (D121 item 5).
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import '../core/safe_log.dart';
+import '../settings/consents.dart';
+import '../settings/settings.dart';
 import 'journal_files.dart';
 import 'night.dart';
 
@@ -55,9 +59,12 @@ final class JournalStore {
   /// (MP·10, then MP·32); removed with the journal (D49 c, O6).
   static const firstUseFlag = 'first-use-seen';
 
-  /// Kept once the dreamer has agreed to the disclosure, as one 18 or over
-  /// (D103); removed with the journal, or by a withdrawal (D103 item 4).
+  /// Kept once the dreamer has answered the three consents, as one 18 or
+  /// over (D103; D122); removed with the journal.
   static const consentFile = 'consent.json';
+
+  /// The settings, once one is changed (D122); removed with the journal.
+  static const settingsFile = 'settings.json';
 
   // The one queue (D54): each operation starts when the one before it,
   // whether it succeeded or failed, has finished. No operation calls
@@ -283,27 +290,23 @@ final class JournalStore {
 
   Future<void> markFirstUseSeen() => _run(() => _files.write(firstUseFlag, Uint8List(0)));
 
-  /// Whether the dreamer has agreed, as one 18 or over: the file holds
-  /// exactly that, or it is no consent and onboarding asks again.
-  Future<bool> consented() => _run(() async {
+  /// The consents, or null when none is kept or the file does not read as
+  /// version 1 or 2 exactly: onboarding then asks again.
+  Future<Consents?> consents() => _run(() async {
     final bytes = await _files.read(consentFile);
-    if (bytes == null) return false;
-    try {
-      final json = jsonDecode(utf8.decode(bytes));
-      return json is Map<String, dynamic> && json.length == 2 && json['version'] == 1 && json['over18'] == true;
-    } on FormatException {
-      return false;
-    }
+    return bytes == null ? null : decodeConsents(bytes);
   });
 
-  /// Keeps the consent: that the dreamer agreed, and is 18 or over.
-  Future<void> keepConsent() =>
-      _run(() => _whole(consentFile, utf8.encode(jsonEncode(const {'version': 1, 'over18': true}))));
+  /// Keeps the consents whole (version 2), replacing any before.
+  Future<void> keepConsents(Consents consents) => _run(() => _whole(consentFile, encodeConsents(consents)));
 
-  /// Removes the consent, and any temporary file of its keeping; the
-  /// nights stay (D103 item 4).
-  Future<void> withdrawConsent() => _run(() async {
-    await _files.delete(consentFile);
-    await _files.delete(tempPrefix + consentFile);
+  /// The settings, or null when none is kept or the file does not read as
+  /// version 1 exactly: the defaults then stand.
+  Future<Settings?> settings() => _run(() async {
+    final bytes = await _files.read(settingsFile);
+    return bytes == null ? null : decodeSettings(bytes);
   });
+
+  /// Keeps the settings whole, replacing any before.
+  Future<void> keepSettings(Settings settings) => _run(() => _whole(settingsFile, encodeSettings(settings)));
 }

@@ -10,6 +10,8 @@ import 'package:souldreams/journal/journal.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_rules.dart';
+import 'package:souldreams/settings/consents.dart';
+import 'package:souldreams/settings/settings.dart';
 import 'package:souldreams/words/lines.g.dart' show Lang;
 
 import '../fixtures.dart';
@@ -34,31 +36,38 @@ void main() {
 
   tearDown(() => dir.deleteSync(recursive: true));
 
-  // D103 item 4: the consent kept, withdrawn or deleted with the journal;
-  // each going is told once, so the app returns to its start.
-  test('withdrawing the consent keeps every night, and is told', () async {
+  // D121 item 5; D122: a consent withdrawn is an answer kept, every night
+  // stays, and nothing is told; the app stays where it is.
+  test('a consent withdrawn keeps every night, and tells nothing', () async {
     await journal.addDream(await journal.targetNow(), a[0], Lang.en);
     var told = 0;
     journal.consentGone.addListener(() => told++);
-    expect(await journal.consented(), isFalse);
-    await journal.keepConsent();
-    expect(await journal.consented(), isTrue);
+    expect(await journal.consents(), isNull);
+    final given = Consents.answered({Consent.readings: true}, journal.now());
+    await journal.keepConsents(given);
+    expect(await journal.consents(), given);
+    final withdrawn = given.withAnswer(Consent.readings, false, journal.now());
+    await journal.keepConsents(withdrawn);
+    expect(await journal.consents(), withdrawn);
+    await journal.keepSettings(const Settings(wordAnimation: false));
+    expect(await journal.settings(), const Settings(wordAnimation: false));
     expect(told, 0);
-    await journal.withdrawConsent();
-    expect(await journal.consented(), isFalse);
-    expect(told, 1);
     expect((await journal.newestFirst()).single.dreams, [a[0]]);
   });
 
-  test('deleting the journal takes the consent and every night, told', () async {
+  // D110: deleting the journal takes the consents, the settings and every
+  // night, and is told once, so the app returns to its start.
+  test('deleting the journal takes the consents and every night, told', () async {
     await journal.addDream(await journal.targetNow(), a[0], Lang.en);
-    await journal.keepConsent();
+    await journal.keepConsents(Consents.answered({Consent.readings: true}, journal.now()));
+    await journal.keepSettings(const Settings(wordAnimation: false));
     await journal.markFirstUseSeen();
     var told = 0;
     journal.consentGone.addListener(() => told++);
     await journal.deleteAll();
     expect(told, 1);
-    expect(await journal.consented(), isFalse);
+    expect(await journal.consents(), isNull);
+    expect(await journal.settings(), isNull);
     expect(await journal.firstUseSeen(), isFalse);
     expect(await journal.newestFirst(), isEmpty);
     expect(files.everything(), isEmpty);

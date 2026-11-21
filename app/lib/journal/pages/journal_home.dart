@@ -3,9 +3,9 @@
 // (D103), held in the light theme, and then the journal list; the first
 // time, the journal list's first empty state (main-path.md, Onboarding, 5).
 // Nothing leaves the phone before the consent: the recording and its
-// retries start only with the journal. When the consent goes, withdrawn or
-// deleted with the journal, it returns to onboarding's start, closing every
-// page above it (D103 item 4). Until the folder is
+// retries start only with the journal. When the journal is deleted, the
+// consents with it, it returns to onboarding's start, closing every page
+// above it (D110). Until the folder is
 // open the page is blank; if it cannot be opened it stays blank and logs
 // a code, never a night's words (R3). A phone check it is handed (D65)
 // finishes first, so its probe never shows as a row. The recording it is
@@ -21,6 +21,7 @@ import '../../core/always_light.dart';
 import '../../core/safe_log.dart';
 import '../../onboarding/onboarding.dart';
 import '../../recording/recording.dart';
+import '../../settings/consents.dart';
 import '../journal.dart';
 import '../journal_audio.dart';
 import '../journal_files.dart';
@@ -109,7 +110,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     final journal = Journal(store)..consentGone.addListener(_restart);
     bool agreed;
     try {
-      agreed = await journal.consented();
+      agreed = await journal.consents() != null;
     } on Object {
       // Asked again: nothing is shown as agreed that is not kept.
       SafeLog.event(LogEvent.consentReadFailed);
@@ -144,13 +145,16 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     _recording?.retries?.kick();
   }
 
-  // "I agree": the consent kept, then the journal. A consent that cannot be
-  // kept logs a code; the journal opens, and the next opening asks again.
+  // "I consent": the consents kept, then the journal. Until onboarding asks
+  // the three (D119 item 1), it gives (a) and leaves (b) and (c) not given
+  // (D122). Consents that cannot be kept log a code; the journal opens, and
+  // the next opening asks again.
   Future<void> _agree() async {
     if (_agreeing) return;
     _agreeing = true;
     try {
-      await _journal!.keepConsent();
+      final journal = _journal!;
+      await journal.keepConsents(Consents.answered({Consent.readings: true}, journal.now()));
     } on Object {
       SafeLog.event(LogEvent.consentKeepFailed);
     }
@@ -159,8 +163,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     if (mounted) _enter(first: true);
   }
 
-  // The consent gone (D103 item 4): every page above closes, the retries
-  // stop, and onboarding starts again.
+  // The journal deleted, the consents with it (D110): every page above
+  // closes, the retries stop, and onboarding starts again.
   void _restart() {
     if (!mounted) return;
     _recording?.retries?.dispose();
