@@ -1,6 +1,7 @@
-// The app's own words: whole by default, Word Animation being off everywhere
-// (D106 2); with it on, word by word at about 60 ms a word (D58 Q17), whole
-// with Reduce Motion; always whole to a screen reader.
+// The app's own words: Word Animation is on by default, and only the app's
+// responses appear word by word, at about 60 ms a word (D110; D58 Q17); every
+// other line stands whole (D106 2), and so does a response with the setting
+// off or Reduce Motion on; always whole to a screen reader.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
@@ -23,25 +24,33 @@ void main() {
   final line = Lines.C4_P_5.text(Lang.en);
   final words = line.split(' ').length;
 
-  Future<void> pump(WidgetTester tester) => tester.pumpWidget(
-      Directionality(textDirection: TextDirection.ltr, child: Center(child: AppLine(line, style: style))));
+  Future<void> pump(WidgetTester tester, {bool response = false}) => tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr, child: Center(child: AppLine(line, style: style, response: response))));
 
-  // The setting itself comes with Settings (P8); until then only a test turns
-  // it on.
-  void animate(WidgetTester tester) {
-    wordAnimation = true;
-    addTearDown(() => wordAnimation = false);
+  // The setting itself comes with Settings; until then only a test turns it
+  // off.
+  void still(WidgetTester tester) {
+    wordAnimation = false;
+    addTearDown(() => wordAnimation = true);
   }
 
-  testWidgets('with Word Animation off, the default, the line stands whole', (tester) async {
-    expect(wordAnimation, isFalse);
+  testWidgets('Word Animation is on by default (D110)', (tester) async {
+    expect(wordAnimation, isTrue);
+  });
+
+  testWidgets('a line that is not a response stands whole', (tester) async {
     await pump(tester);
     expect(shown(tester), words);
   });
 
-  testWidgets('with it on: one word, then one more every 60 ms', (tester) async {
-    animate(tester);
-    await pump(tester);
+  testWidgets('with Word Animation off, a response stands whole', (tester) async {
+    still(tester);
+    await pump(tester, response: true);
+    expect(shown(tester), words);
+  });
+
+  testWidgets('a response: one word, then one more every 60 ms', (tester) async {
+    await pump(tester, response: true);
     expect(shown(tester), 1);
     await tester.pump(wordPace);
     expect(shown(tester), 2);
@@ -51,18 +60,19 @@ void main() {
     expect(shown(tester), words);
   });
 
-  testWidgets('with it on, Reduce Motion still stands whole', (tester) async {
-    animate(tester);
+  testWidgets('with Reduce Motion, a response stands whole', (tester) async {
     tester.platformDispatcher.accessibilityFeaturesTestValue = const FakeAccessibilityFeatures(reduceMotion: true);
     addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
-    await pump(tester);
+    await pump(tester, response: true);
     expect(shown(tester), words);
   });
 
-  testWidgets('a screen reader hears the whole line at once', (tester) async {
+  testWidgets('a screen reader hears a response whole at once', (tester) async {
     final handle = tester.ensureSemantics();
-    await pump(tester);
+    await pump(tester, response: true);
+    expect(shown(tester), 1);
     expect(find.bySemanticsLabel(line), findsOneWidget);
     handle.dispose();
+    await tester.pump(wordPace * words);
   });
 }
