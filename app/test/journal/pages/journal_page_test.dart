@@ -75,9 +75,10 @@ void main() {
     // gone (D110).
     expect(find.text(Lines.MP_11.text(Lang.en)), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
-    // No Settings entry and no search: later branches.
+    // No Settings entry: a later branch (D116 item 5). One field, search's.
     expect(find.text(Lines.MP_25.text(Lang.en)), findsNothing);
-    expect(find.byType(TextField), findsNothing);
+    expect(find.byType(TextField), findsOneWidget);
+    expect(find.byKey(JournalPage.searchKey), findsOneWidget);
   });
 
   // D110: a greeting by the part of the day, centred in h2, heard as a

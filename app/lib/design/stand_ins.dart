@@ -28,6 +28,16 @@ abstract final class StandIns {
   static const rowBorderLight = Color(0xFF9E9E9E);
   static const rowBorderDark = Color(0xFF8A8A8A);
 
+  /// The search field (D116; D117 Q7): above it, inside it at the sides,
+  /// its magnifier, drawn as a ring and a handle, and the space after it;
+  /// and the space between a result's row and its context line (D117 Q8).
+  static const double searchAbove = 20;
+  static const searchPadding = EdgeInsets.symmetric(horizontal: 18);
+  static const magnifier = Size(16, 16);
+  static const double magnifierStroke = 1.5;
+  static const double searchGap = 10;
+  static const double contextGap = 6;
+
   /// The sky mark above the greeting (D112): its size, the space below it,
   /// and the colours of the sun and the moon, stand-ins drawn in code until
   /// the founder supplies the images.
