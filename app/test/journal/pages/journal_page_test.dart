@@ -95,6 +95,21 @@ void main() {
     expect(greetingFor(Daypart.evening), OwedLines.greetingEvening);
   });
 
+  // D110: on returning, the greeting follows the clock at once, without
+  // waiting for the minute's check (the final review).
+  testWidgets('the greeting follows the clock on returning', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(find.text(OwedLines.greetingAfternoon.text), findsOneWidget);
+    Harness.clock = stockholm(2026, 6, 10, 17);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text(OwedLines.greetingEvening.text), findsOneWidget);
+    expect(find.text(OwedLines.greetingAfternoon.text), findsNothing);
+  });
+
   // D110: New Dream, centred, the painted gradient behind its words, heard
   // as a button.
   testWidgets('New Dream: centred, on the painted gradient, a button', (tester) async {

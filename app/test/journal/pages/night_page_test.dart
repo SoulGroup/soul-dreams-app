@@ -550,6 +550,9 @@ void main() {
     await tester.pump();
     await tester.pump(StandIns.jumpTime ~/ 2);
     expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, greaterThan(list.top));
+    // It has arrived when the time is up, not before.
+    await tester.pump(StandIns.jumpTime - StandIns.jumpTime ~/ 2);
+    expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, closeTo(list.top, 1));
     await tester.pumpAndSettle();
     expect(tester.getRect(find.byKey(NightPage.dreamsKey)).top, closeTo(list.top, 1));
     expect(label, findsOneWidget);
@@ -622,6 +625,20 @@ void main() {
     final item = tester.getRect(find.byType(CupertinoMenuItem));
     expect(item.top - look.bottom, closeTo(8, 0.5));
     expect(look.right - item.right, closeTo(0, 0.5));
+  });
+
+  // D110: the picture runs from the screen's top and the header is 240 below
+  // the status bar; the controls stand under it (the final review).
+  testWidgets('the header and its controls clear the status bar', (tester) async {
+    await open(tester);
+    tester.view.padding = const FakeViewPadding(top: 141);
+    tester.view.viewPadding = const FakeViewPadding(top: 141);
+    await tester.pump();
+    final art = tester.getRect(find.byType(NightArt));
+    expect(art.top, 0);
+    expect(art.height, 47 + StandIns.headerHeight);
+    expect(tester.getTopLeft(find.byKey(BackControl.buttonKey)).dy, 47);
+    expect(tester.getTopLeft(find.byKey(NightPage.menuKey)).dy, 47);
   });
 
   // D110: the back control and the pill stand over the header, at its top.

@@ -226,11 +226,11 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 539 tests, and 413 mutation checks (A1 to A393; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 541 tests, and 417 mutation checks (A1 to A397; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270
   and A313 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 413 run, 413 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 417 run, 417 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -789,6 +789,17 @@ Banked in redesign-a (D91; none changes what the dreamer sees beyond D110; the p
      the rows' height and the greeting's places are stand-ins (`stand_ins.dart`), for the founder's look.
 139. A night's header does not scroll; on a short phone at large text the dreams have less room (the tests' phone,
      390 by 844, has room at twice the size).
+140. From redesign-a's Opus review (D91): fixed with rows A394 to A397 (the greeting on returning, the header's room
+     for the status bar, the jump's time). Banked, none a defect: on returning, the greeting follows the clock only
+     when the journal read succeeds (a failed read leaves it until the next minute); no test checks the first-empty
+     arrow's direction; the picture's silence test reads the nearest ancestor's label, with A371 biting on its second
+     half; the reflowed comment at `parts.dart:80` runs past the line width; a date in h2 cannot wrap at the largest
+     text sizes and is clipped at the sides (as before the branch).
+141. The preview's placeholder paintings: the date over them is low contrast in places (about 1.2 to 4.0 to 1 where
+     the soft light sits behind it); the painted gradient is fine. Stand-ins for the founder's set; for the owner's
+     by-eye look in the `PREVIEW_READ` build.
+142. The status bar over a night's header: nothing sets its style, so in the phone's light mode iOS draws dark time
+     and battery over the dark gradient. Asked of the owner at the review (a new choice, not settled here).
 
 ## Before Cohort 1
 
