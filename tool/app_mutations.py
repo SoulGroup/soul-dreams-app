@@ -1,12 +1,12 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A570, A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A580, A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 583 run, 583 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 593 run, 593 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -2299,7 +2299,7 @@ ROWS = [
      '',
      'test/journal/pages/journal_home_test.dart', 'the settings kept are followed; the deletion resets them'),
     ('A515', 'lib/journal/pages/journal_home.dart',
-     '    NightDayChoice.set(context, controller.settings.nightDay);\n',
+     '    NightDayChoice.set(context, controller.settings.nightDay, instant: opening);\n',
      '',
      'test/journal/pages/journal_home_test.dart', 'the settings kept are followed; the deletion resets them'),
     ('A516', 'lib/journal/pages/journal_home.dart',
@@ -2522,6 +2522,54 @@ ROWS = [
      '                        value: choices[chosen],\n',
      '',
      'test/settings/settings_page_test.dart', 'the page: its title, six rows, then three actions'),
+    ('A571', 'lib/journal/pages/journal_home.dart',
+     'instant: opening);',
+     'instant: false);',
+     'test/journal/pages/journal_home_test.dart', 'a Manual mode kept shows at once when the journal opens'),
+    ('A572', 'lib/core/night_day.dart',
+     'returning || (mode is NightDayModeNotifier && mode.instant)',
+     'returning',
+     'test/journal/pages/journal_home_test.dart', 'a Manual mode kept shows at once when the journal opens'),
+    ('A573', 'lib/core/night_day.dart',
+     '    } finally {\n      _instant = false;\n    }',
+     '    } finally {\n    }',
+     'test/journal/pages/journal_home_test.dart', 'a Manual mode kept shows at once when the journal opens'),
+    ('A574', 'lib/journal/pages/journal_home.dart',
+     '      _recording?.retries?.dispose();\n      _recording = null;\n    }\n    setState(() {});',
+     '      _recording?.retries?.dispose();\n      unawaited(_audio!.discard(\'1\' * 32));\n      _recording = null;\n    }\n    setState(() {});',
+     'test/journal/pages/journal_home_test.dart', 'consent (a) withdrawn: the retry cut; given again: resumed'),
+    ('A575', 'lib/journal/pages/journal_home.dart',
+     '      _recording?.retries?.dispose();\n      _recording = null;\n    }\n    setState(() {});',
+     '      _recording?.retries?.dispose();\n      _recording?.warm();\n      _recording = null;\n    }\n    setState(() {});',
+     'test/journal/pages/journal_home_test.dart', 'consent (a) withdrawn: the retry cut; given again: resumed'),
+    ('A576', 'lib/settings/settings_page.dart',
+     '    NightDayMode.night => true,\n',
+     '    NightDayMode.night => false,\n',
+     'test/settings/settings_page_test.dart', 'the toggle tapped twice within the fade undoes the first'),
+    ('A577', 'lib/settings/settings_page.dart',
+     '    NightDayMode.day => false,\n',
+     '    NightDayMode.day => true,\n',
+     'test/settings/settings_page_test.dart', 'Night/Day: Manual keeps the theme; the toggle switches it'),
+    ('A578', 'lib/settings/settings_page.dart',
+     'if (!await ConsentPage.ask(context, Consent.images)) return;',
+     'if (!await ConsentPage.ask(context, Consent.images)) {}',
+     'test/settings/settings_page_test.dart', "Night images: the consent first; I don't consent changes nothing"),
+    ('A579', 'lib/settings/settings_page.dart',
+     '              isDestructiveAction: true,\n',
+     '              isDestructiveAction: false,\n',
+     'test/settings/settings_page_test.dart', 'Withdraw consent behind MP·96; Give consent behind MP·68'),
+    ('A580', 'lib/settings/settings_page.dart',
+     '            CupertinoDialogAction(\n              onPressed: () => Navigator.of(context).pop(false),\n'
+     '              child: Text(Lines.MP_61.text(appLanguage)),\n            ),\n'
+     '            CupertinoDialogAction(\n              isDestructiveAction: true,\n'
+     '              onPressed: () => Navigator.of(context).pop(true),\n'
+     '              child: Text(yes.text(appLanguage)),\n            ),\n',
+     '            CupertinoDialogAction(\n              isDestructiveAction: true,\n'
+     '              onPressed: () => Navigator.of(context).pop(true),\n'
+     '              child: Text(yes.text(appLanguage)),\n            ),\n'
+     '            CupertinoDialogAction(\n              onPressed: () => Navigator.of(context).pop(false),\n'
+     '              child: Text(Lines.MP_61.text(appLanguage)),\n            ),\n',
+     'test/settings/settings_page_test.dart', 'Withdraw consent behind MP·96; Give consent behind MP·68'),
 ]
 
 

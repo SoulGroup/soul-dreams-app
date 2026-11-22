@@ -31,7 +31,7 @@ class _SoulDreamsAppState extends State<SoulDreamsApp> {
   final _light = ValueNotifier<bool>(false);
   bool _wasLight = false;
   // Night/Day mode, set from the settings (D122); Automatic until then.
-  final _mode = ValueNotifier<NightDayMode>(NightDayMode.automatic);
+  final _mode = NightDayModeNotifier(NightDayMode.automatic);
 
   @override
   void dispose() {

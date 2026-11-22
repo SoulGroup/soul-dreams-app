@@ -82,6 +82,17 @@ void main() {
 
   Map<String, dynamic> kept(String name) => jsonDecode(utf8.decode(files.files[name]!)) as Map<String, dynamic>;
 
+  // A confirmation: Cancel (MP·61) before [yes], which is the destructive one.
+  void cancelFirst(WidgetTester tester, Line yes) {
+    final cancel = tester.getCenter(find.text(en(Lines.MP_61)));
+    final go = tester.getCenter(find.text(en(yes)));
+    expect(cancel.dy < go.dy || (cancel.dy == go.dy && cancel.dx < go.dx), isTrue);
+    final action = find.ancestor(of: find.text(en(yes)), matching: find.byType(CupertinoDialogAction));
+    expect(tester.widget<CupertinoDialogAction>(action).isDestructiveAction, isTrue);
+    final back = find.ancestor(of: find.text(en(Lines.MP_61)), matching: find.byType(CupertinoDialogAction));
+    expect(tester.widget<CupertinoDialogAction>(back).isDestructiveAction, isFalse);
+  }
+
   testWidgets('the page: its title, six rows, then three actions', (tester) async {
     await open(tester);
     expect(find.text(en(Lines.MP_25)), findsOneWidget);
@@ -174,6 +185,31 @@ void main() {
     expect(tester.widget<SkyMark>(mark).sky, Sky.sun);
   });
 
+  // The toggle heads for the other theme from where it is going, not from
+  // the theme on screen, which lags a fade: a second tap within the fade
+  // undoes the first.
+  testWidgets('the toggle tapped twice within the fade undoes the first', (tester) async {
+    final c = await open(tester, hour: 12);
+    await hit(tester, find.byKey(SettingsPage.toggleKey));
+    await tester.pump(const Duration(seconds: 1));
+    expect(c.settings.nightDay, NightDayMode.night);
+    await tester.tap(find.byKey(SettingsPage.toggleKey));
+    await tester.pump(const Duration(seconds: 1));
+    expect(c.settings.nightDay, NightDayMode.day);
+    expect(kept(JournalStore.settingsFile)['nightDay'], 'day');
+    await tester.pumpAndSettle();
+    expect(Theme.of(tester.element(find.byType(SettingsPage))).brightness, Brightness.light);
+  });
+
+  // Manual keeps the theme on screen, the dark one too.
+  testWidgets('Manual chosen in the dark theme keeps the dark', (tester) async {
+    final c = await open(tester, hour: 23);
+    await choose(tester, SettingRow.nightDay, 1);
+    expect(c.settings.nightDay, NightDayMode.night);
+    expect(kept(JournalStore.settingsFile)['nightDay'], 'night');
+    expect(Theme.of(tester.element(find.byType(SettingsPage))).brightness, Brightness.dark);
+  });
+
   // The stop's question 6: Personal or Random needs consent (c) first; Off
   // withdraws it.
   testWidgets('Night images: the consent first; I don\'t consent changes nothing', (tester) async {
@@ -185,6 +221,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(ConsentPage), findsNothing);
     expect(c.nightImages, NightImages.off);
+    // Nothing chosen is kept before the answer: the painting stays as it was.
+    expect(c.settings.images, const Settings().images);
+    expect(files.files.keys, isNot(contains(JournalStore.settingsFile)));
     await choose(tester, SettingRow.nightImages, 1);
     await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.images, true)));
     await tester.pumpAndSettle();
@@ -212,6 +251,7 @@ void main() {
     expect(shown(tester, SettingRow.lifeContext), 'On');
     await choose(tester, SettingRow.lifeContext, 1);
     expect(find.text(en(Lines.MP_93)), findsOneWidget);
+    cancelFirst(tester, Lines.MP_94);
     await tester.tap(find.text(en(Lines.MP_61)));
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.lifeContext), isTrue);
@@ -229,6 +269,7 @@ void main() {
     await hit(tester, find.byKey(SettingsPage.consentKey));
     await tester.pumpAndSettle();
     expect(find.text(en(Lines.MP_96)), findsOneWidget);
+    cancelFirst(tester, Lines.MP_97);
     await tester.tap(find.text(en(Lines.MP_61)));
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.readings), isTrue);
@@ -267,6 +308,7 @@ void main() {
     await hit(tester, find.byKey(SettingsPage.deleteKey));
     await tester.pumpAndSettle();
     expect(find.text(en(Lines.C4_P_4)), findsOneWidget);
+    cancelFirst(tester, Lines.MP_60);
     await tester.tap(find.text(en(Lines.MP_61)));
     await tester.pumpAndSettle();
     expect(files.files.keys.where((n) => n.startsWith('night-')), hasLength(1));

@@ -283,12 +283,12 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 649 tests, and 583 mutation checks (A1 to A570; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 652 tests, and 593 mutation checks (A1 to A580; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A300, A313, A363, A375 and A507 dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 583 run, 583 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 593 run, 593 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -907,6 +907,31 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      again; no row proves it (a retry finishing after the consent is given again is a constructed sequence, D17).
 154. The consent record keeps the UTC day, not the instant (decided under D91); Interpretation may want the
      consent text's version as well (item 152).
+155. Fixed under D91 after the three Opus reviews (rows A571 to A580): a Manual mode kept shows at once when the
+     journal opens, not after a five-second fade (D57 Q15); the Settings toggle heads for the other theme from where
+     it is going, so a second tap within the fade undoes the first; the Settings page's header no longer names Help
+     (R9); the gating tests now count key fetches and prove the waiting audio survives a withdrawal; the Night images
+     refusal proves nothing is kept; the dialogs' Cancel-first order and destructive action; a midnight flake in
+     the consent day test.
+156. For the owner (they touch consent (a); none is fixed): (a) a retry in flight when the retries are disposed (a
+     withdrawal, or the journal's deletion) can still fetch one key from our server, open one Soniox stream with
+     no audio sent, or send one more 100 ms frame, inside a window of milliseconds (`retries.dart` checks `_halted`
+     after the key, not at every await; a constructed timing, D17); (b) a withdrawal of (a) that cannot be kept
+     holds until the app closes, and the next start resumes sending with no sign (D122 as built); (c) consents that
+     did not read, answered again, ignore a settings file that did (`_agree` uses the defaults).
+157. The Settings page's notes: the value pill's 44 tap box scales down with its words inside a `FittedBox` at large
+     text (from about 1.2 times for Automatic, Personal, 3 months, 2 weeks; the large-text test checks overflow
+     only; the owner's step 14 looks at it); in an Automatic fade the toggle still reads the theme on screen; a
+     failed deletion shows nothing and may leave some files; choices map to their enum by index, so a later
+     register import that changes MP·85's count would throw rather than show a handle (R1); the gear has no guard
+     against two taps, or against New Dream still opening.
+158. The storage task's notes: `Settings`' `assert(images != NightImages.off)` is debug only, and a caller that
+     wrote Off would make a file that does not read, so every setting would return to its default; `version` 1.0
+     and 2.0 read as 1 and 2; the day pattern accepts impossible dates (nothing finer than a day passes); the keep
+     tests compare file names after the store's open, which sweeps temporary files, and the cut ones start from an
+     empty folder; the test "I agree keeps the consent, then the journal and its retries" kept its old name (rows
+     A296, A507 and A508 key on it); `JournalHome` counts any readable consents file as agreed, a withdrawn (a)
+     included (D121 item 5).
 
 ## Before Cohort 1
 

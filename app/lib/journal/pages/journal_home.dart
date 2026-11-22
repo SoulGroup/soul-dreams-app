@@ -161,17 +161,19 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     });
     // D98: the counts at launch and after each retry, for DevTools.
     unawaited(audio.logCounts());
-    _follow();
+    _follow(opening: true);
   }
 
   // The settings followed (D122): Word Animation, Night/Day mode, and
   // recording by voice with its retries only while consent (a) is given;
   // withdrawn, a retry running is cut and none starts (D121 item 5).
-  void _follow() {
+  void _follow({bool opening = false}) {
     final controller = _settings;
     if (controller == null || !mounted) return;
     wordAnimation = controller.settings.wordAnimation;
-    NightDayChoice.set(context, controller.settings.nightDay);
+    // A mode found as the journal opens shows at once; one the dreamer
+    // changes fades (D57 Q15).
+    NightDayChoice.set(context, controller.settings.nightDay, instant: opening);
     final readings = controller.consents.given(Consent.readings);
     if (readings && _recording == null) {
       final audio = _audio!;

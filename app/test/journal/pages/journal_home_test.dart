@@ -87,11 +87,15 @@ Future<void> waiting(MemoryJournalFiles files) async {
   await store.appendAudio(x, Uint8List(32000));
 }
 
-/// A recording whose streams are counted in [links].
-Recording counted(List<MemoryLink> links) => Recording(
+/// A recording whose streams are counted in [links], and its key fetches
+/// in [keys].
+Recording counted(List<MemoryLink> links, [List<void>? keys]) => Recording(
   on: true,
   microphone: SilentMicrophone(),
-  key: () async => 'k',
+  key: () async {
+    keys?.add(null);
+    return 'k';
+  },
   connect: (_) async {
     final link = MemoryLink();
     links.add(link);
@@ -305,6 +309,7 @@ void main() {
       home: JournalHome(files: files, recording: counted(links)),
     ));
     await tester.pumpAndSettle();
+    final started = DateTime.now();
     tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
     tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
     await tester.pump();
@@ -316,7 +321,8 @@ void main() {
     expect(kept.keys, ['version', 'over18', 'readings', 'lifeContext', 'images']);
     expect([kept['version'], kept['over18']], [2, true]);
     expect([for (final c in ['readings', 'lifeContext', 'images']) kept[c]['given']], [true, false, false]);
-    expect(kept['readings']['day'], dayOf(DateTime.now()));
+    // Either side of a UTC midnight crossed while the test ran.
+    expect(kept['readings']['day'], anyOf(dayOf(started), dayOf(DateTime.now())));
     expect(links, hasLength(1));
     // The journal opened once: its counts logged once (D98).
     expect(lines.where((l) => l.startsWith('journalAudio')), hasLength(1));
@@ -458,7 +464,8 @@ void main() {
     final files = answered(MemoryJournalFiles(), {Consent.lifeContext: true});
     await waiting(files);
     final links = <MemoryLink>[];
-    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links))));
+    final keys = <void>[];
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links, keys))));
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNull);
@@ -469,6 +476,7 @@ void main() {
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pumpAndSettle();
     expect(links, isEmpty);
+    expect(keys, isEmpty);
   });
 
   // D121 item 5: withdrawn, the retry running is cut and none follows, the
@@ -478,10 +486,12 @@ void main() {
     final files = agreed(MemoryJournalFiles());
     await waiting(files);
     final links = <MemoryLink>[];
-    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links))));
+    final keys = <void>[];
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links, keys))));
     await tester.pump();
     await tester.pump();
     expect(links, hasLength(1));
+    final keysBefore = keys.length;
     final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings!;
     await settings.answer(Consent.readings, false);
     await tester.pump(const Duration(milliseconds: 150));
@@ -490,6 +500,12 @@ void main() {
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNull);
     expect(links.single.closed, isTrue);
     expect(files.files.keys.where((n) => n.startsWith('night-')), hasLength(1));
+    // The recording waiting is kept whole by the cut: nothing is lost, and
+    // nothing is sent.
+    final audio = files.files.keys.where((n) => n.startsWith('audio-')).toList();
+    expect(audio, hasLength(1));
+    expect(files.files[audio.single]!.length, 32000);
+    expect(keys, hasLength(keysBefore));
     expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.readings), isFalse);
     for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.inactive]) {
       tester.binding.handleAppLifecycleStateChanged(state);
@@ -498,6 +514,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(links, hasLength(1));
+    expect(keys, hasLength(keysBefore));
     await settings.answer(Consent.readings, true);
     await tester.pump();
     await tester.pump();
@@ -529,6 +546,25 @@ void main() {
     expect(find.byType(Onboarding), findsOneWidget);
     expect(wordAnimation, isTrue);
     expect(tester.widget<NightDayChoice>(find.byType(NightDayChoice)).mode.value, NightDayMode.automatic);
+  });
+
+  // D57 Q15: a mode found at start is instant. Manual Night kept, Word
+  // Animation on (the default), the hour's own theme light: the journal
+  // opens dark with no five-second fade.
+  testWidgets('a Manual mode kept shows at once when the journal opens', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = answered(MemoryJournalFiles(), {Consent.readings: true});
+    files.files[JournalStore.settingsFile] = encodeSettings(const Settings(nightDay: NightDayMode.night));
+    await tester.pumpWidget(SoulDreamsApp(clock: () => DateTime(2026, 6, 10, 12), home: JournalHome(files: files)));
+    await tester.pumpAndSettle();
+    expect(find.byType(JournalPage), findsOneWidget);
+    expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
+    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeAnimationDuration, Duration.zero);
+    // A change the dreamer makes afterwards still fades.
+    NightDayChoice.set(tester.element(find.byType(JournalPage)), NightDayMode.day);
+    await tester.pump();
+    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeAnimationDuration, NightDay.fade);
+    await tester.pumpAndSettle();
   });
 
   // MP·85: consent (c) not given, Night images is Off: every night the

@@ -8,7 +8,7 @@
 // Night/Day mode (MP·44), Life Context (MP·83) and Life Context length
 // (MP·84); then "Read disclosure & privacy" (MP·48), "Withdraw consent" or
 // "Give consent" (MP·95), and "Delete journal" (EM·11) in the destructive
-// style. No feedback (D121 item 4), no region, nothing of Help (R9).
+// style. No feedback (D121 item 4), no region.
 //
 // What needs a consent asks for it first (ConsentPage): Personal or Random
 // while (c) is not given, Life Context On while (b) is not, Give consent
@@ -86,7 +86,14 @@ class _SettingsPageState extends State<SettingsPage> {
     if (mounted) setState(() {});
   }
 
-  bool get _dark => Theme.of(context).brightness == Brightness.dark;
+  // The theme the dreamer is heading for: Manual's own, since the theme on
+  // screen lags a fade by half its length and a second tap would undo
+  // nothing; Automatic's is the one shown.
+  bool get _dark => switch (_c.settings.nightDay) {
+    NightDayMode.night => true,
+    NightDayMode.day => false,
+    NightDayMode.automatic => Theme.of(context).brightness == Brightness.dark,
+  };
 
   // The phone's standard dialog, Cancel (MP·61) first, [yes] destructive.
   Future<bool> _confirm(Line text, Line yes) async =>

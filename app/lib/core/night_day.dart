@@ -29,15 +29,40 @@ bool isNight(NightDayMode mode, DateTime local) => switch (mode) {
   NightDayMode.night => true,
 };
 
+/// The mode, which can also be set so that its change is instant: a mode
+/// found at start, not one the dreamer changes while the app is open (D57
+/// Q15).
+class NightDayModeNotifier extends ValueNotifier<NightDayMode> {
+  NightDayModeNotifier(super.value);
+
+  bool _instant = false;
+
+  /// Whether the change being announced is to show at once.
+  bool get instant => _instant;
+
+  /// Sets [mode]; the change shows at once.
+  void setInstant(NightDayMode mode) {
+    _instant = true;
+    try {
+      value = mode;
+    } finally {
+      _instant = false;
+    }
+  }
+}
+
 /// The mode, held above the app so a page under it can set it (D122).
 class NightDayChoice extends InheritedWidget {
   const NightDayChoice({super.key, required this.mode, required super.child});
 
-  final ValueNotifier<NightDayMode> mode;
+  final NightDayModeNotifier mode;
 
-  /// Sets the mode from a page under it.
-  static void set(BuildContext context, NightDayMode mode) =>
-      context.getInheritedWidgetOfExactType<NightDayChoice>()?.mode.value = mode;
+  /// Sets the mode from a page under it; [instant] when it is found at
+  /// start, not changed by the dreamer (D57 Q15).
+  static void set(BuildContext context, NightDayMode mode, {bool instant = false}) {
+    final notifier = context.getInheritedWidgetOfExactType<NightDayChoice>()?.mode;
+    instant ? notifier?.setInstant(mode) : notifier?.value = mode;
+  }
 
   @override
   bool updateShouldNotify(NightDayChoice old) => old.mode != mode;
@@ -105,9 +130,11 @@ class _NightDayState extends State<NightDay> with WidgetsBindingObserver {
   void _check({bool returning = false}) {
     final night = _nightNow();
     if (night == _night) return;
+    final mode = widget.mode;
+    final found = returning || (mode is NightDayModeNotifier && mode.instant);
     setState(() {
       _night = night;
-      _fade = !returning && _open && !_still ? NightDay.fade : Duration.zero;
+      _fade = !found && _open && !_still ? NightDay.fade : Duration.zero;
     });
   }
 
