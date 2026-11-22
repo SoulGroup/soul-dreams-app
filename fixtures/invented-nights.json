@@ -4,6 +4,22 @@
     {
       "key": "two-dreams-en",
       "lang": "en",
+      "waking": [
+        {
+          "text": "I started a new job at the library this week. My sister moved to Lisbon in October!",
+          "sentences": [
+            "I started a new job at the library this week.",
+            "My sister moved to Lisbon in October!"
+          ]
+        },
+        {
+          "text": "We painted the kitchen green last weekend... It still smells of paint.",
+          "sentences": [
+            "We painted the kitchen green last weekend...",
+            "It still smells of paint."
+          ]
+        }
+      ],
       "heard": [
         ["The", " light", "house", " was", " dark", "."],
         ["I", " was", " there", " a", "gain", "."]
@@ -16,6 +32,15 @@
     {
       "key": "framed-opening-en",
       "lang": "en",
+      "waking": [
+        {
+          "text": "I have been walking to work since the bus route changed\nThe mornings are colder now.  ",
+          "sentences": [
+            "I have been walking to work since the bus route changed",
+            "The mornings are colder now."
+          ]
+        }
+      ],
       "dreams": [
         "I had a dream that a paper boat carried me down a staircase of water inside an old library."
       ]
@@ -23,6 +48,15 @@
     {
       "key": "one-dream-sv",
       "lang": "sv",
+      "waking": [
+        {
+          "text": "Vi flyttade till en ny lägenhet i september. Jag har börjat sjunga i en kör!",
+          "sentences": [
+            "Vi flyttade till en ny lägenhet i september.",
+            "Jag har börjat sjunga i en kör!"
+          ]
+        }
+      ],
       "dreams": [
         "Jag stod på en perrong där tågen var gjorda av glas, och varje vagn var full av små citronträd."
       ]
@@ -30,6 +64,15 @@
     {
       "key": "named-three-dreams-sv",
       "lang": "sv",
+      "waking": [
+        {
+          "text": "Har jag berättat att vi fick en hund? Hon heter Selma.",
+          "sentences": [
+            "Har jag berättat att vi fick en hund?",
+            "Hon heter Selma."
+          ]
+        }
+      ],
       "name": "Glastrappan",
       "dreams": [
         "En trappa av glas gick upp genom molnen.",
@@ -40,6 +83,20 @@
     {
       "key": "long-dream-en",
       "lang": "en",
+      "waking": [
+        {
+          "text": "The exam is on Friday. Dr. Lind said it would be short. “It is only an hour.” she told us. Prices went up 2.5 percent?! ... I keep forgetting my keys",
+          "sentences": [
+            "The exam is on Friday.",
+            "Dr.",
+            "Lind said it would be short.",
+            "“It is only an hour.”",
+            "she told us.",
+            "Prices went up 2.5 percent?!",
+            "I keep forgetting my keys"
+          ]
+        }
+      ],
       "dreams": [
         "A copper bell hung from the branch of an orange tree, and every time the wind moved it the oranges changed colour, first to blue, then to grey, then back again. I climbed the tree to stop the bell, but the branches kept growing longer under my hands, so the bell was always one arm away. Below me a crowd of tortoises carried lanterns across a frozen river, and none of them looked up."
       ]

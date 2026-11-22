@@ -41,4 +41,20 @@ void main() {
     // The second recording has a piece with no space in front, after others.
     expect(heard[1].skip(1).any((p) => !p.startsWith(' ')), isTrue);
   });
+
+  test('the waking passages: both languages, each with its sentences', () {
+    final json = jsonDecode(File('../fixtures/invented-nights.json').readAsStringSync());
+    final raw = [
+      for (final n in (json as Map<String, Object?>)['nights'] as List<Object?>)
+        ...((n as Map<String, Object?>)['waking'] as List<Object?>? ?? const []),
+    ];
+    final waking = [for (final n in inventedNights()) ...n.waking];
+    expect(waking, hasLength(raw.length));
+    expect(waking, isNotEmpty);
+    expect({for (final n in inventedNights()) if (n.waking.isNotEmpty) n.lang}, {'en', 'sv'});
+    for (final w in waking) {
+      expect(w.text.trim(), isNotEmpty);
+      expect(w.sentences, isNotEmpty);
+    }
+  });
 }

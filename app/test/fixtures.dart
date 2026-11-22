@@ -9,7 +9,7 @@ import 'package:souldreams/words/lines.g.dart' show Lang;
 
 /// One invented night, as the fixture file holds it.
 final class InventedNight {
-  const InventedNight(this.key, this.lang, this.name, this.dreams, [this.heard = const []]);
+  const InventedNight(this.key, this.lang, this.name, this.dreams, [this.heard = const [], this.waking = const []]);
 
   final String key;
   final String lang;
@@ -19,7 +19,15 @@ final class InventedNight {
   /// Recordings of this night as Soniox sends them: each a list of
   /// sub-word pieces, spaces inside them (D73). Only some nights have them.
   final List<List<String>> heard;
+
+  /// What the dreamer wrote or said in this night outside the dream (Life
+  /// Context, C159-I item 1): each passage, and the sentences it holds, word
+  /// for word. Only some nights have them.
+  final List<Waking> waking;
 }
+
+/// One passage of a night outside the dream, and its sentences.
+typedef Waking = ({String text, List<String> sentences});
 
 /// Every invented night, in the file's order.
 List<InventedNight> inventedNights() {
@@ -29,6 +37,10 @@ List<InventedNight> inventedNights() {
       if (n case {'key': String key, 'lang': String lang, 'dreams': List<Object?> dreams})
         InventedNight(key, lang, (n as Map)['name'] as String?, dreams.cast<String>(), [
           for (final h in (n['heard'] as List<Object?>?) ?? const []) (h as List<Object?>).cast<String>(),
+        ], [
+          for (final w in (n['waking'] as List<Object?>?) ?? const [])
+            if (w case {'text': String text, 'sentences': List<Object?> sentences})
+              (text: text, sentences: sentences.cast<String>()),
         ]),
   ];
 }
