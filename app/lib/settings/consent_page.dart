@@ -40,12 +40,8 @@ class ConsentChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final words = Lines.MP_67.parts(appLanguage);
-    Widget one(bool given, String text) => _Choice(
-      key: keyOf(consent, given),
-      text: text,
-      chosen: chosen == given,
-      onTap: () => onChoose(given),
-    );
+    Widget one(bool given, String text) =>
+        _Choice(key: keyOf(consent, given), text: text, chosen: chosen == given, onTap: () => onChoose(given));
     return ButtonRow(left: one(true, words.first), right: one(false, words.last));
   }
 }
@@ -60,7 +56,9 @@ class _Choice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
-    final filled = Theme.of(context).brightness == Brightness.dark ? DarkColours.buttonFilled : LightColours.buttonFilled;
+    final filled = Theme.of(context).brightness == Brightness.dark
+        ? DarkColours.buttonFilled
+        : LightColours.buttonFilled;
     final top = chosen ? filled.colour! : p.buttonTop;
     final bottom = chosen ? (filled.colourEnd ?? filled.colour!) : p.buttonBottom;
     return Semantics(
@@ -94,29 +92,34 @@ class ConsentPage extends StatelessWidget {
 
   /// Shows [consent]'s page; true only when the dreamer consents.
   static Future<bool> ask(BuildContext context, Consent consent) async =>
-      await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => ConsentPage(consent: consent))) ==
-      true;
+      await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => ConsentPage(consent: consent))) == true;
 
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     return Scaffold(
       body: SafeArea(
-        child: ListView(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.gap, Spacing.pageSide, StandIns.gap),
-          children: [
-            Align(alignment: Alignment.topLeft, child: BackControl(onPressed: () => Navigator.of(context).pop())),
-            const SizedBox(height: StandIns.gap),
-            DecoratedBox(
-              decoration: surface(p),
-              child: Padding(
-                padding: Spacing.onboardingBox,
-                child: AppLine(consentText(consent).text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Align(
+                alignment: Alignment.topLeft,
+                child: BackControl(onPressed: () => Navigator.of(context).pop()),
               ),
-            ),
-            const SizedBox(height: StandIns.gap),
-            ConsentChoice(consent: consent, chosen: null, onChoose: (given) => Navigator.of(context).pop(given)),
-          ],
+              const SizedBox(height: StandIns.gap),
+              DecoratedBox(
+                decoration: surface(p),
+                child: Padding(
+                  padding: Spacing.onboardingBox,
+                  child: AppLine(consentText(consent).text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                ),
+              ),
+              const SizedBox(height: StandIns.gap),
+              ConsentChoice(consent: consent, chosen: null, onChoose: (given) => Navigator.of(context).pop(given)),
+            ],
+          ),
         ),
       ),
     );

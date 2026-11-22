@@ -7,9 +7,10 @@
 // a time; a month divider over each month with nights; C4-P·5 when there is
 // no night. Straight from onboarding, the first empty journal also shows
 // MP·9 under New Dream, with an arrow up to it, once (main-path.md,
-// Onboarding, 5); the logo waits for the founder's file. No Settings entry
-// (a later branch, D116 item 5). Nothing on a row grades it: no badge,
-// count or status.
+// Onboarding, 5); the logo waits for the founder's file. The gear, top
+// left above the search field, opens Settings (main-path.md, Settings;
+// D110; D122): drawn in code in a 41 bordered circle in a 44 tap box, spoken
+// as MP·25. Nothing on a row grades it: no badge, count or status.
 // Search (D110; D116; D117): the field at the top, as wide as a row, EM·4
 // its placeholder, a magnifier drawn in code and silent, no clear button.
 // From three characters, where the list starts: the count of nights (MP·76)
@@ -17,8 +18,9 @@
 // month dividers, each with its context line under it, the match in Inter
 // Bold. The query lives only while the page does: never kept, never logged
 // (R3), no recent searches.
-// The sky mark stays 140 down.
+// The search field sits under the gear; the sky mark stays 140 down.
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -31,6 +33,7 @@ import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
 import '../../settings/settings_controller.dart';
+import '../../settings/settings_page.dart';
 import '../greeting.dart';
 import '../journal.dart';
 import '../night.dart';
@@ -64,6 +67,7 @@ class JournalPage extends StatefulWidget {
   final bool firstTime;
 
   static const arrowKey = Key('first-arrow');
+  static const gearKey = Key('gear');
   static const newDreamKey = Key('new-dream');
   static const searchKey = Key('search');
   static const searchFieldKey = Key('search-field');
@@ -239,11 +243,26 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.searchAbove, Spacing.pageSide, StandIns.journalEnd),
           children: [
+            if (widget.settings case final settings?) ...[
+              Align(
+                alignment: Alignment.topLeft,
+                child: _Gear(
+                  onPressed: () => _push(SettingsPage(journal: widget.journal, settings: settings)),
+                ),
+              ),
+              const SizedBox(height: StandIns.gearBelow),
+            ],
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: StandIns.rowSide - Spacing.pageSide),
               child: _SearchField(_search),
             ),
-            const SizedBox(height: StandIns.greetingAbove - StandIns.searchAbove - Spacing.sizeFieldSearch),
+            SizedBox(
+              height:
+                  StandIns.greetingAbove -
+                  StandIns.searchAbove -
+                  Spacing.sizeFieldSearch -
+                  (widget.settings == null ? 0 : StandIns.hitMin + StandIns.gearBelow),
+            ),
             // The sun by day, the moon by night, then the greeting (D112).
             Center(child: SkyMark(_sky)),
             const SizedBox(height: StandIns.skyGap),
@@ -294,6 +313,84 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
       ),
     );
   }
+}
+
+/// The gear (D122; TO TRY): a thin gear drawn in code in a round bordered
+/// button of 41 (color.button), in a tap box of 44, as the back control;
+/// spoken as MP·25.
+class _Gear extends StatelessWidget {
+  const _Gear({required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Semantics(
+      button: true,
+      label: Lines.MP_25.text(appLanguage),
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: JournalPage.gearKey,
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: SizedBox.square(
+          dimension: StandIns.hitMin,
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox.square(
+              dimension: StandIns.backSize,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [p.buttonTop, p.buttonBottom],
+                  ),
+                  border: Border.all(color: p.buttonBorder),
+                ),
+                child: Center(
+                  child: SizedBox.fromSize(size: StandIns.gear, child: CustomPaint(painter: _GearLine(p.buttonText))),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GearLine extends CustomPainter {
+  _GearLine(this.colour);
+
+  final Color colour;
+
+  /// How many teeth the gear has.
+  static const teeth = 8;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final c = size.center(Offset.zero);
+    final r = size.shortestSide / 2;
+    final line = Paint()
+      ..color = colour
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = StandIns.chevronStroke * 0.75
+      ..strokeCap = StrokeCap.round;
+    canvas.drawCircle(c, r * 0.62, line);
+    canvas.drawCircle(c, r * 0.25, line);
+    for (var i = 0; i < teeth; i++) {
+      final a = i * 2 * pi / teeth;
+      final d = Offset(cos(a), sin(a));
+      canvas.drawLine(c + d * (r * 0.66), c + d * (r * 0.95), line..strokeWidth = StandIns.chevronStroke * 1.4);
+      line.strokeWidth = StandIns.chevronStroke * 0.75;
+    }
+  }
+
+  @override
+  bool shouldRepaint(_GearLine old) => old.colour != colour;
 }
 
 /// The search's count: one night, more, or none (D117 Q2, Q3, Q5).

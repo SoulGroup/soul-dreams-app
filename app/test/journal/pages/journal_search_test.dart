@@ -14,6 +14,9 @@ import 'package:souldreams/journal/pages/night_page.dart';
 import 'package:souldreams/journal/pages/sky_mark.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/journal/search.dart';
+import 'package:souldreams/settings/consents.dart';
+import 'package:souldreams/settings/settings_controller.dart';
+import 'package:souldreams/settings/settings_page.dart';
 import 'package:souldreams/words/lines.g.dart';
 
 import '../../fixtures.dart';
@@ -67,6 +70,33 @@ void main() {
     expect(field.right, closeTo(width - StandIns.rowSide, 1));
     // The sky mark stays where it was, below it.
     expect(tester.getRect(find.byType(SkyMark)).top - top, closeTo(StandIns.greetingAbove, 1));
+  });
+
+  // D122: with the settings, the gear stands top left, the field under it,
+  // and the sky mark stays 140 down; the gear opens Settings, spoken MP·25.
+  testWidgets('the gear: top left, the field under it', (tester) async {
+    final h = await Harness.make();
+    final settings = SettingsController(h.journal, consents: Consents.answered({}, DateTime.utc(2026)));
+    await h.pump(tester, JournalPage(journal: h.journal, settings: settings));
+    final top = tester.getRect(find.byType(ListView)).top;
+    final gear = tester.getRect(find.byKey(JournalPage.gearKey));
+    final field = tester.getRect(find.byKey(JournalPage.searchFieldKey));
+    expect(gear.top - top, closeTo(StandIns.searchAbove, 1));
+    expect(gear.left, closeTo(Spacing.pageSide, 1));
+    expect(gear.size, const Size.square(StandIns.hitMin));
+    expect(field.top - gear.bottom, closeTo(StandIns.gearBelow, 1));
+    expect(tester.getRect(find.byType(SkyMark)).top - top, closeTo(StandIns.greetingAbove, 1));
+    expect(tester.getSemantics(find.byKey(JournalPage.gearKey)).label, Lines.MP_25.text(Lang.en));
+    await tester.tap(find.byKey(JournalPage.gearKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(SettingsPage), findsOneWidget);
+    expect(tester.widget<SettingsPage>(find.byType(SettingsPage)).settings, same(settings));
+  });
+
+  testWidgets('with no settings, no gear', (tester) async {
+    final h = await Harness.make();
+    await h.pump(tester, JournalPage(journal: h.journal));
+    expect(find.byKey(JournalPage.gearKey), findsNothing);
   });
 
   testWidgets('the field suggests and corrects nothing', (tester) async {

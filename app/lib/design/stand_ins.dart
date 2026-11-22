@@ -32,6 +32,17 @@ abstract final class StandIns {
   /// its magnifier, drawn as a ring and a handle, and the space after it;
   /// and the space between a result's row and its context line (D117 Q8).
   static const double searchAbove = 20;
+
+  /// Settings (D122; TO TRY): the gear's drawing inside its 41 circle, and
+  /// the space under its tap box, above the search field; a row's padding,
+  /// its value pill's, the pill's small chevron (pointing down); the quick
+  /// toggle's sun or moon inside its circle.
+  static const gear = Size(22, 22);
+  static const double gearBelow = 8;
+  static const settingPadding = EdgeInsets.symmetric(horizontal: 24, vertical: 10);
+  static const settingValuePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 10);
+  static const settingChevron = Size(7, 12);
+  static const toggleMark = Size(26, 26);
   static const searchPadding = EdgeInsets.symmetric(horizontal: 18);
   static const magnifier = Size(16, 16);
   static const double magnifierStroke = 1.5;

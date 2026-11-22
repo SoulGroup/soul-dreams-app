@@ -9,16 +9,19 @@ import '../../design/stand_ins.dart';
 import '../sky.dart';
 
 class SkyMark extends StatelessWidget {
-  const SkyMark(this.sky, {super.key});
+  const SkyMark(this.sky, {super.key, this.size = StandIns.skyMark});
 
   final Sky sky;
+
+  /// Its size: the journal's, unless given (Settings' quick toggle).
+  final Size size;
 
   /// How many rays the sun has.
   static const rays = 8;
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-    child: SizedBox.fromSize(size: StandIns.skyMark, child: CustomPaint(painter: _SkyPainter(sky))),
+    child: SizedBox.fromSize(size: size, child: CustomPaint(painter: _SkyPainter(sky))),
   );
 }
 
