@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `life-context` (Life Context, the mechanical part, D110 item 2 and D131; the owner's by-eye review next), by Claude Code.
+Last updated: 2026-11-22, in branch `life-context` (Life Context, the mechanical part, D110 item 2, D131 to D134; the owner's look passed and the full mutation run done; the merge next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -24,8 +24,9 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `life-context`: the owner's by-eye review (plan Task 7), the Product questions (banked item 167), then the full
-  mutation run before the merge (D126).
+- `life-context`: the merge. The owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
+  the full pass, D98) and the full mutation run is done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min 1 s
+  on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
 - Then "Made by AI"; Feedback, with its server change (D121 item 4). Life Context's sources (the opening's answers,
   what is said after it, the reflection, Waking Life) come with Questions and Reflection, and with them the mark on a
   tapped sentence's night (D131 item 3). The curated set of night paintings (about 60, the founder's)
