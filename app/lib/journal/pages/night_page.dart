@@ -428,7 +428,7 @@ class _NightPageState extends State<NightPage> {
                           child: Semantics(
                             key: NightPage.transcribingKey,
                             liveRegion: true,
-                            child: AppLine(Lines.AI_6.text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                            child: AppLine(Lines.AI_6.text(appLanguage), style: StandIns.voiceApp(p.text)),
                           ),
                         ),
                         const SizedBox(height: StandIns.bubbleGap),

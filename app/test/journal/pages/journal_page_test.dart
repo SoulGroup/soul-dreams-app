@@ -185,44 +185,20 @@ void main() {
     handle.dispose();
   });
 
-  // Onboarding's last step (main-path.md, Onboarding, 5): the first empty
-  // journal adds MP·9 with an arrow up to New Dream, shown once: gone when a
-  // night is there, and never on a later empty journal.
-  testWidgets('the first empty journal: MP·9 under New Dream, once', (tester) async {
+  // D125 item 3: the first empty journal shows C4-P·5 and nothing more: no
+  // MP·9 under New Dream, and no arrow up to it.
+  testWidgets('the first empty journal: no MP·9, no arrow', (tester) async {
     final h = await Harness.make();
-    await h.pump(tester, JournalPage(journal: h.journal, firstTime: true));
-    final pointer = find.bySemanticsLabel(Lines.MP_9.text(Lang.en));
-    expect(pointer, findsOneWidget);
-    expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
-    expect(find.byKey(JournalPage.arrowKey), findsOneWidget);
-    final arrow = tester.getRect(find.byKey(JournalPage.arrowKey));
-    final button = tester.getRect(find.byKey(JournalPage.newDreamKey));
-    expect(arrow.top, greaterThanOrEqualTo(button.bottom));
-    expect(arrow.center.dx, closeTo(button.center.dx, 1));
-    final mp9 = tester.getRect(find.byWidgetPredicate((w) => w is AppLine && w.text == Lines.MP_9.text(Lang.en)));
-    expect(mp9.top, greaterThanOrEqualTo(arrow.bottom));
-    // A night comes, then goes, on the same visit: MP·9 does not return.
-    final night = await keep(h, 'two-dreams-en', stockholm(2026, 6, 10, 7));
-    Future<void> back() async {
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-      await tester.pumpAndSettle();
-    }
-
-    await back();
-    expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
-    await h.journal.delete(night.id);
-    await back();
+    await h.pump(tester, JournalPage(journal: h.journal));
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
-    expect(find.byKey(JournalPage.arrowKey), findsNothing);
+    expect(find.byWidgetPredicate((w) => w is CustomPaint && w.size == const Size(12, 32)), findsNothing);
   });
 
   testWidgets('a later empty journal has no MP·9', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
     expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
-    expect(find.byKey(JournalPage.arrowKey), findsNothing);
   });
 
   // Head's message 20, item 7: the empty journal's line in the button type,

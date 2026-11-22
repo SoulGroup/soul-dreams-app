@@ -109,11 +109,12 @@ void main() {
     var now = DateTime(2026, 6, 10, 12);
     await tester.pumpWidget(SoulDreamsApp(clock: () => now));
     expect(pageOf(tester), light);
+    // A change the dreamer makes takes half a second, not five (D125 item 6).
     NightDayChoice.set(tester.element(find.byType(Scaffold)), NightDayMode.night);
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 2500));
+    await tester.pump(NightDay.quickFade ~/ 2);
     expect(pageOf(tester), Color.lerp(light, dark, 0.5));
-    await tester.pump(const Duration(milliseconds: 2600));
+    await tester.pump(NightDay.quickFade ~/ 2 + const Duration(milliseconds: 100));
     expect(pageOf(tester), dark);
     now = DateTime(2026, 6, 11, 9);
     await tester.pump(NightDay.tick);
@@ -121,8 +122,21 @@ void main() {
     expect(pageOf(tester), dark);
     NightDayChoice.set(tester.element(find.byType(Scaffold)), NightDayMode.automatic);
     await tester.pump();
-    await tester.pump(NightDay.fade);
+    await tester.pump(NightDay.quickFade);
     expect(pageOf(tester), light);
+  });
+
+  // D125 item 6: the clock turning the hour keeps the five seconds.
+  testWidgets('the clock turning the hour still fades over five seconds', (tester) async {
+    var now = DateTime(2026, 6, 10, 20, 59);
+    await tester.pumpWidget(SoulDreamsApp(clock: () => now));
+    expect(pageOf(tester), light);
+    now = DateTime(2026, 6, 10, 21, 0);
+    await tester.pump(NightDay.tick);
+    await tester.pump(NightDay.fade ~/ 2);
+    expect(pageOf(tester), Color.lerp(light, dark, 0.5));
+    await tester.pump(NightDay.fade ~/ 2 + const Duration(milliseconds: 100));
+    expect(pageOf(tester), dark);
   });
 
   // Design System §6: with Word Animation off, the change is at once.

@@ -1,9 +1,11 @@
 // Settings (main-path.md, Settings; Design System §6; C18-P; D110; D121;
 // D122), reached from the journal's gear, in SoulDreams Dev only: the back
-// control top left; the quick toggle top centre (MP·45), the sun in the
-// light theme and the moon in the dark, which switches the theme and sets
-// Night/Day mode to Manual; MP·25 in h2; then six rows, each its name and a
-// value pill opening the phone's menu: Language (EM·9; English only, its
+// control top left; the quick toggle top centre (MP·45), showing what it
+// switches to, a moon in the light theme and a sun in the dark, which
+// switches the theme in half a second and sets Night/Day mode to Manual
+// (D125 items 6 and 7); MP·25 in h2; then six rows, each its name and a
+// value pill, every pill one size and every row one height (D125 item 4),
+// opening the phone's menu: Language (EM·9; English only, its
 // name owed, D121 item 1), Word Animation (MP·26), Night images (MP·85),
 // Night/Day mode (MP·44), Life Context (MP·83) and Life Context length
 // (MP·84); then "Read disclosure & privacy" (MP·48), "Withdraw consent" or
@@ -59,6 +61,9 @@ class SettingsPage extends StatefulWidget {
   static const consentKey = Key('settings-consent');
   static const deleteKey = Key('settings-delete');
   static const notKeptKey = Key('settings-not-kept');
+
+  /// A row, whole.
+  static Key rowKey(SettingRow row) => ValueKey('setting-row-${row.name}');
 
   /// A row's value pill.
   static Key valueKey(SettingRow row) => ValueKey('setting-${row.name}');
@@ -294,76 +299,78 @@ class _Row extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: Spacing.journalRow),
       child: DecoratedBox(
+        key: SettingsPage.rowKey(row),
         decoration: surface(p),
-        child: Padding(
-          padding: StandIns.settingPadding,
-          child: Row(
-            children: [
-              Expanded(child: Text(name, style: style)),
-              const SizedBox(width: StandIns.gap),
-              // At large text the pill shrinks its words to fit the row.
-              if (choices.isNotEmpty)
-                Flexible(
-                  child: FittedBox(
-                    fit: BoxFit.scaleDown,
-                    child: CupertinoMenuAnchor(
-                      consumeOutsideTaps: true,
-                      menuChildren: [
-                        for (final (i, choice) in choices.indexed)
-                          CupertinoMenuItem(
-                            key: SettingsPage.choiceKey(row, i),
-                            onPressed: () => onChoose(i),
-                            child: Text(choice),
-                          ),
-                      ],
-                      builder: (context, controller, _) => Semantics(
-                        button: true,
-                        label: name,
-                        value: choices[chosen],
-                        excludeSemantics: true,
-                        child: GestureDetector(
-                          key: SettingsPage.valueKey(row),
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () => controller.isOpen ? controller.close() : controller.open(),
-                          child: ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: StandIns.hitMin),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: p.field,
-                                borderRadius: BorderRadius.circular(Spacing.radius),
-                                border: Border.all(color: p.fieldBorder),
-                              ),
-                              child: Padding(
-                                padding: StandIns.settingValuePadding,
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(choices[chosen], style: TypeRoles.button.style(p.fieldText)),
-                                    const SizedBox(width: StandIns.searchGap),
-                                    RotatedBox(
-                                      quarterTurns: 1,
-                                      child: Chevron(colour: p.fieldText, size: StandIns.settingChevron),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: StandIns.settingRowHeight),
+          child: Padding(
+            padding: StandIns.settingPadding,
+            child: Row(
+              children: [
+                Expanded(child: Text(name, style: style)),
+                const SizedBox(width: StandIns.searchGap),
+                if (choices.isNotEmpty) SizedBox(width: StandIns.settingPillWidth, child: _pill(p)),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
+  // The value pill opening the phone's menu: one size for every row, its
+  // border the row's own grey (D125 item 4); at large text its words shrink
+  // to fit, the pill's size staying.
+  Widget _pill(Palette p) => CupertinoMenuAnchor(
+    consumeOutsideTaps: true,
+    menuChildren: [
+      for (final (i, choice) in choices.indexed)
+        CupertinoMenuItem(key: SettingsPage.choiceKey(row, i), onPressed: () => onChoose(i), child: Text(choice)),
+    ],
+    builder: (context, controller, _) => Semantics(
+      button: true,
+      label: name,
+      value: choices[chosen],
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: SettingsPage.valueKey(row),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: StandIns.hitMin),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: p.field,
+              borderRadius: BorderRadius.circular(Spacing.radius),
+              border: Border.all(color: p.surfaceBorder),
+            ),
+            child: Padding(
+              padding: StandIns.settingValuePadding,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(choices[chosen], style: TypeRoles.button.style(p.fieldText)),
+                    const SizedBox(width: StandIns.searchGap),
+                    RotatedBox(
+                      quarterTurns: 1,
+                      child: Chevron(colour: p.fieldText, size: StandIns.settingChevron),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
-/// The quick toggle (MP·45): a 41 bordered circle in a 44 tap box, the sun
-/// in the light theme and the moon in the dark (the sky mark's drawing).
+/// The quick toggle (MP·45): a 41 bordered circle in a 44 tap box, showing
+/// what it switches to: a moon in the light theme, drawn in the dark theme's
+/// page colour, and a sun in the dark (the sky mark's drawing; D125 item 7).
 class _Toggle extends StatelessWidget {
   const _Toggle({required this.dark, required this.onPressed});
 
@@ -398,7 +405,9 @@ class _Toggle extends StatelessWidget {
                   ),
                   border: Border.all(color: p.buttonBorder),
                 ),
-                child: Center(child: SkyMark(dark ? Sky.moon : Sky.sun, size: StandIns.toggleMark)),
+                child: Center(
+                  child: SkyMark(dark ? Sky.sun : Sky.moon, size: StandIns.toggleMark, moon: DarkColours.page.colour),
+                ),
               ),
             ),
           ),

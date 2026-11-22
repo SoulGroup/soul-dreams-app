@@ -1,9 +1,11 @@
 // Night/Day mode (design-system.md §6; main-path.md, Settings; P14; D56;
 // D122): Automatic, dark from 21:00 and light from 08:00 by the phone's
-// local time now; or Manual, Day or Night, as the dreamer set it. A change
-// found while the app is open fades over five seconds, easing in and out
-// (head's message 20, item 13); with Word Animation off, or the phone's
-// Reduce Motion on, or animations disabled, it is instant. A change found
+// local time now; or Manual, Day or Night, as the dreamer set it. The clock
+// turning the hour while the app is open fades over five seconds, easing in
+// and out (head's message 20, item 13); a change the dreamer makes, the
+// quick toggle or the mode, takes half a second (D125 item 6); with Word
+// Animation off, or the phone's Reduce Motion on, or animations disabled,
+// it is instant. A change found
 // at start or on returning to the app is instant (D57 Q15). On iOS, Reduce
 // Motion is its own flag, which MediaQuery does not carry, so it is read
 // from the platform's accessibility features. The mode lives above the app
@@ -79,8 +81,11 @@ class NightDay extends StatefulWidget {
 
   final Widget Function(BuildContext context, ThemeMode mode, Duration fade) builder;
 
-  /// The fade while the app is open (§6).
+  /// The fade while the app is open, when the clock turns the hour (§6).
   static const fade = Duration(seconds: 5);
+
+  /// The fade of a change the dreamer makes (D125 item 6).
+  static const quickFade = Duration(milliseconds: 500);
 
   /// How often the clock is looked at.
   static const tick = Duration(minutes: 1);
@@ -100,13 +105,13 @@ class _NightDayState extends State<NightDay> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    widget.mode?.addListener(_check);
+    widget.mode?.addListener(_modeChanged);
     _timer = Timer.periodic(NightDay.tick, (_) => _check());
   }
 
   @override
   void dispose() {
-    widget.mode?.removeListener(_check);
+    widget.mode?.removeListener(_modeChanged);
     _timer.cancel();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
@@ -127,14 +132,16 @@ class _NightDayState extends State<NightDay> with WidgetsBindingObserver {
     return state == null || state == AppLifecycleState.resumed;
   }
 
-  void _check({bool returning = false}) {
+  void _modeChanged() => _check(chosen: true);
+
+  void _check({bool returning = false, bool chosen = false}) {
     final night = _nightNow();
     if (night == _night) return;
     final mode = widget.mode;
     final found = returning || (mode is NightDayModeNotifier && mode.instant);
     setState(() {
       _night = night;
-      _fade = !found && _open && !_still ? NightDay.fade : Duration.zero;
+      _fade = found || !_open || _still ? Duration.zero : (chosen ? NightDay.quickFade : NightDay.fade);
     });
   }
 

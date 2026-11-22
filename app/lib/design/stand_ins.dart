@@ -5,9 +5,18 @@
 // those of journal-design, in docs/plans/journal-design.md.
 import 'package:flutter/painting.dart';
 
+import 'tokens.g.dart';
+
 abstract final class StandIns {
   // The page's side margin and the space between two journal rows, once
   // here, are filed at C17-P: `Spacing.pageSide` and `Spacing.journalRow`.
+
+  /// `type.voice.app`'s line height, 1.3: the founder's override of the filed
+  /// 1.5 (D125 item 1; for Product's next filing). Every use of that role
+  /// goes through [voiceApp], never `TypeRoles.voiceApp` itself.
+  static const double voiceAppHeight = 1.3;
+
+  static TextStyle voiceApp(Color colour) => TypeRoles.voiceApp.style(colour).copyWith(height: voiceAppHeight);
 
   /// A chevron (head's message 20, items 4 and 9): its size, and its line.
   static const rowChevron = Size(10, 18);
@@ -33,14 +42,15 @@ abstract final class StandIns {
   /// and the space between a result's row and its context line (D117 Q8).
   static const double searchAbove = 20;
 
-  /// Settings (D122; TO TRY): the gear's drawing inside its 41 circle, and
-  /// the space under its tap box, above the search field; a row's padding,
-  /// its value pill's, the pill's small chevron (pointing down); the quick
-  /// toggle's sun or moon inside its circle.
+  /// Settings (D122, D125; TO TRY): the settings button's drawing (three
+  /// sliders) inside its 41 circle; a row's padding and its one height; every
+  /// value pill's one width and its padding; the pill's small chevron
+  /// (pointing down); the quick toggle's sun or moon inside its circle.
   static const gear = Size(22, 22);
-  static const double gearBelow = 8;
-  static const settingPadding = EdgeInsets.symmetric(horizontal: 24, vertical: 10);
-  static const settingValuePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 10);
+  static const settingPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 10);
+  static const double settingRowHeight = 64;
+  static const double settingPillWidth = 128;
+  static const settingValuePadding = EdgeInsets.symmetric(horizontal: 10, vertical: 10);
   static const settingChevron = Size(7, 12);
   static const toggleMark = Size(26, 26);
   static const searchPadding = EdgeInsets.symmetric(horizontal: 18);
@@ -89,11 +99,6 @@ abstract final class StandIns {
   static const double jumpGap = 8;
   static const jumpTime = Duration(milliseconds: 300);
   static const jumpQuestions = [Color(0xFF8A5A1E), Color(0xFF5E3C12)];
-
-  /// The first empty journal's arrow up to New Dream (main-path.md,
-  /// Onboarding, 5): its size, and the space above and below it.
-  static const firstArrow = Size(12, 32);
-  static const double arrowGap = 8;
 
   /// Inside a button, and a section label.
   static const buttonPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 15);

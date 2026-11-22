@@ -69,7 +69,7 @@ class DisclosurePage extends StatelessWidget {
                         child: Text(
                           line.parts(appLanguage).join('\n'),
                           textAlign: TextAlign.center,
-                          style: TypeRoles.voiceApp.style(p.text),
+                          style: StandIns.voiceApp(p.text),
                         ),
                       ),
                   ],

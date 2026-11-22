@@ -9,26 +9,30 @@ import '../../design/stand_ins.dart';
 import '../sky.dart';
 
 class SkyMark extends StatelessWidget {
-  const SkyMark(this.sky, {super.key, this.size = StandIns.skyMark});
+  const SkyMark(this.sky, {super.key, this.size = StandIns.skyMark, this.moon});
 
   final Sky sky;
 
   /// Its size: the journal's, unless given (Settings' quick toggle).
   final Size size;
 
+  /// The moon's colour, unless given (the quick toggle's, D125 item 7).
+  final Color? moon;
+
   /// How many rays the sun has.
   static const rays = 8;
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-    child: SizedBox.fromSize(size: size, child: CustomPaint(painter: _SkyPainter(sky))),
+    child: SizedBox.fromSize(size: size, child: CustomPaint(painter: _SkyPainter(sky, moon ?? StandIns.moonColour))),
   );
 }
 
 class _SkyPainter extends CustomPainter {
-  _SkyPainter(this.sky);
+  _SkyPainter(this.sky, this.moon);
 
   final Sky sky;
+  final Color moon;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -51,10 +55,10 @@ class _SkyPainter extends CustomPainter {
         // A disc with a second one taken from it, leaving a crescent.
         final disc = Path()..addOval(Rect.fromCircle(center: c, radius: u * 0.42));
         final bite = Path()..addOval(Rect.fromCircle(center: c + Offset(u * 0.2, -u * 0.08), radius: u * 0.36));
-        canvas.drawPath(Path.combine(PathOperation.difference, disc, bite), Paint()..color = StandIns.moonColour);
+        canvas.drawPath(Path.combine(PathOperation.difference, disc, bite), Paint()..color = moon);
     }
   }
 
   @override
-  bool shouldRepaint(_SkyPainter old) => old.sky != sky;
+  bool shouldRepaint(_SkyPainter old) => old.sky != sky || old.moon != moon;
 }

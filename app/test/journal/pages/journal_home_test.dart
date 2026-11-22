@@ -324,7 +324,7 @@ void main() {
     await tester.pump();
     await tester.pump();
     expect(find.byType(JournalPage), findsOneWidget);
-    expect(tester.widget<JournalPage>(find.byType(JournalPage)).firstTime, isTrue);
+    expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
     expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
     final kept = jsonDecode(utf8.decode(files.files[JournalStore.consentFile]!)) as Map<String, dynamic>;
     expect(kept.keys, ['version', 'over18', 'readings', 'lifeContext', 'images']);
@@ -682,10 +682,10 @@ void main() {
     expect(find.byType(JournalPage), findsOneWidget);
     expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
     expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeAnimationDuration, Duration.zero);
-    // A change the dreamer makes afterwards still fades.
+    // A change the dreamer makes afterwards still fades, in half a second.
     NightDayChoice.set(tester.element(find.byType(JournalPage)), NightDayMode.day);
     await tester.pump();
-    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeAnimationDuration, NightDay.fade);
+    expect(tester.widget<MaterialApp>(find.byType(MaterialApp)).themeAnimationDuration, NightDay.quickFade);
     await tester.pumpAndSettle();
   });
 

@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/night_day.dart';
+import 'package:souldreams/design/palette.dart';
+import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
@@ -184,15 +186,33 @@ void main() {
     expect(c.settings.nightDay, NightDayMode.night);
     expect(shown(tester, SettingRow.nightDay), 'Manual');
     expect(tester.getSemantics(find.byKey(SettingsPage.toggleKey)).label, en(Lines.MP_45));
-    // The moon in the dark theme, at the toggle's size; tapped, the day.
+    // It shows what it switches to (D125 item 7): the sun in the dark theme,
+    // at the toggle's size; tapped, the day.
     final mark = find.descendant(of: find.byKey(SettingsPage.toggleKey), matching: find.byType(SkyMark));
-    expect(tester.widget<SkyMark>(mark).sky, Sky.moon);
+    expect(tester.widget<SkyMark>(mark).sky, Sky.sun);
     expect(tester.getSize(mark), StandIns.toggleMark);
     await hit(tester, find.byKey(SettingsPage.toggleKey));
     await tester.pumpAndSettle();
     expect(c.settings.nightDay, NightDayMode.day);
     expect(now(), Brightness.light);
-    expect(tester.widget<SkyMark>(mark).sky, Sky.sun);
+    // A moon in the light theme, drawn in the dark theme's page colour.
+    expect(tester.widget<SkyMark>(mark).sky, Sky.moon);
+    expect(tester.widget<SkyMark>(mark).moon, DarkColours.page.colour);
+    expect(tester.renderObject(find.descendant(of: mark, matching: find.byType(CustomPaint)).last), paints..path(color: DarkColours.page.colour));
+  });
+
+  // D125 item 6: the toggle's change takes half a second.
+  testWidgets('the toggle fades the theme over half a second', (tester) async {
+    await open(tester, hour: 12);
+    Color page() => Theme.of(tester.element(find.byType(SettingsPage))).scaffoldBackgroundColor;
+    final light = page();
+    await hit(tester, find.byKey(SettingsPage.toggleKey));
+    await tester.pump();
+    await tester.pump(NightDay.quickFade ~/ 2);
+    expect(page(), isNot(light));
+    expect(page(), isNot(DarkColours.page.colour));
+    await tester.pump(NightDay.quickFade ~/ 2 + const Duration(milliseconds: 100));
+    expect(page(), DarkColours.page.colour);
   });
 
   // The toggle heads for the other theme from where it is going, not from
@@ -201,10 +221,10 @@ void main() {
   testWidgets('the toggle tapped twice within the fade undoes the first', (tester) async {
     final c = await open(tester, hour: 12);
     await hit(tester, find.byKey(SettingsPage.toggleKey));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
     expect(c.settings.nightDay, NightDayMode.night);
     await tester.tap(find.byKey(SettingsPage.toggleKey));
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pump(const Duration(milliseconds: 200));
     expect(c.settings.nightDay, NightDayMode.day);
     expect(kept(JournalStore.settingsFile)['nightDay'], 'day');
     await tester.pumpAndSettle();
@@ -361,11 +381,57 @@ void main() {
     expect(find.text(en(Lines.MP_3)), findsOneWidget);
   });
 
+  // D125 item 4: every value pill one size, its border the row's own grey,
+  // every row one height.
+  for (final hour in [12, 23]) {
+    testWidgets('pills one size, row grey, rows one height ($hour h)', (tester) async {
+      // The test font (Ahem) is wider than Inter: its text is scaled down to
+      // stand for it, so that no name needs more than two lines.
+      tester.platformDispatcher.textScaleFactorTestValue = 0.8;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await open(tester, hour: hour);
+      final pills = [for (final row in SettingRow.values) find.byKey(SettingsPage.valueKey(row))];
+      final rows = [for (final row in SettingRow.values) find.byKey(SettingsPage.rowKey(row))];
+      for (final f in [...pills, ...rows]) {
+        await tester.ensureVisible(f);
+      }
+      await tester.pumpAndSettle();
+      final sizes = {for (final f in pills) tester.getSize(f)};
+      expect(sizes, hasLength(1));
+      expect(sizes.single.width, StandIns.settingPillWidth);
+      expect(sizes.single.height, greaterThanOrEqualTo(StandIns.hitMin));
+      final heights = {for (final f in rows) tester.getSize(f).height};
+      expect(heights, hasLength(1));
+      expect(heights.single, StandIns.settingRowHeight);
+      Color border(Finder f) {
+        final box = tester.widget<DecoratedBox>(f).decoration as BoxDecoration;
+        return (box.border! as Border).top.color;
+      }
+
+      final p = Palette.of(tester.element(find.byType(SettingsPage)));
+      for (var i = 0; i < SettingRow.values.length; i++) {
+        final inner = find.descendant(of: pills[i], matching: find.byType(DecoratedBox)).first;
+        expect(border(inner), p.surfaceBorder);
+        expect(border(inner), border(rows[i]));
+      }
+    });
+  }
+
   testWidgets('at the largest text, nothing overflows', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 3.1;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await open(tester);
     expect(tester.takeException(), isNull);
+    // Each pill keeps its size, and its words shrink to stay inside it.
+    for (final row in SettingRow.values) {
+      final pill = find.byKey(SettingsPage.valueKey(row));
+      await tester.ensureVisible(pill);
+      await tester.pumpAndSettle();
+      expect(tester.getSize(pill).width, StandIns.settingPillWidth);
+      final words = tester.getRect(find.descendant(of: pill, matching: find.byType(Text)));
+      expect(words.right, lessThanOrEqualTo(tester.getRect(pill).right));
+      expect(words.left, greaterThanOrEqualTo(tester.getRect(pill).left));
+    }
     await tester.drag(find.byType(SingleChildScrollView).first, const Offset(0, -3000));
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);

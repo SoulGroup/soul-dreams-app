@@ -5,12 +5,12 @@
 // gone); one rounded row per night, newest first, carrying only its date
 // over the night's picture (an unread night's the painted gradient), never
 // a time; a month divider over each month with nights; C4-P·5 when there is
-// no night. Straight from onboarding, the first empty journal also shows
-// MP·9 under New Dream, with an arrow up to it, once (main-path.md,
-// Onboarding, 5); the logo waits for the founder's file. The gear, top
-// left above the search field, opens Settings (main-path.md, Settings;
-// D110; D122): drawn in code in a 41 bordered circle in a 44 tap box, spoken
-// as MP·25. Nothing on a row grades it: no badge, count or status.
+// no night. The first empty journal shows nothing more: no MP·9 and no arrow
+// (D125 item 3); the logo waits for the founder's file. The settings button,
+// top left, on the search field's row, opens Settings (main-path.md,
+// Settings; D110; D122; D125 items 5 and 10): three sliders drawn in code in
+// a 41 bordered circle in a 44 tap box, spoken as MP·25. Nothing on a row
+// grades it: no badge, count or status.
 // Search (D110; D116; D117): the field at the top, as wide as a row, EM·4
 // its placeholder, a magnifier drawn in code and silent, no clear button.
 // From three characters, where the list starts: the count of nights (MP·76)
@@ -18,9 +18,9 @@
 // month dividers, each with its context line under it, the match in Inter
 // Bold. The query lives only while the page does: never kept, never logged
 // (R3), no recent searches.
-// The search field sits under the gear; the sky mark stays 140 down.
+// The search field sits to the right of the settings button, on its row; the
+// sky mark stays 140 down.
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 
@@ -53,7 +53,6 @@ class JournalPage extends StatefulWidget {
     super.key,
     required this.journal,
     this.recording,
-    this.firstTime = false,
     this.nightAction,
     this.read = noneRead,
     this.settings,
@@ -62,11 +61,6 @@ class JournalPage extends StatefulWidget {
 
   final Journal journal;
 
-  /// Straight from onboarding: while the journal is empty, MP·9 and its
-  /// arrow, until a night is there.
-  final bool firstTime;
-
-  static const arrowKey = Key('first-arrow');
   static const gearKey = Key('gear');
   static const newDreamKey = Key('new-dream');
   static const searchKey = Key('search');
@@ -101,7 +95,6 @@ class JournalPage extends StatefulWidget {
 
 class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   List<Night>? _nights;
-  late bool _first = widget.firstTime;
   late Greeting _greeting = _greetingNow();
   late Sky _sky = _skyNow();
   late final Timer _clock;
@@ -179,7 +172,6 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
       _greeting = _greetingNow();
       _sky = _skyNow();
       // Shown once: a night there ends it, even one deleted later.
-      if (nights.isNotEmpty) _first = false;
     });
   }
 
@@ -243,26 +235,26 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(Spacing.pageSide, StandIns.searchAbove, Spacing.pageSide, StandIns.journalEnd),
           children: [
-            if (widget.settings case final settings?) ...[
-              Align(
-                alignment: Alignment.topLeft,
-                child: _Gear(
-                  onPressed: () => _push(SettingsPage(journal: widget.journal, settings: settings)),
+            // The settings button, then the search field to its right, on one
+            // row (D125 item 5); the field ends where the rows do.
+            Row(
+              children: [
+                if (widget.settings case final settings?) ...[
+                  _Gear(onPressed: () => _push(SettingsPage(journal: widget.journal, settings: settings))),
+                  const SizedBox(width: StandIns.searchGap),
+                ],
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(
+                      left: widget.settings == null ? StandIns.rowSide - Spacing.pageSide : 0,
+                      right: StandIns.rowSide - Spacing.pageSide,
+                    ),
+                    child: _SearchField(_search),
+                  ),
                 ),
-              ),
-              const SizedBox(height: StandIns.gearBelow),
-            ],
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: StandIns.rowSide - Spacing.pageSide),
-              child: _SearchField(_search),
+              ],
             ),
-            SizedBox(
-              height:
-                  StandIns.greetingAbove -
-                  StandIns.searchAbove -
-                  Spacing.sizeFieldSearch -
-                  (widget.settings == null ? 0 : StandIns.hitMin + StandIns.gearBelow),
-            ),
+            const SizedBox(height: StandIns.greetingAbove - StandIns.searchAbove - Spacing.sizeFieldSearch),
             // The sun by day, the moon by night, then the greeting (D112).
             Center(child: SkyMark(_sky)),
             const SizedBox(height: StandIns.skyGap),
@@ -277,12 +269,6 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
             ),
             const SizedBox(height: StandIns.gap),
             Center(child: _NewDream(onPressed: _record)),
-            if (nights != null && nights.isEmpty && _first) ...[
-              const SizedBox(height: StandIns.arrowGap),
-              Center(child: _Arrow(key: JournalPage.arrowKey, colour: p.text)),
-              const SizedBox(height: StandIns.arrowGap),
-              AppLine(Lines.MP_9.text(appLanguage), style: TypeRoles.button.style(p.text)),
-            ],
             if (found != null) ...[
               const SizedBox(height: StandIns.listAbove),
               // The count of nights, or none (D117 Q2, Q3, Q5), where the
@@ -315,9 +301,10 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   }
 }
 
-/// The gear (D122; TO TRY): a thin gear drawn in code in a round bordered
-/// button of 41 (color.button), in a tap box of 44, as the back control;
-/// spoken as MP·25.
+/// The settings button (D122, D125 item 10; TO TRY): three sliders drawn in
+/// code, in place of the gear, in a round bordered button of 41
+/// (color.button), in a tap box of 44, as the back control; spoken as
+/// MP·25.
 class _Gear extends StatelessWidget {
   const _Gear({required this.onPressed});
 
@@ -326,7 +313,9 @@ class _Gear extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
+    // Its own node: on the search field's row it is not read with the field.
     return Semantics(
+      container: true,
       button: true,
       label: Lines.MP_25.text(appLanguage),
       excludeSemantics: true,
@@ -351,7 +340,7 @@ class _Gear extends StatelessWidget {
                   border: Border.all(color: p.buttonBorder),
                 ),
                 child: Center(
-                  child: SizedBox.fromSize(size: StandIns.gear, child: CustomPaint(painter: _GearLine(p.buttonText))),
+                  child: SizedBox.fromSize(size: StandIns.gear, child: CustomPaint(painter: _SlidersLine(p.buttonText))),
                 ),
               ),
             ),
@@ -362,35 +351,32 @@ class _Gear extends StatelessWidget {
   }
 }
 
-class _GearLine extends CustomPainter {
-  _GearLine(this.colour);
+class _SlidersLine extends CustomPainter {
+  _SlidersLine(this.colour);
 
   final Color colour;
 
-  /// How many teeth the gear has.
-  static const teeth = 8;
+  /// Where each knob sits along its line, as a share of the width.
+  static const knobs = [0.7, 0.3, 0.6];
 
   @override
   void paint(Canvas canvas, Size size) {
-    final c = size.center(Offset.zero);
-    final r = size.shortestSide / 2;
     final line = Paint()
       ..color = colour
       ..style = PaintingStyle.stroke
       ..strokeWidth = StandIns.chevronStroke * 0.75
       ..strokeCap = StrokeCap.round;
-    canvas.drawCircle(c, r * 0.62, line);
-    canvas.drawCircle(c, r * 0.25, line);
-    for (var i = 0; i < teeth; i++) {
-      final a = i * 2 * pi / teeth;
-      final d = Offset(cos(a), sin(a));
-      canvas.drawLine(c + d * (r * 0.66), c + d * (r * 0.95), line..strokeWidth = StandIns.chevronStroke * 1.4);
-      line.strokeWidth = StandIns.chevronStroke * 0.75;
+    final knob = Paint()..color = colour;
+    final r = size.height * 0.1;
+    for (final (i, at) in knobs.indexed) {
+      final y = size.height * (0.2 + 0.3 * i);
+      canvas.drawLine(Offset(r, y), Offset(size.width - r, y), line);
+      canvas.drawCircle(Offset(size.width * at, y), r * 1.5, knob);
     }
   }
 
   @override
-  bool shouldRepaint(_GearLine old) => old.colour != colour;
+  bool shouldRepaint(_SlidersLine old) => old.colour != colour;
 }
 
 /// The search's count: one night, more, or none (D117 Q2, Q3, Q5).
@@ -505,53 +491,6 @@ class _NewDream extends StatelessWidget {
       ),
     ),
   );
-}
-
-/// The first empty journal's arrow, up to New Dream: a thin line with a
-/// thin head, drawn as the chevrons are. Heard as nothing.
-class _Arrow extends StatelessWidget {
-  const _Arrow({super.key, required this.colour});
-
-  final Color colour;
-
-  @override
-  Widget build(BuildContext context) => ExcludeSemantics(
-    child: SizedBox.fromSize(
-      size: StandIns.firstArrow,
-      child: CustomPaint(painter: _ArrowLine(colour)),
-    ),
-  );
-}
-
-class _ArrowLine extends CustomPainter {
-  _ArrowLine(this.colour);
-
-  final Color colour;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const inset = StandIns.chevronStroke / 2;
-    final mid = size.width / 2;
-    const tip = inset;
-    final path = Path()
-      ..moveTo(mid, size.height - inset)
-      ..lineTo(mid, tip)
-      ..moveTo(inset, tip + mid)
-      ..lineTo(mid, tip)
-      ..lineTo(size.width - inset, tip + mid);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = colour
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = StandIns.chevronStroke
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round,
-    );
-  }
-
-  @override
-  bool shouldRepaint(_ArrowLine old) => old.colour != colour;
 }
 
 class _Divider extends StatelessWidget {

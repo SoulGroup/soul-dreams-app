@@ -72,21 +72,27 @@ void main() {
     expect(tester.getRect(find.byType(SkyMark)).top - top, closeTo(StandIns.greetingAbove, 1));
   });
 
-  // D122: with the settings, the gear stands top left, the field under it,
-  // and the sky mark stays 140 down; the gear opens Settings, spoken MP·25.
-  testWidgets('the gear: top left, the field under it', (tester) async {
+  // D122, D125 item 5: with the settings, the settings button stands top left
+  // and the field to its right on the same row, ending where the rows end; the
+  // sky mark stays 140 down; the button opens Settings, spoken MP·25.
+  testWidgets('the settings button: the field beside it', (tester) async {
     final h = await Harness.make();
-    final settings = SettingsController(h.journal, consents: Consents.answered({}, DateTime.utc(2026)));
+    final settings = SettingsController(h.journal, consents: Consents.answered(const {}, DateTime.utc(2026)));
     await h.pump(tester, JournalPage(journal: h.journal, settings: settings));
     final top = tester.getRect(find.byType(ListView)).top;
     final gear = tester.getRect(find.byKey(JournalPage.gearKey));
     final field = tester.getRect(find.byKey(JournalPage.searchFieldKey));
-    expect(gear.top - top, closeTo(StandIns.searchAbove, 1));
+    expect(field.top - top, closeTo(StandIns.searchAbove, 1));
     expect(gear.left, closeTo(Spacing.pageSide, 1));
     expect(gear.size, const Size.square(StandIns.hitMin));
-    expect(field.top - gear.bottom, closeTo(StandIns.gearBelow, 1));
+    expect(field.left, greaterThanOrEqualTo(gear.right));
+    expect(field.center.dy, closeTo(gear.center.dy, 1));
+    expect(field.right, closeTo(tester.view.physicalSize.width / tester.view.devicePixelRatio - StandIns.rowSide, 1));
     expect(tester.getRect(find.byType(SkyMark)).top - top, closeTo(StandIns.greetingAbove, 1));
     expect(tester.getSemantics(find.byKey(JournalPage.gearKey)).label, Lines.MP_25.text(Lang.en));
+    // Drawn as three sliders (D125 item 10): a line, then its knob, three times.
+    final mark = find.descendant(of: find.byKey(JournalPage.gearKey), matching: find.byType(CustomPaint)).last;
+    expect(tester.renderObject(mark), paints..line()..circle()..line()..circle()..line()..circle());
     await tester.tap(find.byKey(JournalPage.gearKey));
     await tester.pumpAndSettle();
     expect(find.byType(SettingsPage), findsOneWidget);

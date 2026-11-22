@@ -78,8 +78,6 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   Future<void> _idle = Future<void>.value();
   // Null until the consent is read; then whether it is given.
   bool? _agreed;
-  // The journal's first showing, straight from "I agree".
-  bool _first = false;
   bool _agreeing = false;
 
   @override
@@ -153,7 +151,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
 
   // The journal, once the dreamer has answered the consents, with the
   // settings kept (D122). Only now may anything leave the phone (D103).
-  void _enter(Consents consents, Settings settings, {bool first = false}) {
+  void _enter(Consents consents, Settings settings) {
     AlwaysLight.hold(context, false);
     final audio = _audio = JournalAudio(_store!);
     final controller = SettingsController(_journal!, consents: consents, settings: settings)
@@ -161,7 +159,6 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
       ..stopSending = () => _idle;
     setState(() {
       _agreed = true;
-      _first = first;
       _settings = controller;
     });
     // D98: the counts at launch and after each retry, for DevTools.
@@ -209,7 +206,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     }
     // Not reset here: a tap that lands before onboarding has left the tree
     // must not open the journal twice. `_onboard` resets it.
-    if (mounted) _enter(consents, const Settings(), first: true);
+    if (mounted) _enter(consents, const Settings());
   }
 
   // The journal deleted, the consents and settings with it (D110): every
@@ -235,7 +232,6 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
       true => JournalPage(
         journal: _journal!,
         recording: _recording,
-        firstTime: _first,
         nightAction: widget.nightAction,
         read: widget.read,
         settings: _settings,

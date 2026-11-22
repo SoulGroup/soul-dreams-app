@@ -113,7 +113,7 @@ class ConsentPage extends StatelessWidget {
                 decoration: surface(p),
                 child: Padding(
                   padding: Spacing.onboardingBox,
-                  child: AppLine(consentText(consent).text(appLanguage), style: TypeRoles.voiceApp.style(p.text)),
+                  child: AppLine(consentText(consent).text(appLanguage), style: StandIns.voiceApp(p.text)),
                 ),
               ),
               const SizedBox(height: StandIns.gap),

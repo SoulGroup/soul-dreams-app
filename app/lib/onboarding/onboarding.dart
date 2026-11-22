@@ -168,7 +168,7 @@ class _OnboardingState extends State<Onboarding> {
   }
 
   List<Widget> _words(Palette p) {
-    final voice = TypeRoles.voiceApp.style(p.text);
+    final voice = StandIns.voiceApp(p.text);
     Widget says(Line line) => AppLine(line.parts(appLanguage).join('\n'), style: voice);
     Widget reads(Line line) => Text(line.parts(appLanguage).join('\n'), textAlign: TextAlign.center, style: voice);
     switch (_step) {
