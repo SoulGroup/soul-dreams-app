@@ -28,6 +28,7 @@ import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/journal/search.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../../recording/fakes.dart';
@@ -86,6 +87,7 @@ void main() {
     bool unread = false,
     String? query,
     bool images = true,
+    bool agreed = true,
   }) async {
     // The test's own 800 by 600, where the foot's two buttons do not fill
     // the row, or a phone.
@@ -107,8 +109,21 @@ void main() {
     }
     // A first read that fails leaves the page blank, with no picture.
     if (unread) files!.failReads = true;
-    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read, images: images, query: query)),
-        hour: hour);
+    await h.pump(
+      tester,
+      Opener(
+        () async => NightPage(
+          journal: h.journal,
+          id: n.id,
+          action: action,
+          read: read,
+          images: images,
+          query: query,
+          agreed: agreed,
+        ),
+      ),
+      hour: hour,
+    );
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
   }
@@ -843,6 +858,33 @@ void main() {
     expect(find.byType(TypingPage), findsNothing);
     expect((await h.journal.night(n.id))!.dreams, n.dreams);
     handle.dispose();
+  });
+
+  // D128 item 3: before the dreamer has agreed, Start Interpretation shows
+  // MP·101 with its one button MP·102; nothing is started.
+  testWidgets('before agreeing: Start Interpretation shows the popup', (tester) async {
+    await open(tester, wide: true, agreed: false);
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
+    expect(find.byType(CupertinoDialogAction), findsOneWidget);
+    await tester.tap(find.text(PendingLines.MP_102.text(Lang.en)));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsNothing);
+    expect(find.byType(NightPage), findsOneWidget);
+  });
+
+  // D128 item 3: Add dreams from a night, before agreeing, opens the typing
+  // screen told so: the microphone shows, with the popup.
+  testWidgets('before agreeing: Add dreams opens a typing screen with the microphone', (tester) async {
+    await open(tester, wide: true, agreed: false);
+    await tester.tap(find.byKey(NightPage.addKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    expect(find.byKey(TypingPage.micKey), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
   });
 
   testWidgets('the date is heard as a heading', (tester) async {

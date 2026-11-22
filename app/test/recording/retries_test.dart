@@ -467,8 +467,10 @@ void main() {
 
   // D124 item 1: a withdrawal completes only after the retry in flight has
   // stopped, and nothing is sent after the cut: no key, no stream, no frame.
-  group('cut by a withdrawal (D124)', () {
-    test('idle waits for the frame read; none sent after the cut', () async {
+  // D124 item 1, which stands though there is no withdrawing now (D128): a cut
+  // sends nothing after it, no key, no stream and no frame.
+  group('after a cut, nothing is sent', () {
+    test('no frame after the cut, the one being read dropped', () async {
       await waits(first, [Waiting(x)], {x: 6400});
       audio
         ..open = 1
@@ -478,18 +480,13 @@ void main() {
       await pumpEventQueue();
       expect(frames(links.single), hasLength(1));
       r.dispose();
-      var idle = false;
-      unawaited(r.idle.then((_) => idle = true));
-      await pumpEventQueue();
-      expect(idle, isFalse);
       audio.gate!.complete();
       await pumpEventQueue();
-      expect(idle, isTrue);
       expect(frames(links.single), hasLength(1));
       expect(links.single.closed, isTrue);
     });
 
-    test('idle waits for the key; no stream opens after the cut', () async {
+    test('no stream opens after the cut, the key in flight ignored', () async {
       await waits(first, [Waiting(x)], {x: 6400});
       final gate = Completer<String>();
       var keys = 0;
@@ -502,13 +499,8 @@ void main() {
       await pumpEventQueue();
       expect(keys, 1);
       r.dispose();
-      var idle = false;
-      unawaited(r.idle.then((_) => idle = true));
-      await pumpEventQueue();
-      expect(idle, isFalse);
       gate.complete('k');
       await pumpEventQueue();
-      expect(idle, isTrue);
       expect(links, isEmpty);
       expect(keys, 1);
     });
@@ -539,22 +531,10 @@ void main() {
       r.kick();
       await pumpEventQueue();
       r.dispose();
-      var idle = false;
-      unawaited(r.idle.then((_) => idle = true));
-      await pumpEventQueue();
-      expect(idle, isFalse);
       gate.complete();
       await pumpEventQueue();
-      expect(idle, isTrue);
       expect(links.single.closed, isTrue);
       expect(frames(links.single), isEmpty);
-    });
-
-    test('idle is done at once when nothing runs', () async {
-      final r = retries();
-      await r.idle;
-      r.dispose();
-      await r.idle;
     });
   });
 

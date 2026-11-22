@@ -25,7 +25,7 @@
 // the day it last changed, and that the dreamer is 18 or over, never the
 // age band (C146-I item 1) (`settings/consents.dart`). So are the settings
 // (`settings/settings.dart`). Deleting the journal takes both, and returns
-// the app to its start; a consent withdrawn is an answer, kept (D121 item 5).
+// the app to its start; there is no withdrawing (D128).
 import 'dart:convert';
 import 'dart:typed_data';
 

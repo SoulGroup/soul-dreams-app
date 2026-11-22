@@ -42,12 +42,13 @@ abstract final class StandIns {
   /// and the space between a result's row and its context line (D117 Q8).
   static const double searchAbove = 20;
 
-  /// Settings (D122, D125; TO TRY): the settings button's drawing (three
-  /// sliders) inside its 41 circle; a row's padding and its one height; every
+  /// Settings (D122, D125, D128; TO TRY): the settings button's drawing (three
+  /// sliders) inside its 41 circle; a row's padding (its right the same as its
+  /// top and bottom, D128 item 6) and its one height; every
   /// value pill's one width and its padding; the pill's small chevron
   /// (pointing down); the quick toggle's sun or moon inside its circle.
   static const gear = Size(22, 22);
-  static const settingPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 10);
+  static const settingPadding = EdgeInsets.fromLTRB(20, 10, 10, 10);
   static const double settingRowHeight = 64;
   static const double settingPillWidth = 128;
   static const settingValuePadding = EdgeInsets.symmetric(horizontal: 10, vertical: 10);

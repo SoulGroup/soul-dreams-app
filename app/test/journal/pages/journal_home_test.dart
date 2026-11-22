@@ -488,160 +488,46 @@ void main() {
     expect(keys, isEmpty);
   });
 
-  // D121 item 5: withdrawn, the retry running is cut and none follows, the
-  // journal stays with every night; given again, the retries resume.
-  testWidgets('consent (a) withdrawn: the retry cut; given again: resumed', (tester) async {
+  // D128: before the dreamer has agreed, nothing is sent; the page knows it
+  // (the microphone and Start Interpretation then show the popup).
+  testWidgets('not agreed: the page is told, nothing retried', (tester) async {
     JournalStore.newQueueForTests();
-    final files = agreed(MemoryJournalFiles());
+    final files = answered(MemoryJournalFiles(), {});
     await waiting(files);
     final links = <MemoryLink>[];
     final keys = <void>[];
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links, keys))));
-    await tester.pump();
-    await tester.pump();
-    expect(links, hasLength(1));
-    final keysBefore = keys.length;
-    final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings!;
-    await settings.answer(Consent.readings, false);
-    await tester.pump(const Duration(milliseconds: 150));
-    expect(find.byType(JournalPage), findsOneWidget);
-    expect(find.byType(Onboarding), findsNothing);
-    expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNull);
-    expect(links.single.closed, isTrue);
-    expect(files.files.keys.where((n) => n.startsWith('night-')), hasLength(1));
-    // The recording waiting is kept whole by the cut: nothing is lost, and
-    // nothing is sent.
-    final audio = files.files.keys.where((n) => n.startsWith('audio-')).toList();
-    expect(audio, hasLength(1));
-    expect(files.files[audio.single]!.length, 32000);
-    expect(keys, hasLength(keysBefore));
-    expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.readings), isFalse);
-    for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.inactive]) {
-      tester.binding.handleAppLifecycleStateChanged(state);
-    }
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pump();
-    await tester.pump();
-    expect(links, hasLength(1));
-    expect(keys, hasLength(keysBefore));
-    await settings.answer(Consent.readings, true);
-    await tester.pump();
-    await tester.pump();
-    expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNotNull);
-    expect(links, hasLength(2));
+    await tester.pumpAndSettle();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.agreed, isFalse);
+    expect(page.recording, isNull);
+    expect(links, isEmpty);
+    expect(keys, isEmpty);
     await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 11));
   });
 
-  // D124 item 1: the withdrawal completes only after the retry in flight has
-  // stopped: a key being fetched is waited for, and no stream opens after it.
-  testWidgets('withdrawn mid key fetch: waited for, no stream', (tester) async {
+  // D128 item 3: agreeing later, from Settings' Disclosure & privacy page, gives
+  // both consents and starts the recording and the retries then; there is no
+  // way back.
+  testWidgets('agreeing later starts the recording and its retries', (tester) async {
     JournalStore.newQueueForTests();
-    final files = agreed(MemoryJournalFiles());
+    final files = answered(MemoryJournalFiles(), {});
     await waiting(files);
     final links = <MemoryLink>[];
-    final gate = Completer<String>();
-    var keys = 0;
-    final recording = Recording(
-      on: true,
-      microphone: SilentMicrophone(),
-      key: () {
-        keys++;
-        return gate.future;
-      },
-      connect: (_) async {
-        final link = MemoryLink();
-        links.add(link);
-        return link;
-      },
-    );
-    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: recording)));
-    await tester.pump();
-    await tester.pump();
-    expect(keys, 1);
+    final keys = <void>[];
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links, keys))));
+    await tester.pumpAndSettle();
     final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings!;
-    var done = false;
-    final withdrawal = settings.answer(Consent.readings, false).then((_) => done = true);
-    await tester.pump(const Duration(milliseconds: 150));
-    expect(settings.sending, isFalse);
-    expect(done, isFalse);
-    expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.readings), isTrue);
-    gate.complete('k');
-    await tester.pump(const Duration(milliseconds: 150));
-    await withdrawal;
-    expect(done, isTrue);
     expect(links, isEmpty);
-    expect(keys, 1);
-    expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.readings), isFalse);
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 11));
-  });
-
-  // D124 item 1 with D110: Delete journal while a withdrawal waits for a key:
-  // the consents are not written back into the deleted journal.
-  testWidgets('a withdrawal waiting when the journal is deleted writes nothing back', (tester) async {
-    JournalStore.newQueueForTests();
-    final files = agreed(MemoryJournalFiles());
-    await waiting(files);
-    final gate = Completer<String>();
-    final recording = Recording(
-      on: true,
-      microphone: SilentMicrophone(),
-      key: () => gate.future,
-      connect: (_) async => MemoryLink(),
-    );
-    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: recording)));
+    await settings.agree();
     await tester.pump();
     await tester.pump();
     final page = tester.widget<JournalPage>(find.byType(JournalPage));
-    final withdrawal = page.settings!.answer(Consent.readings, false);
-    await tester.pump(const Duration(milliseconds: 150));
-    await page.journal.deleteAll();
-    await tester.pump(const Duration(milliseconds: 150));
-    expect(find.byType(Onboarding), findsOneWidget);
-    gate.complete('k');
-    await tester.pump(const Duration(milliseconds: 150));
-    await withdrawal;
-    expect(files.files, isEmpty);
-    await tester.pumpWidget(const SizedBox());
-    await tester.pump(const Duration(seconds: 11));
-  });
-
-  // D124 item 2: a withdrawal that cannot be kept still stops sending for
-  // this session, and the readings still show as given.
-  testWidgets('consent (a) withdrawal not kept: sending stopped, still shown as given', (tester) async {
-    JournalStore.newQueueForTests();
-    final lines = <String>[];
-    final sink = SafeLog.sink;
-    SafeLog.sink = lines.add;
-    addTearDown(() => SafeLog.sink = sink);
-    final files = agreed(Flaky());
-    await waiting(files);
-    files.failing = true;
-    final links = <MemoryLink>[];
-    final keys = <void>[];
-    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links, keys))));
-    await tester.pump();
-    await tester.pump();
+    expect(page.agreed, isTrue);
+    expect(page.recording, isNotNull);
     expect(links, hasLength(1));
-    final keysBefore = keys.length;
-    final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings!;
-    await settings.answer(Consent.readings, false);
-    await tester.pump(const Duration(milliseconds: 150));
-    expect(settings.withdrawalNotKept, isTrue);
-    expect(settings.consents.given(Consent.readings), isTrue);
-    expect(find.byType(JournalPage), findsOneWidget);
-    expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNull);
-    expect(links.single.closed, isTrue);
-    expect(lines, contains('consentKeepFailed'));
-    for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.inactive]) {
-      tester.binding.handleAppLifecycleStateChanged(state);
-    }
-    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-    await tester.pump();
-    await tester.pump();
-    expect(links, hasLength(1));
-    expect(keys, hasLength(keysBefore));
+    expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.readings), isTrue);
+    expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.lifeContext), isTrue);
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 11));
   });

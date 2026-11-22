@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
@@ -20,6 +21,7 @@ import 'package:souldreams/recording/heard_text.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/recording/retries.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../memory_journal_files.dart';
@@ -582,7 +584,13 @@ void main() {
   });
 
   // D70 (head's message 20, Product message 19; D71).
-  Future<Harness> tall(WidgetTester tester, {Recording? recording, MemoryJournalFiles? files, DreamEdit? edit}) async {
+  Future<Harness> tall(
+    WidgetTester tester, {
+    Recording? recording,
+    MemoryJournalFiles? files,
+    DreamEdit? edit,
+    bool agreed = true,
+  }) async {
     tester.view.devicePixelRatio = 2;
     tester.view.physicalSize = const Size(786, 1704);
     addTearDown(tester.view.reset);
@@ -592,7 +600,13 @@ void main() {
       tester,
       Opener(
         () async =>
-            TypingPage(journal: h.journal, target: await h.journal.targetNow(), recording: recording, edit: edit),
+            TypingPage(
+              journal: h.journal,
+              target: await h.journal.targetNow(),
+              recording: recording,
+              edit: edit,
+              agreed: agreed,
+            ),
       ),
     );
     await tester.tap(find.byKey(Opener.openKey));
@@ -679,6 +693,34 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
     expect(await h.nights(), isEmpty);
+  });
+
+  // D128 item 3: before the dreamer has agreed, the microphone and Start
+  // Interpretation stay visible; a tap shows MP·101 with its one button MP·102,
+  // and nothing is recorded or sent.
+  testWidgets('before agreeing: the microphone shows, a tap shows the popup', (tester) async {
+    await tall(tester, agreed: false);
+    expect(find.byKey(TypingPage.micKey), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
+    expect(find.text(PendingLines.MP_102.text(Lang.en)), findsOneWidget);
+    expect(find.byType(CupertinoDialogAction), findsOneWidget);
+    await tester.tap(find.text(PendingLines.MP_102.text(Lang.en)));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsNothing);
+    expect(find.byType(TypingPage), findsOneWidget);
+    expect(tester.widget<IconButton>(find.byKey(TypingPage.micKey)).isSelected, isFalse);
+  });
+
+  testWidgets('before agreeing: Start Interpretation shows the popup', (tester) async {
+    await tall(tester, agreed: false);
+    await tester.tap(find.byKey(TypingPage.startKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
+    await tester.tap(find.text(PendingLines.MP_102.text(Lang.en)));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
   });
 
   testWidgets('no microphone in a build that does not record', (tester) async {

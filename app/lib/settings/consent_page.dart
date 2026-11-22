@@ -1,14 +1,10 @@
-// The two consents' words and their choice (C18-P, MP·66 to MP·69; C159-I
-// item 5; D110; D122; D125 item 8): each consent's text, then MP·67's two
-// choices, "I consent" and "I don't consent", side by side, equally
-// prominent, neither chosen beforehand, and a tap answers at once. Only
-// Settings shows them, one consent on its own page when a setting needs it
-// (the stop's questions 6 and 10), whose back control gives nothing;
-// onboarding asks no consent of its own (D127 item 1). MP·68 is "to rewrite" and shows its owed sentence in braces,
-// as filed, in SoulDreams Dev only (D119 item 2; D122, Q1 (B)). Life Context's
-// own page, from Settings, has two buttons of its own in place of MP·67's
-// pair: Back on the left, Turn on on the right, MP·98 and MP·99, pending
-// lines (D125 item 9), the same two keys, the same look.
+// Life Context's own page, from Settings (D110; D122; D125 item 9; D128):
+// MP·69 over two buttons, Back on the left and Turn on on the right (MP·98
+// and MP·99, pending lines: their words show in SoulDreams Dev only, R1),
+// equally prominent, neither chosen beforehand, a tap answering at once. Back
+// and the back control give nothing; Turn on gives Life Context. It is the
+// only page of its kind: there is no consent to give or withdraw anywhere
+// else (D128 item 2), and onboarding asks none of its own (D127 item 1).
 import 'package:flutter/material.dart';
 
 import '../core/app_line.dart';
@@ -19,30 +15,24 @@ import '../design/tokens.g.dart';
 import '../journal/pages/parts.dart';
 import '../words/lines.g.dart';
 import '../words/pending.g.dart';
-import 'consents.dart';
 
-/// The consent's text: MP·68 (a), MP·69 (b).
-Line consentText(Consent consent) => switch (consent) {
-  Consent.readings => Lines.MP_68,
-  Consent.lifeContext => Lines.MP_69,
-};
+/// Life Context's two buttons: Back on the left, which answers false, and
+/// Turn on on the right, which answers true; neither is chosen beforehand.
+class TurnOnChoice extends StatelessWidget {
+  const TurnOnChoice({super.key, required this.onChoose});
 
-/// MP·67's two choices under one consent. Each tap tells [onChoose] true for
-/// "I consent".
-class ConsentChoice extends StatelessWidget {
-  const ConsentChoice({super.key, required this.consent, required this.onChoose});
-
-  final Consent consent;
   final ValueChanged<bool> onChoose;
 
-  /// A choice's key: [given] true for "I consent".
-  static Key keyOf(Consent consent, bool given) => ValueKey('consent-${consent.name}-$given');
+  /// A button's key: [given] true for Turn on.
+  static Key keyOf(bool given) => ValueKey('life-context-$given');
 
   @override
   Widget build(BuildContext context) {
-    final words = Lines.MP_67.parts(appLanguage);
-    Widget one(bool given, String text) => _Choice(key: keyOf(consent, given), text: text, onTap: () => onChoose(given));
-    return ButtonRow(left: one(true, words.first), right: one(false, words.last));
+    Widget one(bool given, String text) => _Choice(key: keyOf(given), text: text, onTap: () => onChoose(given));
+    return ButtonRow(
+      left: one(false, PendingLines.MP_98.text(appLanguage)),
+      right: one(true, PendingLines.MP_99.text(appLanguage)),
+    );
   }
 }
 
@@ -81,40 +71,14 @@ class _Choice extends StatelessWidget {
   }
 }
 
-/// Life Context's two buttons, on its page from Settings (D125 item 9): Back
-/// on the left, which answers false, and Turn on on the right, which answers
-/// true, each under its [ConsentChoice] key, neither filled beforehand.
-class TurnOnChoice extends StatelessWidget {
-  const TurnOnChoice({super.key, required this.onChoose});
-
-  final ValueChanged<bool> onChoose;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget one(bool given, String text) => _Choice(
-      key: ConsentChoice.keyOf(Consent.lifeContext, given),
-      text: text,
-      onTap: () => onChoose(given),
-    );
-    return ButtonRow(
-      left: one(false, PendingLines.MP_98.text(appLanguage)),
-      right: one(true, PendingLines.MP_99.text(appLanguage)),
-    );
-  }
-}
-
-/// One consent on its own page, from Settings: its text, then the two
-/// choices (Life Context: Back and Turn on). Pops true for "I consent" or
-/// "Turn on", false for "I don't consent" or "Back", null for the back
-/// control.
+/// Life Context's page: its text, then Back and Turn on. Pops true for Turn
+/// on, false for Back, null for the back control.
 class ConsentPage extends StatelessWidget {
-  const ConsentPage({super.key, required this.consent});
+  const ConsentPage({super.key});
 
-  final Consent consent;
-
-  /// Shows [consent]'s page; true only when the dreamer consents.
-  static Future<bool> ask(BuildContext context, Consent consent) async =>
-      await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => ConsentPage(consent: consent))) == true;
+  /// Shows the page; true only when the dreamer turns Life Context on.
+  static Future<bool> ask(BuildContext context) async =>
+      await Navigator.of(context).push<bool>(MaterialPageRoute(builder: (_) => const ConsentPage())) == true;
 
   @override
   Widget build(BuildContext context) {
@@ -135,14 +99,11 @@ class ConsentPage extends StatelessWidget {
                 decoration: surface(p),
                 child: Padding(
                   padding: Spacing.onboardingBox,
-                  child: AppLine(consentText(consent).text(appLanguage), style: StandIns.voiceApp(p.text)),
+                  child: AppLine(Lines.MP_69.text(appLanguage), style: StandIns.voiceApp(p.text)),
                 ),
               ),
               const SizedBox(height: StandIns.gap),
-              if (consent == Consent.lifeContext)
-                TurnOnChoice(onChoose: (given) => Navigator.of(context).pop(given))
-              else
-                ConsentChoice(consent: consent, onChoose: (given) => Navigator.of(context).pop(given)),
+              TurnOnChoice(onChoose: (given) => Navigator.of(context).pop(given)),
             ],
           ),
         ),

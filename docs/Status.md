@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `redesign-c` (Settings, the settings button and the two consents, D110, D121 to D127; the owner's look at the founder's corrections, then the merge, next), by Claude Code.
+Last updated: 2026-11-22, in branch `redesign-c` (Settings, the settings button and the two consents, D110, D121 to D128; the owner's look at the founder's corrections, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,7 +14,7 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`redesign-c`: Settings, the settings button and the two consents (D110, D121 to D127; plan `docs/plans/redesign-c.md`).
+`redesign-c`: Settings, the settings button and the agreement (D110, D121 to D128; plan `docs/plans/redesign-c.md`).
 `redesign-b` is merged (`8243128`); its Status was not updated at the merge (this entry records it).
 
 ## Road ahead
@@ -254,58 +254,61 @@ rulings given during each branch are listed in this file, one line each, under "
   (D117 Q4), the told dreams in order, never a name, the first place. A result
   opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
   goes. The query is never kept or logged (R3).
-- The two consents (C18-P, MP·66 to MP·69; C159-I item 5; D110; D121; D122; D125 items 2 and 8; D127 item 1;
-  `redesign-c`; `app/lib/settings/`, SoulDreams Dev only): onboarding asks for no consent in a page of its own now.
-  Its second page ends with the disclosure parts, MP·58 ("Read everything", optional, opening the full disclosure
-  page, the text only, with back), then at the foot EM·6 "I don't agree" left and MP·100 "I agree" right (a pending
-  line), equal, neither chosen beforehand. "I agree" accepts the disclosure and gives the readings (a) and Life
-  Context (b) consents together, so Life Context is On from then; "I don't agree" gives neither and the journal opens
-  as a private journal. D127 amends MP·83's "never on before consent" and C159-I's separate consents; the Build chat
-  carries it to the head. Kept in `consent.json`, version 3: "18 or over" and the two answers, each with the UTC day
-  of its last change. Version 2, which also held the night images consent (c, retired by D125 item 8), and version 1
-  (a given, (b) not) still read (`consents.dart`); only (a) and (b) are written. (a) not given: nothing leaves the
-  phone, so no microphone and no retries; every night kept; given again, with MP·68 and MP·67's two choices on its
-  own page (`ConsentPage`), they resume; a withdrawal waits for the retry in flight and is shown only once kept
-  (D124). (b) is the Life Context setting (nothing is kept yet, D121 item 2): turning it Off asks MP·93 and what is
-  kept goes (as built), turning it On again shows its page, MP·69 over Back (MP·98) left and Turn on (MP·99) right
-  (D125 item 9). MP·66, MP·67 in onboarding, MP·70 and MP·9 are shown nowhere. Night images has no consent: Off by
+- The agreement (C159-I item 5; D110; D121; D122; D125 items 2 and 8; D127 item 1; D128; `redesign-c`;
+  `app/lib/settings/`, SoulDreams Dev only). Onboarding's second page ends with the disclosure parts, MP·58
+  ("Read everything", optional, opening the full disclosure page, the text only, with back), then at the foot EM·6
+  "I don't agree" left and MP·100 "I agree" right (a pending line), equal, neither chosen beforehand. "I agree"
+  accepts the disclosure and gives the readings (a) and Life Context (b) together, so Life Context is On from
+  then; "I don't agree" gives neither and the journal opens as a private journal. D127 amends MP·83's "never on
+  before consent" and C159-I's separate consents; the Build chat carries it to the head. There is no withdrawing
+  (D128 item 2): Settings has no Give or Withdraw row and no readings page. Each feature is the dreamer's own act:
+  readings only on Start Interpretation (nothing to start yet), voice only on the microphone, Life Context by its
+  On/Off row (Off asks MP·93 and what is kept goes, as built; On shows its page, MP·69 over Back MP·98 and Turn on
+  MP·99, D125 item 9). Kept in `consent.json`, version 3: "18 or over" and the two answers, each with the UTC day
+  of its last change; versions 2 (which also held the retired night images consent) and 1 still read
+  (`consents.dart`); only (a) and (b) are written. Agreed means (a) given (`SettingsController.agreed`). Until the
+  dreamer agrees nothing leaves the phone: no recording by voice and no retries (`JournalHome`), every night kept;
+  the microphone, Start Interpretation and the Life Context row stay visible, and a tap on one shows a popup,
+  MP·101 with one button MP·102 (pending lines, `agreement_popup.dart`), changing and sending nothing. The
+  Disclosure & privacy page from Settings is then the text with one button at its end, MP·100, which gives both
+  consents (`SettingsController.agree`), starts the recording and the retries, and goes; once agreed the page has
+  no button. MP·66, MP·67, MP·68, MP·70, MP·95 to MP·97 and MP·9 are shown nowhere now. The word "consent" is on no
+  screen but one line: EM·6's Swedish, "Jag samtycker inte" (banked item 164). Night images has no consent: Off by
   default, every night the gradient (`lookOf`'s `images`); Personal and Random keep D110's look until the personal
   painting exists (D121 item 3).
-- Settings (main-path.md, Settings; D110; D121; D122; D125; `settings_page.dart`; TO TRY where a stand-in): the
+- Settings (main-path.md, Settings; D110; D121; D122; D125; D128; `settings_page.dart`; TO TRY where a stand-in): the
   settings button top left on the journal, on the search field's row, the field to its right and ending where the
   rows end (three drawn sliders in place of the gear, 41 in a 44 tap box, its own semantics node, spoken MP·25; the
   sky mark stays 140 down). The page: the back control, the quick toggle top centre (MP·45), which shows what it
   switches to, a moon in the light theme drawn in the dark page colour and a sun in the dark, switches the theme in
   half a second and sets Manual (the 5 s fade stays for the clock's 21:00 and 08:00, `NightDay.fade`; a change the
   dreamer makes takes `NightDay.quickFade`); MP·25 in h2; six rows of one height, each a white rounded row with a
-  value pill, all one width and one height, its border the row's grey, the value left and the chevron right with the
-  space right of the chevron equal to that above and below the value and left of it (D127 item 2), opening the
-  phone's menu: Language (EM·9,
-  `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44; Manual keeps
-  the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure), MP·95
-  (Withdraw or Give consent) and Delete journal (EM·11, `color.destructive`). Life Context On shows its consent
-  first (`ConsentPage`); Withdraw asks MP·96 (MP·97), Life Context Off MP·93 (MP·94), Night images asks nothing;
-  Delete journal asks C4-P·4 once, then everything goes and onboarding starts again. The setting lines are read by
+  value pill, all one width, its border the row's grey, the gap from its right edge to the row's equal to the gap above
+  and below it (D128 item 6; inside it the value and its chevron are centred, as before D127), opening the phone's
+  menu: Language (EM·9, `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44; Manual keeps
+  the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure) and
+  Delete journal (EM·11, `color.destructive`); no Give or Withdraw row (D128 item 2). Life Context On shows its
+  page (`ConsentPage`), Off asks MP·93 (MP·94), and before the dreamer has agreed either shows the popup instead;
+  Night images asks nothing; Delete journal asks C4-P·4 once, then everything goes and onboarding starts again. The setting lines are read by
   form ("Name (A / B)", `setting_line.dart`). Kept in `settings.json` (version 2; Word Animation, Night/Day mode,
   Night images, Life Context length; version 1, which chose a painting for while (c) was given, reads as that
   choice only beside a version 2 consents file with (c) given, else Night images is Off, and is kept again as
   version 2), followed by the journal's home (`SettingsController`): Word Animation into `AppLine` and the theme's
   fade (off, instant, as with Reduce Motion), Night/Day mode through `NightDayChoice` above the app. A change that
-  cannot be kept logs `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes (a withdrawal of
-  (a) that cannot be kept, D124 item 2); a read that fails, `settingsReadFailed`, and the defaults stand. No
+  cannot be kept logs `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes; a read that fails, `settingsReadFailed`, and the defaults stand. No
   feedback (D121 item 4), no region, no Help (R9).
 - `type.voice.app` is read at line height 1.3, the founder's override of the filed 1.5 (`StandIns.voiceApp`; the
   generated token keeps 1.5; D125 item 1; for Product's next filing).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 690 tests, and 635 mutation checks (A1 to A646; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 690 tests, and 624 mutation checks (A1 to A664; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A537, A538, A539, A541, A543, A546, A549, A550, A566, A578, A610, A623, A624, A626, A627, A633 and A634
+  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645 and A646
   dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 635 run, 635 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 624 run, 624 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95; the full run's timing is
   D126's).
 
@@ -931,15 +934,11 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      (R9); the gating tests now count key fetches and prove the waiting audio survives a withdrawal; the Night images
      refusal proves nothing is kept; the dialogs' Cancel-first order and destructive action; a midnight flake in
      the consent day test.
-156. Ruled by the owner under D124: (a) a retry in flight when consent (a) is withdrawn is waited for, and nothing is
-     fetched, opened or sent after the cut (fixed, rows A581 to A584, A594 to A596: `Retries.idle`, a halt check
-     before the key and after each frame is read); (b) a withdrawal that cannot be kept stops sending for the
-     session, shows MP·62 under the button, which stays "Withdraw consent" to try again (fixed, rows A585 to A593,
-     A597, A598; the next start still reads the file as it was kept, so sending resumes then, as D122 built);
-     the review of that fix found a withdrawal waiting for a retry could write the consents back after Delete journal;
-     it now writes nothing once the journal is gone (rows A599, A600);
-     (c) consents that did not read, answered again, ignore a settings file that did (`_agree` uses the defaults):
-     left banked.
+156. D124's withdrawing is replaced by D128 (there is no withdrawing): its code is gone (`SettingsController`'s
+     `_withdraw`, `stopSending`, `withdrawalNotKept`, `Retries.idle`, the MP·62 line in Settings, rows A585 to A600);
+     what stays is the retries' halt checks, before the key and after each frame is read (rows A581, A582, A584),
+     and the item (c) below, still banked: consents that did not read, answered again, ignore a settings file that
+     did (`_agree` uses the defaults).
 157. The Settings page's notes: the value pill's size no longer scales at large text (D125 item 4: every pill one
      width, its words shrink inside it; the large-text test checks each pill's size and that its words stay inside); in an Automatic fade the toggle still reads the theme on screen; a
      failed deletion shows nothing and may leave some files; choices map to their enum by index, so a later
@@ -963,10 +962,10 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      owner's to weigh against shipping it with the founder's corrections; (d) MP·70 (the night images consent) and MP·9
      are in the register and shown nowhere now; MP·66's "each choice is separate" opens two consents, not three.
 160. D127 item 1 replaced D125 item 2's flow, for the owner: "I don't agree" no longer goes back to the first page
-     (C127-I I7 is superseded); it decides, like "I agree", and opens the journal as a private journal, so a dreamer
-     who taps it by mistake has no way back to page one (the journal's Settings give consent again, MP·95). Tapping
-     either is final within the session (`_decide`, told once); MP·58 opens the text, and back returns to the second
-     page.
+     (C127-I I7 is superseded); it decides, like "I agree", and opens the journal as a private journal. D128 makes
+     that recoverable: Settings' Disclosure & privacy page ends with MP·100 until the dreamer has agreed. Tapping
+     either onboarding button is final within the session (`_decide`, told once); MP·58 opens the text, and back
+     returns to the second page.
 161. D125 item 6, confirmed by the owner: the half second applies to every change the dreamer makes (the toggle and
      the Night/Day mode row); only the clock's 21:00 and 08:00 keep the five seconds. D125 item 10: the settings
      button's sliders (`_SlidersLine`) replace the gear, which is in git history (`8674d92`); the founder's eye
@@ -980,11 +979,19 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      MP·99 (then the handles change).
 163. D127 notes, for the owner: (a) Life Context is On after "I agree" while nothing is kept yet (D121 item 2), so
      what "On" does waits on Life Context being built; (b) MP·100 is a pending line (the owner wrote it, sha256
-     `e57e1e8b…9852`; handle proposed to Product); (c) the readings consent's own page (Settings, "Give consent") keeps
-     MP·67's pair, "I consent" and "I don't consent", since the ruling names Life Context's page only; (d) the pill's
-     four gaps are one (the space left of the value as well, my reading of "equals the space above and below"), and
-     its height is a line's, held by an unseen empty line so that shrunk words never make a shorter pill; (e) D125
-     item 9's `TurnOnChoice` stays, now reached from Settings only.
+     `e57e1e8b…9852`; handle proposed to Product); (c) D127's pill inside (value left, chevron right, the unseen empty
+     line) was put back as it was before by D128 item 6: the value and its chevron centred, the pill 44 high.
+164. D128, for the owner and Product: (1) item 5 STOP: MP·101 names "Disclosure & privacy" / "Villkor och integritet",
+     but the filed name of that Settings row, MP·48, is "Read disclosure & privacy" / "Läs om sekretess och personlig
+     data"; the popup was built with MP·101 as given, and one of the two texts needs changing (not by Claude Code);
+     (2) item 4: of the filed lines shown, only EM·6 holds the word, in Swedish, "Jag samtycker inte" (English "I
+     don't agree" is fine): for Product to reword; MP·67 ("I consent" / "I don't consent"), MP·95 ("Withdraw consent" /
+     "Give consent") and MP·96 hold it too and are shown nowhere now (a test, `shown_lines_test.dart`, keeps the
+     list at EM·6); (3) the popup (MP·101, MP·102) is on the microphone, Start Interpretation (still doing nothing
+     once agreed, as before) and Life Context's row, in the typing screen, a night and Settings; the readings'
+     "only on Start Interpretation" waits on the readings being built; (4) a journal that has (a) not given from an
+     earlier build (a withdrawn or refused one) is "not agreed" now: everything visible, the popup, and MP·100 at the
+     end of the disclosure; one with (b) given and (a) not shows Life Context On while its row shows the popup.
 
 ## Before Cohort 1
 
@@ -1033,7 +1040,7 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
   founder, 2026-11-22, D125 item 9; the owner wrote them in `pending-lines.csv`; handles proposed to Product, banked
-  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page (D127 item 1; banked item 163). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
+  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
 
 ## Rulings during branch 2
 
@@ -1403,6 +1410,21 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   shows its page (MP·98, MP·99); it amends MP·83's "never on before consent" and C159-I's separate consents, and
   the Build chat carries it to the head; (2) Settings value pills: the space right of the value and its chevron
   equals the space above and below it. Targeted rows only (D126).
+
+- D128 (founder, a correction round; replaces D127's Settings side and D124's withdraw): (1) onboarding stays, EM·6
+  "I don't agree" / MP·100 "I agree" ("I agree" gives readings and Life Context; Life Context On by default); (2)
+  after "I agree" the Disclosure & privacy page (from Settings) is text only, no buttons; the Give/Withdraw consent
+  row and the readings consent page are removed from Settings; there is no withdraw; each feature is the dreamer's
+  own act (readings only on Start Interpretation, voice only on the microphone, Life Context by its On/Off row:
+  Off deletes what is kept, MP·93; On shows MP·98 Back / MP·99 Turn on); (3) after "I don't agree" everything stays
+  visible (the microphone, Start Interpretation, the Life Context row); tapping one shows a popup with MP·101 and
+  one button MP·102 "OK", nothing is sent; the Disclosure & privacy page then ends with one button, MP·100 "I
+  agree", which gives agreement as in onboarding and disappears; (4) the word "consent" appears nowhere on screen,
+  and the filed lines still shown that hold it are listed for Product (banked item 164); (5) MP·101 names
+  "Disclosure & privacy" / "Villkor och integritet": where MP·48 differs, stop and tell the Build chat the filed
+  text (banked item 164); (6) Settings pills: the inside as before D127 item 2, the gap from the pill's right edge
+  to the row's right edge equal to the gap above and below it. Storage: every older consent file still reads.
+  Targeted rows only (D126).
 
 ## Documents as last imported
 

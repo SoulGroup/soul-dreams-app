@@ -84,16 +84,10 @@ final class Retries extends ChangeNotifier {
   bool _again = false;
   bool _disposed = false;
   Completer<void> _stop = Completer<void>();
-  // Completed when the run going now is over.
-  Completer<void>? _ended;
   String? _transcribing;
 
   /// The recording being turned into words now, for AI·6 (D93 Q3), or null.
   String? get transcribing => _transcribing;
-
-  /// Completes when the retry running is over, at once when none runs: a
-  /// withdrawal of consent (a) completes only after it (D124 item 1).
-  Future<void> get idle => _ended?.future ?? Future<void>.value();
 
   bool get _stopped => _holds > 0 || _away;
 
@@ -153,7 +147,6 @@ final class Retries extends ChangeNotifier {
     _running = true;
     _again = false;
     _stop = Completer<void>();
-    final ended = _ended = Completer<void>();
     try {
       Pending? done;
       // The recordings whose retry failed in this run: at the back of the
@@ -193,8 +186,6 @@ final class Retries extends ChangeNotifier {
     } finally {
       _running = false;
       if (_transcribing != null) _show(null);
-      ended.complete();
-      if (identical(_ended, ended)) _ended = null;
       if (_again) kick();
     }
   }

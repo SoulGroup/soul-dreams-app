@@ -1,26 +1,27 @@
 // Settings (main-path.md, Settings; Design System §6; C18-P; D110; D121;
-// D122), reached from the journal's gear, in SoulDreams Dev only: the back
-// control top left; the quick toggle top centre (MP·45), showing what it
+// D122; D128), reached from the journal's gear, in SoulDreams Dev only: the
+// back control top left; the quick toggle top centre (MP·45), showing what it
 // switches to, a moon in the light theme and a sun in the dark, which
 // switches the theme in half a second and sets Night/Day mode to Manual
 // (D125 items 6 and 7); MP·25 in h2; then six rows, each its name and a
 // value pill, every pill one size and every row one height (D125 item 4),
-// opening the phone's menu: Language (EM·9; English only, its
-// name owed, D121 item 1), Word Animation (MP·26), Night images (MP·85),
-// Night/Day mode (MP·44), Life Context (MP·83) and Life Context length
-// (MP·84); then "Read disclosure & privacy" (MP·48), "Withdraw consent" or
-// "Give consent" (MP·95), and "Delete journal" (EM·11) in the destructive
-// style. No feedback (D121 item 4), no region.
+// the gap from a pill's right edge to its row's equal to the gap above and
+// below it (D128 item 6), opening the phone's menu: Language (EM·9; English
+// only, its name owed, D121 item 1), Word Animation (MP·26), Night images
+// (MP·85), Night/Day mode (MP·44), Life Context (MP·83) and Life Context
+// length (MP·84); then "Read disclosure & privacy" (MP·48) and "Delete
+// journal" (EM·11) in the destructive style. No feedback (D121 item 4), no
+// region, and no way to give or withdraw consent: each feature is the
+// dreamer's own act (D128 item 2).
 //
-// What needs a consent asks for it first (ConsentPage): Life Context On
-// while (b) is not given, Give consent for (a); Night images asks nothing
-// (D125 item 8). Turning off asks only where the register has a
-// confirmation: MP·93 for Life Context, MP·96 for the readings. Delete journal asks once (C4-P·4), then everything
-// goes and the app starts again (D110). A withdrawal that cannot be kept
-// shows MP·62 under the button, which stays "Withdraw consent" to try again
-// (D124 item 2). Each confirmation is the phone's
-// standard dialog, Cancel first (as a night's delete). The rows, the pills
-// and the toggle are stand-ins (TO TRY, P13).
+// Life Context On shows its page (ConsentPage: Back, Turn on); Off asks MP·93
+// (what is kept goes). Before the dreamer has agreed, a tap on that row shows
+// the popup (MP·101, MP·102) and changes nothing; the Disclosure & privacy
+// page then ends with one button, MP·100, which agrees (D128 item 3). Night
+// images asks nothing (D125 item 8). Delete journal asks once (C4-P·4), then
+// everything goes and the app starts again (D110). Each confirmation is the
+// phone's standard dialog, Cancel first (as a night's delete). The rows, the
+// pills and the toggle are stand-ins (TO TRY, P13).
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -36,6 +37,8 @@ import '../journal/pages/sky_mark.dart';
 import '../journal/sky.dart';
 import '../onboarding/disclosure_page.dart';
 import '../words/lines.g.dart';
+import '../words/pending.g.dart';
+import 'agreement_popup.dart';
 import 'consent_page.dart';
 import 'consents.dart';
 import 'setting_line.dart';
@@ -57,9 +60,8 @@ class SettingsPage extends StatefulWidget {
 
   static const toggleKey = Key('settings-toggle');
   static const disclosureKey = Key('settings-disclosure');
-  static const consentKey = Key('settings-consent');
+  static const agreeKey = Key('settings-agree');
   static const deleteKey = Key('settings-delete');
-  static const notKeptKey = Key('settings-not-kept');
 
   /// A row, whole.
   static Key rowKey(SettingRow row) => ValueKey('setting-row-${row.name}');
@@ -136,21 +138,44 @@ class _SettingsPageState extends State<SettingsPage> {
     _c.settings.copyWith(nightDay: i == 0 ? NightDayMode.automatic : (_dark ? NightDayMode.night : NightDayMode.day)),
   );
 
+  // Before the dreamer has agreed, the popup, nothing changed (D128 item 3);
+  // On shows Life Context's page, Off asks MP·93 (what is kept goes).
   Future<void> _lifeContext(int i) async {
+    if (!_c.agreed) return showAgreementPopup(context);
     final on = i == 0;
     if (on == _c.consents.given(Consent.lifeContext)) return;
-    final yes = on ? await ConsentPage.ask(context, Consent.lifeContext) : await _confirm(Lines.MP_93, Lines.MP_94);
+    final yes = on ? await ConsentPage.ask(context) : await _confirm(Lines.MP_93, Lines.MP_94);
     if (yes) await _c.answer(Consent.lifeContext, on);
   }
 
-  void _length(int i) => _c.change(_c.settings.copyWith(length: LifeContextLength.values[i]));
+  // The Disclosure & privacy page, the text only; before the dreamer has
+  // agreed it ends with one button, MP·100, which agrees, as in onboarding,
+  // and goes (D128 item 3).
+  void _openDisclosure() => Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => DisclosurePage(
+        end: [
+          ListenableBuilder(
+            listenable: _c,
+            builder: (context, _) => _c.agreed
+                ? const SizedBox.shrink()
+                : Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: PlainButton(
+                        key: SettingsPage.agreeKey,
+                        PendingLines.MP_100.text(appLanguage),
+                        onPressed: _c.agree,
+                      ),
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    ),
+  );
 
-  // Withdraw consent (a), behind MP·96; or give it, behind its text.
-  Future<void> _readings() async {
-    final given = _c.consents.given(Consent.readings);
-    final yes = given ? await _confirm(Lines.MP_96, Lines.MP_97) : await ConsentPage.ask(context, Consent.readings);
-    if (yes) await _c.answer(Consent.readings, !given);
-  }
+  void _length(int i) => _c.change(_c.settings.copyWith(length: LifeContextLength.values[i]));
 
   // Delete journal (D110): one confirmation; then everything goes, and the
   // journal's home returns to the start, closing this page.
@@ -228,31 +253,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 PlainButton(
                   key: SettingsPage.disclosureKey,
                   Lines.MP_48.text(appLanguage),
-                  onPressed: () =>
-                      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const DisclosurePage())),
+                  onPressed: _openDisclosure,
                 ),
               ),
-              const SizedBox(height: Spacing.journalRow),
-              _action(
-                PlainButton(
-                  key: SettingsPage.consentKey,
-                  Lines.MP_95.parts(appLanguage)[c.given(Consent.readings) ? 0 : 1],
-                  onPressed: _readings,
-                ),
-              ),
-              if (_c.withdrawalNotKept)
-                Padding(
-                  key: SettingsPage.notKeptKey,
-                  padding: const EdgeInsets.only(top: StandIns.gap),
-                  child: Semantics(
-                    liveRegion: true,
-                    child: Text(
-                      Lines.MP_62.text(appLanguage),
-                      textAlign: TextAlign.center,
-                      style: TypeRoles.button.style(p.text),
-                    ),
-                  ),
-                ),
               const SizedBox(height: Spacing.journalRow),
               _action(_Destructive(Lines.EM_11.parts(appLanguage).first, onPressed: _delete)),
             ],
@@ -313,69 +316,52 @@ class _Row extends StatelessWidget {
   }
 
   // The value pill opening the phone's menu: one size for every row, its
-  // border the row's grey (D125 item 4). Inside, the value stands at the left
-  // and the chevron at the right, and the space to the right of the chevron,
-  // above and below the value, and to the left of it is one (D127 item 2); the
-  // pill's height is a line's, however the words are scaled, and at large text
-  // the words shrink to fit its width. Its tap box is 44 high, round it.
+  // border the row's own grey (D125 item 4); at large text its words shrink
+  // to fit, the pill's size staying.
   Widget _pill(Palette p) => CupertinoMenuAnchor(
     consumeOutsideTaps: true,
     menuChildren: [
       for (final (i, choice) in choices.indexed)
         CupertinoMenuItem(key: SettingsPage.choiceKey(row, i), onPressed: () => onChoose(i), child: Text(choice)),
     ],
-    builder: (context, controller, _) {
-      final style = TypeRoles.button.style(p.fieldText);
-      return Semantics(
-        button: true,
-        label: name,
-        value: choices[chosen],
-        excludeSemantics: true,
-        child: GestureDetector(
-          key: SettingsPage.valueKey(row),
-          behavior: HitTestBehavior.opaque,
-          onTap: () => controller.isOpen ? controller.close() : controller.open(),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: StandIns.hitMin),
-            child: Center(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: p.field,
-                  borderRadius: BorderRadius.circular(Spacing.radius),
-                  border: Border.all(color: p.surfaceBorder),
-                ),
-                child: Padding(
-                  padding: StandIns.settingValuePadding,
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Stack(
-                          alignment: Alignment.centerLeft,
-                          children: [
-                            // An empty line, unseen: it holds the pill to a line's height.
-                            Opacity(opacity: 0, child: Text.rich(const TextSpan(), style: style)),
-                            FittedBox(
-                              fit: BoxFit.scaleDown,
-                              alignment: Alignment.centerLeft,
-                              child: Text(choices[chosen], style: style),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: StandIns.searchGap),
-                      RotatedBox(
-                        quarterTurns: 1,
-                        child: Chevron(colour: p.fieldText, size: StandIns.settingChevron),
-                      ),
-                    ],
-                  ),
+    builder: (context, controller, _) => Semantics(
+      button: true,
+      label: name,
+      value: choices[chosen],
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: SettingsPage.valueKey(row),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => controller.isOpen ? controller.close() : controller.open(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: StandIns.hitMin),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: p.field,
+              borderRadius: BorderRadius.circular(Spacing.radius),
+              border: Border.all(color: p.surfaceBorder),
+            ),
+            child: Padding(
+              padding: StandIns.settingValuePadding,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(choices[chosen], style: TypeRoles.button.style(p.fieldText)),
+                    const SizedBox(width: StandIns.searchGap),
+                    RotatedBox(
+                      quarterTurns: 1,
+                      child: Chevron(colour: p.fieldText, size: StandIns.settingChevron),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
         ),
-      );
-    },
+      ),
+    ),
   );
 }
 

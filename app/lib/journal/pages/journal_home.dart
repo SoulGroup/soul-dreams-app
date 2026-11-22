@@ -15,10 +15,10 @@
 // app cuts a retry short (D92 item 3, D94). Once the journal opens, it
 // holds the settings and the consents (`SettingsController`, D122) and
 // follows them: Word Animation, Night/Day mode, Night images (a setting, no
-// consent behind it, D125 item 8), and recording
-// by voice with its retries only while consent (a) is given; withdrawn,
-// they pause and every night stays (D121 item 5). A withdrawal waits for
-// the retry in flight to stop before it is kept (D124 item 1).
+// consent behind it, D125 item 8), and recording by voice with its retries
+// only once the dreamer has agreed (D128): until then every night stays, the
+// microphone and Start Interpretation show a popup when tapped, and nothing is
+// sent.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -75,8 +75,6 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   JournalAudio? _audio;
   SettingsController? _settings;
   Recording? _recording;
-  // The retry cut by the last withdrawal, to be waited for (D124 item 1).
-  Future<void> _idle = Future<void>.value();
   // Null until the consent is read; then whether it is given.
   bool? _agreed;
   bool _agreeing = false;
@@ -155,9 +153,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   void _enter(Consents consents, Settings settings) {
     AlwaysLight.hold(context, false);
     final audio = _audio = JournalAudio(_store!);
-    final controller = SettingsController(_journal!, consents: consents, settings: settings)
-      ..addListener(_follow)
-      ..stopSending = () => _idle;
+    final controller = SettingsController(_journal!, consents: consents, settings: settings)..addListener(_follow);
     setState(() {
       _agreed = true;
       _settings = controller;
@@ -168,8 +164,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   }
 
   // The settings followed (D122): Word Animation, Night/Day mode, and
-  // recording by voice with its retries only while consent (a) is given;
-  // withdrawn, a retry running is cut and none starts (D121 item 5).
+  // recording by voice with its retries only once the dreamer has agreed
+  // (D128); there is no withdrawing, so what starts is not stopped again.
   void _follow({bool opening = false}) {
     final controller = _settings;
     if (controller == null || !mounted) return;
@@ -177,17 +173,11 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     // A mode found as the journal opens shows at once; one the dreamer
     // changes fades (D57 Q15).
     NightDayChoice.set(context, controller.settings.nightDay, instant: opening);
-    final readings = controller.sending;
-    if (readings && _recording == null) {
+    if (controller.agreed && _recording == null) {
       final audio = _audio!;
       _recording = widget.recording?.keeping(audio, waiting: audio);
       _recording?.retries?.afterRetry = audio.logCounts;
       _recording?.retries?.kick();
-    } else if (!readings && _recording != null) {
-      final retries = _recording?.retries;
-      retries?.dispose();
-      _idle = retries?.idle ?? Future<void>.value();
-      _recording = null;
     }
     setState(() {});
   }
@@ -238,6 +228,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         read: widget.read,
         settings: _settings,
         images: _settings?.settings.images != NightImages.off,
+        agreed: _settings?.agreed ?? true,
       ),
     };
   }

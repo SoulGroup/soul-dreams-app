@@ -40,6 +40,7 @@ import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../recording/heard_text.dart';
 import '../../recording/recording.dart';
+import '../../settings/agreement_popup.dart';
 import '../../words/lines.g.dart';
 import '../journal.dart';
 import '../night.dart';
@@ -50,7 +51,14 @@ import 'parts.dart';
 typedef DreamEdit = ({String id, int index, String text});
 
 class TypingPage extends StatefulWidget {
-  const TypingPage({super.key, required this.journal, required this.target, this.edit, this.recording});
+  const TypingPage({
+    super.key,
+    required this.journal,
+    required this.target,
+    this.edit,
+    this.recording,
+    this.agreed = true,
+  });
 
   static const fieldKey = Key('typing-field');
   static const saveKey = Key('typing-save');
@@ -69,6 +77,11 @@ class TypingPage extends StatefulWidget {
 
   /// How to record by voice, or null for no microphone.
   final Recording? recording;
+
+  /// Whether the dreamer has agreed (D128): when not, the microphone shows
+  /// with no recording behind it, and it and Start Interpretation show the
+  /// popup when tapped.
+  final bool agreed;
 
   @override
   State<TypingPage> createState() => _TypingPageState();
@@ -249,6 +262,11 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
   }
 
   void _toggleMic() {
+    // Before agreeing: the popup, nothing recorded (D128).
+    if (!widget.agreed) {
+      showAgreementPopup(context);
+      return;
+    }
     // Save or Back is waiting for the recording: no second one (D74).
     if (_saving) return;
     switch (_mic) {
@@ -620,7 +638,7 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                                       border: edge,
                                       enabledBorder: edge,
                                       focusedBorder: edge,
-                                      suffixIcon: widget.recording == null
+                                      suffixIcon: widget.recording == null && widget.agreed
                                           ? null
                                           : IconButton(
                                               key: TypingPage.micKey,
@@ -651,8 +669,14 @@ class _TypingPageState extends State<TypingPage> with WidgetsBindingObserver {
                       ),
                       right: KeyedSubtree(
                         key: TypingPage.startKey,
-                        // Nothing to start yet: the readings come later (D71 Q3).
-                        child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
+                        // Nothing to start yet: the readings come later (D71 Q3);
+                        // before agreeing, the popup (D128).
+                        child: PlainButton(
+                          Lines.EM_1.text(appLanguage),
+                          onPressed: () {
+                            if (!widget.agreed) showAgreementPopup(context);
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: StandIns.gap),

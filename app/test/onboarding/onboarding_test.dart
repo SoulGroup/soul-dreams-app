@@ -147,7 +147,7 @@ void main() {
     }
     expect(said(Lines.W27_1), findsNothing);
     // D127 item 1: no consent anywhere in onboarding, and no Next.
-    expect(find.byType(ConsentChoice), findsNothing);
+    expect(find.byType(TurnOnChoice), findsNothing);
     for (final line in [Lines.MP_66, Lines.MP_67, Lines.MP_68, Lines.MP_69, Lines.MP_70, Lines.MP_30]) {
       expect(said(line), findsNothing, reason: line.handle);
     }
@@ -172,7 +172,7 @@ void main() {
   testWidgets('the full page is the text only', (tester) async {
     await start(tester);
     await toFull(tester);
-    expect(find.byType(ConsentChoice), findsNothing);
+    expect(find.byType(TurnOnChoice), findsNothing);
     for (final line in [Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_30, Lines.EM_6]) {
       expect(said(line), findsNothing, reason: line.handle);
     }
@@ -235,7 +235,7 @@ void main() {
     expect(find.textContaining('[X·1]'), findsNothing);
     expect(said(Lines.W27_3), findsOneWidget);
     expect(said(Lines.W27_1), findsNothing);
-    expect(find.byType(ConsentChoice), findsNothing);
+    expect(find.byType(TurnOnChoice), findsNothing);
   });
 
   test('the pages default to their parts', () {
@@ -394,7 +394,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(DisclosurePage), findsNothing);
     expect(said(Lines.MP_58), findsOneWidget);
-    expect(find.byType(ConsentChoice), findsNothing);
+    expect(find.byType(TurnOnChoice), findsNothing);
     expect(iAgree(), findsOneWidget);
     expect(agreed, 0);
   });

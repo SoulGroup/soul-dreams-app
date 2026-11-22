@@ -1,7 +1,6 @@
 // The settings and the consents while the journal is open (D121; D122): a
 // change shows at once and is kept; one that cannot be kept logs a code and
 // holds; Night images is a setting with no consent behind it (D125 item 8).
-import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -21,15 +20,6 @@ final class NoRename extends MemoryJournalFiles {
   Future<void> rename(String from, String to) async => throw StateError('journal-io');
 }
 
-/// A folder whose rename fails while [failing].
-final class Flaky extends MemoryJournalFiles {
-  bool failing = false;
-
-  @override
-  Future<void> rename(String from, String to) async =>
-      failing ? throw StateError('journal-io') : super.rename(from, to);
-}
-
 final now = DateTime.utc(2026, 11, 21, 12);
 
 Future<(SettingsController, MemoryJournalFiles)> make({
@@ -43,17 +33,6 @@ Future<(SettingsController, MemoryJournalFiles)> make({
 
 Map<String, dynamic> kept(MemoryJournalFiles f, String name) =>
     jsonDecode(utf8.decode(f.files[name]!)) as Map<String, dynamic>;
-
-/// A folder whose rename waits at [gate].
-final class Slow extends MemoryJournalFiles {
-  Completer<void>? gate;
-
-  @override
-  Future<void> rename(String from, String to) async {
-    await gate?.future;
-    return super.rename(from, to);
-  }
-}
 
 void main() {
   late List<String> lines;
@@ -80,118 +59,54 @@ void main() {
     expect(lines, isEmpty);
   });
 
-  // D124 item 1: sending stops at once, the withdrawal waits for the retry
-  // in flight to stop, and is shown only when it is kept.
-  test('withdrawn: sending stops, the retry is waited for, then kept', () async {
-    final (c, f) = await make();
-    final stopped = Completer<void>();
-    var asked = 0;
-    c.stopSending = () {
-      asked++;
-      return stopped.future;
-    };
+  // D128 item 3: "I agree" (from the Disclosure & privacy page) gives the
+  // readings and Life Context together, shown at once, then kept with the day;
+  // there is no withdrawing.
+  test('agree gives both consents at once, then keeps them', () async {
+    final (c, f) = await make(given: const {});
     var told = 0;
     c.addListener(() => told++);
-    expect(c.sending, isTrue);
-    var done = false;
-    final withdrawal = c.answer(Consent.readings, false).then((_) => done = true);
-    expect(c.sending, isFalse);
+    expect(c.agreed, isFalse);
+    final done = c.agree();
+    expect(c.agreed, isTrue);
+    expect(c.consents.given(Consent.readings), isTrue);
+    expect(c.consents.given(Consent.lifeContext), isTrue);
     expect(told, 1);
-    await pumpEventQueue();
-    expect(asked, 1);
-    expect(done, isFalse);
-    expect(c.consents.given(Consent.readings), isTrue);
-    expect(f.files, isEmpty);
-    stopped.complete();
-    await withdrawal;
-    expect(c.consents.given(Consent.readings), isFalse);
-    expect(c.sending, isFalse);
-    expect(c.withdrawalNotKept, isFalse);
-    expect(kept(f, JournalStore.consentFile)['readings'], {'given': false, 'day': '2026-11-21'});
+    await done;
+    expect(kept(f, JournalStore.consentFile)['readings'], {'given': true, 'day': '2026-11-21'});
+    expect(kept(f, JournalStore.consentFile)['lifeContext'], {'given': true, 'day': '2026-11-21'});
     expect(lines, isEmpty);
-    // Given again, sending resumes.
-    await c.answer(Consent.readings, true);
-    expect(c.sending, isTrue);
+    // Agreed already: nothing more.
+    await c.agree();
+    expect(told, 1);
   });
 
-  test('a second withdrawal while one is under way is ignored', () async {
-    final (c, _) = await make();
-    final stopped = Completer<void>();
-    var asked = 0;
-    c.stopSending = () {
-      asked++;
-      return stopped.future;
-    };
-    final first = c.answer(Consent.readings, false);
-    final second = c.answer(Consent.readings, false);
-    await pumpEventQueue();
-    stopped.complete();
-    await Future.wait([first, second]);
-    expect(asked, 1);
-  });
-
-  // D124 item 2: not kept, sending still stops for the session, the readings
-  // still show as given, and the dreamer can try again.
-  test('withdrawal not kept: sending stops, shown given, retry keeps it', () async {
-    final f = Flaky()..failing = true;
-    final (c, _) = await make(files: f);
+  // Already agreed (the readings given): "I agree" is not offered, and does nothing.
+  test('agree when the readings are already given changes nothing', () async {
+    final (c, f) = await make();
     var told = 0;
     c.addListener(() => told++);
-    await c.answer(Consent.readings, false);
-    expect(c.sending, isFalse);
-    expect(c.consents.given(Consent.readings), isTrue);
-    expect(c.withdrawalNotKept, isTrue);
-    expect(told, greaterThanOrEqualTo(2));
+    expect(c.agreed, isTrue);
+    await c.agree();
+    expect(told, 0);
+    expect(c.consents.given(Consent.lifeContext), isFalse);
+    expect(f.files, isEmpty);
+  });
+
+  // Agreed is the readings alone: Life Context given without them is not it.
+  test('agreed follows the readings, not Life Context', () async {
+    final (c, _) = await make(given: const {Consent.lifeContext: true});
+    expect(c.agreed, isFalse);
+    expect(c.consents.given(Consent.lifeContext), isTrue);
+  });
+
+  test('agree that cannot be kept logs a code and holds', () async {
+    final (c, f) = await make(given: const {}, files: NoRename());
+    await c.agree();
+    expect(c.agreed, isTrue);
+    expect(c.consents.given(Consent.lifeContext), isTrue);
     expect(lines, ['consentKeepFailed']);
     expect(f.files, isEmpty);
-    f.failing = false;
-    final before = told;
-    final again = c.answer(Consent.readings, false);
-    expect(c.withdrawalNotKept, isFalse);
-    expect(told, greaterThan(before));
-    await again;
-    expect(c.consents.given(Consent.readings), isFalse);
-    expect(c.sending, isFalse);
-    expect(c.withdrawalNotKept, isFalse);
-    expect(kept(f, JournalStore.consentFile)['readings'], {'given': false, 'day': '2026-11-21'});
-    expect(lines, ['consentKeepFailed']);
-  });
-
-  test('not kept twice: sending still stops', () async {
-    final (c, _) = await make(files: NoRename());
-    await c.answer(Consent.readings, false);
-    await c.answer(Consent.readings, false);
-    expect(c.sending, isFalse);
-    expect(c.withdrawalNotKept, isTrue);
-    expect(c.consents.given(Consent.readings), isTrue);
-    expect(lines, ['consentKeepFailed', 'consentKeepFailed']);
-  });
-
-  // The journal deleted while a withdrawal waits: it ends quietly.
-  test('a withdrawal under way when the journal goes ends quietly', () async {
-    final (c, f) = await make();
-    final stopped = Completer<void>();
-    c.stopSending = () => stopped.future;
-    final withdrawal = c.answer(Consent.readings, false);
-    await pumpEventQueue();
-    c.dispose();
-    stopped.complete();
-    await withdrawal;
-    // Nothing is written into a journal that has gone (D110).
-    expect(f.files, isEmpty);
-    expect(lines, isEmpty);
-  });
-
-  // The journal goes while the withdrawal is being written: it ends quietly.
-  test('a withdrawal being written when the journal goes ends quietly', () async {
-    final f = Slow();
-    final (c, _) = await make(files: f);
-    f.gate = Completer<void>();
-    final withdrawal = c.answer(Consent.readings, false);
-    await pumpEventQueue();
-    c.dispose();
-    f.gate!.complete();
-    await withdrawal;
   });
 
   test('a setting changed shows at once, then is kept', () async {

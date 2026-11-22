@@ -2,9 +2,10 @@
 // disclosure, W27·1 to W27·17 (W27·7 is merged into W27·6, W27·16 retired),
 // in order, opened from onboarding's second page by MP·58 and closed by the
 // back control, back to it. The text only, from onboarding and from Settings
-// alike: no consent is asked here (D127 item 1). A part with no line yet (to
-// rewrite) shows nothing in its place (D106 3; R1). No title: none is given
-// (the plan's question 4).
+// alike (D127 item 1); from Settings, before the dreamer has agreed, it ends
+// with one button, MP·100, handed in as [end] (D128 item 3). A part with no
+// line yet (to rewrite) shows nothing in its place (D106 3; R1). No title:
+// none is given (the plan's question 4).
 import 'package:flutter/material.dart';
 
 import '../core/language.dart';
@@ -22,10 +23,14 @@ List<Line> written(List<Line> lines) => [for (final line in lines) if (line.writ
 List<Line> lacking(List<Line> lines) => [for (final line in lines) if (!line.written) line];
 
 class DisclosurePage extends StatelessWidget {
-  const DisclosurePage({super.key, this.shown = DisclosurePage.parts});
+  const DisclosurePage({super.key, this.shown = DisclosurePage.parts, this.end = const []});
 
   /// The parts shown: [parts], unless a test hands in others (D106 3).
   final List<Line> shown;
+
+  /// What stands after the last part, in the list: from Settings, before the
+  /// dreamer has agreed, MP·100; else none.
+  final List<Widget> end;
 
   /// Every part, in the register's order.
   static const parts = [
@@ -73,6 +78,7 @@ class DisclosurePage extends StatelessWidget {
                           style: StandIns.voiceApp(p.text),
                         ),
                       ),
+                    ...end,
                   ],
                 ),
               ),

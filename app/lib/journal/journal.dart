@@ -8,8 +8,7 @@
 //   deleted, as a deletion deletes it (P10).
 // - The two consents and the settings (D103; D122; D125) are kept and read
 //   here. When the journal is deleted, they go with it, and `consentGone`
-//   tells the app, which returns to its start (D110). A consent withdrawn
-//   is an answer kept, and the app stays (D121 item 5).
+//   tells the app, which returns to its start (D110).
 // - A dream is told in words or waits as a recording (D93 Q2); a dream's
 //   index counts both, and a waiting one is never edited. A Save puts the
 //   recordings its screen left waiting after its words, in order; a Save

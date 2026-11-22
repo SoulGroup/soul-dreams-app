@@ -26,6 +26,7 @@ import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/journal/sky.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../../fixtures.dart';
 import '../memory_journal_files.dart';
@@ -193,6 +194,30 @@ void main() {
     expect(find.bySemanticsLabel(Lines.C4_P_5.text(Lang.en)), findsOneWidget);
     expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
     expect(find.byWidgetPredicate((w) => w is CustomPaint && w.size == const Size(12, 32)), findsNothing);
+  });
+
+  // D128 item 3: before the dreamer has agreed, the journal hands that on:
+  // the typing screen shows the microphone with its popup, and a night's
+  // Start Interpretation shows it too.
+  testWidgets('before agreeing: the typing screen and a night are told', (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal, agreed: false));
+    await tester.tap(find.byKey(JournalPage.newDreamKey));
+    await tester.pumpAndSettle();
+    expect(find.byType(TypingPage), findsOneWidget);
+    await tester.tap(find.byKey(TypingPage.micKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
+    await tester.tap(find.text(PendingLines.MP_102.text(Lang.en)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackControl).first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(JournalPage.rowKey(n.id)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
   });
 
   testWidgets('a later empty journal has no MP·9', (tester) async {

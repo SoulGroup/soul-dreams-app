@@ -57,6 +57,7 @@ class JournalPage extends StatefulWidget {
     this.read = noneRead,
     this.settings,
     this.images = true,
+    this.agreed = true,
   });
 
   final Journal journal;
@@ -88,6 +89,11 @@ class JournalPage extends StatefulWidget {
   /// False while Night images is Off: every night shows the gradient
   /// (D121 item 3).
   final bool images;
+
+  /// Whether the dreamer has agreed (D128): when not, the typing screen and
+  /// a night show the microphone and Start Interpretation, and a tap shows the
+  /// popup.
+  final bool agreed;
 
   @override
   State<JournalPage> createState() => _JournalPageState();
@@ -197,7 +203,11 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
         SafeLog.event(LogEvent.journalListFailed);
         return;
       }
-      if (mounted) await _push(TypingPage(journal: widget.journal, target: target, recording: widget.recording));
+      if (mounted) {
+        await _push(
+          TypingPage(journal: widget.journal, target: target, recording: widget.recording, agreed: widget.agreed),
+        );
+      }
     } finally {
       _recording = false;
     }
@@ -226,6 +236,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
           action: widget.nightAction,
           read: widget.read,
           images: widget.images,
+          agreed: widget.agreed,
           query: query,
         ),
       ),

@@ -41,15 +41,6 @@ void phone(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-/// A folder whose rename fails while [failing].
-final class Flaky extends MemoryJournalFiles {
-  bool failing = false;
-
-  @override
-  Future<void> rename(String from, String to) async =>
-      failing ? throw StateError('journal-io') : super.rename(from, to);
-}
-
 void main() {
   late MemoryJournalFiles files;
 
@@ -134,13 +125,14 @@ void main() {
     expect(shown(tester, SettingRow.lifeContext), 'Off');
     expect(shown(tester, SettingRow.length), '2 weeks');
     expect(find.text(en(Lines.MP_48)), findsOneWidget);
-    expect(find.text(en(Lines.MP_95)), findsOneWidget);
     expect(find.text(en(Lines.EM_11)), findsOneWidget);
+    // D128 item 2: no Give or Withdraw consent, no row for it.
+    expect(find.text(en(Lines.MP_95, 0)), findsNothing);
+    expect(find.text(en(Lines.MP_95, 1)), findsNothing);
     // Nothing of Feedback (D121 item 4) or of what Life Context keeps.
     expect(find.text(en(Lines.MP_49)), findsNothing);
     expect(find.text(en(Lines.MP_86)), findsNothing);
     final delete = tester.getCenter(find.byKey(SettingsPage.deleteKey)).dy;
-    expect(tester.getCenter(find.byKey(SettingsPage.consentKey)).dy, lessThan(delete));
     expect(tester.getCenter(find.byKey(SettingsPage.disclosureKey)).dy, lessThan(delete));
   });
 
@@ -270,12 +262,12 @@ void main() {
     expect(kept(JournalStore.consentFile).keys, ['version', 'over18', 'readings', 'lifeContext']);
   });
 
-  // The stop's question 7: Life Context On needs consent (b); Off asks MP·93.
-  testWidgets('Life Context: On asks its consent; Off asks MP·93', (tester) async {
+  // The stop's question 7, D128: Life Context On shows its page; Off asks MP·93.
+  testWidgets('Life Context: On shows its page; Off asks MP·93', (tester) async {
     final c = await open(tester);
     await choose(tester, SettingRow.lifeContext, 0);
     expect(find.text(en(Lines.MP_69)), findsOneWidget);
-    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.lifeContext, true)));
+    await hit(tester, find.byKey(TurnOnChoice.keyOf(true)));
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.lifeContext), isTrue);
     expect(shown(tester, SettingRow.lifeContext), 'On');
@@ -308,76 +300,66 @@ void main() {
     expect(find.byType(ConsentPage), findsOneWidget);
     expect(find.text(PendingLines.MP_98.text(appLanguage)), findsOneWidget);
     expect(find.text(PendingLines.MP_99.text(appLanguage)), findsOneWidget);
-    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.lifeContext, false)));
+    await hit(tester, find.byKey(TurnOnChoice.keyOf(false)));
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.lifeContext), isFalse);
     await choose(tester, SettingRow.lifeContext, 0);
-    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.lifeContext, true)));
+    await hit(tester, find.byKey(TurnOnChoice.keyOf(true)));
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.lifeContext), isTrue);
     expect(shown(tester, SettingRow.lifeContext), 'On');
   });
 
-  // D121 item 5; the stop's question 10: Withdraw behind MP·96, the journal
-  // stays; Give consent behind MP·68.
-  testWidgets('Withdraw consent behind MP·96; Give consent behind MP·68', (tester) async {
-    final c = await open(tester);
-    await hit(tester, find.byKey(SettingsPage.consentKey));
-    await tester.pumpAndSettle();
-    expect(find.text(en(Lines.MP_96)), findsOneWidget);
-    cancelFirst(tester, Lines.MP_97);
-    await tester.tap(find.text(en(Lines.MP_61)));
-    await tester.pumpAndSettle();
-    expect(c.consents.given(Consent.readings), isTrue);
-    await hit(tester, find.byKey(SettingsPage.consentKey));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text(en(Lines.MP_97)));
-    await tester.pumpAndSettle();
-    expect(c.consents.given(Consent.readings), isFalse);
-    expect(find.byType(SettingsPage), findsOneWidget);
-    expect(find.text(en(Lines.MP_95, 1)), findsOneWidget);
-    await hit(tester, find.byKey(SettingsPage.consentKey));
-    await tester.pumpAndSettle();
-    expect(find.text(en(Lines.MP_68)), findsOneWidget);
-    // The back control gives nothing.
-    await tester.tap(find.descendant(of: find.byType(ConsentPage), matching: find.byType(BackControl)));
-    await tester.pumpAndSettle();
-    expect(c.consents.given(Consent.readings), isFalse);
-    await hit(tester, find.byKey(SettingsPage.consentKey));
-    await tester.pumpAndSettle();
-    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.readings, true)));
-    await tester.pumpAndSettle();
-    expect(c.consents.given(Consent.readings), isTrue);
-    expect(find.text(en(Lines.MP_95, 0)), findsOneWidget);
+  // D128 item 2: no Give consent, no Withdraw consent, and no readings consent
+  // page: nothing in Settings gives or withdraws the readings.
+  testWidgets('no consent row, no consent page, in either state', (tester) async {
+    for (final given in [const {Consent.readings: true}, const <Consent, bool>{}]) {
+      await open(tester, given: given);
+      expect(find.byKey(const Key('settings-consent')), findsNothing);
+      expect(find.textContaining(RegExp('onsent', caseSensitive: false)), findsNothing);
+      await tester.pumpWidget(const SizedBox());
+    }
   });
 
-  // D124 item 2: a withdrawal that cannot be written: MP·62 shows, the button
-  // stays "Withdraw consent", and a second try is kept.
-  testWidgets('a withdrawal not kept: MP·62, the button stays; tried again, kept', (tester) async {
-    final folder = Flaky();
-    final c = await open(tester, folder: folder);
-    folder.failing = true;
-    expect(find.byKey(SettingsPage.notKeptKey), findsNothing);
-    await hit(tester, find.byKey(SettingsPage.consentKey));
+  // D128 item 3: before the dreamer has agreed, Life Context's row shows the
+  // popup (MP·101, one button MP·102) and changes nothing.
+  testWidgets('before agreeing: Life Context shows the popup, changes nothing', (tester) async {
+    final c = await open(tester, given: const {});
+    for (final choice in [0, 1]) {
+      await choose(tester, SettingRow.lifeContext, choice);
+      expect(find.text(PendingLines.MP_101.text(appLanguage)), findsOneWidget);
+      expect(find.byType(CupertinoDialogAction), findsOneWidget);
+      await tester.tap(find.text(PendingLines.MP_102.text(appLanguage)));
+      await tester.pumpAndSettle();
+      expect(find.text(PendingLines.MP_101.text(appLanguage)), findsNothing);
+      expect(c.consents.given(Consent.lifeContext), isFalse);
+      expect(shown(tester, SettingRow.lifeContext), 'Off');
+      expect(find.byType(ConsentPage), findsNothing);
+    }
+  });
+
+  // D128 item 3: before agreeing, the Disclosure & privacy page ends with one
+  // button, MP·100; it agrees, as in onboarding, and goes.
+  testWidgets('before agreeing: the disclosure ends with I agree', (tester) async {
+    final c = await open(tester, given: const {});
+    await hit(tester, find.byKey(SettingsPage.disclosureKey));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(en(Lines.MP_97)));
+    final agree = find.byKey(SettingsPage.agreeKey);
+    await tester.scrollUntilVisible(agree, 300, scrollable: find.byType(Scrollable).last, maxScrolls: 200);
+    expect(find.byType(PlainButton), findsOneWidget);
+    expect(find.text(PendingLines.MP_100.text(appLanguage)), findsOneWidget);
+    await tester.tap(agree);
     await tester.pumpAndSettle();
-    expect(c.sending, isFalse);
+    expect(c.agreed, isTrue);
     expect(c.consents.given(Consent.readings), isTrue);
-    await tester.ensureVisible(find.byKey(SettingsPage.notKeptKey));
-    expect(find.text(en(Lines.MP_62)), findsOneWidget);
-    expect(find.text(en(Lines.MP_95, 0)), findsOneWidget);
-    expect(find.text(en(Lines.MP_95, 1)), findsNothing);
-    folder.failing = false;
-    await hit(tester, find.byKey(SettingsPage.consentKey));
+    expect(c.consents.given(Consent.lifeContext), isTrue);
+    expect(kept(JournalStore.consentFile)['readings']['given'], isTrue);
+    expect(kept(JournalStore.consentFile)['lifeContext']['given'], isTrue);
+    expect(find.byKey(SettingsPage.agreeKey), findsNothing);
+    expect(find.byType(DisclosurePage), findsOneWidget);
+    await tester.tap(find.byType(BackControl));
     await tester.pumpAndSettle();
-    expect(find.text(en(Lines.MP_96)), findsOneWidget);
-    await tester.tap(find.text(en(Lines.MP_97)));
-    await tester.pumpAndSettle();
-    expect(find.byKey(SettingsPage.notKeptKey), findsNothing);
-    expect(find.text(en(Lines.MP_62)), findsNothing);
-    expect(find.text(en(Lines.MP_95, 1)), findsOneWidget);
-    expect(c.consents.given(Consent.readings), isFalse);
+    expect(shown(tester, SettingRow.lifeContext), 'On');
   });
 
   testWidgets('Read disclosure & privacy opens every part', (tester) async {
@@ -385,13 +367,12 @@ void main() {
     await hit(tester, find.byKey(SettingsPage.disclosureKey));
     await tester.pumpAndSettle();
     expect(tester.widget<DisclosurePage>(find.byType(DisclosurePage)).shown, DisclosurePage.parts);
-    // D127 item 1: from Settings, as from onboarding, the page is only to
-    // read: no consent, no Next, no agreeing.
-    expect(find.byType(ConsentChoice), findsNothing);
+    // D128 item 2: once agreed, the page is only to read: no button at all.
+    expect(find.byType(PlainButton), findsNothing);
+    expect(find.byKey(SettingsPage.agreeKey), findsNothing);
     expect(find.text(en(Lines.MP_66)), findsNothing);
     expect(find.text(en(Lines.MP_30)), findsNothing);
     expect(find.text(en(Lines.EM_6)), findsNothing);
-    expect(find.textContaining('[MP·100]'), findsNothing);
   });
 
   // D110: one confirmation; then everything goes, back to the welcome.
@@ -450,10 +431,10 @@ void main() {
     });
   }
 
-  // D127 item 2: in every pill the space to the right of the chevron equals
-  // the space above and below the value.
-  testWidgets('every pill: even space round the value and chevron', (tester) async {
-    // The test font (Ahem) is wider than Inter: scaled down, no value shrinks.
+  // D128 item 6: outside every pill, the gap from its right edge to the row's
+  // right edge equals the gap above and below it (inside, as before D127).
+  testWidgets('every pill: right gap to the row equals top and bottom', (tester) async {
+    // The test font (Ahem) is wider than Inter: scaled down, no name wraps to three lines.
     tester.platformDispatcher.textScaleFactorTestValue = 0.8;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await open(tester);
@@ -462,12 +443,10 @@ void main() {
       await tester.ensureVisible(pill);
       await tester.pumpAndSettle();
       final box = tester.getRect(find.descendant(of: pill, matching: find.byType(DecoratedBox)).first);
-      // The value's line, an unseen empty one: its words may shrink inside it at large text.
-      final value = tester.getRect(find.descendant(of: pill, matching: find.byType(Opacity)));
-      final chevron = tester.getRect(find.descendant(of: pill, matching: find.byType(Chevron)));
-      final above = value.top - box.top;
-      final below = box.bottom - value.bottom;
-      final right = box.right - chevron.right;
+      final line = tester.getRect(find.byKey(SettingsPage.rowKey(row)));
+      final above = box.top - line.top;
+      final below = line.bottom - box.bottom;
+      final right = line.right - box.right;
       expect(above, closeTo(below, 0.5), reason: row.name);
       expect(right, closeTo(above, 0.5), reason: row.name);
       expect(right, greaterThan(0), reason: row.name);
@@ -479,16 +458,7 @@ void main() {
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await open(tester);
     expect(tester.takeException(), isNull);
-    // Each pill keeps its size, and its words shrink to stay inside it; the
-    // pills are one height, whatever their words.
-    final heights = <double>{};
-    for (final row in SettingRow.values) {
-      final pill = find.byKey(SettingsPage.valueKey(row));
-      await tester.ensureVisible(pill);
-      await tester.pumpAndSettle();
-      heights.add(tester.getSize(find.descendant(of: pill, matching: find.byType(DecoratedBox)).first).height);
-    }
-    expect(heights, hasLength(1));
+    // Each pill keeps its size, and its words shrink to stay inside it.
     for (final row in SettingRow.values) {
       final pill = find.byKey(SettingsPage.valueKey(row));
       await tester.ensureVisible(pill);

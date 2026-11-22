@@ -47,6 +47,7 @@ import '../night_action.dart';
 import '../night_look.dart';
 import '../night_rules.dart';
 import '../row_text.dart';
+import '../../settings/agreement_popup.dart';
 import '../search.dart';
 import 'night_art.dart';
 import 'parts.dart';
@@ -72,6 +73,7 @@ class NightPage extends StatefulWidget {
     this.action,
     this.read = noneRead,
     this.images = true,
+    this.agreed = true,
     this.query,
   });
 
@@ -100,6 +102,10 @@ class NightPage extends StatefulWidget {
 
   /// False while Night images is Off: the gradient (D121 item 3).
   final bool images;
+
+  /// Whether the dreamer has agreed (D128): when not, Start Interpretation
+  /// shows the popup.
+  final bool agreed;
 
   /// The search this night was opened from, as searched, or null.
   final String? query;
@@ -174,6 +180,7 @@ class _NightPageState extends State<NightPage> {
       target: IntoNight(widget.id),
       edit: edit,
       recording: widget.recording,
+      agreed: widget.agreed,
     );
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     await _load();
@@ -447,8 +454,14 @@ class _NightPageState extends State<NightPage> {
                     ),
                     right: KeyedSubtree(
                       key: NightPage.startKey,
-                      // Nothing to start yet: the readings come later (P3, as D71 Q3).
-                      child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: () {}),
+                      // Nothing to start yet: the readings come later (P3, as D71
+                      // Q3); before agreeing, the popup (D128).
+                      child: PlainButton(
+                        Lines.EM_1.text(appLanguage),
+                        onPressed: () {
+                          if (!widget.agreed) showAgreementPopup(context);
+                        },
+                      ),
                     ),
                   ),
                 ),

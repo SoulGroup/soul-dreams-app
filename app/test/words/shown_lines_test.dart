@@ -63,16 +63,35 @@ void main() {
       if (Lang.values.any((lang) => l.parts(lang).any(braced))) l.handle,
   ];
 
+  // D128 item 4: the word "consent" is on no screen. One filed line still
+  // shown holds it, in Swedish only: EM·6 "Jag samtycker inte" (onboarding's
+  // "I don't agree"), for Product to reword (filed lines are not changed
+  // here). MP·67, MP·95 and MP·96 hold it too and are shown nowhere now.
+  test('no shown line says consent, but the one named for Product', () {
+    final word = RegExp('consent|samtycke', caseSensitive: false);
+    final seen = named(reached('lib/main_dev.dart'));
+    final shown = [
+      for (final l in Lines.all)
+        if (seen.contains(dartName(l)) && Lang.values.any((lang) => l.parts(lang).any(word.hasMatch))) l.handle,
+    ];
+    expect(shown, ['EM·6']);
+    expect(Lines.EM_6.parts(Lang.en).any(word.hasMatch), isFalse);
+    for (final unshown in ['MP_67', 'MP_95', 'MP_96']) {
+      expect(seen, isNot(contains(unshown)));
+    }
+  });
+
   test('the scan sees the places the screens use', () {
     final seen = named(reached('lib/main_dev.dart'));
     // One plain place and one with a slot, so a scan that finds nothing, or
     // misses the places with a slot, fails here and not silently; and the
-    // consent Dev shows with its braces (D122); the night images consent,
-    // retired, is shown nowhere (D125 item 8).
-    expect(seen, containsAll(['MP_11', 'MP_76', 'MP_68']));
+    // Life Context's page (MP·69); the readings and night images consents
+    // are shown nowhere now (D125 item 8; D128 item 2).
+    expect(seen, containsAll(['MP_11', 'MP_76', 'MP_69']));
+    expect(seen, isNot(contains('MP_68')));
     expect(seen, isNot(contains('MP_70')));
     expect(seen, isNot(contains('all')), reason: 'a screen reaching Lines.all would hide what it shows');
-    expect(bracedIn(seen), contains('MP·68'));
+    expect(bracedIn(seen), isEmpty);
   });
 
   test('every place the screens name is in the register', () {
