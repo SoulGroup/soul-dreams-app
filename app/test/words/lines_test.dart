@@ -1,5 +1,6 @@
 // The generated words (D32): read by handle only, never quoted (R1).
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/settings/setting_line.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
 
@@ -59,6 +60,15 @@ void main() {
       final popup = PendingLines.MP_101.text(lang, flavor: 'dev');
       expect(popup, contains(Lines.MP_48.text(lang)), reason: lang.name);
       expect(popup, contains(PendingLines.MP_100.text(lang, flavor: 'dev')), reason: lang.name);
+    }
+  });
+
+  // D133: the line shown while Life Context is Off names the Settings row as
+  // filed (MP·83's name), in both languages.
+  test('MP·104 names MP·83 exactly', () {
+    for (final lang in Lang.values) {
+      final name = settingWords(Lines.MP_83, lang)!.name;
+      expect(PendingLines.MP_104.text(lang, flavor: 'dev'), contains(name), reason: lang.name);
     }
   });
 }

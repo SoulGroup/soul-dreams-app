@@ -16,9 +16,11 @@
 //   the keyboard, or leaving the field, keeps the edit, which changes only
 //   the kept copy (D131 item 2). Emptied, it is a deletion, and asks C4-P·4;
 //   Cancel keeps the sentence as it was.
-// - Select sentences: each box toggles its selection, a mark at its left;
-//   the foot shows Delete selected ({n}) (MP·90), which does nothing at 0;
-//   the back control leaves the selection first.
+// - Select sentences: each box, and its mark at its left, toggles its
+//   selection; the foot shows Delete selected ({n}) (MP·90), which does
+//   nothing at 0; the top left is a drawn tick (MP·103's name) instead of
+//   the back control, and it ends selecting (D133).
+// - While Life Context is Off the page shows MP·104 alone (D133 item 3).
 // - Every deletion asks C4-P·4 once, the phone's standard dialog, Cancel
 //   (MP·61) first and Delete (MP·60) destructive (C4-P·4's flag).
 // The boxes, labels, icons and spacing are stand-ins (TO TRY, P13).
@@ -34,6 +36,7 @@ import '../journal/night_rules.dart' show isEmptyText;
 import '../journal/pages/parts.dart';
 import '../journal/row_text.dart';
 import '../words/lines.g.dart';
+import '../words/pending.g.dart';
 import 'kept.dart';
 import 'life_context.dart';
 
@@ -55,11 +58,13 @@ class LifeContextPage extends StatefulWidget {
   static const deleteAllKey = Key('kept-delete-all');
   static const deleteSelectedKey = Key('kept-delete-selected');
   static const emptyKey = Key('kept-empty');
+  static const offKey = Key('kept-off');
   static const fieldKey = Key('kept-field');
 
   /// A kept sentence's box, its words, edit and delete.
   static Key sentenceKey(String id) => ValueKey('kept-$id');
   static Key wordsKey(String id) => ValueKey('kept-words-$id');
+  static Key markKey(String id) => ValueKey('kept-mark-$id');
   static Key editKey(String id) => ValueKey('kept-edit-$id');
   static Key deleteKey(String id) => ValueKey('kept-delete-$id');
 
@@ -166,31 +171,29 @@ class _LifeContextPageState extends State<LifeContextPage> {
     await _life.edit(id, text);
   }
 
-  void _tap(Kept k) {
-    if (_selecting) {
+  void _toggle(Kept k) =>
       setState(() => _selected.contains(k.id) ? _selected.remove(k.id) : _selected.add(k.id));
-      return;
-    }
+
+  void _tap(Kept k) {
+    if (_selecting) return _toggle(k);
     if (_editing != null) return;
     final open = widget.openNight;
     if (open != null) open(k.night).then((_) => _load());
   }
 
-  void _back() {
-    if (_selecting) {
-      setState(() {
-        _selecting = false;
-        _selected.clear();
-      });
-      return;
-    }
-    Navigator.of(context).pop();
+  // The tick ends selecting, and the selection with it.
+  void _done() {
+    setState(() {
+      _selecting = false;
+      _selected.clear();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     final longer = _life.longer;
+    final off = !_life.on;
     final empty = _recent.isEmpty && longer.isEmpty;
     final labels = Lines.MP_87.parts(appLanguage);
     return Scaffold(
@@ -206,7 +209,9 @@ class _LifeContextPageState extends State<LifeContextPage> {
                   children: [
                     Align(
                       alignment: Alignment.topLeft,
-                      child: BackControl(onPressed: _back),
+                      child: _selecting
+                          ? DoneControl(onPressed: _done)
+                          : BackControl(onPressed: () => Navigator.of(context).pop()),
                     ),
                     if (!_selecting && !empty) Align(alignment: Alignment.topRight, child: _menu(p, longer)),
                   ],
@@ -224,6 +229,8 @@ class _LifeContextPageState extends State<LifeContextPage> {
               const SizedBox(height: StandIns.gap),
               if (!_loaded)
                 const SizedBox.shrink()
+              else if (off)
+                AppLine(key: LifeContextPage.offKey, PendingLines.MP_104.text(appLanguage), style: StandIns.voiceApp(p.text))
               else if (empty)
                 AppLine(key: LifeContextPage.emptyKey, Lines.MP_92.text(appLanguage), style: StandIns.voiceApp(p.text))
               else ...[
@@ -357,12 +364,17 @@ class _LifeContextPageState extends State<LifeContextPage> {
               if (_selecting)
                 Semantics(
                   checked: selected,
-                  child: SizedBox.square(
-                    dimension: StandIns.hitMin,
-                    child: Icon(
-                      selected ? Icons.check_circle : Icons.radio_button_unchecked,
-                      size: StandIns.keptIcon,
-                      color: p.keptText,
+                  child: GestureDetector(
+                    key: LifeContextPage.markKey(k.id),
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _toggle(k),
+                    child: SizedBox.square(
+                      dimension: StandIns.hitMin,
+                      child: Icon(
+                        selected ? Icons.check_circle : Icons.radio_button_unchecked,
+                        size: StandIns.keptIcon,
+                        color: p.keptText,
+                      ),
                     ),
                   ),
                 )

@@ -322,8 +322,11 @@ merge (this entry records it).
   (color.lifecontext.*; the light box edged with the surface's grey), its date (dd/mm/yy) beneath in
   type.button.small, edit (MP·89) at its left and delete at its right (#8F3D24; in the dark #D0775A, proposed by C18-P,
   a stand-in); Delete all (MP·91) at the foot; MP·92 alone when nothing is kept. Edit makes the box a field: Done or
-  leaving keeps the edit, the kept copy only (D131 item 2); emptied, it asks C4-P·4. Selecting: each box toggles,
-  Delete selected ({n}) (MP·90) at the foot, the back control leaves the selection. Every deletion asks C4-P·4 once.
+  leaving keeps the edit, the kept copy only (D131 item 2); emptied, it asks C4-P·4. Selecting: each box, and its
+  tick box, toggles; Delete selected ({n}) (MP·90) at the foot; the top left is a drawn tick, spoken MP·103 "Done",
+  in the back control's round button, which ends selecting and forgets it (D133 items 1 and 2). While Life Context is
+  Off the page shows MP·104 (a pending line, naming MP·83's name) in place of the lists and the empty line, with the
+  back control only (D133 item 3). Every deletion asks C4-P·4 once.
   Tapping a sentence opens its night, nothing marked yet (D131 item 3 waits for the parts that show it). The labels
   take color.tag.dream (a stand-in). SoulDreams Dev built with the file `tool/preview_kept.py` writes
   (`--dart-define-from-file`) seeds, once (the flag file `preview-kept-seeded`), the invented nights that have waking
@@ -333,8 +336,8 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 750 tests (691 at the branch's start: `cc2ea8c` added
-  one after the 690 written here), and 714 mutation checks (A1 to A754; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 753 tests (691 at the branch's start: `cc2ea8c` added
+  one after the 690 written here), and 723 mutation checks (A1 to A763; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645 and A646
   dropped, each with its reason in the file; with the rows A24a to
@@ -1106,7 +1109,7 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
   founder, 2026-11-22, D125 item 9; the owner wrote them in `pending-lines.csv`; handles proposed to Product, banked
-  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
+  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164); MP·103 "Done" / "Klar" (the tick that ends selecting on Life Context's page) and MP·104 (the line shown there while Life Context is Off) (the founder, D133; handles proposed to Product). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
 
 ## Rulings during branch 2
 
@@ -1517,6 +1520,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   "Kept longer" shows its heading and stays empty until its rule exists. D91 and D126 apply.
 - D132 (owner): every question of the plan's Part 4 takes its lean: questions 1 to 11 for Product, written into
   `.scratch/for-build-chat/life-context-product-questions.md` (banked item 167); 12 to 14 as leaned.
+- D133 (the founder, a correction round, targeted rows only, D126): (1) in selecting, the tick box itself selects and
+  unselects, as the row does; (2) while selecting, the top left is a drawn tick (done), not the back chevron, which
+  ends selecting, its spoken name MP·103 "Done" / "Klar"; (3) while Life Context is Off, the page shows MP·104
+  instead of the empty line and the lists. The owner added MP·103 and MP·104 to `pending-lines.csv` (seven lines
+  now); MP·104's first filing spelled the Settings row "Life context", differing from MP·83's filed "Life Context" /
+  "Livssammanhang", so the round stopped and asked; the owner corrected it to the register's name, and a test pins
+  that MP·104 contains MP·83's name in both languages (as MP·101's test does for MP·48 and MP·100).
 
 ## Documents as last imported
 

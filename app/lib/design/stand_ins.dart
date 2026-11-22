@@ -82,6 +82,10 @@ abstract final class StandIns {
   static const double backSize = 41;
   static const backChevron = Size(9, 16);
 
+  /// The drawn tick of the control that ends selecting (D133 item 2), in the
+  /// back control's round button (a stand-in, TO TRY).
+  static const doneTick = Size(18, 13);
+
   /// The least a tap target measures, invisibly (Apple's 44; D102): the
   /// look stays 41, anchored to the page's margin and the row's top.
   static const double hitMin = 44;

@@ -3,12 +3,12 @@
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
 # Parallel by default (D129), each worker in its own copy of app/ in
 # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
-# Expected: every row "caught" (A1 to A754, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A763, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 714 run, 714 caught", exit 0. Each row breaks one thing in app/ (with --serial, in
+# mutations: 723 run, 723 caught", exit 0. Each row breaks one thing in app/ (with --serial, in
 # place; else in a worker's copy), runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
@@ -1261,8 +1261,23 @@ ROWS = [
      'Widget build(BuildContext context) => Semantics(\n    child: SizedBox.fromSize(',
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A257', 'lib/journal/pages/parts.dart',
-     '                shape: BoxShape.circle,\n',
-     '',
+     ('                    shape: BoxShape.circle,\n'
+      '                    gradient: LinearGradient(\n'
+      '                      begin: Alignment.topCenter,\n'
+      '                      end: Alignment.bottomCenter,\n'
+      '                      colors: [p.buttonTop, p.buttonBottom],\n'
+      '                    ),\n'
+      '                    border: Border.all(color: p.buttonBorder),\n'
+      '                  ),\n'
+      '                  child: Center(child: Chevron'),
+     ('                    gradient: LinearGradient(\n'
+      '                      begin: Alignment.topCenter,\n'
+      '                      end: Alignment.bottomCenter,\n'
+      '                      colors: [p.buttonTop, p.buttonBottom],\n'
+      '                    ),\n'
+      '                    border: Border.all(color: p.buttonBorder),\n'
+      '                  ),\n'
+      '                  child: Center(child: Chevron'),
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A258', 'lib/journal/pages/parts.dart',
      'size: StandIns.backChevron, left: true)',
@@ -1305,8 +1320,22 @@ ROWS = [
      'consumeOutsideTaps: false,',
      'test/journal/pages/night_page_test.dart', 'a tap outside the open menu only closes it'),
     ('A268', 'lib/journal/pages/parts.dart',
-     'dimension: StandIns.hitMin,',
-     'dimension: StandIns.backSize,',
+     ('message: Lines.MP_14.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      '        child: GestureDetector(\n'
+      '          behavior: HitTestBehavior.opaque,\n'
+      '          onTap: onPressed,\n'
+      '          child: SizedBox.square(\n'
+      '            dimension: StandIns.hitMin,\n'),
+     ('message: Lines.MP_14.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      '        child: GestureDetector(\n'
+      '          behavior: HitTestBehavior.opaque,\n'
+      '          onTap: onPressed,\n'
+      '          child: SizedBox.square(\n'
+      '            dimension: StandIns.backSize,\n'),
      'test/journal/pages/night_page_test.dart', 'the back control and the pill take a tap in 44'),
     ('A269', 'lib/journal/pages/night_page.dart',
      'height: StandIns.hitMin,',
@@ -1317,8 +1346,26 @@ ROWS = [
      'minHeight: box.maxHeight,\n        maxHeight: box.maxHeight,',
      'test/journal/pages/typing_page_test.dart', 'one line, growing with its words to 0.7 at most'),
     ('A272', 'lib/journal/pages/parts.dart',
-     'alignment: Alignment.topLeft,',
-     'alignment: Alignment.center,',
+     ('message: Lines.MP_14.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      '        child: GestureDetector(\n'
+      '          behavior: HitTestBehavior.opaque,\n'
+      '          onTap: onPressed,\n'
+      '          child: SizedBox.square(\n'
+      '            dimension: StandIns.hitMin,\n'
+      '            child: Align(\n'
+      '              alignment: Alignment.topLeft,'),
+     ('message: Lines.MP_14.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      '        child: GestureDetector(\n'
+      '          behavior: HitTestBehavior.opaque,\n'
+      '          onTap: onPressed,\n'
+      '          child: SizedBox.square(\n'
+      '            dimension: StandIns.hitMin,\n'
+      '            child: Align(\n'
+      '              alignment: Alignment.center,'),
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A273', 'lib/journal/pages/night_page.dart',
      '              alignment: Alignment.topCenter,\n              child: SizedBox(\n                key: NightPage.menuKey,',
@@ -2925,7 +2972,7 @@ ROWS = [
     ('A719', 'lib/life_context/life_context_page.dart',
      'onPressed: _selected.isEmpty ? null : _deleteSelected,',
      'onPressed: _deleteSelected,',
-     'test/life_context/life_context_page_test.dart', 'selecting: each box toggles; Delete selected (n); back leaves'),
+     'test/life_context/life_context_page_test.dart', 'selecting: the row or its tick box toggles; Delete selected (n)'),
     ('A720', 'lib/life_context/life_context_page.dart',
      '    if (!await _confirm()) return;\n    await _life.delete(ids);',
      '    await _life.delete(ids);',
@@ -2953,11 +3000,11 @@ ROWS = [
     ('A726', 'lib/life_context/life_context_page.dart',
      'setState(() => _selected.contains(k.id) ? _selected.remove(k.id) : _selected.add(k.id));',
      'setState(() => _selected.add(k.id));',
-     'test/life_context/life_context_page_test.dart', 'selecting: each box toggles; Delete selected (n); back leaves'),
+     'test/life_context/life_context_page_test.dart', 'selecting: the row or its tick box toggles; Delete selected (n)'),
     ('A727', 'lib/life_context/life_context_page.dart',
-     '  void _back() {\n    if (_selecting) {',
-     '  void _back() {\n    if (false) {',
-     'test/life_context/life_context_page_test.dart', 'selecting: each box toggles; Delete selected (n); back leaves'),
+     '      _selecting = false;\n      _selected.clear();\n',
+     '      _selecting = false;\n',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
     ('A728', 'lib/life_context/life_context_page.dart',
      '    if (open != null) open(k.night).then((_) => _load());\n',
      '',
@@ -3066,6 +3113,42 @@ ROWS = [
      '    } on Object {\n      // Swept again at the next opening.\n',
      '    } on ArgumentError {\n      // Swept again at the next opening.\n',
      'test/life_context/kept_store_test.dart', 'a failed orphan sweep never stops the journal opening'),
+    ('A755', 'lib/life_context/life_context_page.dart',
+     '      _selecting = false;\n      _selected.clear();\n',
+     '      _selecting = true;\n      _selected.clear();\n',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A756', 'lib/life_context/life_context_page.dart',
+     '              else if (off)',
+     '              else if (false)',
+     'test/life_context/life_context_page_test.dart', 'Off: MP·104 replaces the lists and the empty line'),
+    ('A757', 'lib/life_context/life_context_page.dart',
+     '? DoneControl(onPressed: _done)',
+     '? BackControl(onPressed: _done)',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A758', 'lib/life_context/life_context_page.dart',
+     'onTap: () => _toggle(k),',
+     'onTap: () {},',
+     'test/life_context/life_context_page_test.dart', 'selecting: the row or its tick box toggles; Delete selected (n)'),
+    ('A759', 'lib/life_context/life_context_page.dart',
+     'PendingLines.MP_104.text(appLanguage)',
+     'PendingLines.MP_101.text(appLanguage)',
+     'test/life_context/life_context_page_test.dart', 'Off: MP·104 replaces the lists and the empty line'),
+    ('A760', 'lib/life_context/life_context_page.dart',
+     'BackControl(onPressed: () => Navigator.of(context).pop())',
+     'BackControl(onPressed: () {})',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A761', 'lib/journal/pages/parts.dart',
+     'final name = PendingLines.MP_103.text(appLanguage);',
+     'final name = PendingLines.MP_102.text(appLanguage);',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A762', 'lib/journal/pages/parts.dart',
+     'child: CustomPaint(painter: _TickLine(p.buttonText)),',
+     'child: Chevron(colour: p.buttonText),',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A763', 'lib/journal/pages/parts.dart',
+     'excludeSemantics: true,\n        child: GestureDetector(\n          behavior: HitTestBehavior.opaque,\n          onTap: onPressed,',
+     'excludeSemantics: true,\n        child: GestureDetector(\n          behavior: HitTestBehavior.opaque,\n          onTap: () {},',
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
 ]
 
 

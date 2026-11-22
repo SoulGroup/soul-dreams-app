@@ -7,6 +7,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
+import '../../words/pending.g.dart';
 import '../search.dart';
 
 BoxDecoration _pill(Color top, Color bottom, [Color? border]) => BoxDecoration(
@@ -283,6 +284,89 @@ class BackControl extends StatelessWidget {
       ),
     );
   }
+}
+
+/// The control that ends selecting (D133 item 2): the back control's round
+/// bordered button with a tick drawn in code, in the same box of 44; its
+/// spoken name is MP·103.
+class DoneControl extends StatelessWidget {
+  const DoneControl({super.key, required this.onPressed});
+
+  static const buttonKey = Key('done');
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    final name = PendingLines.MP_103.text(appLanguage);
+    return Tooltip(
+      message: name,
+      child: Semantics(
+        button: true,
+        label: name,
+        excludeSemantics: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onPressed,
+          child: SizedBox.square(
+            dimension: StandIns.hitMin,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox.square(
+                key: buttonKey,
+                dimension: StandIns.backSize,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [p.buttonTop, p.buttonBottom],
+                    ),
+                    border: Border.all(color: p.buttonBorder),
+                  ),
+                  child: Center(
+                    child: SizedBox.fromSize(
+                      size: StandIns.doneTick,
+                      child: CustomPaint(painter: _TickLine(p.buttonText)),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TickLine extends CustomPainter {
+  _TickLine(this.colour);
+
+  final Color colour;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final inset = StandIns.chevronStroke / 2;
+    final path = Path()
+      ..moveTo(inset, size.height * 0.55)
+      ..lineTo(size.width * 0.38, size.height - inset)
+      ..lineTo(size.width - inset, inset);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = colour
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = StandIns.chevronStroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_TickLine old) => old.colour != colour;
 }
 
 /// What stands below a row whose tap boxes are taller than its looks (the

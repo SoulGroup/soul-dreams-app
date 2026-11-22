@@ -243,7 +243,7 @@ void main() {
     expect(find.byKey(LifeContextPage.emptyKey), findsOneWidget);
   });
 
-  testWidgets('selecting: each box toggles; Delete selected (n); back leaves', (tester) async {
+  testWidgets('selecting: the row or its tick box toggles; Delete selected (n)', (tester) async {
     await open(tester);
     final [a, b, ...rest] = await kept();
     await tap(tester, find.byKey(LifeContextPage.menuKey));
@@ -257,9 +257,13 @@ void main() {
     await tap(tester, selected);
     expect(find.text(en(Lines.C4_P_4)), findsNothing);
     await tap(tester, find.byKey(LifeContextPage.wordsKey(a.id)));
-    await tap(tester, find.byKey(LifeContextPage.wordsKey(b.id)));
-    await tap(tester, find.byKey(LifeContextPage.wordsKey(b.id)));
-    await tap(tester, find.byKey(LifeContextPage.wordsKey(rest.first.id)));
+    await tap(tester, find.byKey(LifeContextPage.markKey(b.id)));
+    expect(find.descendant(of: selected, matching: find.text(en(Lines.MP_90(n: 2)))), findsOneWidget);
+    await tap(tester, find.byKey(LifeContextPage.markKey(b.id)));
+    expect(find.descendant(of: selected, matching: find.text(en(Lines.MP_90(n: 1)))), findsOneWidget);
+    await tap(tester, find.byKey(LifeContextPage.markKey(rest.first.id)));
+    await tap(tester, find.byKey(LifeContextPage.markKey(a.id)));
+    await tap(tester, find.byKey(LifeContextPage.markKey(a.id)));
     expect(find.descendant(of: selected, matching: find.text(en(Lines.MP_90(n: 2)))), findsOneWidget);
     expect(find.byType(NightPage), findsNothing);
     await tap(tester, selected);
@@ -267,10 +271,38 @@ void main() {
     await tester.tap(find.text(en(Lines.MP_60)));
     await tester.pumpAndSettle();
     expect(await kept(), [b, ...rest.skip(1)]);
-    // The back control leaves selecting first, then the page.
-    await tap(tester, find.descendant(of: find.byType(LifeContextPage), matching: find.byType(BackControl)));
+  });
+
+  testWidgets('selecting: a drawn tick, spoken Done, replaces back and ends selecting', (tester) async {
+    await open(tester);
+    final a = (await kept()).first;
+    final page = find.byType(LifeContextPage);
+    expect(find.descendant(of: page, matching: find.byType(DoneControl)), findsNothing);
+    await tap(tester, find.byKey(LifeContextPage.menuKey));
+    await tester.tap(find.byKey(LifeContextPage.selectKey));
+    await tester.pumpAndSettle();
+    final done = find.descendant(of: page, matching: find.byType(DoneControl));
+    expect(done, findsOneWidget);
+    expect(find.descendant(of: page, matching: find.byType(BackControl)), findsNothing);
+    expect(find.descendant(of: done, matching: find.byType(Chevron)), findsNothing);
+    expect(find.bySemanticsLabel(PendingLines.MP_103.text(Lang.en)), findsOneWidget);
+    // The selection is forgotten with the selecting.
+    await tap(tester, find.byKey(LifeContextPage.markKey(a.id)));
+    expect(find.descendant(of: find.byKey(LifeContextPage.deleteSelectedKey), matching: find.text(en(Lines.MP_90(n: 1)))), findsOneWidget);
+    await tap(tester, done);
     expect(find.byKey(LifeContextPage.deleteAllKey), findsOneWidget);
-    expect(find.byType(LifeContextPage), findsOneWidget);
+    expect(find.byKey(LifeContextPage.menuKey), findsOneWidget);
+    expect(find.byKey(LifeContextPage.editKey(a.id)), findsOneWidget);
+    expect(find.descendant(of: page, matching: find.byType(DoneControl)), findsNothing);
+    expect(page, findsOneWidget);
+    await tap(tester, find.byKey(LifeContextPage.menuKey));
+    await tester.tap(find.byKey(LifeContextPage.selectKey));
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byKey(LifeContextPage.deleteSelectedKey), matching: find.text(en(Lines.MP_90(n: 0)))), findsOneWidget);
+    await tap(tester, find.descendant(of: page, matching: find.byType(DoneControl)));
+    // Back, once selecting is over, leaves the page.
+    await tap(tester, find.descendant(of: page, matching: find.byType(BackControl)));
+    expect(page, findsNothing);
   });
 
   testWidgets('edit: the field holds the words; Done keeps only the copy', (tester) async {
@@ -317,7 +349,20 @@ void main() {
     expect(tester.widget<NightPage>(find.byType(NightPage)).query, isNull);
   });
 
-  testWidgets('Life Context turned off in Settings: the page shows MP·92', (tester) async {
+  testWidgets('Off: MP·104 replaces the lists and the empty line', (tester) async {
+    await open(tester, on: false);
+    expect(find.byKey(LifeContextPage.offKey), findsOneWidget);
+    expect(tester.widget<AppLine>(find.byKey(LifeContextPage.offKey)).text, PendingLines.MP_104.text(Lang.en));
+    expect(find.byKey(LifeContextPage.emptyKey), findsNothing);
+    expect(find.text(en(Lines.MP_92)), findsNothing);
+    expect(find.text(en(Lines.MP_87)), findsNothing);
+    expect(find.byKey(LifeContextPage.menuKey), findsNothing);
+    expect(find.byKey(LifeContextPage.deleteAllKey), findsNothing);
+    expect(find.byType(LifeContextPage), findsOneWidget);
+    expect(find.descendant(of: find.byType(LifeContextPage), matching: find.byType(BackControl)), findsOneWidget);
+  });
+
+  testWidgets('Life Context turned off in Settings: the page shows MP·104', (tester) async {
     await open(tester, page: false);
     await tester.ensureVisible(find.byKey(SettingsPage.valueKey(SettingRow.lifeContext)));
     await tester.pumpAndSettle();
@@ -329,7 +374,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(await journal.kept(), isEmpty);
     await tap(tester, find.byKey(SettingsPage.keptKey));
-    expect(find.byKey(LifeContextPage.emptyKey), findsOneWidget);
+    expect(find.byKey(LifeContextPage.offKey), findsOneWidget);
+    expect(find.byKey(LifeContextPage.emptyKey), findsNothing);
   });
 
   testWidgets('at the largest text, nothing overflows', (tester) async {
