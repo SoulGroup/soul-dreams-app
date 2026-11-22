@@ -26,12 +26,21 @@
 // age band (C146-I item 1) (`settings/consents.dart`). So are the settings
 // (`settings/settings.dart`). Deleting the journal takes both, and returns
 // the app to its start; there is no withdrawing (D128).
+//
+// Life Context's kept sentences (C159-I item 1; D131) are one more file
+// here, written whole and renamed (`life_context/kept.dart`); keeping
+// nothing removes it. A sentence is kept only into a night whose file is
+// here. Deleting a night deletes its sentences first, then the night (X11:
+// everything made from it); at open, sentences whose night's file is gone
+// are removed. A kept file that does not read is shown as nothing kept and
+// replaced by the next change.
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show listEquals, visibleForTesting;
 
 import '../core/safe_log.dart';
+import '../life_context/kept.dart';
 import '../settings/consents.dart';
 import '../settings/settings.dart';
 import 'journal_files.dart';
@@ -65,6 +74,10 @@ final class JournalStore {
 
   /// The settings, once one is changed (D122); removed with the journal.
   static const settingsFile = 'settings.json';
+
+  /// Life Context's kept sentences, while any is kept (C159-I item 1);
+  /// removed with the journal.
+  static const keptFile = 'kept.json';
 
   // The one queue (D54): each operation starts when the one before it,
   // whether it succeeded or failed, has finished. No operation calls
@@ -123,8 +136,22 @@ final class JournalStore {
         SafeLog.event(LogEvent.audioSwept);
       }
     }
-    return JournalStore._(files);
+    final store = JournalStore._(files);
+    await store._sweepKept({for (final name in names) ?_nightFile.firstMatch(name)?[1]});
+    return store;
   });
+
+  // Removes the kept sentences of nights whose file is gone (X11), as a
+  // night's delete cut short would leave them.
+  Future<void> _sweepKept(Set<String> nights) async {
+    final bytes = await _files.read(keptFile);
+    final kept = bytes == null ? null : decodeKept(bytes);
+    if (kept == null) return;
+    final rest = [for (final k in kept) if (nights.contains(k.night)) k];
+    if (rest.length == kept.length) return;
+    await _writeKept(rest);
+    SafeLog.event(LogEvent.keptOrphansSwept, [kept.length - rest.length]);
+  }
 
   // The recordings a night's file names, read from its bytes whether or
   // not it reads as a night, so a damaged night's audio is never swept.
@@ -208,6 +235,9 @@ final class JournalStore {
 
   Future<void> _delete(String id) async {
     final name = fileOf(id);
+    final kept = await _readKept();
+    final rest = [for (final k in kept) if (k.night != id) k];
+    if (rest.length != kept.length) await _writeKept(rest);
     final bytes = await _files.read(name);
     await _files.delete(name);
     await _files.delete(tempPrefix + name);
@@ -338,4 +368,44 @@ final class JournalStore {
 
   /// Keeps the settings whole, replacing any before.
   Future<void> keepSettings(Settings settings) => _run(() => _whole(settingsFile, encodeSettings(settings)));
+
+  // The kept sentences: none when there is no file; one that does not read
+  // logs a code and reads as none.
+  Future<List<Kept>> _readKept() async {
+    final bytes = await _files.read(keptFile);
+    if (bytes == null) return const [];
+    final kept = decodeKept(bytes);
+    if (kept == null) SafeLog.event(LogEvent.keptFileSkipped);
+    return kept ?? const [];
+  }
+
+  // Keeps [kept] whole; nothing kept removes the file.
+  Future<void> _writeKept(List<Kept> kept) async {
+    if (kept.isNotEmpty) return _whole(keptFile, encodeKept(kept));
+    await _files.delete(keptFile);
+    await _files.delete(tempPrefix + keptFile);
+  }
+
+  /// The kept sentences, in the order kept.
+  Future<List<Kept>> kept() => _run(_readKept);
+
+  /// Adds [kept], said in night [night], when that night's file is here.
+  /// Returns whether it was.
+  Future<bool> addKept(String night, List<Kept> kept) => _run(() async {
+    if (await _files.size(fileOf(night)) == null) return false;
+    if (kept.isNotEmpty) await _writeKept([...await _readKept(), ...kept]);
+    return true;
+  });
+
+  /// Reads the kept sentences and writes back what [change] makes of them,
+  /// all in one turn of the queue; no change writes nothing. [change] must
+  /// not wait.
+  Future<void> changeKept(List<Kept> Function(List<Kept> kept) change) => _run(() async {
+    final before = await _readKept();
+    final after = change(before);
+    if (!listEquals(after, before)) await _writeKept(after);
+  });
+
+  /// Deletes every kept sentence: the file, and any temporary file of it.
+  Future<void> deleteKept() => _run(() => _writeKept(const []));
 }

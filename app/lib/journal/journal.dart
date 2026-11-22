@@ -13,10 +13,17 @@
 //   index counts both, and a waiting one is never edited. A Save puts the
 //   recordings its screen left waiting after its words, in order; a Save
 //   with nothing typed but a recording waiting keeps it (D93 Q7).
+// - Life Context's kept sentences (C159-I item 1; D131): kept from a piece
+//   of the dreamer's words said in a night, sentence by sentence, each with
+//   the day it was said; edited (only the kept copy, D131 item 2), deleted
+//   one by one, several, or all; and swept when past the Recent window.
+//   Whether Life Context is on is decided above (`LifeContext`), not here.
 import 'dart:math';
 
 import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier, listEquals;
 
+import '../life_context/kept.dart';
+import '../life_context/sentences.dart';
 import '../settings/consents.dart';
 import '../settings/settings.dart';
 import '../words/lines.g.dart' show Lang;
@@ -134,6 +141,46 @@ final class Journal {
 
   /// Keeps the settings (D122).
   Future<void> keepSettings(Settings settings) => _store.keepSettings(settings);
+
+  /// The kept sentences, in the order kept.
+  Future<List<Kept>> kept() => _store.kept();
+
+  /// Keeps the sentences of [text], said now in night [night], word for
+  /// word. Returns how many were kept: none when that night is gone.
+  Future<int> keep(String night, String text) async {
+    final day = dateOf(_now(), zone);
+    final add = [for (final s in sentencesOf(text)) Kept(id: newKeptId(random), night: night, day: day, text: s)];
+    return await _store.addKept(night, add) ? add.length : 0;
+  }
+
+  /// Replaces kept sentence [id]'s words with [text]; nothing but spaces
+  /// deletes it. The night's own text never changes (D131 item 2).
+  Future<void> editKept(String id, String text) => _store.changeKept(
+    (kept) => [
+      for (final k in kept)
+        if (k.id != id) k else if (!isEmptyText(text)) k.withText(text.trim()),
+    ],
+  );
+
+  /// Deletes the kept sentences [ids].
+  Future<void> deleteKept(Set<String> ids) =>
+      _store.changeKept((kept) => [for (final k in kept) if (!ids.contains(k.id)) k]);
+
+  /// Deletes every kept sentence.
+  Future<void> deleteAllKept() => _store.deleteKept();
+
+  /// Deletes the kept sentences past the Recent window of [length] today.
+  /// Returns how many went.
+  Future<int> sweepKept(LifeContextLength length) async {
+    final today = dateOf(_now(), zone);
+    var gone = 0;
+    await _store.changeKept((kept) {
+      final rest = [for (final k in kept) if (inWindow(k, today, length)) k];
+      gone = kept.length - rest.length;
+      return rest;
+    });
+    return gone;
+  }
 
   /// Moves on each time the journal is deleted, the consents with it: the
   /// app returns to its start (D110).

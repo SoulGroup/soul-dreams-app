@@ -100,6 +100,17 @@ enum LogEvent {
   retryDone,
   retryCut,
   retryFailed,
+
+  /// Life Context (C159-I item 1; D131): the kept file did not read, so
+  /// nothing kept is shown and the next change replaces it; at open,
+  /// sentences whose night is gone removed (X11), with how many; at the
+  /// Recent window's sweep, sentences past it removed, with how many; a
+  /// change to what is kept, or its deletion, that could not be done.
+  keptFileSkipped,
+  keptOrphansSwept,
+  keptExpired,
+  keptKeepFailed,
+  keptDeleteFailed,
 }
 
 abstract final class SafeLog {
