@@ -405,6 +405,20 @@ void main() {
     expect(find.text(shownDate(n.date)), findsOneWidget);
   });
 
+  // D121 item 3: Night images Off, a read night's row shows the gradient,
+  // and its page is handed the same.
+  testWidgets("with Night images Off, a read row shows the gradient", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal, read: (_) => true, images: false));
+    final row = find.byKey(JournalPage.rowKey(n.id));
+    final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
+    expect(art.look, const PaintedGradient());
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    expect(tester.widget<NightPage>(find.byType(NightPage)).images, isFalse);
+  });
+
   // D110: naming a night is removed; a name kept from before is not shown.
   testWidgets('a named night shows only its date', (tester) async {
     final h = await Harness.make();

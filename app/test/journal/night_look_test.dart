@@ -41,6 +41,11 @@ void main() {
     expect(lookOf(nightWith(a), read: true, paintings: 4), const Painting(2));
   });
 
+  // D121 item 3: Night images Off, every night the gradient.
+  test('with Night images Off, a read night shows the gradient', () {
+    expect(lookOf(nightWith(a), read: true, paintings: 4, images: false), const PaintedGradient());
+  });
+
   test('with no paintings, a read night shows the gradient', () {
     expect(lookOf(nightWith(a), read: true, paintings: 0), const PaintedGradient());
   });

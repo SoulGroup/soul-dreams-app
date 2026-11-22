@@ -85,6 +85,7 @@ void main() {
     int hour = 12,
     bool unread = false,
     String? query,
+    bool images = true,
   }) async {
     // The test's own 800 by 600, where the foot's two buttons do not fill
     // the row, or a phone.
@@ -106,7 +107,7 @@ void main() {
     }
     // A first read that fails leaves the page blank, with no picture.
     if (unread) files!.failReads = true;
-    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read, query: query)),
+    await h.pump(tester, Opener(() async => NightPage(journal: h.journal, id: n.id, action: action, read: read, images: images, query: query)),
         hour: hour);
     await tester.tap(find.byKey(Opener.openKey));
     await tester.pumpAndSettle();
@@ -554,6 +555,14 @@ void main() {
       final words = find.descendant(of: find.byKey(NightPage.jumpKey(o)), matching: find.byType(Text));
       expect(tester.widget<Text>(words).data, Lines.MP_77.parts(Lang.en)[o.index]);
     }
+  });
+
+  // D121 item 3: Night images Off, a read night's header shows the
+  // gradient; its jump buttons stay.
+  testWidgets('with Night images Off, a read night: the gradient', (tester) async {
+    await open(tester, read: (_) => true, images: false);
+    expect(tester.widget<NightArt>(find.byType(NightArt)).look, const PaintedGradient());
+    expect(find.byKey(NightPage.jumpKey(Jump.dreams)), findsOneWidget);
   });
 
   // D110: a read night shows its painting, and the four jump buttons in

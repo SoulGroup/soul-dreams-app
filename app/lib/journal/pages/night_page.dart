@@ -71,6 +71,7 @@ class NightPage extends StatefulWidget {
     this.recording,
     this.action,
     this.read = noneRead,
+    this.images = true,
     this.query,
   });
 
@@ -96,6 +97,9 @@ class NightPage extends StatefulWidget {
 
   /// Whether a night has been read: none is yet (the readings come later).
   final ReadCheck read;
+
+  /// False while Night images is Off: the gradient (D121 item 3).
+  final bool images;
 
   /// The search this night was opened from, as searched, or null.
   final String? query;
@@ -327,7 +331,7 @@ class _NightPageState extends State<NightPage> {
     const side = EdgeInsets.symmetric(horizontal: Spacing.pageSide);
     final top = MediaQuery.paddingOf(context).top;
     final read = n != null && widget.read(n);
-    final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings);
+    final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings, images: widget.images);
     final query = widget.query;
     final found = n == null || query == null ? null : findIn(n, query);
     // Light time and battery over the header's picture, in both themes (D113);

@@ -12,16 +12,24 @@
 // handed keeps its audio in the journal's folder (D92), and retries the
 // recordings waiting there while the app is open: when the journal opens,
 // when the app comes back, and when the connection returns; leaving the
-// app cuts a retry short (D92 item 3, D94).
+// app cuts a retry short (D92 item 3, D94). Once the journal opens, it
+// holds the settings and the consents (`SettingsController`, D122) and
+// follows them: Word Animation, Night/Day mode, Night images, and recording
+// by voice with its retries only while consent (a) is given; withdrawn,
+// they pause and every night stays (D121 item 5).
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
 import '../../core/always_light.dart';
+import '../../core/app_line.dart' show wordAnimation;
+import '../../core/night_day.dart';
 import '../../core/safe_log.dart';
 import '../../onboarding/onboarding.dart';
 import '../../recording/recording.dart';
 import '../../settings/consents.dart';
+import '../../settings/settings.dart';
+import '../../settings/settings_controller.dart';
 import '../journal.dart';
 import '../journal_audio.dart';
 import '../journal_files.dart';
@@ -62,6 +70,8 @@ class JournalHome extends StatefulWidget {
 class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   JournalStore? _store;
   Journal? _journal;
+  JournalAudio? _audio;
+  SettingsController? _settings;
   Recording? _recording;
   // Null until the consent is read; then whether it is given.
   bool? _agreed;
@@ -80,6 +90,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _journal?.consentGone.removeListener(_restart);
+    _settings?.dispose();
     _recording?.retries?.dispose();
     super.dispose();
   }
@@ -108,18 +119,26 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
       return;
     }
     final journal = Journal(store)..consentGone.addListener(_restart);
-    bool agreed;
+    Consents? consents;
     try {
-      agreed = await journal.consents() != null;
+      consents = await journal.consents();
     } on Object {
       // Asked again: nothing is shown as agreed that is not kept.
       SafeLog.event(LogEvent.consentReadFailed);
-      agreed = false;
+    }
+    Settings? settings;
+    if (consents != null) {
+      try {
+        settings = await journal.settings();
+      } on Object {
+        // The defaults stand (D122).
+        SafeLog.event(LogEvent.settingsReadFailed);
+      }
     }
     if (!mounted) return;
     _store = store;
     _journal = journal;
-    agreed ? _enter() : _onboard();
+    consents == null ? _onboard() : _enter(consents, settings ?? const Settings());
   }
 
   // Onboarding, always in the light theme (main-path.md, Every Screen).
@@ -129,20 +148,41 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     setState(() => _agreed = false);
   }
 
-  // The journal, once the dreamer has agreed: only now may anything leave
-  // the phone, so the recording and its retries begin here (D103).
-  void _enter({bool first = false}) {
+  // The journal, once the dreamer has answered the consents, with the
+  // settings kept (D122). Only now may anything leave the phone (D103).
+  void _enter(Consents consents, Settings settings, {bool first = false}) {
     AlwaysLight.hold(context, false);
-    final audio = JournalAudio(_store!);
+    final audio = _audio = JournalAudio(_store!);
+    final controller = SettingsController(_journal!, consents: consents, settings: settings)..addListener(_follow);
     setState(() {
       _agreed = true;
       _first = first;
-      _recording = widget.recording?.keeping(audio, waiting: audio);
+      _settings = controller;
     });
     // D98: the counts at launch and after each retry, for DevTools.
     unawaited(audio.logCounts());
-    _recording?.retries?.afterRetry = audio.logCounts;
-    _recording?.retries?.kick();
+    _follow();
+  }
+
+  // The settings followed (D122): Word Animation, Night/Day mode, and
+  // recording by voice with its retries only while consent (a) is given;
+  // withdrawn, a retry running is cut and none starts (D121 item 5).
+  void _follow() {
+    final controller = _settings;
+    if (controller == null || !mounted) return;
+    wordAnimation = controller.settings.wordAnimation;
+    NightDayChoice.set(context, controller.settings.nightDay);
+    final readings = controller.consents.given(Consent.readings);
+    if (readings && _recording == null) {
+      final audio = _audio!;
+      _recording = widget.recording?.keeping(audio, waiting: audio);
+      _recording?.retries?.afterRetry = audio.logCounts;
+      _recording?.retries?.kick();
+    } else if (!readings && _recording != null) {
+      _recording?.retries?.dispose();
+      _recording = null;
+    }
+    setState(() {});
   }
 
   // "I consent": the consents kept, then the journal. Until onboarding asks
@@ -152,23 +192,29 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   Future<void> _agree() async {
     if (_agreeing) return;
     _agreeing = true;
+    final journal = _journal!;
+    final consents = Consents.answered({Consent.readings: true}, journal.now());
     try {
-      final journal = _journal!;
-      await journal.keepConsents(Consents.answered({Consent.readings: true}, journal.now()));
+      await journal.keepConsents(consents);
     } on Object {
       SafeLog.event(LogEvent.consentKeepFailed);
     }
     // Not reset here: a tap that lands before onboarding has left the tree
     // must not open the journal twice. `_onboard` resets it.
-    if (mounted) _enter(first: true);
+    if (mounted) _enter(consents, const Settings(), first: true);
   }
 
-  // The journal deleted, the consents with it (D110): every page above
-  // closes, the retries stop, and onboarding starts again.
+  // The journal deleted, the consents and settings with it (D110): every
+  // page above closes, the retries stop, the settings return to their
+  // defaults, and onboarding starts again.
   void _restart() {
     if (!mounted) return;
     _recording?.retries?.dispose();
     _recording = null;
+    _settings?.dispose();
+    _settings = null;
+    wordAnimation = true;
+    NightDayChoice.set(context, NightDayMode.automatic);
     Navigator.of(context).popUntil((route) => route.isFirst);
     _onboard();
   }
@@ -184,6 +230,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         firstTime: _first,
         nightAction: widget.nightAction,
         read: widget.read,
+        settings: _settings,
+        images: _settings?.nightImages != NightImages.off,
       ),
     };
   }

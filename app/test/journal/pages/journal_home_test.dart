@@ -7,6 +7,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
+import 'package:souldreams/core/app_line.dart';
+import 'package:souldreams/core/night_day.dart';
 import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/journal.dart';
 import 'package:souldreams/journal/journal_audio.dart';
@@ -20,6 +22,7 @@ import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/onboarding/onboarding.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/settings/consents.dart';
+import 'package:souldreams/settings/settings.dart';
 import 'package:souldreams/words/lines.g.dart';
 
 import '../../fixtures.dart';
@@ -57,6 +60,19 @@ final class NoConsentRead extends MemoryJournalFiles {
 /// given (D122).
 T agreed<T extends MemoryJournalFiles>(T files) {
   files.files[JournalStore.consentFile] = Uint8List.fromList(utf8.encode('{"version":1,"over18":true}'));
+  return files;
+}
+
+/// A folder whose read of the settings fails.
+final class NoSettingsRead extends MemoryJournalFiles {
+  @override
+  Future<Uint8List?> read(String name) async =>
+      name == JournalStore.settingsFile ? throw StateError('journal-io') : super.read(name);
+}
+
+/// [files] holding the three consents as [given] (D122), version 2.
+T answered<T extends MemoryJournalFiles>(T files, Map<Consent, bool> given) {
+  files.files[JournalStore.consentFile] = encodeConsents(Consents.answered(given, DateTime.utc(2026)));
   return files;
 }
 
@@ -277,6 +293,10 @@ void main() {
     final files = MemoryJournalFiles();
     await waiting(files);
     final links = <MemoryLink>[];
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
     await tester.pumpWidget(SoulDreamsApp(
       clock: () => DateTime(2026, 6, 10, 23),
       home: JournalHome(files: files, recording: counted(links)),
@@ -295,6 +315,8 @@ void main() {
     expect([for (final c in ['readings', 'lifeContext', 'images']) kept[c]['given']], [true, false, false]);
     expect(kept['readings']['day'], dayOf(DateTime.now()));
     expect(links, hasLength(1));
+    // The journal opened once: its counts logged once (D98).
+    expect(lines.where((l) => l.startsWith('journalAudio')), hasLength(1));
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 11));
   });
@@ -316,10 +338,13 @@ void main() {
     await tester.pump();
     expect(find.byType(JournalPage), findsOneWidget);
     expect(links, hasLength(1));
+    final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings;
     agree();
     await tester.pump();
     await tester.pump();
     expect(links, hasLength(1));
+    // One journal, with its one settings (D122).
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).settings, same(settings));
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 11));
   });
@@ -421,5 +446,106 @@ void main() {
     expect(links, hasLength(1));
     await tester.pumpWidget(const SizedBox());
     await tester.pump(const Duration(seconds: 11));
+  });
+
+  // D121 item 5; D122: consent (a) not given, the journal opens as a private
+  // journal: no recording by voice, nothing retried, every night there.
+  testWidgets('consent (a) not given: the journal, no recording, no retry', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = answered(MemoryJournalFiles(), {Consent.lifeContext: true});
+    await waiting(files);
+    final links = <MemoryLink>[];
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links))));
+    await tester.pumpAndSettle();
+    expect(find.byType(JournalPage), findsOneWidget);
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNull);
+    expect(find.byKey(JournalPage.rowKey(nightsFromFixtures().first.id)), findsOneWidget);
+    for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.inactive]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect(links, isEmpty);
+  });
+
+  // D121 item 5: withdrawn, the retry running is cut and none follows, the
+  // journal stays with every night; given again, the retries resume.
+  testWidgets('consent (a) withdrawn: the retry cut; given again: resumed', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = agreed(MemoryJournalFiles());
+    await waiting(files);
+    final links = <MemoryLink>[];
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links))));
+    await tester.pump();
+    await tester.pump();
+    expect(links, hasLength(1));
+    final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings!;
+    await settings.answer(Consent.readings, false);
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.byType(JournalPage), findsOneWidget);
+    expect(find.byType(Onboarding), findsNothing);
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNull);
+    expect(links.single.closed, isTrue);
+    expect(files.files.keys.where((n) => n.startsWith('night-')), hasLength(1));
+    expect(decodeConsents(files.files[JournalStore.consentFile]!)!.given(Consent.readings), isFalse);
+    for (final state in [AppLifecycleState.inactive, AppLifecycleState.hidden, AppLifecycleState.inactive]) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pump();
+    await tester.pump();
+    expect(links, hasLength(1));
+    await settings.answer(Consent.readings, true);
+    await tester.pump();
+    await tester.pump();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).recording, isNotNull);
+    expect(links, hasLength(2));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 11));
+  });
+
+  // D122: the settings kept are followed when the journal opens: Word
+  // Animation, Night/Day mode and Night images (consent (c) given); deleting
+  // the journal returns them to their defaults.
+  testWidgets('the settings kept are followed; the deletion resets them', (tester) async {
+    JournalStore.newQueueForTests();
+    addTearDown(() => wordAnimation = true);
+    final files = answered(MemoryJournalFiles(), {Consent.readings: true, Consent.images: true});
+    files.files[JournalStore.settingsFile] = encodeSettings(
+      const Settings(wordAnimation: false, nightDay: NightDayMode.night, images: NightImages.random),
+    );
+    await tester.pumpWidget(SoulDreamsApp(clock: () => DateTime(2026, 6, 10, 12), home: JournalHome(files: files)));
+    await tester.pumpAndSettle();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.images, isTrue);
+    expect(page.settings!.nightImages, NightImages.random);
+    expect(wordAnimation, isFalse);
+    expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
+    await page.journal.deleteAll();
+    await tester.pumpAndSettle();
+    expect(find.byType(Onboarding), findsOneWidget);
+    expect(wordAnimation, isTrue);
+    expect(tester.widget<NightDayChoice>(find.byType(NightDayChoice)).mode.value, NightDayMode.automatic);
+  });
+
+  // MP·85: consent (c) not given, Night images is Off: every night the
+  // gradient.
+  testWidgets('consent (c) not given: Night images Off', (tester) async {
+    JournalStore.newQueueForTests();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).images, isFalse);
+  });
+
+  testWidgets('settings that cannot be read: the defaults, a code', (tester) async {
+    JournalStore.newQueueForTests();
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(NoSettingsRead()))));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).settings!.settings, const Settings());
+    expect(lines, ['settingsReadFailed', 'journalAudio 0 0']);
   });
 }

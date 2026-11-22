@@ -30,27 +30,34 @@ class SoulDreamsApp extends StatefulWidget {
 class _SoulDreamsAppState extends State<SoulDreamsApp> {
   final _light = ValueNotifier<bool>(false);
   bool _wasLight = false;
+  // Night/Day mode, set from the settings (D122); Automatic until then.
+  final _mode = ValueNotifier<NightDayMode>(NightDayMode.automatic);
 
   @override
   void dispose() {
     _light.dispose();
+    _mode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return AlwaysLight(
-      light: _light,
-      child: NightDay(
-        now: widget.clock ?? DateTime.now,
-        builder: (context, mode, fade) => ValueListenableBuilder<bool>(
-          valueListenable: _light,
-          builder: (context, light, _) {
-            // Held light, or let go: at once, never a fade.
-            final held = light != _wasLight;
-            _wasLight = light;
-            return _app(light ? ThemeMode.light : mode, held ? Duration.zero : fade);
-          },
+    return NightDayChoice(
+      mode: _mode,
+      child: AlwaysLight(
+        light: _light,
+        child: NightDay(
+          now: widget.clock ?? DateTime.now,
+          mode: _mode,
+          builder: (context, mode, fade) => ValueListenableBuilder<bool>(
+            valueListenable: _light,
+            builder: (context, light, _) {
+              // Held light, or let go: at once, never a fade.
+              final held = light != _wasLight;
+              _wasLight = light;
+              return _app(light ? ThemeMode.light : mode, held ? Duration.zero : fade);
+            },
+          ),
         ),
       ),
     );

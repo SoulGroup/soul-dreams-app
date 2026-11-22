@@ -2,7 +2,9 @@
 // night shows one painting of the set shipped in the app, chosen from the
 // night's id alone, so from none of its words, and the same every time; an
 // unread night shows the painted gradient, and so does any night while the
-// app holds no painting. Nothing is stored: the id is already random (128
+// app holds no painting, and every night while Night images is Off (D121
+// item 3). Personal and Random both show the set until the personal
+// painting exists (D121 item 3; D122, the stop's question 9). Nothing is stored: the id is already random (128
 // bits from the phone's secure source, newNightId).
 import 'night.dart';
 
@@ -38,9 +40,10 @@ final class Painting extends NightLook {
 /// bits, modulo the count.
 int paintingFor(String id, int count) => int.parse(id.substring(0, 8), radix: 16) % count;
 
-/// The look of [night], [read] or not, with [paintings] in the set.
-NightLook lookOf(Night night, {required bool read, required int paintings}) =>
-    read && paintings > 0 ? Painting(paintingFor(night.id, paintings)) : const PaintedGradient();
+/// The look of [night], [read] or not, with [paintings] in the set, and
+/// [images] false while Night images is Off.
+NightLook lookOf(Night night, {required bool read, required int paintings, bool images = true}) =>
+    images && read && paintings > 0 ? Painting(paintingFor(night.id, paintings)) : const PaintedGradient();
 
 /// Whether a night has been read.
 typedef ReadCheck = bool Function(Night night);

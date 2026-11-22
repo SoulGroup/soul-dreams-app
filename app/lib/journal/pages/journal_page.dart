@@ -30,6 +30,7 @@ import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
+import '../../settings/settings_controller.dart';
 import '../greeting.dart';
 import '../journal.dart';
 import '../night.dart';
@@ -52,6 +53,8 @@ class JournalPage extends StatefulWidget {
     this.firstTime = false,
     this.nightAction,
     this.read = noneRead,
+    this.settings,
+    this.images = true,
   });
 
   final Journal journal;
@@ -80,6 +83,13 @@ class JournalPage extends StatefulWidget {
 
   /// Whether a night has been read: none is yet (the readings come later).
   final ReadCheck read;
+
+  /// The settings and the consents, which the gear opens (D122), or null.
+  final SettingsController? settings;
+
+  /// False while Night images is Off: every night shows the gradient
+  /// (D121 item 3).
+  final bool images;
 
   @override
   State<JournalPage> createState() => _JournalPageState();
@@ -117,6 +127,17 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
         });
       }
     });
+  }
+
+  // Consent (a) withdrawn or given again hands a new recording, or none
+  // (D121 item 5): the list follows the new one's retries.
+  @override
+  void didUpdateWidget(JournalPage old) {
+    super.didUpdateWidget(old);
+    if (old.recording?.retries != widget.recording?.retries) {
+      old.recording?.retries?.removeListener(_load);
+      widget.recording?.retries?.addListener(_load);
+    }
   }
 
   @override
@@ -199,7 +220,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     };
     Widget row(Night night) => _Row(
       night,
-      look: lookOf(night, read: widget.read(night), paintings: NightArt.paintings),
+      look: lookOf(night, read: widget.read(night), paintings: NightArt.paintings, images: widget.images),
       line: contexts[night.id],
       onTap: () => _push(
         NightPage(
@@ -208,6 +229,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
           recording: widget.recording,
           action: widget.nightAction,
           read: widget.read,
+          images: widget.images,
           query: query,
         ),
       ),

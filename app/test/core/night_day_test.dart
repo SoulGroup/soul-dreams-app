@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
+import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/night_day.dart';
 import 'package:souldreams/core/privacy_cover.dart';
 import 'package:souldreams/design/palette.dart';
@@ -93,5 +94,45 @@ void main() {
     expect(tester.widget<ColoredBox>(find.byKey(PrivacyCover.coverKey)).color, dark);
     tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
     await tester.pump();
+  });
+
+  // D122: Manual, Day or Night, whatever the hour; set from a page under the
+  // app, it fades over five seconds while the app is open.
+  test('Manual holds its theme whatever the hour', () {
+    expect(isNight(NightDayMode.day, DateTime(2026, 6, 10, 23)), isFalse);
+    expect(isNight(NightDayMode.night, DateTime(2026, 6, 10, 12)), isTrue);
+    expect(isNight(NightDayMode.automatic, DateTime(2026, 6, 10, 23)), isTrue);
+    expect(isNight(NightDayMode.automatic, DateTime(2026, 6, 10, 12)), isFalse);
+  });
+
+  testWidgets('Manual set while open fades, and holds through the hours', (tester) async {
+    var now = DateTime(2026, 6, 10, 12);
+    await tester.pumpWidget(SoulDreamsApp(clock: () => now));
+    expect(pageOf(tester), light);
+    NightDayChoice.set(tester.element(find.byType(Scaffold)), NightDayMode.night);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 2500));
+    expect(pageOf(tester), Color.lerp(light, dark, 0.5));
+    await tester.pump(const Duration(milliseconds: 2600));
+    expect(pageOf(tester), dark);
+    now = DateTime(2026, 6, 11, 9);
+    await tester.pump(NightDay.tick);
+    await tester.pump(NightDay.fade);
+    expect(pageOf(tester), dark);
+    NightDayChoice.set(tester.element(find.byType(Scaffold)), NightDayMode.automatic);
+    await tester.pump();
+    await tester.pump(NightDay.fade);
+    expect(pageOf(tester), light);
+  });
+
+  // Design System §6: with Word Animation off, the change is at once.
+  testWidgets('with Word Animation off, a change is instant', (tester) async {
+    wordAnimation = false;
+    addTearDown(() => wordAnimation = true);
+    await tester.pumpWidget(SoulDreamsApp(clock: () => DateTime(2026, 6, 10, 12)));
+    NightDayChoice.set(tester.element(find.byType(Scaffold)), NightDayMode.night);
+    await tester.pump();
+    await tester.pump();
+    expect(pageOf(tester), dark);
   });
 }

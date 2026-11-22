@@ -50,6 +50,11 @@ enum LogEvent {
   consentReadFailed,
   consentKeepFailed,
 
+  /// Settings (D122): the settings could not be read, so the defaults stand;
+  /// or a change could not be kept, so it holds until the app closes.
+  settingsReadFailed,
+  settingsKeepFailed,
+
   /// Recording by voice (D69, D71). Off in this build; the microphone
   /// refused; no key from our server (its status); Soniox's stream refused
   /// or broken (its code); the microphone failing; a recording started,
