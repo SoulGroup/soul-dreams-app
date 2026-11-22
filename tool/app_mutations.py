@@ -1,12 +1,12 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A646, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A288, A291, A537, A538, A543, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A646, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 637 run, 637 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 635 run, 635 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -2361,14 +2361,10 @@ ROWS = [
      'last.substring(0, last.length - 1)]',
      'last]',
      'test/settings/setting_line_test.dart', 'each setting line gives its name and choices, both languages'),
-    ('A539', 'lib/settings/consent_page.dart',
-     'chosen: chosen == given,',
-     'chosen: false,',
-     'test/onboarding/onboarding_test.dart', 'Next waits for both answers, then tells them once'),
     ('A540', 'lib/settings/consent_page.dart',
      'right: one(false, words.last)',
      'right: one(false, words.first)',
-     'test/onboarding/onboarding_test.dart', 'the full page ends with MP·66, the two consents, then Next'),
+     'test/settings/consent_page_test.dart', "the readings consent keeps I consent and I don't consent"),
     ('A542', 'lib/settings/consent_page.dart',
      ') == true;',
      ') == false;',
@@ -2381,10 +2377,6 @@ ROWS = [
      '      if (Lang.values.any((lang) => l.parts(lang).any(braced))) l.handle,',
      '      if (false) l.handle,',
      'test/words/shown_lines_test.dart', 'the scan sees the places the screens use'),
-    ('A546', 'lib/settings/consent_page.dart',
-     '      selected: chosen,\n',
-     '      selected: false,\n',
-     'test/onboarding/onboarding_test.dart', 'Next waits for both answers, then tells them once'),
     ('A547', 'lib/settings/settings_page.dart',
      '_dark ? NightDayMode.day : NightDayMode.night',
      'NightDayMode.night',
@@ -2746,10 +2738,9 @@ ROWS = [
      '      key: ConsentChoice.keyOf(Consent.readings, given),',
      'test/settings/consent_page_test.dart', 'Life Context: Back left, Turn on right, equally prominent'),
     ('A638', 'lib/settings/consent_page.dart',
-     '      chosen: false,\n      onTap: () => onChoose(given),',
-     '      chosen: false,\n      onTap: () => onChoose(!given),',
+     '      text: text,\n      onTap: () => onChoose(given),',
+     '      text: text,\n      onTap: () => onChoose(!given),',
      'test/settings/consent_page_test.dart', 'the page answers true for yes'),
-    # redesign-c, D127: onboarding's two buttons (EM·6, MP·100) decide, the full page is the text only; the pill's gaps.
     ('A639', 'lib/onboarding/onboarding.dart',
      'left: PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _decide(false)),',
      'left: PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _decide(true)),',

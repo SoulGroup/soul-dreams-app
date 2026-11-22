@@ -1,15 +1,14 @@
 // The two consents' words and their choice (C18-P, MP·66 to MP·69; C159-I
 // item 5; D110; D122; D125 item 8): each consent's text, then MP·67's two
 // choices, "I consent" and "I don't consent", side by side, equally
-// prominent, neither chosen beforehand; the chosen one filled
-// (color.button.filled, a stand-in). Onboarding shows both at the end of the
-// full disclosure page (MP·66 above them); Settings shows one on its own page
-// when a setting needs it (the stop's questions 6 and 10), whose back control
-// gives nothing. MP·68 is "to rewrite" and shows its owed sentence in braces,
+// prominent, neither chosen beforehand, and a tap answers at once. Only
+// Settings shows them, one consent on its own page when a setting needs it
+// (the stop's questions 6 and 10), whose back control gives nothing;
+// onboarding asks no consent of its own (D127 item 1). MP·68 is "to rewrite" and shows its owed sentence in braces,
 // as filed, in SoulDreams Dev only (D119 item 2; D122, Q1 (B)). Life Context's
 // own page, from Settings, has two buttons of its own in place of MP·67's
 // pair: Back on the left, Turn on on the right, MP·98 and MP·99, pending
-// lines (D125 item 9), the same two keys, the same look, neither filled.
+// lines (D125 item 9), the same two keys, the same look.
 import 'package:flutter/material.dart';
 
 import '../core/app_line.dart';
@@ -28,13 +27,12 @@ Line consentText(Consent consent) => switch (consent) {
   Consent.lifeContext => Lines.MP_69,
 };
 
-/// MP·67's two choices under one consent: [chosen] is null until one is
-/// tapped. Each tap tells [onChoose] true for "I consent".
+/// MP·67's two choices under one consent. Each tap tells [onChoose] true for
+/// "I consent".
 class ConsentChoice extends StatelessWidget {
-  const ConsentChoice({super.key, required this.consent, required this.chosen, required this.onChoose});
+  const ConsentChoice({super.key, required this.consent, required this.onChoose});
 
   final Consent consent;
-  final bool? chosen;
   final ValueChanged<bool> onChoose;
 
   /// A choice's key: [given] true for "I consent".
@@ -43,41 +41,39 @@ class ConsentChoice extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final words = Lines.MP_67.parts(appLanguage);
-    Widget one(bool given, String text) =>
-        _Choice(key: keyOf(consent, given), text: text, chosen: chosen == given, onTap: () => onChoose(given));
+    Widget one(bool given, String text) => _Choice(key: keyOf(consent, given), text: text, onTap: () => onChoose(given));
     return ButtonRow(left: one(true, words.first), right: one(false, words.last));
   }
 }
 
 class _Choice extends StatelessWidget {
-  const _Choice({super.key, required this.text, required this.chosen, required this.onTap});
+  const _Choice({super.key, required this.text, required this.onTap});
 
   final String text;
-  final bool chosen;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
-    final filled = Theme.of(context).brightness == Brightness.dark
-        ? DarkColours.buttonFilled
-        : LightColours.buttonFilled;
-    final top = chosen ? filled.colour! : p.buttonTop;
-    final bottom = chosen ? (filled.colourEnd ?? filled.colour!) : p.buttonBottom;
     return Semantics(
       button: true,
-      selected: chosen,
+      // Neither is chosen beforehand, and a tap answers at once.
+      selected: false,
       child: GestureDetector(
         onTap: onTap,
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [top, bottom]),
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [p.buttonTop, p.buttonBottom],
+            ),
             borderRadius: BorderRadius.circular(Spacing.radius),
             border: Border.all(color: p.buttonBorder),
           ),
           child: Padding(
             padding: StandIns.buttonPadding,
-            child: Text(text, style: TypeRoles.button.style(chosen ? filled.text! : p.buttonText)),
+            child: Text(text, style: TypeRoles.button.style(p.buttonText)),
           ),
         ),
       ),
@@ -98,7 +94,6 @@ class TurnOnChoice extends StatelessWidget {
     Widget one(bool given, String text) => _Choice(
       key: ConsentChoice.keyOf(Consent.lifeContext, given),
       text: text,
-      chosen: false,
       onTap: () => onChoose(given),
     );
     return ButtonRow(
@@ -147,7 +142,7 @@ class ConsentPage extends StatelessWidget {
               if (consent == Consent.lifeContext)
                 TurnOnChoice(onChoose: (given) => Navigator.of(context).pop(given))
               else
-                ConsentChoice(consent: consent, chosen: null, onChoose: (given) => Navigator.of(context).pop(given)),
+                ConsentChoice(consent: consent, onChoose: (given) => Navigator.of(context).pop(given)),
             ],
           ),
         ),

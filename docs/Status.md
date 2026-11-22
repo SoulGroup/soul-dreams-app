@@ -299,13 +299,13 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 690 tests, and 637 mutation checks (A1 to A646; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 690 tests, and 635 mutation checks (A1 to A646; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A537, A538, A541, A543, A549, A550, A566, A578, A610, A623, A624, A626, A627, A633 and A634
+  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A537, A538, A539, A541, A543, A546, A549, A550, A566, A578, A610, A623, A624, A626, A627, A633 and A634
   dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 637 run, 637 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 635 run, 635 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95; the full run's timing is
   D126's).
 

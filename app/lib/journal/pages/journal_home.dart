@@ -192,7 +192,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     setState(() {});
   }
 
-  // Next, the two consents answered: kept, then the journal (D122).
+  // "I agree" or "I don't agree": the two consents kept, then the journal (D122;
+  // D127 item 1).
   // Consents that cannot be kept log a code; the journal opens, and the
   // next opening asks again.
   Future<void> _agree(Map<Consent, bool> given) async {
