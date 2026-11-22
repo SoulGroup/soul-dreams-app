@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `faster-mutations` (the full app mutation run in parallel, D129 and D130; the merge next), by Claude Code.
+Last updated: 2026-11-22, in branch `life-context` (Life Context, the mechanical part, D110 item 2 and D131; the owner's by-eye review next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,16 +14,21 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`faster-mutations`: the full app mutation run in parallel, each worker in its own copy of `app/` (D129, D130; plan
-`docs/plans/faster-mutations.md`). A tooling change only: nothing in `app/` or `server/`.
-`redesign-c` (Settings, the settings button and the agreement, D110, D121 to D128) is merged (`cc2ea8c`); its Status was
-not updated at the merge (this entry records it). `redesign-b` is merged (`8243128`), likewise.
+`life-context`: Life Context, the mechanical part (D110, head's message 24 item 2; C159-I item 1; D127; D128; D131; plan
+`docs/plans/life-context.md`): what counts as a sentence, the kept sentences on the phone, the Recent window's sweep,
+Off deleting what is kept, the page "What you've told Soul Dreams" from Settings, and SoulDreams Dev's invented kept
+sentences. Nothing calls the capture yet: a night holds only dreams, and its real sources come with Questions and
+Reflection. The kept-longer choice and the readings' use of kept words wait (D110 item 2).
+`faster-mutations` (the parallel mutation run, D129, D130) is merged (`79fbf6a`); its Status was not updated at the
+merge (this entry records it).
 
 ## Road ahead
 
-- `faster-mutations`: the merge (its full parallel run is done, see "The app" and "Rulings during faster-mutations").
-- Then Life Context (its page, MP·86 to MP·92, and what is kept), with C159-I's import, and "Made by AI"; Feedback, with
-  its server change (D121 item 4). The curated set of night paintings (about 60, the founder's)
+- `life-context`: the owner's by-eye review (plan Task 7), the Product questions (banked item 167), then the full
+  mutation run before the merge (D126).
+- Then "Made by AI"; Feedback, with its server change (D121 item 4). Life Context's sources (the opening's answers,
+  what is said after it, the reflection, Waking Life) come with Questions and Reflection, and with them the mark on a
+  tapped sentence's night (D131 item 3). The curated set of night paintings (about 60, the founder's)
   replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
   C17-P (and, for the founder app, with his export).
@@ -299,12 +304,37 @@ not updated at the merge (this entry records it). `redesign-b` is merged (`82431
   fade (off, instant, as with Reduce Motion), Night/Day mode through `NightDayChoice` above the app. A change that
   cannot be kept logs `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes; a read that fails, `settingsReadFailed`, and the defaults stand. No
   feedback (D121 item 4), no region, no Help (R9).
+- Life Context (C159-I item 1; D110, head's message 24 item 2; D127; D128; D131; `app/lib/life_context/`, SoulDreams
+  Dev only; TO TRY where a stand-in): what is kept is each sentence of the dreamer's words said in a night outside the
+  dream, word for word (`sentences.dart`: a sentence ends at `.`, `!`, `?` or `…` with any closing quotes, then a space
+  or the end, and at a line break; no abbreviation list), each with the phone's date when it was said and its night.
+  Nothing calls the capture yet (`LifeContext.capture`): a night holds only dreams. Kept in `kept.json` in the
+  journal's folder (version 1, written whole and renamed; nothing kept, no file), only into a night whose file is
+  there; deleting a night deletes its sentences first (X11), and at open sentences whose night is gone go
+  (`keptOrphansSwept`); a file that does not read shows nothing (`keptFileSkipped`) and the next change replaces it.
+  On is consent (b): Off keeps nothing and deletes what is kept (a failed deletion logs `keptDeleteFailed`; the next
+  opening's sweep deletes it). The Recent window (MP·84) by the calendar: a sentence is in it while its date is later
+  than today less the length; older ones go when the journal opens, when the app comes back and at each local
+  midnight while it is open (D131 item 4; `keptExpired` with the count). The page (`life_context_page.dart`), from
+  Settings' row MP·86 under Life Context length (before agreeing, the popup): the back control, the "⋯" menu (MP·88:
+  Select sentences, and a list's deletion only for a list holding anything), MP·86 in h2, then Kept longer (MP·87,
+  empty until its rule exists, D131 item 5) and Recent with the window as set, each sentence in “ ” in its box
+  (color.lifecontext.*; the light box edged with the surface's grey), its date (dd/mm/yy) beneath in
+  type.button.small, edit (MP·89) at its left and delete at its right (#8F3D24; in the dark #D0775A, proposed by C18-P,
+  a stand-in); Delete all (MP·91) at the foot; MP·92 alone when nothing is kept. Edit makes the box a field: Done or
+  leaving keeps the edit, the kept copy only (D131 item 2); emptied, it asks C4-P·4. Selecting: each box toggles,
+  Delete selected ({n}) (MP·90) at the foot, the back control leaves the selection. Every deletion asks C4-P·4 once.
+  Tapping a sentence opens its night, nothing marked yet (D131 item 3 waits for the parts that show it). The labels
+  take color.tag.dream (a stand-in). SoulDreams Dev built with the file `tool/preview_kept.py` writes
+  (`--dart-define-from-file`) seeds, once (the flag file `preview-kept-seeded`), the invented nights that have waking
+  passages, dated 0, 5, 12, 25 and 70 days back, their passages kept only while Life Context is on (D131 item 1).
 - `type.voice.app` is read at line height 1.3, the founder's override of the filed 1.5 (`StandIns.voiceApp`; the
   generated token keeps 1.5; D125 item 1; for Product's next filing).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 690 tests, and 624 mutation checks (A1 to A664; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 749 tests (691 at the branch's start: `cc2ea8c` added
+  one after the 690 written here), and 713 mutation checks (A1 to A753; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645 and A646
   dropped, each with its reason in the file; with the rows A24a to
@@ -1015,6 +1045,14 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      where the serial way shows it differently; the tests that look at real time check lower bounds only (plan Part 1,
      finding 7); (c) the comparison script does not itself prove a copy is put back between rows; the unit test
      `test_each_row_puts_its_copy_back` does (M8).
+167. For Product, through the head (`life-context`, D91; plan Part 4): the questions on Life Context's page, built as
+     leaned and shown as stand-ins: the quotation marks, the labels' colour, the dark delete icon, the page with nothing
+     kept and while Off, the menu's items, leaving a selection, editing without words, MP·86's row, the date's form,
+     the order, and the tapped sentence's mark.
+168. Life Context notes (`life-context`, D91): what counts as a sentence has no abbreviation list ("Dr." ends one); a
+     sentence's date is the day it was said, and the window counts by it; the sweep also runs when the app comes back
+     (a day may have passed away from it); the seed's own Life Context gate (`lifeContext:`) is not seen from the
+     journal's home, whose opening sweep deletes everything kept while Off (a row for it would survive, so none).
 
 ## Before Cohort 1
 
@@ -1464,6 +1502,16 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   at `a058895`, the one before the merge, recorded under "The app". The equivalence rests on the 101-row sample (the
   same both ways) and on those two rows being the only difference between the two full runs, explained by their
   changed tests. D91 and D126 apply.
+
+## Rulings during life-context
+
+- `faster-mutations` merged by the owner (`79fbf6a`).
+- D131 (owner, the brainstorm): (1) a Dev-only set of invented kept sentences (fixtures) so the page can be seen; (2)
+  editing changes only the kept copy, never the night's text; (3) the marked sentence on its night in Bold, as
+  search's; (4) expiry: sentences older than the chosen length are deleted at launch and once a day while open; (5)
+  "Kept longer" shows its heading and stays empty until its rule exists. D91 and D126 apply.
+- D132 (owner): every question of the plan's Part 4 takes its lean: questions 1 to 11 for Product, written into
+  `.scratch/for-build-chat/life-context-product-questions.md` (banked item 167); 12 to 14 as leaned.
 
 ## Documents as last imported
 

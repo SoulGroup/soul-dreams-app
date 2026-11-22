@@ -71,6 +71,8 @@ void main() {
       expect(files.where((f) => f.startsWith('lib/onboarding/')), isEmpty);
       // Settings and the consents (D122): SoulDreams Dev only.
       expect(files.where((f) => f.startsWith('lib/settings/')), isEmpty);
+      // Life Context, its page and Dev's invented sentences (D131): Dev only.
+      expect(files.where((f) => f.startsWith('lib/life_context/')), isEmpty);
       expect(files, isNot(contains(pending)));
     });
   }
@@ -87,6 +89,16 @@ void main() {
     expect(files, contains('lib/recording/record_microphone.dart'));
     expect(files, containsAll(['lib/onboarding/onboarding.dart', 'lib/onboarding/disclosure_page.dart']));
     expect(files, containsAll(['lib/founder/founder_export.dart', 'lib/founder/export_text.dart']));
+    expect(
+      files,
+      containsAll([
+        'lib/life_context/sentences.dart',
+        'lib/life_context/kept.dart',
+        'lib/life_context/life_context.dart',
+        'lib/life_context/life_context_page.dart',
+        'lib/life_context/preview.dart',
+      ]),
+    );
   });
 
   // R8, D108: the journal's pages, which testers will get, carry only the
