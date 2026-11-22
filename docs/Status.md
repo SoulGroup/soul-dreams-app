@@ -983,11 +983,12 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      what "On" does waits on Life Context being built; (b) MP·100 is a pending line (the owner wrote it, sha256
      `e57e1e8b…9852`; handle proposed to Product); (c) D127's pill inside (value left, chevron right, the unseen empty
      line) was put back as it was before by D128 item 6: the value and its chevron centred, the pill 44 high.
-164. D128, for the owner and Product: (1) item 5 STOP: MP·101 names "Disclosure & privacy" / "Villkor och integritet",
-     but the filed name of that Settings row, MP·48, is "Read disclosure & privacy" / "Läs om sekretess och personlig
-     data"; the popup was built with MP·101 as given, and one of the two texts needs changing (not by Claude Code);
+164. D128, for the owner and Product: (1) item 5, settled: MP·101 first named "Disclosure & privacy" / "Villkor och
+     integritet", which is not MP·48's filed name; the owner reworded MP·101 to name MP·48 exactly ("Read disclosure &
+     privacy" / "Läs om sekretess och personlig data", then "I agree" / "Jag godkänner"), sha256 `afebb8b9…7cd5`, and
+     a test (`lines_test.dart`) keeps both names in it, in both languages;
      (2) item 4: of the filed lines shown, only EM·6 holds the word, in Swedish, "Jag samtycker inte" (English "I
-     don't agree" is fine): for Product to reword; MP·67 ("I consent" / "I don't consent"), MP·95 ("Withdraw consent" /
+     don't agree" is fine): the owner takes it to Product to reword; MP·67 ("I consent" / "I don't consent"), MP·95 ("Withdraw consent" /
      "Give consent") and MP·96 hold it too and are shown nowhere now (a test, `shown_lines_test.dart`, keeps the
      list at EM·6); (3) the popup (MP·101, MP·102) is on the microphone, Start Interpretation (still doing nothing
      once agreed, as before) and Life Context's row, in the typing screen, a night and Settings; the readings'

@@ -51,4 +51,14 @@ void main() {
     final filed = Lines.all.map((l) => l.handle).toSet();
     expect(PendingLines.all.where((p) => filed.contains(p.handle)), isEmpty);
   });
+
+  // D128 item 5: the popup names the Settings row and the agree button as
+  // filed, in both languages: MP·48's own words, and MP·100's.
+  test('MP·101 names MP·48 and MP·100 exactly', () {
+    for (final lang in Lang.values) {
+      final popup = PendingLines.MP_101.text(lang, flavor: 'dev');
+      expect(popup, contains(Lines.MP_48.text(lang)), reason: lang.name);
+      expect(popup, contains(PendingLines.MP_100.text(lang, flavor: 'dev')), reason: lang.name);
+    }
+  });
 }
