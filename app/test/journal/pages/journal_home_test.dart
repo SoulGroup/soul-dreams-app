@@ -729,6 +729,27 @@ void main() {
     expect([for (final c in Consent.values) kept.given(c)], [false, true]);
   });
 
+  // D127 item 1: "I agree" from onboarding gives both consents: kept as given,
+  // Life Context on, the recording and its retries on.
+  testWidgets('both given from onboarding: kept, Life Context on', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = MemoryJournalFiles();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted([]))));
+    await tester.pumpAndSettle();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(
+      const {Consent.readings: true, Consent.lifeContext: true},
+    );
+    await tester.pump();
+    await tester.pump();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.settings!.consents.given(Consent.lifeContext), isTrue);
+    expect(page.recording, isNotNull);
+    final kept = decodeConsents(files.files[JournalStore.consentFile]!)!;
+    expect([for (final c in Consent.values) kept.given(c)], [true, true]);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 11));
+  });
+
   // D125 item 8: a journal from before: consents that held (c), settings that
   // chose a painting for while it was given. A "yes" keeps the painting; a
   // "no" makes Night images Off, and either is kept as the new version, so

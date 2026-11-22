@@ -1,11 +1,11 @@
 // Onboarding (main-path.md, Onboarding; D103): the welcome, the note, the
 // age question, the under-18 card, and the disclosure's first layer on two
-// pages, the second ending at MP·58, which opens the full page; the two
-// consents (MP·66 to MP·69; D122; D125 items 2 and 8) and Next stand at the
-// end of that page, and back returns to the second page. Every word is the
-// register's; a part with no line shows nothing in its place (D106 3).
-import 'dart:ui' show Tristate;
-
+// pages. The second ends with MP·58, which opens the full page, the text
+// only, with back; then EM·6 "I don't agree" left and MP·100 "I agree" right,
+// equal, neither chosen beforehand (D127 item 1): "I agree" gives the readings
+// and Life Context consents, "I don't agree" gives neither, a private journal.
+// Every word is the register's, or a pending line's; a part with no line shows
+// nothing in its place (D106 3).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
@@ -19,13 +19,14 @@ import 'package:souldreams/onboarding/onboarding.dart';
 import 'package:souldreams/settings/consent_page.dart';
 import 'package:souldreams/settings/consents.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 String w(Line line) => line.parts(appLanguage).join('\n');
 
 Finder said(Line line) => find.text(w(line));
 
-/// The readings consent's "I consent" (MP·67's first part; D122).
-Finder consent() => find.byKey(ConsentChoice.keyOf(Consent.readings, true));
+/// MP·100, a pending line: its handle here, its words in SoulDreams Dev only.
+Finder iAgree() => find.text(PendingLines.MP_100.text(appLanguage));
 
 /// The full page's own scrolling list.
 Finder full() => find.descendant(of: find.byType(DisclosurePage), matching: find.byType(Scrollable)).first;
@@ -73,12 +74,6 @@ void main() {
     await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
     await tap(tester, Lines.MP_58);
-  }
-
-  // Down the full page to [finder], then on it.
-  Future<void> reach(WidgetTester tester, Finder finder) async {
-    await tester.scrollUntilVisible(finder, 600, scrollable: full(), maxScrolls: 200);
-    await tester.pumpAndSettle();
   }
 
   testWidgets('the welcome: the line into the wordmark, the second line, Next', (tester) async {
@@ -140,73 +135,50 @@ void main() {
     expect(agreed, 0);
   });
 
-  testWidgets('the second page ends at MP·58, no consents', (tester) async {
+  testWidgets('the second page ends with I don\'t agree and I agree', (tester) async {
     await start(tester);
     await toDisclosure(tester);
     for (final line in written(Onboarding.firstPage)) {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
-    expect(consent(), findsNothing);
     await tap(tester, Lines.MP_30);
     for (final line in written([Lines.W27_14, Lines.W27_15, Lines.W27_17, Lines.MP_57, Lines.MP_58])) {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
     expect(said(Lines.W27_1), findsNothing);
-    // D125 item 2: no consent here, and no Next: the page ends at MP·58, with
-    // "I don't agree" alone at the foot.
+    // D127 item 1: no consent anywhere in onboarding, and no Next.
     expect(find.byType(ConsentChoice), findsNothing);
-    expect(said(Lines.MP_66), findsNothing);
-    expect(said(Lines.MP_68), findsNothing);
-    expect(said(Lines.MP_30), findsNothing);
+    for (final line in [Lines.MP_66, Lines.MP_67, Lines.MP_68, Lines.MP_69, Lines.MP_70, Lines.MP_30]) {
+      expect(said(line), findsNothing, reason: line.handle);
+    }
+    // The foot: EM·6 left, MP·100 right, side by side, below the page's words.
     expect(said(Lines.EM_6), findsOneWidget);
+    expect(iAgree(), findsOneWidget);
+    expect(tester.getCenter(said(Lines.EM_6)).dy, closeTo(tester.getCenter(iAgree()).dy, 1));
+    expect(tester.getCenter(said(Lines.EM_6)).dx, lessThan(tester.getCenter(iAgree()).dx));
     final ys = [for (final line in [Lines.MP_57, Lines.MP_58]) tester.getTopLeft(said(line)).dy];
     expect(ys, [...ys]..sort());
     expect(tester.getTopLeft(said(Lines.EM_6)).dy, greaterThan(ys.last));
+    // Equal, neither chosen beforehand: the same kind of button, the same look.
+    final no = find.ancestor(of: said(Lines.EM_6), matching: find.byType(PlainButton)).first;
+    final yes = find.ancestor(of: iAgree(), matching: find.byType(PlainButton)).first;
+    expect(tester.getSize(no).height, tester.getSize(yes).height);
+    expect(tester.getSemantics(no).flagsCollection.isSelected, tester.getSemantics(yes).flagsCollection.isSelected);
+    expect(agreed, 0);
   });
 
-  // D125 items 2 and 8: at the end of the full page, after every part, MP·66,
-  // then each of the two consents' text over its two choices, then Next.
-  testWidgets('the full page ends with MP·66, the two consents, then Next', (tester) async {
-    // A window tall enough to hold the end of the page whole.
-    tester.view.physicalSize = const Size(800, 3000);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.reset);
+  // D127 item 1: the full page is the text only, with back: no consent, no
+  // Next, no I agree.
+  testWidgets('the full page is the text only', (tester) async {
     await start(tester);
     await toFull(tester);
-    await reach(tester, said(Lines.MP_30));
-    expect(find.byType(ConsentChoice), findsNWidgets(2));
-    final order = [Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_30];
-    final ys = [for (final line in order) tester.getTopLeft(said(line)).dy];
-    expect(ys, [...ys]..sort());
-    expect(said(Lines.MP_70), findsNothing);
-    expect(find.byKey(const ValueKey('consent-images-true')), findsNothing);
-    for (final (i, c) in Consent.values.indexed) {
-      final yes = find.byKey(ConsentChoice.keyOf(c, true));
-      final no = find.byKey(ConsentChoice.keyOf(c, false));
-      expect(find.descendant(of: yes, matching: find.text(Lines.MP_67.parts(appLanguage)[0])), findsOneWidget);
-      expect(find.descendant(of: no, matching: find.text(Lines.MP_67.parts(appLanguage)[1])), findsOneWidget);
-      // Side by side, under its own text, above Next.
-      expect(tester.getCenter(yes).dy, tester.getCenter(no).dy);
-      expect(tester.getTopLeft(yes).dy, greaterThan(ys[i + 1]));
-      expect(tester.getTopLeft(yes).dy, lessThan(ys.last));
-      // Neither chosen beforehand.
-      expect(tester.getSemantics(yes).flagsCollection.isSelected, Tristate.isFalse);
-      expect(tester.getSemantics(no).flagsCollection.isSelected, Tristate.isFalse);
+    expect(find.byType(ConsentChoice), findsNothing);
+    for (final line in [Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_30, Lines.EM_6]) {
+      expect(said(line), findsNothing, reason: line.handle);
     }
-    // No "I don't agree" here: back returns to the second page.
-    expect(said(Lines.EM_6), findsNothing);
-  });
-
-  // D122: MP·68 shows as filed, its owed sentence in braces (Dev only), and
-  // MP·69 whole.
-  testWidgets('the consents show their lines as filed', (tester) async {
-    await start(tester);
-    await toFull(tester);
-    for (final line in [Lines.MP_66, Lines.MP_68, Lines.MP_69]) {
-      await reach(tester, said(line));
-      expect(said(line), findsOneWidget, reason: line.handle);
-    }
-    expect(w(Lines.MP_68), contains('{'));
+    expect(iAgree(), findsNothing);
+    expect(find.byType(BackControl), findsOneWidget);
+    expect(agreed, 0);
   });
 
   testWidgets('the first layer only: no part of the full page alone', (tester) async {
@@ -263,8 +235,7 @@ void main() {
     expect(find.textContaining('[X·1]'), findsNothing);
     expect(said(Lines.W27_3), findsOneWidget);
     expect(said(Lines.W27_1), findsNothing);
-    // The consents stand at the end of this page, whatever parts it shows.
-    expect(said(Lines.MP_66), findsOneWidget);
+    expect(find.byType(ConsentChoice), findsNothing);
   });
 
   test('the pages default to their parts', () {
@@ -364,73 +335,42 @@ void main() {
     expect(find.byKey(Onboarding.boxKey), findsOneWidget);
   });
 
-  testWidgets("I don't agree returns to the first page; nothing agreed", (tester) async {
+  // D127 item 1: "I agree" accepts the disclosure and gives the readings and
+  // Life Context consents, told once; any further tap does nothing.
+  testWidgets('I agree gives both consents, told once', (tester) async {
     await start(tester);
     await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
-    await tap(tester, Lines.EM_6);
-    expect(said(Lines.W27_1), findsOneWidget);
-    expect(find.byType(ConsentChoice), findsNothing);
-    expect(agreed, 0);
+    await tester.tap(iAgree());
+    await tester.tap(iAgree());
+    await tester.pumpAndSettle();
+    expect(agreed, 1);
+    expect(answers, {Consent.readings: true, Consent.lifeContext: true});
   });
 
-  Future<void> answer(WidgetTester tester, Consent c, bool given) async {
-    final f = find.byKey(ConsentChoice.keyOf(c, given));
-    await reach(tester, f);
-    await tester.tap(f);
-    await tester.pumpAndSettle();
-  }
-
-  // D122, D125 item 8: Next waits until both are answered; then the answers
-  // are told once, the full page closes, and any answers open the journal,
-  // both refused too.
-  testWidgets('Next waits for both answers, then tells them once', (tester) async {
+  // "I don't agree" leaves both not given: the journal opens as a private
+  // journal, asked nothing more.
+  testWidgets("I don't agree gives neither, told once", (tester) async {
     await start(tester);
-    await toFull(tester);
-    await answer(tester, Consent.readings, true);
+    await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
-    expect(agreed, 0);
-    expect(find.byType(DisclosurePage), findsOneWidget);
-    await answer(tester, Consent.lifeContext, false);
-    // A choice can be changed before Next; the chosen one is marked.
-    await answer(tester, Consent.readings, false);
-    final no = find.byKey(ConsentChoice.keyOf(Consent.readings, false));
-    expect(tester.getSemantics(no).flagsCollection.isSelected, Tristate.isTrue);
-    expect(tester.getSemantics(consent()).flagsCollection.isSelected, Tristate.isFalse);
-    await tap(tester, Lines.MP_30);
+    await tester.tap(said(Lines.EM_6));
+    await tester.tap(said(Lines.EM_6));
+    await tester.pumpAndSettle();
     expect(agreed, 1);
     expect(answers, {Consent.readings: false, Consent.lifeContext: false});
-    // Nothing of the full page is left over the journal.
-    expect(find.byType(DisclosurePage), findsNothing);
   });
 
-  // Back keeps what was chosen; Next is not there until the end is reached.
-  testWidgets('back from the full page keeps the answers', (tester) async {
+  // Review (D125): once a decision is taken the journal is opening and the
+  // second page is uncovered; MP·58 must not push the full page over a journal
+  // that then replaces onboarding below it.
+  testWidgets('after I agree, Read everything opens nothing more', (tester) async {
     await start(tester);
-    await toFull(tester);
-    await answer(tester, Consent.readings, true);
-    await tester.tap(find.byType(BackControl));
-    await tester.pumpAndSettle();
-    expect(find.byType(DisclosurePage), findsNothing);
-    expect(said(Lines.MP_58), findsOneWidget);
-    expect(find.byType(ConsentChoice), findsNothing);
-    await tap(tester, Lines.MP_58);
-    await reach(tester, consent());
-    expect(tester.getSemantics(consent()).flagsCollection.isSelected, Tristate.isTrue);
-    expect(agreed, 0);
-  });
-
-  // Review: once Next is accepted the full page is popped and the second page
-  // is uncovered while the journal is still being opened; MP·58 must not push
-  // the page again over a journal that then replaces onboarding below it.
-  testWidgets('after Next, Read everything opens nothing more', (tester) async {
-    await start(tester);
-    await toFull(tester);
-    await answer(tester, Consent.readings, true);
-    await answer(tester, Consent.lifeContext, true);
+    await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
+    await tester.tap(iAgree());
+    await tester.pumpAndSettle();
     expect(agreed, 1);
-    expect(find.byType(DisclosurePage), findsNothing);
     await tap(tester, Lines.MP_58);
     expect(find.byType(DisclosurePage), findsNothing);
     expect(agreed, 1);
@@ -455,15 +395,21 @@ void main() {
     expect(find.byType(DisclosurePage), findsNothing);
     expect(said(Lines.MP_58), findsOneWidget);
     expect(find.byType(ConsentChoice), findsNothing);
+    expect(iAgree(), findsOneWidget);
+    expect(agreed, 0);
   });
 
   testWidgets('at the largest text, every step scrolls and nothing overflows', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 3.1;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await start(tester);
-    await toFull(tester);
+    await toDisclosure(tester);
+    await tap(tester, Lines.MP_30);
     expect(tester.takeException(), isNull);
-    await reach(tester, said(Lines.MP_30));
+    // The foot's two buttons shrink their words to stay on one row.
+    expect(iAgree(), findsOneWidget);
+    expect(said(Lines.EM_6), findsOneWidget);
+    await tap(tester, Lines.MP_58);
     expect(tester.takeException(), isNull);
   });
 }

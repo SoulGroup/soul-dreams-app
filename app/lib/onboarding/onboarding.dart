@@ -1,26 +1,24 @@
 // Onboarding (main-path.md, Onboarding; D103), SoulDreams Dev only: the
 // welcome, the founder's note, the age question, then the disclosure's
 // first layer on two pages (C14-P item 1; the plan's question 2 for which
-// part stands on which page), the second ending at MP·58, which opens the
-// full disclosure page. At the end of that page stand the two consents
-// (C18-P, MP·66 to MP·69; C159-I item 5; D110; D122; D125 items 2 and 8):
-// MP·66, then each consent's text with MP·67's two choices, equally
-// prominent, neither chosen beforehand, then Next (MP·30), which waits until
-// both are answered; any answer opens the journal. Night images has no
-// consent (D125 item 8). The page that shows it holds the app light
-// (AlwaysLight). Every word is the register's; a part with no line yet
-// shows nothing in its place (D106 3; R1). Every box is centred between the
-// top and the foot (D106 1), and the words appear whole (D106 2). Nothing
-// is kept here: the two answers are told to the page that shows this,
-// which keeps them and that the dreamer is 18 or over (D103 item 2;
-// D122). Under 18: EM·5 and
-// "I understand", which changes nothing; the card stays until the app
-// closes, and the question is asked again at the next opening, since
-// nothing was kept (C127-I I6). "I don't agree" goes back to the
-// disclosure's first page and asks nothing (C127-I I7); it stands alone at
-// the second page's foot, which has no Next (D125 item 2). There is no back
-// control on a step: each goes forward only (the plan's question 8); the full
-// page has its own back control, to the second page.
+// part stands on which page). The second ends with MP·58, which opens the
+// full disclosure page, the text only, with its own back control (D127 item
+// 1); then, at the foot, EM·6 "I don't agree" left and MP·100 "I agree"
+// right, a pending line, equal, neither chosen beforehand. "I agree"
+// accepts the disclosure and gives the readings (a) and Life Context (b)
+// consents (C159-I item 5; D127 amends MP·83's "never on before consent");
+// "I don't agree" gives neither, and the journal opens as a private journal.
+// Either opens the journal. No consent is asked in any other way here, and
+// Night images has none (D125 item 8). The page that shows it holds the app
+// light (AlwaysLight). Every word is the register's, or a pending line's; a
+// part with no line yet shows nothing in its place (D106 3; R1). Every box is
+// centred between the top and the foot (D106 1), and the words appear whole
+// (D106 2). Nothing is kept here: the two answers are told to the page that
+// shows this, which keeps them and that the dreamer is 18 or over (D103 item
+// 2; D122). Under 18: EM·5 and "I understand", which changes nothing; the
+// card stays until the app closes, and the question is asked again at the
+// next opening, since nothing was kept (C127-I I6). There is no back control
+// on a step: each goes forward only (the plan's question 8).
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -31,9 +29,9 @@ import '../design/palette.dart';
 import '../design/stand_ins.dart';
 import '../design/tokens.g.dart';
 import '../journal/pages/parts.dart';
-import '../settings/consent_page.dart';
 import '../settings/consents.dart';
 import '../words/lines.g.dart';
+import '../words/pending.g.dart';
 import 'age.dart';
 import 'disclosure_page.dart';
 
@@ -55,8 +53,8 @@ class Onboarding extends StatefulWidget {
     this.full = DisclosurePage.parts,
   });
 
-  /// Next, once both consents are answered: each consent, true when given
-  /// (D122; D125 item 8).
+  /// "I agree" or "I don't agree": each consent, true when given (D122;
+  /// D127 item 1).
   final ValueChanged<Map<Consent, bool>> onAgreed;
 
   /// The parts each page shows: [firstPage], [secondPage] and the full
@@ -92,10 +90,8 @@ class _OnboardingState extends State<Onboarding> {
   _Step _step = _Step.welcome;
   // The band chosen, held only on this screen until Next (D103 item 2).
   int? _band;
-  // The consents answered so far, held only on this screen until Next.
-  final _answers = <Consent, bool>{};
-  // Next accepted: the full page is closed and the journal is opening; the
-  // second page, uncovered meanwhile, opens nothing more.
+  // A decision taken: the journal is opening, and the second page, uncovered
+  // meanwhile, opens nothing more.
   bool _agreed = false;
 
   void _to(_Step step) => setState(() => _step = step);
@@ -204,60 +200,25 @@ class _OnboardingState extends State<Onboarding> {
     }
   }
 
-  // The full disclosure page, ending in MP·66, the two consents and Next
-  // (D125 item 2). The answers are held here, so that back keeps them.
+  // The full disclosure page, the text only (D127 item 1).
   void _openFull() {
     if (_agreed) return;
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (route) => StatefulBuilder(
-          builder: (route, setRoute) {
-            final p = Palette.of(route);
-            final voice = StandIns.voiceApp(p.text);
-            Widget reads(Line line) => Text(
-              line.parts(appLanguage).join('\n'),
-              textAlign: TextAlign.center,
-              style: voice,
-            );
-            return DisclosurePage(
-              shown: widget.full,
-              end: [
-                reads(Lines.MP_66),
-                for (final consent in Consent.values) ...[
-                  const SizedBox(height: StandIns.gap),
-                  reads(consentText(consent)),
-                  const SizedBox(height: StandIns.gap),
-                  ConsentChoice(
-                    consent: consent,
-                    chosen: _answers[consent],
-                    onChoose: (given) {
-                      setState(() => _answers[consent] = given);
-                      setRoute(() {});
-                    },
-                  ),
-                ],
-                const SizedBox(height: StandIns.gap),
-                _one(PlainButton(Lines.MP_30.text(appLanguage), onPressed: () => _agree(route))),
-              ],
-            );
-          },
-        ),
-      ),
-    );
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => DisclosurePage(shown: widget.full)));
   }
 
-  // Next at the end of the full page: both answered, the page closes and the
-  // answers are told once (D122).
-  void _agree(BuildContext route) {
-    if (_answers.length < Consent.values.length) return;
+  // "I agree" gives both consents; "I don't agree" neither; told once.
+  void _decide(bool agree) {
+    if (_agreed) return;
     _agreed = true;
-    Navigator.of(route).pop();
-    widget.onAgreed(Map.of(_answers));
+    widget.onAgreed({for (final c in Consent.values) c: agree});
   }
 
   Widget? _foot() => switch (_step) {
     _Step.underAge => null,
-    _Step.more => _one(PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _to(_Step.disclosure))),
+    _Step.more => ButtonRow(
+      left: PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _decide(false)),
+      right: PlainButton(PendingLines.MP_100.text(appLanguage), onPressed: () => _decide(true)),
+    ),
     _ => _one(PlainButton(Lines.MP_30.text(appLanguage), onPressed: _next)),
   };
 

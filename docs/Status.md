@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `redesign-c` (Settings, the settings button and the two consents, D110, D121 to D125; the owner's look at the founder's corrections, then the merge, next), by Claude Code.
+Last updated: 2026-11-22, in branch `redesign-c` (Settings, the settings button and the two consents, D110, D121 to D127; the owner's look at the founder's corrections, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,7 +14,7 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`redesign-c`: Settings, the settings button and the two consents (D110, D121 to D125; plan `docs/plans/redesign-c.md`).
+`redesign-c`: Settings, the settings button and the two consents (D110, D121 to D127; plan `docs/plans/redesign-c.md`).
 `redesign-b` is merged (`8243128`); its Status was not updated at the merge (this entry records it).
 
 ## Road ahead
@@ -254,20 +254,23 @@ rulings given during each branch are listed in this file, one line each, under "
   (D117 Q4), the told dreams in order, never a name, the first place. A result
   opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
   goes. The query is never kept or logged (R3).
-- The two consents (C18-P, MP·66 to MP·69; C159-I item 5; D110; D121; D122; D125 items 2 and 8; `redesign-c`;
-  `app/lib/settings/`, SoulDreams Dev only): onboarding's second page ends at MP·58 ("Read everything"), with EM·6
-  alone at its foot and no Next; MP·58 opens the full disclosure page, which ends, after every part, with MP·66, then
-  the readings (a, MP·68) and Life Context (b, MP·69), each with MP·67's two choices side by side, equally
-  prominent, neither chosen beforehand, the chosen one filled (`color.button.filled`, a stand-in), then Next (MP·30),
-  inert until both are answered; Next closes the page and any answers open the journal. Settings' "Read disclosure &
-  privacy" shows the same page without them (`DisclosurePage.end`). MP·68 shows its owed sentence in braces (Dev
-  only, D122). Kept in `consent.json`, version 3: "18 or over" and the two answers, each with the UTC day of its
-  last change. Version 2, which also held the night images consent (c, retired by D125 item 8), and version 1 (a
-  given, (b) not) still read (`consents.dart`); only (a) and (b) are written. (a) not given: nothing leaves the
-  phone, so no microphone and no retries; every night kept; given again, they resume; a withdrawal waits for the
-  retry in flight and is shown only once kept (D124). (b) is the Life Context setting (nothing is kept yet, D121
-  item 2). MP·70 is shown nowhere. Night images has no consent: Off by default, every night the gradient
-  (`lookOf`'s `images`); Personal and Random keep D110's look until the personal painting exists (D121 item 3).
+- The two consents (C18-P, MP·66 to MP·69; C159-I item 5; D110; D121; D122; D125 items 2 and 8; D127 item 1;
+  `redesign-c`; `app/lib/settings/`, SoulDreams Dev only): onboarding asks for no consent in a page of its own now.
+  Its second page ends with the disclosure parts, MP·58 ("Read everything", optional, opening the full disclosure
+  page, the text only, with back), then at the foot EM·6 "I don't agree" left and MP·100 "I agree" right (a pending
+  line), equal, neither chosen beforehand. "I agree" accepts the disclosure and gives the readings (a) and Life
+  Context (b) consents together, so Life Context is On from then; "I don't agree" gives neither and the journal opens
+  as a private journal. D127 amends MP·83's "never on before consent" and C159-I's separate consents; the Build chat
+  carries it to the head. Kept in `consent.json`, version 3: "18 or over" and the two answers, each with the UTC day
+  of its last change. Version 2, which also held the night images consent (c, retired by D125 item 8), and version 1
+  (a given, (b) not) still read (`consents.dart`); only (a) and (b) are written. (a) not given: nothing leaves the
+  phone, so no microphone and no retries; every night kept; given again, with MP·68 and MP·67's two choices on its
+  own page (`ConsentPage`), they resume; a withdrawal waits for the retry in flight and is shown only once kept
+  (D124). (b) is the Life Context setting (nothing is kept yet, D121 item 2): turning it Off asks MP·93 and what is
+  kept goes (as built), turning it On again shows its page, MP·69 over Back (MP·98) left and Turn on (MP·99) right
+  (D125 item 9). MP·66, MP·67 in onboarding, MP·70 and MP·9 are shown nowhere. Night images has no consent: Off by
+  default, every night the gradient (`lookOf`'s `images`); Personal and Random keep D110's look until the personal
+  painting exists (D121 item 3).
 - Settings (main-path.md, Settings; D110; D121; D122; D125; `settings_page.dart`; TO TRY where a stand-in): the
   settings button top left on the journal, on the search field's row, the field to its right and ending where the
   rows end (three drawn sliders in place of the gear, 41 in a 44 tap box, its own semantics node, spoken MP·25; the
@@ -275,7 +278,9 @@ rulings given during each branch are listed in this file, one line each, under "
   switches to, a moon in the light theme drawn in the dark page colour and a sun in the dark, switches the theme in
   half a second and sets Manual (the 5 s fade stays for the clock's 21:00 and 08:00, `NightDay.fade`; a change the
   dreamer makes takes `NightDay.quickFade`); MP·25 in h2; six rows of one height, each a white rounded row with a
-  value pill, all one width, its border the row's grey, opening the phone's menu: Language (EM·9,
+  value pill, all one width and one height, its border the row's grey, the value left and the chevron right with the
+  space right of the chevron equal to that above and below the value and left of it (D127 item 2), opening the
+  phone's menu: Language (EM·9,
   `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44; Manual keeps
   the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure), MP·95
   (Withdraw or Give consent) and Delete journal (EM·11, `color.destructive`). Life Context On shows its consent
@@ -294,14 +299,15 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 689 tests, and 640 mutation checks (A1 to A638; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 690 tests, and 637 mutation checks (A1 to A646; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A277, A278, A281, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A541, A549, A550, A566, A578 and A610
+  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A537, A538, A541, A543, A549, A550, A566, A578, A610, A623, A624, A626, A627, A633 and A634
   dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 640 run, 640 caught`); `check_all.sh` does not call it (D55). During a task only the
-  rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
+  (expected: `app mutations: 637 run, 637 caught`); `check_all.sh` does not call it (D55). During a task only the
+  rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95; the full run's timing is
+  D126's).
 
 ## The server
 
@@ -956,9 +962,11 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      nothing; (c) "a storage change ships alone, in a build that changes nothing else" (workflow (c) 3) is the
      owner's to weigh against shipping it with the founder's corrections; (d) MP·70 (the night images consent) and MP·9
      are in the register and shown nowhere now; MP·66's "each choice is separate" opens two consents, not three.
-160. D125 item 2, for the owner: "I don't agree" stands alone at the second page's foot, centred, going back to the
-     first page, and the full page has none (its back control returns to the second page); with no Next on the second
-     page, MP·58 is the only way to the consents, and Next sits at the end of the page's scroll, not pinned.
+160. D127 item 1 replaced D125 item 2's flow, for the owner: "I don't agree" no longer goes back to the first page
+     (C127-I I7 is superseded); it decides, like "I agree", and opens the journal as a private journal, so a dreamer
+     who taps it by mistake has no way back to page one (the journal's Settings give consent again, MP·95). Tapping
+     either is final within the session (`_decide`, told once); MP·58 opens the text, and back returns to the second
+     page.
 161. D125 item 6, confirmed by the owner: the half second applies to every change the dreamer makes (the toggle and
      the Night/Day mode row); only the clock's 21:00 and 08:00 keep the five seconds. D125 item 10: the settings
      button's sliders (`_SlidersLine`) replace the gear, which is in git history (`8674d92`); the founder's eye
@@ -970,6 +978,13 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      elsewhere. Onboarding's end of the full page keeps MP·67's pair for Life Context, and the readings page
      keeps it, since the ruling names only Life Context's consent page; Product's next filing may take MP·98 and
      MP·99 (then the handles change).
+163. D127 notes, for the owner: (a) Life Context is On after "I agree" while nothing is kept yet (D121 item 2), so
+     what "On" does waits on Life Context being built; (b) MP·100 is a pending line (the owner wrote it, sha256
+     `e57e1e8b…9852`; handle proposed to Product); (c) the readings consent's own page (Settings, "Give consent") keeps
+     MP·67's pair, "I consent" and "I don't consent", since the ruling names Life Context's page only; (d) the pill's
+     four gaps are one (the space left of the value as well, my reading of "equals the space above and below"), and
+     its height is a line's, held by an unseen empty line so that shrunk words never make a shorter pill; (e) D125
+     item 9's `TurnOnChoice` stays, now reached from Settings only.
 
 ## Before Cohort 1
 
@@ -1018,7 +1033,7 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
   founder, 2026-11-22, D125 item 9; the owner wrote them in `pending-lines.csv`; handles proposed to Product, banked
-  item 162). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
+  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page (D127 item 1; banked item 163). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
 
 ## Rulings during branch 2
 
@@ -1213,8 +1228,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   keeps the night), except Q6: a ten-minute cap on every recording. Its Q1 B (Soniox's file API) is replaced by D94.
 - D94 (founder): route D: retries through the real-time stream (D92 item 2 restored), only while the app is open,
   progress kept across openings, words may appear in parts; no server, AWS or Soniox change.
-- D95 (owner, standing): the full app mutation run (every row) once, at the end of a branch before the final review,
-  or when the Build chat asks; during a task, only the rows that target the files changed.
+- D95 (owner, standing; its timing replaced by D126): the full app mutation run (every row), and during a task only the
+  rows that target the files changed.
 - D96 (owner, 2026-11-18): after the reviews of Tasks 5 to 7. Q1: a keep that fails with no stream stops the
   recording as a broken stream does, the notice clears, one code. Q2: leaving the app never removes a dream; an
   emptied field on leaving keeps the old words; only a Save removes it. Q3: a Save that cannot land is a failed Save
@@ -1375,6 +1390,19 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   Context's consent page buttons read "Back" and "Turn on": the register had no places for them, so this stopped
   until the owner added the pending lines MP·98 and MP·99 (banked item 162), then it was built; (10) a different drawn icon for the gear, three sliders as a stand-in, the gear if nothing reads
   better. Done in `redesign-c` after `2938323`; items 9 and 10's look wait for the owner.
+
+- D126 (owner, standing; replaces D95's timing): the full app mutation run happens once per branch: after the owner's
+  by-eye look has passed and any correction rounds are done, immediately before the merge, when the Build chat asks
+  for it. During tasks and correction rounds, only the rows for the files changed. In `redesign-c` it has not run in
+  full since D124; the rows for the changed files have, and are caught.
+- D127 (founder, a correction round, by eye): (1) onboarding: no consents inside the full disclosure page (the text
+  only, with back); page two ends with the disclosure parts, MP·58 "Read everything" (optional), then EM·6 "I don't
+  agree" left and MP·100 "I agree" right, equal, neither pre-chosen; "I agree" accepts the disclosure and gives
+  consent (a) and consent (b), Life Context On by default after it; "I don't agree" leaves both not given, a private
+  journal; in Settings turning Life Context off deletes what is kept (MP·93, as built) and turning it on again
+  shows its page (MP·98, MP·99); it amends MP·83's "never on before consent" and C159-I's separate consents, and
+  the Build chat carries it to the head; (2) Settings value pills: the space right of the value and its chevron
+  equals the space above and below it. Targeted rows only (D126).
 
 ## Documents as last imported
 

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
 import 'package:souldreams/core/app_line.dart';
+import 'package:souldreams/core/language.dart';
 import 'package:souldreams/core/night_day.dart';
 import 'package:souldreams/design/palette.dart';
 import 'package:souldreams/design/tokens.g.dart';
@@ -26,6 +27,7 @@ import 'package:souldreams/settings/settings.dart';
 import 'package:souldreams/settings/settings_controller.dart';
 import 'package:souldreams/settings/settings_page.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../fixtures.dart';
 import '../journal/memory_journal_files.dart';
@@ -90,7 +92,11 @@ void main() {
   }
 
   String shown(WidgetTester tester, SettingRow row) =>
-      tester.widget<Text>(find.descendant(of: find.byKey(SettingsPage.valueKey(row)), matching: find.byType(Text))).data!;
+      tester
+          .widgetList<Text>(find.descendant(of: find.byKey(SettingsPage.valueKey(row)), matching: find.byType(Text)))
+          .map((t) => t.data)
+          .whereType<String>()
+          .firstWhere((d) => d.isNotEmpty);
 
   Map<String, dynamic> kept(String name) => jsonDecode(utf8.decode(files.files[name]!)) as Map<String, dynamic>;
 
@@ -286,6 +292,32 @@ void main() {
     expect(shown(tester, SettingRow.lifeContext), 'Off');
   });
 
+  // D127 item 1: after "I agree" both consents are given, so Life Context is
+  // On; turning it Off asks MP·93 (what is kept goes, as built), and turning
+  // it On again shows its page, Back and Turn on (MP·98, MP·99).
+  testWidgets('Life Context On after I agree; Off, then On again', (tester) async {
+    final c = await open(tester, given: const {Consent.readings: true, Consent.lifeContext: true});
+    expect(shown(tester, SettingRow.lifeContext), 'On');
+    await choose(tester, SettingRow.lifeContext, 1);
+    expect(find.text(en(Lines.MP_93)), findsOneWidget);
+    await tester.tap(find.text(en(Lines.MP_94)));
+    await tester.pumpAndSettle();
+    expect(c.consents.given(Consent.lifeContext), isFalse);
+    expect(shown(tester, SettingRow.lifeContext), 'Off');
+    await choose(tester, SettingRow.lifeContext, 0);
+    expect(find.byType(ConsentPage), findsOneWidget);
+    expect(find.text(PendingLines.MP_98.text(appLanguage)), findsOneWidget);
+    expect(find.text(PendingLines.MP_99.text(appLanguage)), findsOneWidget);
+    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.lifeContext, false)));
+    await tester.pumpAndSettle();
+    expect(c.consents.given(Consent.lifeContext), isFalse);
+    await choose(tester, SettingRow.lifeContext, 0);
+    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.lifeContext, true)));
+    await tester.pumpAndSettle();
+    expect(c.consents.given(Consent.lifeContext), isTrue);
+    expect(shown(tester, SettingRow.lifeContext), 'On');
+  });
+
   // D121 item 5; the stop's question 10: Withdraw behind MP·96, the journal
   // stays; Give consent behind MP·68.
   testWidgets('Withdraw consent behind MP·96; Give consent behind MP·68', (tester) async {
@@ -353,11 +385,13 @@ void main() {
     await hit(tester, find.byKey(SettingsPage.disclosureKey));
     await tester.pumpAndSettle();
     expect(tester.widget<DisclosurePage>(find.byType(DisclosurePage)).shown, DisclosurePage.parts);
-    // D125 item 2: from Settings the page is only to read: no consent, no Next.
-    expect(tester.widget<DisclosurePage>(find.byType(DisclosurePage)).end, isEmpty);
+    // D127 item 1: from Settings, as from onboarding, the page is only to
+    // read: no consent, no Next, no agreeing.
     expect(find.byType(ConsentChoice), findsNothing);
     expect(find.text(en(Lines.MP_66)), findsNothing);
     expect(find.text(en(Lines.MP_30)), findsNothing);
+    expect(find.text(en(Lines.EM_6)), findsNothing);
+    expect(find.textContaining('[MP·100]'), findsNothing);
   });
 
   // D110: one confirmation; then everything goes, back to the welcome.
@@ -416,18 +450,51 @@ void main() {
     });
   }
 
+  // D127 item 2: in every pill the space to the right of the chevron equals
+  // the space above and below the value.
+  testWidgets('every pill: even space round the value and chevron', (tester) async {
+    // The test font (Ahem) is wider than Inter: scaled down, no value shrinks.
+    tester.platformDispatcher.textScaleFactorTestValue = 0.8;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await open(tester);
+    for (final row in SettingRow.values) {
+      final pill = find.byKey(SettingsPage.valueKey(row));
+      await tester.ensureVisible(pill);
+      await tester.pumpAndSettle();
+      final box = tester.getRect(find.descendant(of: pill, matching: find.byType(DecoratedBox)).first);
+      // The value's line, an unseen empty one: its words may shrink inside it at large text.
+      final value = tester.getRect(find.descendant(of: pill, matching: find.byType(Opacity)));
+      final chevron = tester.getRect(find.descendant(of: pill, matching: find.byType(Chevron)));
+      final above = value.top - box.top;
+      final below = box.bottom - value.bottom;
+      final right = box.right - chevron.right;
+      expect(above, closeTo(below, 0.5), reason: row.name);
+      expect(right, closeTo(above, 0.5), reason: row.name);
+      expect(right, greaterThan(0), reason: row.name);
+    }
+  });
+
   testWidgets('at the largest text, nothing overflows', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 3.1;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
     await open(tester);
     expect(tester.takeException(), isNull);
-    // Each pill keeps its size, and its words shrink to stay inside it.
+    // Each pill keeps its size, and its words shrink to stay inside it; the
+    // pills are one height, whatever their words.
+    final heights = <double>{};
+    for (final row in SettingRow.values) {
+      final pill = find.byKey(SettingsPage.valueKey(row));
+      await tester.ensureVisible(pill);
+      await tester.pumpAndSettle();
+      heights.add(tester.getSize(find.descendant(of: pill, matching: find.byType(DecoratedBox)).first).height);
+    }
+    expect(heights, hasLength(1));
     for (final row in SettingRow.values) {
       final pill = find.byKey(SettingsPage.valueKey(row));
       await tester.ensureVisible(pill);
       await tester.pumpAndSettle();
       expect(tester.getSize(pill).width, StandIns.settingPillWidth);
-      final words = tester.getRect(find.descendant(of: pill, matching: find.byType(Text)));
+      final words = tester.getRect(find.descendant(of: pill, matching: find.text(shown(tester, row))));
       expect(words.right, lessThanOrEqualTo(tester.getRect(pill).right));
       expect(words.left, greaterThanOrEqualTo(tester.getRect(pill).left));
     }

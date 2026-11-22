@@ -313,52 +313,69 @@ class _Row extends StatelessWidget {
   }
 
   // The value pill opening the phone's menu: one size for every row, its
-  // border the row's own grey (D125 item 4); at large text its words shrink
-  // to fit, the pill's size staying.
+  // border the row's grey (D125 item 4). Inside, the value stands at the left
+  // and the chevron at the right, and the space to the right of the chevron,
+  // above and below the value, and to the left of it is one (D127 item 2); the
+  // pill's height is a line's, however the words are scaled, and at large text
+  // the words shrink to fit its width. Its tap box is 44 high, round it.
   Widget _pill(Palette p) => CupertinoMenuAnchor(
     consumeOutsideTaps: true,
     menuChildren: [
       for (final (i, choice) in choices.indexed)
         CupertinoMenuItem(key: SettingsPage.choiceKey(row, i), onPressed: () => onChoose(i), child: Text(choice)),
     ],
-    builder: (context, controller, _) => Semantics(
-      button: true,
-      label: name,
-      value: choices[chosen],
-      excludeSemantics: true,
-      child: GestureDetector(
-        key: SettingsPage.valueKey(row),
-        behavior: HitTestBehavior.opaque,
-        onTap: () => controller.isOpen ? controller.close() : controller.open(),
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: StandIns.hitMin),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: p.field,
-              borderRadius: BorderRadius.circular(Spacing.radius),
-              border: Border.all(color: p.surfaceBorder),
-            ),
-            child: Padding(
-              padding: StandIns.settingValuePadding,
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(choices[chosen], style: TypeRoles.button.style(p.fieldText)),
-                    const SizedBox(width: StandIns.searchGap),
-                    RotatedBox(
-                      quarterTurns: 1,
-                      child: Chevron(colour: p.fieldText, size: StandIns.settingChevron),
-                    ),
-                  ],
+    builder: (context, controller, _) {
+      final style = TypeRoles.button.style(p.fieldText);
+      return Semantics(
+        button: true,
+        label: name,
+        value: choices[chosen],
+        excludeSemantics: true,
+        child: GestureDetector(
+          key: SettingsPage.valueKey(row),
+          behavior: HitTestBehavior.opaque,
+          onTap: () => controller.isOpen ? controller.close() : controller.open(),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: StandIns.hitMin),
+            child: Center(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: p.field,
+                  borderRadius: BorderRadius.circular(Spacing.radius),
+                  border: Border.all(color: p.surfaceBorder),
+                ),
+                child: Padding(
+                  padding: StandIns.settingValuePadding,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Stack(
+                          alignment: Alignment.centerLeft,
+                          children: [
+                            // An empty line, unseen: it holds the pill to a line's height.
+                            Opacity(opacity: 0, child: Text.rich(const TextSpan(), style: style)),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: Text(choices[chosen], style: style),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: StandIns.searchGap),
+                      RotatedBox(
+                        quarterTurns: 1,
+                        child: Chevron(colour: p.fieldText, size: StandIns.settingChevron),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    ),
+      );
+    },
   );
 }
 
