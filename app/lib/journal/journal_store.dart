@@ -20,8 +20,8 @@
 // open, audio no night names is deleted, and so is an older copy left by
 // a cut that did not finish.
 //
-// The dreamer's two consents (D103; C159-I item 5; D122; D125 item 8) are kept here
-// too, once answered in onboarding: one small file holding each answer and
+// The dreamer's two consents (D103; C159-I item 5; D122; D125 item 8) are
+// kept here too, once answered in onboarding: one small file holding each answer and
 // the day it last changed, and that the dreamer is 18 or over, never the
 // age band (C146-I item 1) (`settings/consents.dart`). So are the settings
 // (`settings/settings.dart`). Deleting the journal takes both, and returns
@@ -59,7 +59,7 @@ final class JournalStore {
   /// (MP·10, then MP·32); removed with the journal (D49 c, O6).
   static const firstUseFlag = 'first-use-seen';
 
-  /// Kept once the dreamer has answered the three consents, as one 18 or
+  /// Kept once the dreamer has answered the two consents, as one 18 or
   /// over (D103; D122); removed with the journal.
   static const consentFile = 'consent.json';
 
@@ -309,7 +309,19 @@ final class JournalStore {
   /// again.
   Future<Settings?> settings() => _run(() async {
     final bytes = await _files.read(settingsFile);
-    if (bytes == null) return null;
+    if (bytes == null) {
+      // Before, (c) given with no settings file meant Personal, the old
+      // default: that yes is kept, as version 2.
+      final consents = await _files.read(consentFile);
+      if (consents == null || decodeConsents(consents)?.retiredImages != true) return null;
+      const settings = Settings(images: NightImages.personal);
+      try {
+        await _whole(settingsFile, encodeSettings(settings));
+      } on Object {
+        // Read again at the next opening.
+      }
+      return settings;
+    }
     if (!isOldSettings(bytes)) return decodeSettings(bytes);
     final consents = await _files.read(consentFile);
     final given = consents != null && decodeConsents(consents)?.retiredImages == true;

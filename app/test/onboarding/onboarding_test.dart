@@ -420,6 +420,22 @@ void main() {
     expect(agreed, 0);
   });
 
+  // Review: once Next is accepted the full page is popped and the second page
+  // is uncovered while the journal is still being opened; MP·58 must not push
+  // the page again over a journal that then replaces onboarding below it.
+  testWidgets('after Next, Read everything opens nothing more', (tester) async {
+    await start(tester);
+    await toFull(tester);
+    await answer(tester, Consent.readings, true);
+    await answer(tester, Consent.lifeContext, true);
+    await tap(tester, Lines.MP_30);
+    expect(agreed, 1);
+    expect(find.byType(DisclosurePage), findsNothing);
+    await tap(tester, Lines.MP_58);
+    expect(find.byType(DisclosurePage), findsNothing);
+    expect(agreed, 1);
+  });
+
   testWidgets('Read everything opens every part; back returns to the second page', (tester) async {
     await start(tester);
     await toDisclosure(tester);

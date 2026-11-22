@@ -6,7 +6,7 @@
 // - An edit replaces a dream's text. An emptied dream disappears and the
 //   night's other dreams remain (D58 Q3); a night left with no dream is
 //   deleted, as a deletion deletes it (P10).
-// - The three consents and the settings (D103; D122) are kept and read
+// - The two consents and the settings (D103; D122; D125) are kept and read
 //   here. When the journal is deleted, they go with it, and `consentGone`
 //   tells the app, which returns to its start (D110). A consent withdrawn
 //   is an answer kept, and the app stays (D121 item 5).

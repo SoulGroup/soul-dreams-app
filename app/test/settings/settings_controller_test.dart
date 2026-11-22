@@ -1,6 +1,6 @@
 // The settings and the consents while the journal is open (D121; D122): a
 // change shows at once and is kept; one that cannot be kept logs a code and
-// holds; Night images is Off while consent (c) is not given.
+// holds; Night images is a setting with no consent behind it (D125 item 8).
 import 'dart:async';
 import 'dart:convert';
 

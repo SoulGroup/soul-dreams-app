@@ -1,12 +1,12 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A629, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A634, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 631 run, 631 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 636 run, 636 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -2370,8 +2370,8 @@ ROWS = [
      'last]',
      'test/settings/setting_line_test.dart', 'each setting line gives its name and choices, both languages'),
     ('A537', 'lib/onboarding/onboarding.dart',
-     '    if (_answers.length < Consent.values.length) return;\n    Navigator.of(route).pop();',
-     '    Navigator.of(route).pop();',
+     '    if (_answers.length < Consent.values.length) return;\n    _agreed = true;',
+     '    _agreed = true;',
      'test/onboarding/onboarding_test.dart', 'Next waits for both answers, then tells them once'),
     ('A538', 'lib/onboarding/onboarding.dart',
      'setState(() => _answers[consent] = given)',
@@ -2712,8 +2712,8 @@ ROWS = [
      "json is Map<String, dynamic> && json['version'] == 2;",
      'test/journal/journal_store_test.dart', 'version 1 settings beside a consents file with (c) given'),
     ('A619', 'lib/journal/journal_store.dart',
-     '        await _whole(settingsFile, encodeSettings(settings));\n      } on Object {',
-     '      } on Object {',
+     '    if (settings != null) {\n      try {\n        await _whole(settingsFile, encodeSettings(settings));\n',
+     '    if (settings != null) {\n      try {\n',
      'test/journal/journal_store_test.dart', 'version 1 settings beside a consents file with (c) given'),
     ('A620', 'lib/settings/settings.dart',
      'images: old && !imagesGiven ? NightImages.off : images,',
@@ -2755,6 +2755,28 @@ ROWS = [
      '  Consent.lifeContext => Lines.MP_69,',
      '  Consent.lifeContext => Lines.MP_68,',
      'test/settings/consent_page_test.dart', 'each consent has its text'),
+    # redesign-c, D125 (review): a yes to the retired consent (c) with no settings file; Next accepted.
+    ('A630', 'lib/journal/journal_store.dart',
+     '      if (consents == null || decodeConsents(consents)?.retiredImages != true) return null;',
+     '      if (consents == null) return null;',
+     'test/journal/journal_store_test.dart', 'no settings file beside version 2 with (c) not given'),
+    ('A631', 'lib/journal/journal_store.dart',
+     '      const settings = Settings(images: NightImages.personal);',
+     '      const settings = Settings(images: NightImages.random);',
+     'test/journal/journal_store_test.dart', 'no settings file beside version 2 with (c) given'),
+    ('A632', 'lib/journal/journal_store.dart',
+     '      const settings = Settings(images: NightImages.personal);\n      try {\n'
+     '        await _whole(settingsFile, encodeSettings(settings));\n',
+     '      const settings = Settings(images: NightImages.personal);\n      try {\n',
+     'test/journal/journal_store_test.dart', 'no settings file beside version 2 with (c) given'),
+    ('A633', 'lib/onboarding/onboarding.dart',
+     '    if (_agreed) return;\n    Navigator.of(context).push(',
+     '    Navigator.of(context).push(',
+     'test/onboarding/onboarding_test.dart', 'after Next, Read everything opens nothing more'),
+    ('A634', 'lib/onboarding/onboarding.dart',
+     '    _agreed = true;\n    Navigator.of(route).pop();',
+     '    Navigator.of(route).pop();',
+     'test/onboarding/onboarding_test.dart', 'after Next, Read everything opens nothing more'),
 ]
 
 

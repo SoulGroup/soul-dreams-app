@@ -652,6 +652,41 @@ void main() {
     });
   }
 
+  // D125 item 8 (review): before, "(c) given" with no settings file meant
+  // Personal, the old default. That yes is kept: a version 2 consents file with
+  // (c) given and no settings file reads as Personal, kept as version 2; with
+  // (c) not given, or beside version 3, there are no settings, and the
+  // defaults (Off) stand.
+  for (final (name, consents, expected) in <(String, String, NightImages?)>[
+    ('(c) given', '"images":{"given":true,"day":"2026-11-21"}', NightImages.personal),
+    ('(c) not given', '"images":{"given":false,"day":"2026-11-21"}', null),
+  ]) {
+    test('no settings file beside version 2 with $name', () async {
+      final store = await JournalStore.open(files);
+      await files.write(
+        JournalStore.consentFile,
+        utf8.encode(
+          '{"version":2,"over18":true,"readings":{"given":true},"lifeContext":{"given":false},$consents}',
+        ),
+      );
+      final read = await store.settings();
+      expect(read?.images, expected);
+      if (expected == null) {
+        expect(files.everything().keys, [JournalStore.consentFile]);
+      } else {
+        expect(read, const Settings(images: NightImages.personal));
+        expect(decodeSettings(files.everything()[JournalStore.settingsFile]!), read);
+      }
+    });
+  }
+
+  test('no settings file beside version 3: none', () async {
+    final store = await JournalStore.open(files);
+    await store.keepConsents(Consents.answered({Consent.readings: true}, DateTime.utc(2026)));
+    expect(await store.settings(), isNull);
+    expect(files.everything().keys, [JournalStore.consentFile]);
+  });
+
   test('settings cut short leave none and no temporary file', () async {
     final store = await JournalStore.open(BrokenRename(files.dir));
     await expectLater(store.keepSettings(const Settings()), throwsA(isA<FileSystemException>()));

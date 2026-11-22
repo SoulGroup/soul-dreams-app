@@ -11,7 +11,7 @@
 // (AlwaysLight). Every word is the register's; a part with no line yet
 // shows nothing in its place (D106 3; R1). Every box is centred between the
 // top and the foot (D106 1), and the words appear whole (D106 2). Nothing
-// is kept here: the three answers are told to the page that shows this,
+// is kept here: the two answers are told to the page that shows this,
 // which keeps them and that the dreamer is 18 or over (D103 item 2;
 // D122). Under 18: EM·5 and
 // "I understand", which changes nothing; the card stays until the app
@@ -70,7 +70,7 @@ class Onboarding extends StatefulWidget {
   /// The white box holding a step's words.
   static const boxKey = Key('onboarding-box');
 
-  /// The disclosure's first page, then its consent page, by part (the
+  /// The disclosure's first page, then its second page, by part (the
   /// plan's question 2). A part with no line shows nothing yet, but keeps
   /// its place here for when its line is filed.
   static const firstPage = [Lines.W27_1, Lines.W27_2, Lines.W27_5, Lines.W27_13];
@@ -94,6 +94,9 @@ class _OnboardingState extends State<Onboarding> {
   int? _band;
   // The consents answered so far, held only on this screen until Next.
   final _answers = <Consent, bool>{};
+  // Next accepted: the full page is closed and the journal is opening; the
+  // second page, uncovered meanwhile, opens nothing more.
+  bool _agreed = false;
 
   void _to(_Step step) => setState(() => _step = step);
 
@@ -204,6 +207,7 @@ class _OnboardingState extends State<Onboarding> {
   // The full disclosure page, ending in MP·66, the two consents and Next
   // (D125 item 2). The answers are held here, so that back keeps them.
   void _openFull() {
+    if (_agreed) return;
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (route) => StatefulBuilder(
@@ -246,6 +250,7 @@ class _OnboardingState extends State<Onboarding> {
   // answers are told once (D122).
   void _agree(BuildContext route) {
     if (_answers.length < Consent.values.length) return;
+    _agreed = true;
     Navigator.of(route).pop();
     widget.onAgreed(Map.of(_answers));
   }

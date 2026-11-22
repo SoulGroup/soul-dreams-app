@@ -294,13 +294,13 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 682 tests, and 631 mutation checks (A1 to A629; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 686 tests, and 636 mutation checks (A1 to A634; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A541, A549, A550, A566, A578 and A610
   dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 631 run, 631 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 636 run, 636 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -945,7 +945,8 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      empty folder; the test "I agree keeps the consent, then the journal and its retries" kept its old name (rows
      A296, A507 and A508 key on it); `JournalHome` counts any readable consents file as agreed, a withdrawn (a)
      included (D121 item 5).
-159. D125 item 8, for the owner (decided under D91, test-first, rows A615 to A629): (a) Night images is Off by
+159. D125 item 8, for the owner (decided under D91, test-first, rows A615 to A634; the review found that a yes to (c) with no
+     settings file was lost, now kept as Personal, and that the full page could be opened again after Next, now inert): (a) Night images is Off by
      default now, since no consent stands behind it and it was Off while (c) was not given; a journal from before
      keeps its painting only where (c) was given, and a "no" to (c) makes it Off, the settings kept again as version 2
      in the same read so the answer is not lost when the consents are next kept as version 3; if that keep fails the
