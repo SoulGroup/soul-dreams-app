@@ -111,6 +111,10 @@ enum LogEvent {
   keptExpired,
   keptKeepFailed,
   keptDeleteFailed,
+
+  /// SoulDreams Dev's invented kept sentences (D131 item 1) could not be
+  /// seeded.
+  previewSeedFailed,
 }
 
 abstract final class SafeLog {

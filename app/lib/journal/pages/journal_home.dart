@@ -20,7 +20,9 @@
 // microphone and Start Interpretation show a popup when tapped, and nothing is
 // sent. It holds Life Context too (`LifeContext`, D131 item 4): what is past
 // its window is deleted when the journal opens, when the app comes back, and
-// at each local midnight while it is open.
+// at each local midnight while it is open. Built with tool/preview_kept.py's
+// file, it seeds the invented kept sentences once, before the journal opens
+// (`preview`, D131 item 1).
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -30,6 +32,7 @@ import '../../core/app_line.dart' show wordAnimation;
 import '../../core/night_day.dart';
 import '../../core/safe_log.dart';
 import '../../life_context/life_context.dart';
+import '../../life_context/preview.dart';
 import '../../onboarding/onboarding.dart';
 import '../../recording/recording.dart';
 import '../../settings/consents.dart';
@@ -51,6 +54,7 @@ class JournalHome extends StatefulWidget {
     this.recording,
     this.nightAction,
     this.read = noneRead,
+    this.preview = '',
   });
 
   final JournalFiles files;
@@ -67,6 +71,10 @@ class JournalHome extends StatefulWidget {
 
   /// Whether a night has been read (D110): none is yet.
   final ReadCheck read;
+
+  /// SoulDreams Dev's invented kept sentences, as tool/preview_kept.py
+  /// writes them, or empty (D131 item 1).
+  final String preview;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -143,6 +151,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         SafeLog.event(LogEvent.settingsReadFailed);
       }
     }
+    if (consents != null) await _seed(store, consents);
     if (!mounted) return;
     _store = store;
     _journal = journal;
@@ -207,9 +216,20 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     } on Object {
       SafeLog.event(LogEvent.consentKeepFailed);
     }
+    await _seed(_store!, consents);
     // Not reset here: a tap that lands before onboarding has left the tree
     // must not open the journal twice. `_onboard` resets it.
     if (mounted) _enter(consents, const Settings());
+  }
+
+  // The invented kept sentences, once, before the journal opens (D131 item
+  // 1); a seed that fails logs a code and the journal opens as it is.
+  Future<void> _seed(JournalStore store, Consents consents) async {
+    try {
+      await seedPreview(store, widget.preview, lifeContext: consents.given(Consent.lifeContext));
+    } on Object {
+      SafeLog.event(LogEvent.previewSeedFailed);
+    }
   }
 
   // The journal deleted, the consents and settings with it (D110): every

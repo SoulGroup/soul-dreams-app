@@ -249,10 +249,14 @@ void main() {
 
   test('SoulDreams Dev hands its phone check and recording to the list', () {
     final text = File('lib/main_dev.dart').readAsStringSync();
-    // With each night's export (D108).
+    // With each night's export (D108), and the invented kept sentences of a
+    // build made for the by-eye review (D131 item 1).
     expect(
       text,
-      contains('JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read)'),
+      contains(
+        'JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, '
+        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'))",
+      ),
     );
     // Every night read only in a build made for the by-eye preview (D110).
     expect(text, contains("bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead"));
@@ -698,6 +702,46 @@ void main() {
     await tester.pumpAndSettle();
     expect([for (final k in await journal.kept()) k.text], passages[1].sentences);
     expect(lines, contains('keptExpired ${passages[2].sentences.length}'));
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  // D131 item 1: SoulDreams Dev built with the preview seeds the invented
+  // kept sentences before the journal opens, from onboarding's "I agree"
+  // too; a seed that fails logs a code and the journal opens.
+  testWidgets('the preview seeds before the journal opens; a failure, a code', (tester) async {
+    JournalStore.newQueueForTests();
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    final define = jsonEncode([
+      for (final n in inventedNights())
+        if (n.waking.isNotEmpty) {'lang': n.lang, 'dreams': n.dreams, 'waking': [for (final w in n.waking) w.text]},
+    ]);
+    final files = MemoryJournalFiles();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, preview: define)));
+    await tester.pumpAndSettle();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(
+      const {Consent.readings: true, Consent.lifeContext: true},
+    );
+    await tester.pumpAndSettle();
+    final journal = Journal(await JournalStore.open(files));
+    expect(await journal.kept(), isNotEmpty);
+    expect(find.byType(JournalPage), findsOneWidget);
+    expect(lines.where((l) => l.startsWith('preview')), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+    // Life Context off: the nights, no sentence.
+    final off = answered(MemoryJournalFiles(), const {Consent.readings: true, Consent.lifeContext: false});
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: off, preview: define)));
+    await tester.pumpAndSettle();
+    final offJournal = Journal(await JournalStore.open(off));
+    expect(await offJournal.newestFirst(), isNotEmpty);
+    expect(await offJournal.kept(), isEmpty);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), preview: '[1]')));
+    await tester.pumpAndSettle();
+    expect(lines, contains('previewSeedFailed'));
+    expect(find.byType(JournalPage), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
   });
 }

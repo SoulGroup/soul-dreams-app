@@ -320,6 +320,13 @@ final class JournalStore {
 
   Future<void> markFirstUseSeen() => _run(() => _files.write(firstUseFlag, Uint8List(0)));
 
+  /// Whether the empty flag file [name] is here (SoulDreams Dev's preview,
+  /// `life_context/preview.dart`); removed with the journal.
+  Future<bool> flagged(String name) => _run(() async => (await _files.list()).contains(name));
+
+  /// Keeps the empty flag file [name].
+  Future<void> flag(String name) => _run(() => _files.write(name, Uint8List(0)));
+
   /// The consents, or null when none is kept or the file does not read as
   /// version 1 or 2 exactly: onboarding then asks again.
   Future<Consents?> consents() => _run(() async {

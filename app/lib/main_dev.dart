@@ -4,6 +4,8 @@
 // (D107; D108; R8 lets this file and main_founder.dart import it). Built
 // with --dart-define=PREVIEW_READ=true, every night shows as read, for the
 // owner's by-eye review of a read night's look (D110); nothing is stored.
+// Built with tool/preview_kept.py's file, it seeds the invented kept
+// sentences once, for the review of Life Context's page (D131 item 1).
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -44,7 +46,7 @@ void main() {
     SoulDreamsApp(
       home: const bool.fromEnvironment('KEYBOARD_CHECK')
           ? const KeyboardCheck()
-          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read),
+          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read, preview: const String.fromEnvironment('PREVIEW_KEPT')),
     ),
   );
   if (check != null) unawaited(check);
