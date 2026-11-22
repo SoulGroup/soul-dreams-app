@@ -44,6 +44,17 @@ Future<(SettingsController, MemoryJournalFiles)> make({
 Map<String, dynamic> kept(MemoryJournalFiles f, String name) =>
     jsonDecode(utf8.decode(f.files[name]!)) as Map<String, dynamic>;
 
+/// A folder whose rename waits at [gate].
+final class Slow extends MemoryJournalFiles {
+  Completer<void>? gate;
+
+  @override
+  Future<void> rename(String from, String to) async {
+    await gate?.future;
+    return super.rename(from, to);
+  }
+}
+
 void main() {
   late List<String> lines;
   final sink = SafeLog.sink;
@@ -158,13 +169,28 @@ void main() {
 
   // The journal deleted while a withdrawal waits: it ends quietly.
   test('a withdrawal under way when the journal goes ends quietly', () async {
-    final (c, _) = await make();
+    final (c, f) = await make();
     final stopped = Completer<void>();
     c.stopSending = () => stopped.future;
     final withdrawal = c.answer(Consent.readings, false);
     await pumpEventQueue();
     c.dispose();
     stopped.complete();
+    await withdrawal;
+    // Nothing is written into a journal that has gone (D110).
+    expect(f.files, isEmpty);
+    expect(lines, isEmpty);
+  });
+
+  // The journal goes while the withdrawal is being written: it ends quietly.
+  test('a withdrawal being written when the journal goes ends quietly', () async {
+    final f = Slow();
+    final (c, _) = await make(files: f);
+    f.gate = Completer<void>();
+    final withdrawal = c.answer(Consent.readings, false);
+    await pumpEventQueue();
+    c.dispose();
+    f.gate!.complete();
     await withdrawal;
   });
 

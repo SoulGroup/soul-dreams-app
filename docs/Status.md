@@ -283,12 +283,12 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 665 tests, and 611 mutation checks (A1 to A598; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 667 tests, and 613 mutation checks (A1 to A600; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A300, A313, A363, A375 and A507 dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 611 run, 611 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 613 run, 613 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -918,6 +918,8 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      before the key and after each frame is read); (b) a withdrawal that cannot be kept stops sending for the
      session, shows MP·62 under the button, which stays "Withdraw consent" to try again (fixed, rows A585 to A593,
      A597, A598; the next start still reads the file as it was kept, so sending resumes then, as D122 built);
+     the review of that fix found a withdrawal waiting for a retry could write the consents back after Delete journal;
+     it now writes nothing once the journal is gone (rows A599, A600);
      (c) consents that did not read, answered again, ignore a settings file that did (`_agree` uses the defaults):
      left banked.
 157. The Settings page's notes: the value pill's 44 tap box scales down with its words inside a `FittedBox` at large

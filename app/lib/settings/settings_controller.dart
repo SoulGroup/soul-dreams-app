@@ -103,6 +103,9 @@ final class SettingsController extends ChangeNotifier {
       } on Object {
         // Nothing further to wait for.
       }
+      // The journal deleted while this waited: nothing is written into it
+      // (D110).
+      if (_disposed) return;
       final next = _consents.withAnswer(Consent.readings, false, _journal.now());
       try {
         await _journal.keepConsents(next);

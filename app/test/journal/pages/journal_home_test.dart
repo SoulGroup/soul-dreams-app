@@ -577,6 +577,36 @@ void main() {
     await tester.pump(const Duration(seconds: 11));
   });
 
+  // D124 item 1 with D110: Delete journal while a withdrawal waits for a key:
+  // the consents are not written back into the deleted journal.
+  testWidgets('a withdrawal waiting when the journal is deleted writes nothing back', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = agreed(MemoryJournalFiles());
+    await waiting(files);
+    final gate = Completer<String>();
+    final recording = Recording(
+      on: true,
+      microphone: SilentMicrophone(),
+      key: () => gate.future,
+      connect: (_) async => MemoryLink(),
+    );
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: recording)));
+    await tester.pump();
+    await tester.pump();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    final withdrawal = page.settings!.answer(Consent.readings, false);
+    await tester.pump(const Duration(milliseconds: 150));
+    await page.journal.deleteAll();
+    await tester.pump(const Duration(milliseconds: 150));
+    expect(find.byType(Onboarding), findsOneWidget);
+    gate.complete('k');
+    await tester.pump(const Duration(milliseconds: 150));
+    await withdrawal;
+    expect(files.files, isEmpty);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 11));
+  });
+
   // D124 item 2: a withdrawal that cannot be kept still stops sending for
   // this session, and the readings still show as given.
   testWidgets('consent (a) withdrawal not kept: sending stopped, still shown as given', (tester) async {
