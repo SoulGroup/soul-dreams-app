@@ -75,7 +75,9 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   JournalAudio? _audio;
   SettingsController? _settings;
   Recording? _recording;
-  // Null until the consent is read; then whether it is given.
+  // Null until the consents are read; then whether onboarding has been
+  // answered (agreeing or not; `SettingsController.agreed` is the readings'
+  // consent, a different thing, D128).
   bool? _agreed;
   bool _agreeing = false;
 

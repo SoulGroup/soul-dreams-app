@@ -132,8 +132,8 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     });
   }
 
-  // Consent (a) withdrawn or given again hands a new recording, or none
-  // (D121 item 5): the list follows the new one's retries.
+  // Agreeing later hands a recording where there was none (D128): the list
+  // follows the new one's retries.
   @override
   void didUpdateWidget(JournalPage old) {
     super.didUpdateWidget(old);

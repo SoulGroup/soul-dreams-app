@@ -939,8 +939,10 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      what stays is the retries' halt checks, before the key and after each frame is read (rows A581, A582, A584),
      and the item (c) below, still banked: consents that did not read, answered again, ignore a settings file that
      did (`_agree` uses the defaults).
-157. The Settings page's notes: the value pill's size no longer scales at large text (D125 item 4: every pill one
-     width, its words shrink inside it; the large-text test checks each pill's size and that its words stay inside); in an Automatic fade the toggle still reads the theme on screen; a
+157. The Settings page's notes: every value pill is one width (D125 item 4), its words shrinking inside it at large
+     text, but the heights follow the words there (a short value stays large, a long one shrinks to the width), as
+     the pill was before D127, which D128 item 6 put back; and where a row's name wraps to two lines the pill is
+     centred, so its gaps above and below exceed the right one (D128 item 6 holds for one-line rows); in an Automatic fade the toggle still reads the theme on screen; a
      failed deletion shows nothing and may leave some files; choices map to their enum by index, so a later
      register import that changes MP·85's count would throw rather than show a handle (R1); the gear has no guard
      against two taps, or against New Dream still opening.
