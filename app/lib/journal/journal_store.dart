@@ -137,7 +137,12 @@ final class JournalStore {
       }
     }
     final store = JournalStore._(files);
-    await store._sweepKept({for (final name in names) ?_nightFile.firstMatch(name)?[1]});
+    try {
+      await store._sweepKept({for (final name in names) ?_nightFile.firstMatch(name)?[1]});
+    } on Object {
+      // Swept again at the next opening.
+      SafeLog.event(LogEvent.keptDeleteFailed);
+    }
     return store;
   });
 

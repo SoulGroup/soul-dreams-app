@@ -125,6 +125,20 @@ void main() {
     expect(lines, ['keptOrphansSwept ${passages[0].sentences.length}']);
   });
 
+  test('a failed orphan sweep never stops the journal opening', () async {
+    final (_, journal, nights) = await open();
+    await journal.keep(nights[0].id, passages[0].text);
+    await journal.keep(nights[1].id, passages[1].text);
+    files.files.remove(JournalStore.fileOf(nights[0].id));
+    final full = _FailingKeptWrites(files.files);
+    lines.clear();
+    final again = Journal(await JournalStore.open(full));
+    expect(lines, ['keptDeleteFailed']);
+    expect(await again.newestFirst(), hasLength(nights.length - 1));
+    full.failing = false;
+    expect(await JournalStore.open(full).then((s) => Journal(s).kept()), isNotEmpty);
+  });
+
   test('an unreadable kept file shows nothing, is logged, then replaced', () async {
     final (_, journal, nights) = await open();
     files.files[JournalStore.keptFile] = utf8.encode('{"version":9}');
@@ -220,4 +234,19 @@ void main() {
     expect((await store.consents())!.given(Consent.lifeContext), isTrue);
     expect((await store.settings())!.length, LifeContextLength.oneMonth);
   });
+}
+
+// A folder whose kept file cannot be written (a full disk), until told otherwise.
+class _FailingKeptWrites extends MemoryJournalFiles {
+  _FailingKeptWrites(Map<String, Uint8List> from) {
+    files.addAll(from);
+  }
+
+  bool failing = true;
+
+  @override
+  Future<void> write(String name, Uint8List bytes) async {
+    if (failing && name.contains('kept')) throw StateError('disk');
+    return super.write(name, bytes);
+  }
 }

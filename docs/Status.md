@@ -333,8 +333,8 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 749 tests (691 at the branch's start: `cc2ea8c` added
-  one after the 690 written here), and 713 mutation checks (A1 to A753; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 750 tests (691 at the branch's start: `cc2ea8c` added
+  one after the 690 written here), and 714 mutation checks (A1 to A754; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645 and A646
   dropped, each with its reason in the file; with the rows A24a to
@@ -1053,6 +1053,11 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      sentence's date is the day it was said, and the window counts by it; the sweep also runs when the app comes back
      (a day may have passed away from it); the seed's own Life Context gate (`lifeContext:`) is not seen from the
      journal's home, whose opening sweep deletes everything kept while Off (a row for it would survive, so none).
+     The review's two minor notes (not fixed, D91): the midnight timer is not rescheduled on return, so after the phone
+     has slept it may fire late and old sentences stay in the file until then or the next return (the page never shows
+     them); and while `kept.json` does not read, deleting a night leaves that night's sentences in the unreadable file
+     until the next capture, Off or Delete journal. The review's one defect, the orphans' sweep at open stopping the
+     journal opening when it cannot write, is fixed (`keptDeleteFailed`; row A754).
 
 ## Before Cohort 1
 
