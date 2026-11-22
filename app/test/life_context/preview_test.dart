@@ -1,11 +1,12 @@
 // SoulDreams Dev's invented kept sentences (D131 item 1): seeded once from
 // what tool/preview_kept.py writes (the invented nights with waking
-// passages, fixtures/invented-nights.json, R2), dated back, kept only while
-// Life Context is on.
+// passages, fixtures/invented-nights.json, R2), dated back, kept whatever
+// Life Context's state (Off only pauses, D134), and logged as a count.
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:souldreams/core/safe_log.dart';
 import 'package:souldreams/journal/journal.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/life_context/preview.dart';
@@ -40,8 +41,8 @@ void main() {
     store = await JournalStore.open(files);
   });
 
-  Future<void> seed(String define, {bool on = true}) =>
-      seedPreview(store, define, lifeContext: on, now: () => now, zone: const FixedZone(1), random: Random(8));
+  Future<void> seed(String define) =>
+      seedPreview(store, define, now: () => now, zone: const FixedZone(1), random: Random(8));
 
   test('without the define, nothing is seeded', () async {
     await seed('');
@@ -73,10 +74,31 @@ void main() {
     expect(await journal.kept(), kept);
   });
 
-  test('Life Context off: the nights, and no sentence', () async {
-    await seed(previewDefine(), on: false);
+  // D134: Off only pauses, so the seed does not depend on Life Context being
+  // on when it runs: with no consent at all, the sentences are there.
+  test('no consent is read: the nights and every sentence are seeded', () async {
+    expect(files.files.containsKey(JournalStore.consentFile), isFalse);
+    await seed(previewDefine());
     expect(await store.nights(), hasLength(withWaking.length));
-    expect(await Journal(store).kept(), isEmpty);
+    expect(
+      (await Journal(store).kept()).length,
+      [for (final n in withWaking) for (final w in n.waking) w.sentences.length].reduce((a, b) => a + b),
+    );
+  });
+
+  // So that a build with no sentences can be told from one whose seed did
+  // not run: a code and two counts, never a word of a night (R3).
+  test('the seed logs its counts once, and nothing the second time', () async {
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    await seed(previewDefine());
+    final sentences = [for (final n in withWaking) for (final w in n.waking) w.sentences.length].reduce((a, b) => a + b);
+    expect(lines, ['previewSeeded ${withWaking.length} $sentences']);
+    lines.clear();
+    await seed(previewDefine());
+    expect(lines, isEmpty);
   });
 
   test('a define that does not read seeds nothing', () async {

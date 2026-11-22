@@ -20,7 +20,10 @@
 //   selection; the foot shows Delete selected ({n}) (MP·90), which does
 //   nothing at 0; the top left is a drawn tick (MP·103's name) instead of
 //   the back control, and it ends selecting (D133).
-// - While Life Context is Off the page shows MP·104 alone (D133 item 3).
+// - While Life Context is Off (it pauses, D134) the page shows MP·104 above
+//   the lists, which all work as when On; with nothing kept, MP·104 alone.
+// - While selecting, a tick box and its sentence are one accessibility
+//   element: it reads the sentence and whether it is selected (D134 item 4).
 // - Every deletion asks C4-P·4 once, the phone's standard dialog, Cancel
 //   (MP·61) first and Delete (MP·60) destructive (C4-P·4's flag).
 // The boxes, labels, icons and spacing are stand-ins (TO TRY, P13).
@@ -229,11 +232,21 @@ class _LifeContextPageState extends State<LifeContextPage> {
               const SizedBox(height: StandIns.gap),
               if (!_loaded)
                 const SizedBox.shrink()
-              else if (off)
-                AppLine(key: LifeContextPage.offKey, PendingLines.MP_104.text(appLanguage), style: StandIns.voiceApp(p.text))
               else if (empty)
-                AppLine(key: LifeContextPage.emptyKey, Lines.MP_92.text(appLanguage), style: StandIns.voiceApp(p.text))
+                AppLine(
+                  key: off ? LifeContextPage.offKey : LifeContextPage.emptyKey,
+                  off ? PendingLines.MP_104.text(appLanguage) : Lines.MP_92.text(appLanguage),
+                  style: StandIns.voiceApp(p.text),
+                )
               else ...[
+                if (off) ...[
+                  AppLine(
+                    key: LifeContextPage.offKey,
+                    PendingLines.MP_104.text(appLanguage),
+                    style: StandIns.voiceApp(p.text),
+                  ),
+                  const SizedBox(height: StandIns.gap),
+                ],
                 Center(child: _Label(labels.first)),
                 for (final k in longer) _sentence(p, k),
                 const SizedBox(height: StandIns.gap),
@@ -359,7 +372,8 @@ class _LifeContextPageState extends State<LifeContextPage> {
         ),
         child: Padding(
           padding: StandIns.keptPadding,
-          child: Row(
+          child: _oneWhenSelecting(
+            Row(
             children: [
               if (_selecting)
                 Semantics(
@@ -422,10 +436,15 @@ class _LifeContextPageState extends State<LifeContextPage> {
                 const SizedBox(width: StandIns.hitMin),
             ],
           ),
+          ),
         ),
       ),
     );
   }
+
+  // While selecting, the tick box and its sentence are one accessibility
+  // element: the sentence, whether it is selected, and one tap (D134 item 4).
+  Widget _oneWhenSelecting(Widget row) => _selecting ? MergeSemantics(child: row) : row;
 }
 
 /// A list's label: a pill in color.tag.dream (a stand-in), heard as a

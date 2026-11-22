@@ -151,7 +151,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         SafeLog.event(LogEvent.settingsReadFailed);
       }
     }
-    if (consents != null) await _seed(store, consents);
+    if (consents != null) await _seed(store);
     if (!mounted) return;
     _store = store;
     _journal = journal;
@@ -216,7 +216,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     } on Object {
       SafeLog.event(LogEvent.consentKeepFailed);
     }
-    await _seed(_store!, consents);
+    await _seed(_store!);
     // Not reset here: a tap that lands before onboarding has left the tree
     // must not open the journal twice. `_onboard` resets it.
     if (mounted) _enter(consents, const Settings());
@@ -224,9 +224,9 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
 
   // The invented kept sentences, once, before the journal opens (D131 item
   // 1); a seed that fails logs a code and the journal opens as it is.
-  Future<void> _seed(JournalStore store, Consents consents) async {
+  Future<void> _seed(JournalStore store) async {
     try {
-      await seedPreview(store, widget.preview, lifeContext: consents.given(Consent.lifeContext));
+      await seedPreview(store, widget.preview);
     } on Object {
       SafeLog.event(LogEvent.previewSeedFailed);
     }

@@ -3,12 +3,12 @@
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
 # Parallel by default (D129), each worker in its own copy of app/ in
 # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
-# Expected: every row "caught" (A1 to A763, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A771, A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 723 run, 723 caught", exit 0. Each row breaks one thing in app/ (with --serial, in
+# mutations: 726 run, 726 caught", exit 0. Each row breaks one thing in app/ (with --serial, in
 # place; else in a worker's copy), runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
@@ -1288,8 +1288,12 @@ ROWS = [
      'message: Lines.MP_38.text(appLanguage),',
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A260', 'lib/journal/pages/parts.dart',
-     '        button: true,\n        child: GestureDetector(\n          behavior',
-     '        button: false,\n        child: GestureDetector(\n          behavior',
+     ('message: Lines.MP_14.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'),
+     ('message: Lines.MP_14.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: false,\n'),
      'test/journal/pages/typing_page_test.dart', 'the back control: a round bordered button, a chevron'),
     ('A261', 'lib/journal/pages/night_page.dart',
      '                                      textAlign: TextAlign.center,\n                                      style: TypeRoles.h2.style(NightArt.over),',
@@ -2424,14 +2428,6 @@ ROWS = [
      '(_dark ? NightDayMode.night : NightDayMode.day)',
      'NightDayMode.night',
      'test/settings/settings_page_test.dart', 'Night/Day: Manual keeps the theme; the toggle switches it'),
-    ('A551', 'lib/settings/settings_page.dart',
-     ': await _confirm(Lines.MP_93, Lines.MP_94);',
-     ': true;',
-     'test/settings/settings_page_test.dart', 'Life Context: On shows its page; Off asks MP·93'),
-    ('A552', 'lib/settings/settings_page.dart',
-     'if (yes) await _c.answer(Consent.lifeContext, on);',
-     'await _c.answer(Consent.lifeContext, on);',
-     'test/settings/settings_page_test.dart', 'Life Context: On shows its page; Off asks MP·93'),
     ('A555', 'lib/settings/settings_page.dart',
      'if (!await _confirm(Lines.C4_P_4, Lines.MP_60)) return;',
      '',
@@ -2511,7 +2507,7 @@ ROWS = [
     ('A579', 'lib/settings/settings_page.dart',
      '              isDestructiveAction: true,\n',
      '              isDestructiveAction: false,\n',
-     'test/settings/settings_page_test.dart', 'Life Context: On shows its page; Off asks MP·93'),
+     'test/settings/settings_page_test.dart', 'Delete journal: C4-P·4 once, then everything goes'),
     ('A580', 'lib/settings/settings_page.dart',
      '            CupertinoDialogAction(\n              onPressed: () => Navigator.of(context).pop(false),\n'
      '              child: Text(Lines.MP_61.text(appLanguage)),\n            ),\n'
@@ -2523,7 +2519,7 @@ ROWS = [
      '              child: Text(yes.text(appLanguage)),\n            ),\n'
      '            CupertinoDialogAction(\n              onPressed: () => Navigator.of(context).pop(false),\n'
      '              child: Text(Lines.MP_61.text(appLanguage)),\n            ),\n',
-     'test/settings/settings_page_test.dart', 'Life Context: On shows its page; Off asks MP·93'),
+     'test/settings/settings_page_test.dart', 'Delete journal: C4-P·4 once, then everything goes'),
     ('A581', 'lib/recording/retries.dart',
      '    if (_halted) return false;\n    SafeLog.event(LogEvent.retryStarted);',
      '    SafeLog.event(LogEvent.retryStarted);',
@@ -2882,9 +2878,10 @@ ROWS = [
      '',
      'test/life_context/life_context_test.dart', 'Off, a capture keeps nothing'),
     ('A697', 'lib/life_context/life_context.dart',
-     '    if (!on) return const [];\n',
-     '',
-     'test/life_context/life_context_test.dart', 'a failed deletion at Off: still Off, a code, swept again'),
+     'Future<List<Kept>> recent() async {\n',
+     ('Future<List<Kept>> recent() async {\n'
+      '    if (!on) return const [];\n'),
+     'test/life_context/life_context_test.dart', 'Off pauses: what is kept stays, shows, returns On'),
     ('A698', 'lib/life_context/life_context.dart',
      'in await _journal.kept()) if (inWindow(k, today, length)) k]',
      'in await _journal.kept()) k]',
@@ -2894,17 +2891,20 @@ ROWS = [
      '    return ([',
      'test/life_context/life_context_test.dart', 'Recent: only the window, newest first; Kept longer is empty'),
     ('A700', 'lib/life_context/life_context.dart',
-     '      if (!on) return await _journal.deleteAllKept();\n',
-     '',
-     'test/life_context/life_context_test.dart', 'the sweep: past the window goes, counted; while Off, everything'),
+     ('Future<void> sweep() async {\n'
+      '    try {\n'),
+     ('Future<void> sweep() async {\n'
+      '    try {\n'
+      '      if (!on) return await _journal.deleteAllKept();\n'),
+     'test/life_context/life_context_test.dart', 'the sweep: past the window goes, counted, On or Off'),
     ('A701', 'lib/life_context/life_context.dart',
      '      if (gone > 0) SafeLog.event',
      '      SafeLog.event',
-     'test/life_context/life_context_test.dart', 'the sweep: past the window goes, counted; while Off, everything'),
+     'test/life_context/life_context_test.dart', 'the sweep: past the window goes, counted, On or Off'),
     ('A702', 'lib/life_context/life_context.dart',
      '      SafeLog.event(LogEvent.keptDeleteFailed);\n    }\n  }\n\n  /// Sweeps now',
      '    }\n  }\n\n  /// Sweeps now',
-     'test/life_context/life_context_test.dart', 'a failed deletion at Off: still Off, a code, swept again'),
+     'test/life_context/life_context_test.dart', 'a sweep that cannot delete logs a code, and goes on'),
     ('A703', 'lib/life_context/life_context.dart',
      '    unawaited(sweep());\n    _schedule();',
      '    _schedule();',
@@ -2933,14 +2933,6 @@ ROWS = [
      '    _midnight?.cancel();\n    super.dispose();',
      '    super.dispose();',
      'test/life_context/life_context_test.dart', 'start sweeps now, then at each local midnight'),
-    ('A710', 'lib/settings/settings_controller.dart',
-     '    if (consent == Consent.lifeContext && !given) {',
-     '    if (false) {',
-     'test/life_context/life_context_test.dart', 'turning Life Context off deletes everything kept'),
-    ('A711', 'lib/settings/settings_controller.dart',
-     '        SafeLog.event(LogEvent.keptDeleteFailed);\n',
-     '',
-     'test/life_context/life_context_test.dart', 'a failed deletion at Off: still Off, a code, swept again'),
     ('A712', 'lib/journal/pages/journal_home.dart',
      'LifeContext(_journal!, controller)..start();',
      'LifeContext(_journal!, controller);',
@@ -3069,10 +3061,6 @@ ROWS = [
      '  await store.flag(previewFlag);\n',
      '',
      'test/life_context/preview_test.dart', 'each invented night, dated back, its passages kept; once'),
-    ('A744', 'lib/life_context/preview.dart',
-     '    if (!lifeContext) continue;\n',
-     '',
-     'test/life_context/preview_test.dart', 'Life Context off: the nights, and no sentence'),
     ('A745', 'lib/life_context/preview.dart',
      'previewDaysBack[i % previewDaysBack.length]',
      'previewDaysBack[0]',
@@ -3090,11 +3078,11 @@ ROWS = [
      '(await _files.list()).contains(firstUseFlag));',
      'test/life_context/preview_test.dart', 'each invented night, dated back, its passages kept; once'),
     ('A749', 'lib/journal/pages/journal_home.dart',
-     '    if (consents != null) await _seed(store, consents);\n',
+     '    if (consents != null) await _seed(store);\n',
      '',
      'test/journal/pages/journal_home_test.dart', 'the preview seeds before the journal opens; a failure, a code'),
     ('A750', 'lib/journal/pages/journal_home.dart',
-     '    await _seed(_store!, consents);\n',
+     '    await _seed(_store!);\n',
      '',
      'test/journal/pages/journal_home_test.dart', 'the preview seeds before the journal opens; a failure, a code'),
     ('A751', 'lib/journal/pages/journal_home.dart',
@@ -3118,9 +3106,9 @@ ROWS = [
      '      _selecting = true;\n      _selected.clear();\n',
      'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
     ('A756', 'lib/life_context/life_context_page.dart',
-     '              else if (off)',
-     '              else if (false)',
-     'test/life_context/life_context_page_test.dart', 'Off: MP·104 replaces the lists and the empty line'),
+     '                  key: off ? LifeContextPage.offKey : LifeContextPage.emptyKey,\n',
+     '                  key: LifeContextPage.emptyKey,\n',
+     'test/life_context/life_context_page_test.dart', 'Off: MP·104 above the lists, which all work'),
     ('A757', 'lib/life_context/life_context_page.dart',
      '? DoneControl(onPressed: _done)',
      '? BackControl(onPressed: _done)',
@@ -3130,25 +3118,81 @@ ROWS = [
      'onTap: () {},',
      'test/life_context/life_context_page_test.dart', 'selecting: the row or its tick box toggles; Delete selected (n)'),
     ('A759', 'lib/life_context/life_context_page.dart',
-     'PendingLines.MP_104.text(appLanguage)',
-     'PendingLines.MP_101.text(appLanguage)',
-     'test/life_context/life_context_page_test.dart', 'Off: MP·104 replaces the lists and the empty line'),
+     '                  off ? PendingLines.MP_104.text(appLanguage) : Lines.MP_92.text(appLanguage),\n',
+     '                  off ? PendingLines.MP_101.text(appLanguage) : Lines.MP_92.text(appLanguage),\n',
+     'test/life_context/life_context_page_test.dart', 'Off, nothing kept: MP·104 alone, no lists, menu or Delete all'),
     ('A760', 'lib/life_context/life_context_page.dart',
      'BackControl(onPressed: () => Navigator.of(context).pop())',
      'BackControl(onPressed: () {})',
      'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
     ('A761', 'lib/journal/pages/parts.dart',
-     'final name = PendingLines.MP_103.text(appLanguage);',
-     'final name = PendingLines.MP_102.text(appLanguage);',
+     'message: PendingLines.MP_103.text(appLanguage),',
+     'message: PendingLines.MP_102.text(appLanguage),',
      'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
     ('A762', 'lib/journal/pages/parts.dart',
      'child: CustomPaint(painter: _TickLine(p.buttonText)),',
      'child: Chevron(colour: p.buttonText),',
      'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
     ('A763', 'lib/journal/pages/parts.dart',
-     'excludeSemantics: true,\n        child: GestureDetector(\n          behavior: HitTestBehavior.opaque,\n          onTap: onPressed,',
-     'excludeSemantics: true,\n        child: GestureDetector(\n          behavior: HitTestBehavior.opaque,\n          onTap: () {},',
+     ('message: PendingLines.MP_103.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      '        child: GestureDetector(\n'
+      '          behavior: HitTestBehavior.opaque,\n'
+      '          onTap: onPressed,'),
+     ('message: PendingLines.MP_103.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      '        child: GestureDetector(\n'
+      '          behavior: HitTestBehavior.opaque,\n'
+      '          onTap: () {},'),
      'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A764', 'lib/journal/pages/parts.dart',
+     ('message: PendingLines.MP_103.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'),
+     ('message: PendingLines.MP_103.text(appLanguage),\n'
+      '      child: Semantics(\n'
+      '        button: true,\n'
+      "        label: 'x',\n"),
+     'test/life_context/life_context_page_test.dart', 'selecting: a drawn tick, spoken Done, replaces back and ends selecting'),
+    ('A765', 'lib/life_context/life_context_page.dart',
+     '_selecting ? MergeSemantics(child: row) : row;',
+     'row;',
+     'test/life_context/life_context_page_test.dart', 'selecting: the tick box and its sentence are one element'),
+    ('A766', 'lib/life_context/life_context_page.dart',
+     '                if (off) ...[\n',
+     '                if (false) ...[\n',
+     'test/life_context/life_context_page_test.dart', 'Off: MP·104 above the lists, which all work'),
+    ('A767', 'lib/life_context/life_context_page.dart',
+     '                    PendingLines.MP_104.text(appLanguage),\n',
+     '                    PendingLines.MP_101.text(appLanguage),\n',
+     'test/life_context/life_context_page_test.dart', 'Off: MP·104 above the lists, which all work'),
+    ('A768', 'lib/settings/settings_page.dart',
+     '    if (on && !await ConsentPage.ask(context)) return;\n',
+     '    if (!await ConsentPage.ask(context)) return;\n',
+     'test/settings/settings_page_test.dart', 'Life Context: On shows its page; Off asks nothing'),
+    ('A769', 'lib/settings/settings_controller.dart',
+     ('    notifyListeners();\n'
+      '    await _keep();\n'
+      '  }\n'
+      '\n'
+      '  /// "I agree"'),
+     ('    notifyListeners();\n'
+      '    if (consent == Consent.lifeContext && !given) await _journal.deleteAllKept();\n'
+      '    await _keep();\n'
+      '  }\n'
+      '\n'
+      '  /// "I agree"'),
+     'test/life_context/life_context_test.dart', 'Off pauses: what is kept stays, shows, returns On'),
+    ('A770', 'lib/life_context/preview.dart',
+     '  SafeLog.event(LogEvent.previewSeeded, [read.length, kept]);\n',
+     '',
+     'test/life_context/preview_test.dart', 'the seed logs its counts once, and nothing the second time'),
+    ('A771', 'lib/life_context/preview.dart',
+     '      kept += await journal.keep(night.id, w);',
+     '      kept += 0; await journal.keep(night.id, w);',
+     'test/life_context/preview_test.dart', 'the seed logs its counts once, and nothing the second time'),
 ]
 
 

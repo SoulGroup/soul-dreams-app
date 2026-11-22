@@ -115,6 +115,10 @@ enum LogEvent {
   /// SoulDreams Dev's invented kept sentences (D131 item 1) could not be
   /// seeded.
   previewSeedFailed,
+
+  /// The invented kept sentences were seeded (D134 item 5): the nights, then
+  /// the sentences, as counts.
+  previewSeeded,
 }
 
 abstract final class SafeLog {

@@ -265,8 +265,9 @@ void main() {
     expect(kept(JournalStore.consentFile).keys, ['version', 'over18', 'readings', 'lifeContext']);
   });
 
-  // The stop's question 7, D128: Life Context On shows its page; Off asks MP·93.
-  testWidgets('Life Context: On shows its page; Off asks MP·93', (tester) async {
+  // The stop's question 7, D128: Life Context On shows its page; D134 item
+  // 1: Off asks nothing (it pauses; nothing is deleted).
+  testWidgets('Life Context: On shows its page; Off asks nothing', (tester) async {
     final c = await open(tester);
     await choose(tester, SettingRow.lifeContext, 0);
     expect(find.text(en(Lines.MP_69)), findsOneWidget);
@@ -275,28 +276,20 @@ void main() {
     expect(c.consents.given(Consent.lifeContext), isTrue);
     expect(shown(tester, SettingRow.lifeContext), 'On');
     await choose(tester, SettingRow.lifeContext, 1);
-    expect(find.text(en(Lines.MP_93)), findsOneWidget);
-    cancelFirst(tester, Lines.MP_94);
-    await tester.tap(find.text(en(Lines.MP_61)));
-    await tester.pumpAndSettle();
-    expect(c.consents.given(Consent.lifeContext), isTrue);
-    await choose(tester, SettingRow.lifeContext, 1);
-    await tester.tap(find.text(en(Lines.MP_94)));
-    await tester.pumpAndSettle();
+    expect(find.text(en(Lines.MP_93)), findsNothing);
+    expect(find.text(en(Lines.MP_94)), findsNothing);
     expect(c.consents.given(Consent.lifeContext), isFalse);
     expect(shown(tester, SettingRow.lifeContext), 'Off');
   });
 
   // D127 item 1: after "I agree" both consents are given, so Life Context is
-  // On; turning it Off asks MP·93 (what is kept goes, as built), and turning
-  // it On again shows its page, Back and Turn on (MP·98, MP·99).
+  // On; turning it Off asks nothing (D134), and turning it On again shows its
+  // page, Back and Turn on (MP·98, MP·99).
   testWidgets('Life Context On after I agree; Off, then On again', (tester) async {
     final c = await open(tester, given: const {Consent.readings: true, Consent.lifeContext: true});
     expect(shown(tester, SettingRow.lifeContext), 'On');
     await choose(tester, SettingRow.lifeContext, 1);
-    expect(find.text(en(Lines.MP_93)), findsOneWidget);
-    await tester.tap(find.text(en(Lines.MP_94)));
-    await tester.pumpAndSettle();
+    expect(find.text(en(Lines.MP_93)), findsNothing);
     expect(c.consents.given(Consent.lifeContext), isFalse);
     expect(shown(tester, SettingRow.lifeContext), 'Off');
     await choose(tester, SettingRow.lifeContext, 0);

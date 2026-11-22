@@ -1,5 +1,5 @@
 // Life Context while the journal is open (C159-I item 1; D127; D128;
-// D131): Off keeps nothing and deletes what is kept; the page's lists; the
+// D131; D134): Off pauses (nothing new is kept, what is kept stays); the page's lists; the
 // sweep when the journal opens, when the app comes back and at each local
 // midnight; a change that cannot be done logs a code, never a sentence.
 import 'dart:math';
@@ -18,11 +18,13 @@ import '../fixtures.dart';
 import '../journal/memory_journal_files.dart';
 import '../journal/zones.dart';
 
-/// A folder whose deletes of the kept file fail.
+/// A folder whose deletes of the kept file fail once [failing] is set.
 final class NoKeptDelete extends MemoryJournalFiles {
+  bool failing = false;
+
   @override
   Future<void> delete(String name) async =>
-      name == JournalStore.keptFile ? throw StateError('journal-io') : super.delete(name);
+      failing && name == JournalStore.keptFile ? throw StateError('journal-io') : super.delete(name);
 }
 
 void main() {
@@ -91,29 +93,24 @@ void main() {
     expect(life.longer, isEmpty);
   });
 
-  test('turning Life Context off deletes everything kept', () async {
+  test('Off pauses: what is kept stays, shows, returns On', () async {
     final (journal, settings, life, nights) = await open();
     await life.capture(nights.first.id, passages.first.text);
+    final before = await journal.kept();
     await settings.answer(Consent.lifeContext, false);
-    expect(await journal.kept(), isEmpty);
     expect(settings.consents.given(Consent.lifeContext), isFalse);
+    expect(await journal.kept(), before);
+    expect(await life.recent(), before);
+    // Paused: nothing new is kept.
+    expect(await life.capture(nights[1].id, passages[1].text), 0);
+    expect(await journal.kept(), before);
+    await settings.answer(Consent.lifeContext, true);
+    expect(await life.recent(), before);
+    expect(await life.capture(nights[1].id, passages[1].text), passages[1].sentences.length);
     expect(lines, isEmpty);
   });
 
-  test('a failed deletion at Off: still Off, a code, swept again', () async {
-    final files = NoKeptDelete();
-    final (journal, settings, life, nights) = await open(files: files);
-    await life.capture(nights.first.id, passages.first.text);
-    await settings.answer(Consent.lifeContext, false);
-    expect(settings.consents.given(Consent.lifeContext), isFalse);
-    expect(lines, ['keptDeleteFailed']);
-    expect(await life.recent(), isEmpty);
-    lines.clear();
-    await life.sweep();
-    expect(lines, ['keptDeleteFailed']);
-  });
-
-  test('the sweep: past the window goes, counted; while Off, everything', () async {
+  test('the sweep: past the window goes, counted, On or Off', () async {
     final (journal, settings, life, nights) = await open(length: LifeContextLength.oneWeek);
     now = DateTime.utc(2026, 11, 10, 9);
     await life.capture(nights[0].id, passages[0].text);
@@ -126,13 +123,35 @@ void main() {
     lines.clear();
     await life.sweep();
     expect(lines, isEmpty);
+    // Paused (Off), the window still holds: what is past it goes, what is
+    // inside stays (D134 item 2).
+    now = DateTime.utc(2026, 11, 1, 9);
     await journal.keep(nights[2].id, passages[2].text);
+    now = DateTime.utc(2026, 11, 22, 9);
     final off = LifeContext(
       journal,
-      SettingsController(journal, consents: settings.consents.withAnswer(Consent.lifeContext, false, now)),
+      SettingsController(
+        journal,
+        consents: settings.consents.withAnswer(Consent.lifeContext, false, now),
+        settings: const Settings(length: LifeContextLength.oneWeek),
+      ),
     );
+    lines.clear();
     await off.sweep();
-    expect(await journal.kept(), isEmpty);
+    expect([for (final k in await journal.kept()) k.text], passages[1].sentences);
+    expect(lines, ['keptExpired ${passages[2].sentences.length}']);
+  });
+
+  test('a sweep that cannot delete logs a code, and goes on', () async {
+    final files = NoKeptDelete();
+    final (journal, _, life, nights) = await open(length: LifeContextLength.oneWeek, files: files);
+    now = DateTime.utc(2026, 11, 1, 9);
+    await life.capture(nights.first.id, passages.first.text);
+    now = DateTime.utc(2026, 11, 22, 9);
+    files.failing = true;
+    await life.sweep();
+    expect(lines, ['keptDeleteFailed']);
+    expect([for (final k in await journal.kept()) k.text], passages.first.sentences);
   });
 
   test('edit, delete and delete all change the kept copies only', () async {

@@ -49,18 +49,12 @@ final class SettingsController extends ChangeNotifier {
   }
 
   /// Gives or turns off [consent] (Life Context's On and Off), then keeps the
-  /// consents with the day. Life Context Off deletes what is kept.
+  /// consents with the day. Life Context Off pauses it and deletes nothing
+  /// (D134): what is kept stays, and On again brings it back as it was.
   Future<void> answer(Consent consent, bool given) async {
     if (_consents.given(consent) == given) return;
     _consents = _consents.withAnswer(consent, given, _journal.now());
     notifyListeners();
-    if (consent == Consent.lifeContext && !given) {
-      try {
-        await _journal.deleteAllKept();
-      } on Object {
-        SafeLog.event(LogEvent.keptDeleteFailed);
-      }
-    }
     await _keep();
   }
 

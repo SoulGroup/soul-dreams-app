@@ -1,16 +1,16 @@
 // Life Context while the journal is open (C159-I item 1; D110; D127; D128;
-// D131), in plain Dart: whether it is on, what its page shows, and what the
-// dreamer does there. On is consent (b), the Life Context row (MP·83): Off
-// keeps nothing (a capture keeps nothing) and deletes what is kept (the
-// sweep finds nothing kept while Off, and turning it off deletes it,
-// `SettingsController.answer`).
+// D131; D134), in plain Dart: whether it is on, what its page shows, and what
+// the dreamer does there. On is consent (b), the Life Context row (MP·83):
+// Off PAUSES it (D134): nothing new is kept (a capture keeps nothing) and the
+// readings may not use what is kept (none do yet), but nothing is deleted, and
+// On again brings everything back as it was.
 //
-// - The page shows exactly what readings could see now: the Recent list,
-//   every kept sentence inside the window (MP·84), newest first, and the
-//   Kept longer list, empty until its rule exists (D131 item 5).
-// - The sweep (D131 item 4): sentences past the window are deleted when the
-//   journal opens, when the app comes back, and at each local midnight
-//   while it is open.
+// - The page shows what is kept, On or Off: the Recent list, every kept
+//   sentence inside the window (MP·84), newest first, and the Kept longer
+//   list, empty until its rule exists (D131 item 5).
+// - The sweep (D131 item 4; D134 item 2): sentences past the window are
+//   deleted when the journal opens, when the app comes back, and at each
+//   local midnight while it is open, On or Off.
 // - A change that cannot be done logs a code and the page shows what is
 //   kept; nothing here carries a sentence into a log (R3).
 import 'dart:async';
@@ -54,9 +54,8 @@ final class LifeContext extends ChangeNotifier {
   }
 
   /// The Recent list: every kept sentence inside the window today, newest
-  /// first; nothing while Off.
+  /// first. While Off the list is the same: Off only pauses (D134).
   Future<List<Kept>> recent() async {
-    if (!on) return const [];
     final today = dateOf(_journal.now(), _journal.zone);
     return newestFirst([for (final k in await _journal.kept()) if (inWindow(k, today, length)) k]);
   }
@@ -64,10 +63,9 @@ final class LifeContext extends ChangeNotifier {
   /// The Kept longer list: empty until its rule exists (D131 item 5).
   List<Kept> get longer => const [];
 
-  /// Deletes what is past the window, or everything while Off.
+  /// Deletes what is past the window, On or Off (D134 item 2).
   Future<void> sweep() async {
     try {
-      if (!on) return await _journal.deleteAllKept();
       final gone = await _journal.sweepKept(length);
       if (gone > 0) SafeLog.event(LogEvent.keptExpired, [gone]);
     } on Object {

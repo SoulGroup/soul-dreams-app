@@ -728,15 +728,17 @@ void main() {
     final journal = Journal(await JournalStore.open(files));
     expect(await journal.kept(), isNotEmpty);
     expect(find.byType(JournalPage), findsOneWidget);
-    expect(lines.where((l) => l.startsWith('preview')), isEmpty);
+    final seeded = [for (final n in inventedNights()) if (n.waking.isNotEmpty) n];
+    final sentences = [for (final n in seeded) for (final w in n.waking) w.sentences.length].reduce((a, b) => a + b);
+    expect(lines.where((l) => l.startsWith('preview')), ['previewSeeded ${seeded.length} $sentences']);
     await tester.pumpWidget(const SizedBox());
-    // Life Context off: the nights, no sentence.
+    // Life Context off (it only pauses, D134): the nights and the sentences.
     final off = answered(MemoryJournalFiles(), const {Consent.readings: true, Consent.lifeContext: false});
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: off, preview: define)));
     await tester.pumpAndSettle();
     final offJournal = Journal(await JournalStore.open(off));
     expect(await offJournal.newestFirst(), isNotEmpty);
-    expect(await offJournal.kept(), isEmpty);
+    expect(await offJournal.kept(), isNotEmpty);
     await tester.pumpWidget(const SizedBox());
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), preview: '[1]')));
     await tester.pumpAndSettle();

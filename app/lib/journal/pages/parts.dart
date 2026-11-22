@@ -288,7 +288,8 @@ class BackControl extends StatelessWidget {
 
 /// The control that ends selecting (D133 item 2): the back control's round
 /// bordered button with a tick drawn in code, in the same box of 44; its
-/// spoken name is MP·103.
+/// spoken name is MP·103, through the tooltip alone, as the back control's is
+/// (D134 item 4).
 class DoneControl extends StatelessWidget {
   const DoneControl({super.key, required this.onPressed});
 
@@ -299,13 +300,10 @@ class DoneControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = Palette.of(context);
-    final name = PendingLines.MP_103.text(appLanguage);
     return Tooltip(
-      message: name,
+      message: PendingLines.MP_103.text(appLanguage),
       child: Semantics(
         button: true,
-        label: name,
-        excludeSemantics: true,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onPressed,

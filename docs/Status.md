@@ -270,7 +270,7 @@ merge (this entry records it).
   before consent" and C159-I's separate consents; the Build chat carries it to the head. There is no withdrawing
   (D128 item 2): Settings has no Give or Withdraw row and no readings page. Each feature is the dreamer's own act:
   readings only on Start Interpretation (nothing to start yet), voice only on the microphone, Life Context by its
-  On/Off row (Off asks MP·93 and what is kept goes, as built; On shows its page, MP·69 over Back MP·98 and Turn on
+  On/Off row (Off pauses it and asks nothing, D134; On shows its page, MP·69 over Back MP·98 and Turn on
   MP·99, D125 item 9). Kept in `consent.json`, version 3: "18 or over" and the two answers, each with the UTC day
   of its last change; versions 2 (which also held the retired night images consent) and 1 still read
   (`consents.dart`); only (a) and (b) are written. Agreed means (a) given (`SettingsController.agreed`). Until the
@@ -295,7 +295,7 @@ merge (this entry records it).
   menu: Language (EM·9, `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44; Manual keeps
   the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure) and
   Delete journal (EM·11, `color.destructive`); no Give or Withdraw row (D128 item 2). Life Context On shows its
-  page (`ConsentPage`), Off asks MP·93 (MP·94), and before the dreamer has agreed either shows the popup instead;
+  page (`ConsentPage`), Off asks nothing (D134), and before the dreamer has agreed either shows the popup instead;
   Night images asks nothing; Delete journal asks C4-P·4 once, then everything goes and onboarding starts again. The setting lines are read by
   form ("Name (A / B)", `setting_line.dart`). Kept in `settings.json` (version 2; Word Animation, Night/Day mode,
   Night images, Life Context length; version 1, which chose a painting for while (c) was given, reads as that
@@ -312,10 +312,11 @@ merge (this entry records it).
   journal's folder (version 1, written whole and renamed; nothing kept, no file), only into a night whose file is
   there; deleting a night deletes its sentences first (X11), and at open sentences whose night is gone go
   (`keptOrphansSwept`); a file that does not read shows nothing (`keptFileSkipped`) and the next change replaces it.
-  On is consent (b): Off keeps nothing and deletes what is kept (a failed deletion logs `keptDeleteFailed`; the next
-  opening's sweep deletes it). The Recent window (MP·84) by the calendar: a sentence is in it while its date is later
+  On is consent (b): Off PAUSES it (D134): nothing new is kept and the readings may not use what is kept (none do
+  yet), but nothing is deleted, the page shows what is kept, and On again brings it back as it was; Settings no longer
+  asks MP·93 (nor shows MP·94). The Recent window (MP·84) by the calendar: a sentence is in it while its date is later
   than today less the length; older ones go when the journal opens, when the app comes back and at each local
-  midnight while it is open (D131 item 4; `keptExpired` with the count). The page (`life_context_page.dart`), from
+  midnight while it is open, On or Off (D131 item 4; D134 item 2; `keptExpired` with the count). The page (`life_context_page.dart`), from
   Settings' row MP·86 under Life Context length (before agreeing, the popup): the back control, the "⋯" menu (MP·88:
   Select sentences, and a list's deletion only for a list holding anything), MP·86 in h2, then Kept longer (MP·87,
   empty until its rule exists, D131 item 5) and Recent with the window as set, each sentence in “ ” in its box
@@ -330,14 +331,16 @@ merge (this entry records it).
   Tapping a sentence opens its night, nothing marked yet (D131 item 3 waits for the parts that show it). The labels
   take color.tag.dream (a stand-in). SoulDreams Dev built with the file `tool/preview_kept.py` writes
   (`--dart-define-from-file`) seeds, once (the flag file `preview-kept-seeded`), the invented nights that have waking
-  passages, dated 0, 5, 12, 25 and 70 days back, their passages kept only while Life Context is on (D131 item 1).
+  passages, dated 0, 5, 12, 25 and 70 days back, their passages kept whatever Life Context's state, since Off only
+  pauses (D131 item 1; D134 item 5); the seed logs `previewSeeded` with its two counts, so a build whose seed did not
+  run shows no such line.
 - `type.voice.app` is read at line height 1.3, the founder's override of the filed 1.5 (`StandIns.voiceApp`; the
   generated token keeps 1.5; D125 item 1; for Product's next filing).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 753 tests (691 at the branch's start: `cc2ea8c` added
-  one after the 690 written here), and 723 mutation checks (A1 to A763; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 756 tests (691 at the branch's start: `cc2ea8c` added
+  one after the 690 written here), and 726 mutation checks (A1 to A771; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645 and A646
   dropped, each with its reason in the file; with the rows A24a to
@@ -1061,10 +1064,12 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      them); and while `kept.json` does not read, deleting a night leaves that night's sentences in the unreadable file
      until the next capture, Off or Delete journal. The review's one defect, the orphans' sweep at open stopping the
      journal opening when it cannot write, is fixed (`keptDeleteFailed`; row A754).
-     The D133 round's re-review (plausible, for a VoiceOver look in SoulDreams Dev; no test can show them): the tick box
-     is now its own node with a tap, so it may be heard as "selected" without a name beside the sentence, which does not
-     say whether it is selected; and `DoneControl` sets MP·103 as both the Tooltip and the Semantics label, so iOS may
-     speak it twice (`BackControl` uses the Tooltip alone; dropping the label would match it).
+     The D133 round's two VoiceOver notes (the tick box a node of its own; `DoneControl`'s name spoken twice) were fixed
+     in D134 item 4 (one element while selecting; the tooltip alone): still for a VoiceOver look in SoulDreams Dev.
+169. For Product, through the head (D134): MP·93 (the confirmation of turning Life Context off) and its button MP·94
+     are no longer shown anywhere: Off pauses and asks nothing. Also, while Life Context is Off the page shows MP·104
+     above the lists, or alone when nothing is kept, where MP·92 ("What you share about your waking life will appear
+     here.") would stand (plan Part 4, question 5).
 
 ## Before Cohort 1
 
@@ -1531,6 +1536,16 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   now); MP·104's first filing spelled the Settings row "Life context", differing from MP·83's filed "Life Context" /
   "Livssammanhang", so the round stopped and asked; the owner corrected it to the register's name, and a test pins
   that MP·104 contains MP·83's name in both languages (as MP·101's test does for MP·48 and MP·100).
+- D134 (the founder, replacing "Off deletes what is kept", head's message 24 item 2, and D127's and D128's "Off
+  deletes"; a correction round, targeted rows only, D126): (1) Life Context Off PAUSES: nothing new is kept and the
+  readings may not use what is kept; On again brings everything back as it was; Off no longer asks MP·93, which is no
+  longer shown (banked item 169); On still shows MP·98 Back / MP·99 Turn on; (2) the window's sweep keeps running
+  while Off; (3) while Off the page shows MP·104 above the lists, which all work as when On (alone when nothing is
+  kept); (4) the tick box and its sentence are one accessibility element while selecting, and the Done control
+  speaks MP·103 through the tooltip alone; (5) the preview seed: the cause of a fresh Dev install showing no invented
+  sentences was not found by reading or by any test (the seed works from "I agree", on real files and through the
+  real `--dart-define-from-file` parsing); the one dependency that could have hidden them, the seed keeping
+  sentences only while Life Context was On at that moment, is gone, and the seed logs `previewSeeded`.
 
 ## Documents as last imported
 

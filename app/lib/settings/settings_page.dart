@@ -150,13 +150,14 @@ class _SettingsPageState extends State<SettingsPage> {
   );
 
   // Before the dreamer has agreed, the popup, nothing changed (D128 item 3);
-  // On shows Life Context's page, Off asks MP·93 (what is kept goes).
+  // On shows Life Context's page; Off asks nothing: it pauses, and nothing is
+  // deleted (D134 item 1).
   Future<void> _lifeContext(int i) async {
     if (!_c.agreed) return showAgreementPopup(context);
     final on = i == 0;
     if (on == _c.consents.given(Consent.lifeContext)) return;
-    final yes = on ? await ConsentPage.ask(context) : await _confirm(Lines.MP_93, Lines.MP_94);
-    if (yes) await _c.answer(Consent.lifeContext, on);
+    if (on && !await ConsentPage.ask(context)) return;
+    await _c.answer(Consent.lifeContext, on);
   }
 
   // The Disclosure & privacy page, the text only; before the dreamer has

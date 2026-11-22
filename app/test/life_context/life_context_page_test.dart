@@ -3,8 +3,11 @@
 // each sentence quoted and dated, edit and delete, the menu, selecting,
 // Delete all, the empty line; every deletion behind C4-P·4. The sentences
 // are the invented passages' (fixtures/invented-nights.json, R2).
+import 'dart:ui' show CheckedState;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
 import 'package:souldreams/core/app_line.dart';
@@ -274,6 +277,7 @@ void main() {
   });
 
   testWidgets('selecting: a drawn tick, spoken Done, replaces back and ends selecting', (tester) async {
+    final semantics = tester.ensureSemantics();
     await open(tester);
     final a = (await kept()).first;
     final page = find.byType(LifeContextPage);
@@ -285,7 +289,12 @@ void main() {
     expect(done, findsOneWidget);
     expect(find.descendant(of: page, matching: find.byType(BackControl)), findsNothing);
     expect(find.descendant(of: done, matching: find.byType(Chevron)), findsNothing);
-    expect(find.bySemanticsLabel(PendingLines.MP_103.text(Lang.en)), findsOneWidget);
+    // Spoken once: through the tooltip alone, as the back control's name is.
+    final spoken =
+        tester.getSemantics(find.descendant(of: done, matching: find.byType(GestureDetector))).getSemanticsData();
+    expect(spoken.tooltip, PendingLines.MP_103.text(Lang.en));
+    expect(spoken.label, isEmpty);
+    expect(spoken.flagsCollection.isButton, isTrue);
     // The selection is forgotten with the selecting.
     await tap(tester, find.byKey(LifeContextPage.markKey(a.id)));
     expect(find.descendant(of: find.byKey(LifeContextPage.deleteSelectedKey), matching: find.text(en(Lines.MP_90(n: 1)))), findsOneWidget);
@@ -303,6 +312,34 @@ void main() {
     // Back, once selecting is over, leaves the page.
     await tap(tester, find.descendant(of: page, matching: find.byType(BackControl)));
     expect(page, findsNothing);
+    semantics.dispose();
+  });
+
+  // D134 item 4: while selecting, a sentence's tick box and its words are one
+  // accessibility element: it reads the sentence and whether it is selected.
+  testWidgets('selecting: the tick box and its sentence are one element', (tester) async {
+    final semantics = tester.ensureSemantics();
+    await open(tester);
+    final [a, b, ...] = await kept();
+    await tap(tester, find.byKey(LifeContextPage.menuKey));
+    await tester.tap(find.byKey(LifeContextPage.selectKey));
+    await tester.pumpAndSettle();
+    SemanticsData one(Kept k) {
+      final mark = tester.getSemantics(find.byKey(LifeContextPage.markKey(k.id)));
+      final words = tester.getSemantics(find.byKey(LifeContextPage.wordsKey(k.id)));
+      expect(mark.id, words.id, reason: 'one node for the box and its sentence');
+      return mark.getSemanticsData();
+    }
+
+    var data = one(a);
+    expect(data.label, contains(quoted(a.text)));
+    expect(data.flagsCollection.isChecked, CheckedState.isFalse);
+    await tap(tester, find.byKey(LifeContextPage.markKey(a.id)));
+    data = one(a);
+    expect(data.flagsCollection.isChecked, CheckedState.isTrue);
+    expect(one(b).flagsCollection.isChecked, CheckedState.isFalse);
+    expect(data.hasAction(SemanticsAction.tap), isTrue);
+    semantics.dispose();
   });
 
   testWidgets('edit: the field holds the words; Done keeps only the copy', (tester) async {
@@ -349,33 +386,60 @@ void main() {
     expect(tester.widget<NightPage>(find.byType(NightPage)).query, isNull);
   });
 
-  testWidgets('Off: MP·104 replaces the lists and the empty line', (tester) async {
+  // D134 item 3: Life Context Off pauses; the page shows MP·104 above the
+  // lists, which all work as when On.
+  testWidgets('Off: MP·104 above the lists, which all work', (tester) async {
     await open(tester, on: false);
+    final off = find.byKey(LifeContextPage.offKey);
+    expect(off, findsOneWidget);
+    expect(tester.widget<AppLine>(off).text, PendingLines.MP_104.text(Lang.en));
+    expect(find.byKey(LifeContextPage.emptyKey), findsNothing);
+    expect(find.text(en(Lines.MP_92)), findsNothing);
+    expect(tester.getCenter(off).dy, lessThan(tester.getCenter(find.text(en(Lines.MP_87, 0))).dy));
+    expect(find.byKey(LifeContextPage.menuKey), findsOneWidget);
+    final [a, ...] = await kept();
+    expect(find.byKey(LifeContextPage.editKey(a.id)), findsOneWidget);
+    expect(find.byKey(LifeContextPage.deleteKey(a.id)), findsOneWidget);
+    await tap(tester, find.byKey(LifeContextPage.deleteKey(a.id)));
+    await tester.tap(find.text(en(Lines.MP_60)));
+    await tester.pumpAndSettle();
+    expect((await kept()).where((k) => k.id == a.id), isEmpty);
+    await tap(tester, find.byKey(LifeContextPage.deleteAllKey));
+    await tester.tap(find.text(en(Lines.MP_60)));
+    await tester.pumpAndSettle();
+    expect(await journal.kept(), isEmpty);
+    // Nothing kept: MP·104 alone where the empty line would be.
+    expect(find.byKey(LifeContextPage.offKey), findsOneWidget);
+    expect(find.byKey(LifeContextPage.emptyKey), findsNothing);
+    expect(find.text(en(Lines.MP_92)), findsNothing);
+  });
+
+  testWidgets('Off, nothing kept: MP·104 alone, no lists, menu or Delete all', (tester) async {
+    await open(tester, on: false, days: const []);
     expect(find.byKey(LifeContextPage.offKey), findsOneWidget);
     expect(tester.widget<AppLine>(find.byKey(LifeContextPage.offKey)).text, PendingLines.MP_104.text(Lang.en));
-    expect(find.byKey(LifeContextPage.emptyKey), findsNothing);
     expect(find.text(en(Lines.MP_92)), findsNothing);
     expect(find.text(en(Lines.MP_87)), findsNothing);
     expect(find.byKey(LifeContextPage.menuKey), findsNothing);
     expect(find.byKey(LifeContextPage.deleteAllKey), findsNothing);
-    expect(find.byType(LifeContextPage), findsOneWidget);
     expect(find.descendant(of: find.byType(LifeContextPage), matching: find.byType(BackControl)), findsOneWidget);
   });
 
-  testWidgets('Life Context turned off in Settings: the page shows MP·104', (tester) async {
+  testWidgets('turned Off in Settings: nothing is deleted, MP·104 above the sentences', (tester) async {
     await open(tester, page: false);
+    final before = await kept();
+    expect(before, isNotEmpty);
     await tester.ensureVisible(find.byKey(SettingsPage.valueKey(SettingRow.lifeContext)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(SettingsPage.valueKey(SettingRow.lifeContext)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(SettingsPage.choiceKey(SettingRow.lifeContext, 1)));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(en(Lines.MP_94)));
-    await tester.pumpAndSettle();
-    expect(await journal.kept(), isEmpty);
+    expect(find.text(en(Lines.MP_93)), findsNothing);
+    expect(await kept(), before);
     await tap(tester, find.byKey(SettingsPage.keptKey));
     expect(find.byKey(LifeContextPage.offKey), findsOneWidget);
-    expect(find.byKey(LifeContextPage.emptyKey), findsNothing);
+    expect(find.text(quoted(before.first.text)), findsOneWidget);
   });
 
   testWidgets('at the largest text, nothing overflows', (tester) async {
