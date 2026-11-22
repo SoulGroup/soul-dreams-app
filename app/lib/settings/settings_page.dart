@@ -15,7 +15,9 @@
 // for (a). Turning off asks only where the register has a confirmation:
 // MP·93 for Life Context, MP·96 for the readings; Night images Off withdraws
 // (c) with nothing lost. Delete journal asks once (C4-P·4), then everything
-// goes and the app starts again (D110). Each confirmation is the phone's
+// goes and the app starts again (D110). A withdrawal that cannot be kept
+// shows MP·62 under the button, which stays "Withdraw consent" to try again
+// (D124 item 2). Each confirmation is the phone's
 // standard dialog, Cancel first (as a night's delete). The rows, the pills
 // and the toggle are stand-ins (TO TRY, P13).
 import 'package:flutter/cupertino.dart';
@@ -56,6 +58,7 @@ class SettingsPage extends StatefulWidget {
   static const disclosureKey = Key('settings-disclosure');
   static const consentKey = Key('settings-consent');
   static const deleteKey = Key('settings-delete');
+  static const notKeptKey = Key('settings-not-kept');
 
   /// A row's value pill.
   static Key valueKey(SettingRow row) => ValueKey('setting-${row.name}');
@@ -238,6 +241,19 @@ class _SettingsPageState extends State<SettingsPage> {
                   onPressed: _readings,
                 ),
               ),
+              if (_c.withdrawalNotKept)
+                Padding(
+                  key: SettingsPage.notKeptKey,
+                  padding: const EdgeInsets.only(top: StandIns.gap),
+                  child: Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      Lines.MP_62.text(appLanguage),
+                      textAlign: TextAlign.center,
+                      style: TypeRoles.button.style(p.text),
+                    ),
+                  ),
+                ),
               const SizedBox(height: Spacing.journalRow),
               _action(_Destructive(Lines.EM_11.parts(appLanguage).first, onPressed: _delete)),
             ],

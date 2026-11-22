@@ -84,10 +84,16 @@ final class Retries extends ChangeNotifier {
   bool _again = false;
   bool _disposed = false;
   Completer<void> _stop = Completer<void>();
+  // Completed when the run going now is over.
+  Completer<void>? _ended;
   String? _transcribing;
 
   /// The recording being turned into words now, for AI·6 (D93 Q3), or null.
   String? get transcribing => _transcribing;
+
+  /// Completes when the retry running is over, at once when none runs: a
+  /// withdrawal of consent (a) completes only after it (D124 item 1).
+  Future<void> get idle => _ended?.future ?? Future<void>.value();
 
   bool get _stopped => _holds > 0 || _away;
 
@@ -147,6 +153,7 @@ final class Retries extends ChangeNotifier {
     _running = true;
     _again = false;
     _stop = Completer<void>();
+    final ended = _ended = Completer<void>();
     try {
       Pending? done;
       // The recordings whose retry failed in this run: at the back of the
@@ -186,6 +193,8 @@ final class Retries extends ChangeNotifier {
     } finally {
       _running = false;
       if (_transcribing != null) _show(null);
+      ended.complete();
+      if (identical(_ended, ended)) _ended = null;
       if (_again) kick();
     }
   }
@@ -202,6 +211,8 @@ final class Retries extends ChangeNotifier {
       _changed();
       return true;
     }
+    // Cut while the audio was looked at: no key is asked for (D124).
+    if (_halted) return false;
     SafeLog.event(LogEvent.retryStarted);
     _show(p.audio);
     final String key;
@@ -249,7 +260,8 @@ final class Retries extends ChangeNotifier {
       final clock = Stopwatch()..start();
       while (sent < end && !ended.isCompleted && !_halted) {
         final bytes = await _audio.read(p.audio, start, sent, math.min(retryFrame, end - sent));
-        if (bytes.isEmpty) break;
+        // Cut while the frame was read: it is not sent (D124).
+        if (bytes.isEmpty || _halted) break;
         link.add(bytes);
         sent += bytes.length;
         final due = Duration(microseconds: ((sent - at) * 1000000 * pace) ~/ bytesPerSecond) - clock.elapsed;

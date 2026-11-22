@@ -33,11 +33,17 @@ class Gated implements WaitingAudio {
   Completer<void>? gate;
   int reads = 0;
 
+  /// Where a look at what is left of a recording waits.
+  Completer<void>? partGate;
+
   @override
   Future<List<Pending>> waiting() => _inner.waiting();
 
   @override
-  Future<({int start, int size})?> part(String audio) => _inner.part(audio);
+  Future<({int start, int size})?> part(String audio) async {
+    await partGate?.future;
+    return _inner.part(audio);
+  }
 
   @override
   Future<Uint8List> read(String audio, int start, int at, int length) async {
@@ -72,6 +78,7 @@ void main() {
   late List<String> lines;
   late void Function(String) sink;
   late Future<String> Function() key;
+  late Future<void> Function() connecting;
   late FakeConnection connection;
   late Night first;
   late Night second;
@@ -86,6 +93,7 @@ void main() {
     audio = Gated(JournalAudio(store));
     links = [];
     key = () async => 'k';
+    connecting = () async {};
     connection = FakeConnection();
     [first, second, ...] = nightsFromFixtures();
   });
@@ -115,6 +123,7 @@ void main() {
         microphone: SilentMicrophone(),
         key: () => key(),
         connect: (_) async {
+          await connecting();
           final link = MemoryLink();
           links.add(link);
           return link;
@@ -454,6 +463,99 @@ void main() {
     await pumpEventQueue();
     expect(links, hasLength(1));
     expect(lines, isNot(contains('retryFailed -2')));
+  });
+
+  // D124 item 1: a withdrawal completes only after the retry in flight has
+  // stopped, and nothing is sent after the cut: no key, no stream, no frame.
+  group('cut by a withdrawal (D124)', () {
+    test('idle waits for the frame read; none sent after the cut', () async {
+      await waits(first, [Waiting(x)], {x: 6400});
+      audio
+        ..open = 1
+        ..gate = Completer<void>();
+      final r = retries();
+      r.kick();
+      await pumpEventQueue();
+      expect(frames(links.single), hasLength(1));
+      r.dispose();
+      var idle = false;
+      unawaited(r.idle.then((_) => idle = true));
+      await pumpEventQueue();
+      expect(idle, isFalse);
+      audio.gate!.complete();
+      await pumpEventQueue();
+      expect(idle, isTrue);
+      expect(frames(links.single), hasLength(1));
+      expect(links.single.closed, isTrue);
+    });
+
+    test('idle waits for the key; no stream opens after the cut', () async {
+      await waits(first, [Waiting(x)], {x: 6400});
+      final gate = Completer<String>();
+      var keys = 0;
+      key = () {
+        keys++;
+        return gate.future;
+      };
+      final r = retries();
+      r.kick();
+      await pumpEventQueue();
+      expect(keys, 1);
+      r.dispose();
+      var idle = false;
+      unawaited(r.idle.then((_) => idle = true));
+      await pumpEventQueue();
+      expect(idle, isFalse);
+      gate.complete('k');
+      await pumpEventQueue();
+      expect(idle, isTrue);
+      expect(links, isEmpty);
+      expect(keys, 1);
+    });
+
+    test('a cut while the audio is looked at fetches no key', () async {
+      await waits(first, [Waiting(x)], {x: 6400});
+      var keys = 0;
+      key = () async {
+        keys++;
+        return 'k';
+      };
+      audio.partGate = Completer<void>();
+      final r = retries();
+      r.kick();
+      await pumpEventQueue();
+      r.dispose();
+      audio.partGate!.complete();
+      await pumpEventQueue();
+      expect(keys, 0);
+      expect(links, isEmpty);
+    });
+
+    test('a cut while the stream opens sends nothing, and closes it', () async {
+      await waits(first, [Waiting(x)], {x: 6400});
+      final gate = Completer<void>();
+      connecting = () => gate.future;
+      final r = retries();
+      r.kick();
+      await pumpEventQueue();
+      r.dispose();
+      var idle = false;
+      unawaited(r.idle.then((_) => idle = true));
+      await pumpEventQueue();
+      expect(idle, isFalse);
+      gate.complete();
+      await pumpEventQueue();
+      expect(idle, isTrue);
+      expect(links.single.closed, isTrue);
+      expect(frames(links.single), isEmpty);
+    });
+
+    test('idle is done at once when nothing runs', () async {
+      final r = retries();
+      await r.idle;
+      r.dispose();
+      await r.idle;
+    });
   });
 
   test('words the journal does not take: a code, no going round', () async {

@@ -37,6 +37,15 @@ void phone(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
+/// A folder whose rename fails while [failing].
+final class Flaky extends MemoryJournalFiles {
+  bool failing = false;
+
+  @override
+  Future<void> rename(String from, String to) async =>
+      failing ? throw StateError('journal-io') : super.rename(from, to);
+}
+
 void main() {
   late MemoryJournalFiles files;
 
@@ -46,11 +55,12 @@ void main() {
     WidgetTester tester, {
     Map<Consent, bool> given = const {Consent.readings: true},
     int hour = 12,
+    MemoryJournalFiles? folder,
   }) async {
     phone(tester);
     JournalStore.newQueueForTests();
     addTearDown(() => wordAnimation = true);
-    files = MemoryJournalFiles();
+    files = folder ?? MemoryJournalFiles();
     files.files[JournalStore.consentFile] = encodeConsents(Consents.answered(given, DateTime.utc(2026)));
     final store = await JournalStore.open(files);
     await store.save(nightsFromFixtures().first);
@@ -293,6 +303,35 @@ void main() {
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.readings), isTrue);
     expect(find.text(en(Lines.MP_95, 0)), findsOneWidget);
+  });
+
+  // D124 item 2: a withdrawal that cannot be written: MP·62 shows, the button
+  // stays "Withdraw consent", and a second try is kept.
+  testWidgets('a withdrawal not kept: MP·62, the button stays; tried again, kept', (tester) async {
+    final folder = Flaky();
+    final c = await open(tester, folder: folder);
+    folder.failing = true;
+    expect(find.byKey(SettingsPage.notKeptKey), findsNothing);
+    await hit(tester, find.byKey(SettingsPage.consentKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(en(Lines.MP_97)));
+    await tester.pumpAndSettle();
+    expect(c.sending, isFalse);
+    expect(c.consents.given(Consent.readings), isTrue);
+    await tester.ensureVisible(find.byKey(SettingsPage.notKeptKey));
+    expect(find.text(en(Lines.MP_62)), findsOneWidget);
+    expect(find.text(en(Lines.MP_95, 0)), findsOneWidget);
+    expect(find.text(en(Lines.MP_95, 1)), findsNothing);
+    folder.failing = false;
+    await hit(tester, find.byKey(SettingsPage.consentKey));
+    await tester.pumpAndSettle();
+    expect(find.text(en(Lines.MP_96)), findsOneWidget);
+    await tester.tap(find.text(en(Lines.MP_97)));
+    await tester.pumpAndSettle();
+    expect(find.byKey(SettingsPage.notKeptKey), findsNothing);
+    expect(find.text(en(Lines.MP_62)), findsNothing);
+    expect(find.text(en(Lines.MP_95, 1)), findsOneWidget);
+    expect(c.consents.given(Consent.readings), isFalse);
   });
 
   testWidgets('Read disclosure & privacy opens every part', (tester) async {

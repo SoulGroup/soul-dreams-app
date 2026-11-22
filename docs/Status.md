@@ -283,12 +283,12 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 652 tests, and 593 mutation checks (A1 to A580; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 665 tests, and 611 mutation checks (A1 to A598; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A300, A313, A363, A375 and A507 dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 593 run, 593 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 611 run, 611 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -913,12 +913,13 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      (R9); the gating tests now count key fetches and prove the waiting audio survives a withdrawal; the Night images
      refusal proves nothing is kept; the dialogs' Cancel-first order and destructive action; a midnight flake in
      the consent day test.
-156. For the owner (they touch consent (a); none is fixed): (a) a retry in flight when the retries are disposed (a
-     withdrawal, or the journal's deletion) can still fetch one key from our server, open one Soniox stream with
-     no audio sent, or send one more 100 ms frame, inside a window of milliseconds (`retries.dart` checks `_halted`
-     after the key, not at every await; a constructed timing, D17); (b) a withdrawal of (a) that cannot be kept
-     holds until the app closes, and the next start resumes sending with no sign (D122 as built); (c) consents that
-     did not read, answered again, ignore a settings file that did (`_agree` uses the defaults).
+156. Ruled by the owner under D124: (a) a retry in flight when consent (a) is withdrawn is waited for, and nothing is
+     fetched, opened or sent after the cut (fixed, rows A581 to A584, A594 to A596: `Retries.idle`, a halt check
+     before the key and after each frame is read); (b) a withdrawal that cannot be kept stops sending for the
+     session, shows MP·62 under the button, which stays "Withdraw consent" to try again (fixed, rows A585 to A593,
+     A597, A598; the next start still reads the file as it was kept, so sending resumes then, as D122 built);
+     (c) consents that did not read, answered again, ignore a settings file that did (`_agree` uses the defaults):
+     left banked.
 157. The Settings page's notes: the value pill's 44 tap box scales down with its words inside a `FittedBox` at large
      text (from about 1.2 times for Automatic, Personal, 3 months, 2 weeks; the large-text test checks overflow
      only; the owner's step 14 looks at it); in an Automatic fade the toggle still reads the theme on screen; a
@@ -1316,6 +1317,12 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D123 (founder, 2026-11-22): no visible AI mark on images; the invisible machine-readable tag stays on every shipped
   or generated image; first launch still says the readings come from AI. It amends the head's message 24 item 4 and
   C159-I item 5 for images; the Build chat carries it to the head. Nothing in this branch builds an image mark.
+
+- D124 (owner, on banked items 155 to 158, consent (a)): (1) a withdrawal completes only after any retry in flight
+  has stopped, with no key fetch, stream open or audio frame after it; (2) a withdrawal that cannot be written
+  still stops sending at once for the session, MP·62 shows, and the button stays "Withdraw consent" so the dreamer
+  can try again, never shown as withdrawn when it is not kept; (3) the rest stays banked. Done in the commit after
+  8674d92.
 
 ## Documents as last imported
 

@@ -1,12 +1,12 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
-# Expected: every row "caught" (A1 to A580, A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A598, A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 593 run, 593 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 611 run, 611 caught", exit 0. Each row breaks one thing in app/, in place, runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
@@ -2311,8 +2311,11 @@ ROWS = [
      '    wordAnimation = true;\n',
      'test/journal/pages/journal_home_test.dart', 'the settings kept are followed; the deletion resets them'),
     ('A518', 'lib/journal/pages/journal_home.dart',
-     '    } else if (!readings && _recording != null) {\n      _recording?.retries?.dispose();\n',
-     '    } else if (!readings && _recording != null) {\n',
+     '    } else if (!readings && _recording != null) {\n'
+     '      final retries = _recording?.retries;\n'
+     '      retries?.dispose();\n',
+     '    } else if (!readings && _recording != null) {\n'
+     '      final retries = _recording?.retries;\n',
      'test/journal/pages/journal_home_test.dart', 'consent (a) withdrawn: the retry cut; given again: resumed'),
     ('A519', 'lib/journal/pages/journal_home.dart',
      '    if (readings && _recording == null) {',
@@ -2535,12 +2538,30 @@ ROWS = [
      '    } finally {\n    }',
      'test/journal/pages/journal_home_test.dart', 'a Manual mode kept shows at once when the journal opens'),
     ('A574', 'lib/journal/pages/journal_home.dart',
-     '      _recording?.retries?.dispose();\n      _recording = null;\n    }\n    setState(() {});',
-     '      _recording?.retries?.dispose();\n      unawaited(_audio!.discard(\'1\' * 32));\n      _recording = null;\n    }\n    setState(() {});',
+     '      retries?.dispose();\n'
+     '      _idle = retries?.idle ?? Future<void>.value();\n'
+     '      _recording = null;\n'
+     '    }\n'
+     '    setState(() {});',
+     '      retries?.dispose();\n'
+     '      unawaited(_audio!.discard(\'1\' * 32));\n'
+     '      _idle = retries?.idle ?? Future<void>.value();\n'
+     '      _recording = null;\n'
+     '    }\n'
+     '    setState(() {});',
      'test/journal/pages/journal_home_test.dart', 'consent (a) withdrawn: the retry cut; given again: resumed'),
     ('A575', 'lib/journal/pages/journal_home.dart',
-     '      _recording?.retries?.dispose();\n      _recording = null;\n    }\n    setState(() {});',
-     '      _recording?.retries?.dispose();\n      _recording?.warm();\n      _recording = null;\n    }\n    setState(() {});',
+     '      retries?.dispose();\n'
+     '      _idle = retries?.idle ?? Future<void>.value();\n'
+     '      _recording = null;\n'
+     '    }\n'
+     '    setState(() {});',
+     '      retries?.dispose();\n'
+     '      _recording?.warm();\n'
+     '      _idle = retries?.idle ?? Future<void>.value();\n'
+     '      _recording = null;\n'
+     '    }\n'
+     '    setState(() {});',
      'test/journal/pages/journal_home_test.dart', 'consent (a) withdrawn: the retry cut; given again: resumed'),
     ('A576', 'lib/settings/settings_page.dart',
      '    NightDayMode.night => true,\n',
@@ -2570,6 +2591,88 @@ ROWS = [
      '            CupertinoDialogAction(\n              onPressed: () => Navigator.of(context).pop(false),\n'
      '              child: Text(Lines.MP_61.text(appLanguage)),\n            ),\n',
      'test/settings/settings_page_test.dart', 'Withdraw consent behind MP·96; Give consent behind MP·68'),
+    ('A581', 'lib/recording/retries.dart',
+     '    if (_halted) return false;\n    SafeLog.event(LogEvent.retryStarted);',
+     '    SafeLog.event(LogEvent.retryStarted);',
+     'test/recording/retries_test.dart', 'a cut while the audio is looked at fetches no key'),
+    ('A582', 'lib/recording/retries.dart',
+     '        if (bytes.isEmpty || _halted) break;',
+     '        if (bytes.isEmpty) break;',
+     'test/recording/retries_test.dart', 'idle waits for the frame read; none sent after the cut'),
+    ('A583', 'lib/recording/retries.dart',
+     '  Future<void> get idle => _ended?.future ?? Future<void>.value();',
+     '  Future<void> get idle => Future<void>.value();',
+     'test/recording/retries_test.dart', 'idle waits for the key; no stream opens after the cut'),
+    ('A584', 'lib/recording/retries.dart',
+     '    if (_halted) return false;\n    final SonioxLink link;',
+     '    final SonioxLink link;',
+     'test/recording/retries_test.dart', 'idle waits for the key; no stream opens after the cut'),
+    ('A585', 'lib/settings/settings_controller.dart',
+     '    if (consent == Consent.readings && !given) return _withdraw();\n',
+     '',
+     'test/settings/settings_controller_test.dart',
+     'withdrawn: sending stops, the retry is waited for, then kept'),
+    ('A586', 'lib/settings/settings_controller.dart',
+     '        await stopSending?.call();\n',
+     '',
+     'test/settings/settings_controller_test.dart',
+     'withdrawn: sending stops, the retry is waited for, then kept'),
+    ('A587', 'lib/settings/settings_controller.dart',
+     '      _withheld = true;\n      _notKept = false;',
+     '      _notKept = false;',
+     'test/settings/settings_controller_test.dart',
+     'withdrawal not kept: sending stops, shown given, retry keeps it'),
+    ('A588', 'lib/settings/settings_controller.dart',
+     '        _notKept = true;\n        _tell();\n        return;',
+     '        _tell();\n        return;',
+     'test/settings/settings_controller_test.dart',
+     'withdrawal not kept: sending stops, shown given, retry keeps it'),
+    ('A589', 'lib/settings/settings_controller.dart',
+     '      _consents = next;\n      _withheld = false;\n',
+     '      _consents = next;\n',
+     'test/settings/settings_controller_test.dart',
+     'withdrawn: sending stops, the retry is waited for, then kept'),
+    ('A590', 'lib/settings/settings_controller.dart',
+     '    if (_withdrawing || !_consents.given(Consent.readings)) return;',
+     '    if (!_consents.given(Consent.readings)) return;',
+     'test/settings/settings_controller_test.dart', 'a second withdrawal while one is under way is ignored'),
+    ('A591', 'lib/settings/settings_controller.dart',
+     '  bool get sending => _consents.given(Consent.readings) && !_withheld;',
+     '  bool get sending => _consents.given(Consent.readings);',
+     'test/settings/settings_controller_test.dart',
+     'not kept twice: sending still stops'),
+    ('A592', 'lib/settings/settings_controller.dart',
+     '      _withheld = true;\n      _notKept = false;\n      _tell();',
+     '      _withheld = true;\n      _tell();',
+     'test/settings/settings_controller_test.dart',
+     'withdrawal not kept: sending stops, shown given, retry keeps it'),
+    ('A593', 'lib/settings/settings_controller.dart',
+     '    if (!_disposed) notifyListeners();',
+     '    notifyListeners();',
+     'test/settings/settings_controller_test.dart', 'a withdrawal under way when the journal goes ends quietly'),
+    ('A594', 'lib/journal/pages/journal_home.dart',
+     '    final readings = controller.sending;',
+     '    final readings = controller.consents.given(Consent.readings);',
+     'test/journal/pages/journal_home_test.dart',
+     'consent (a) withdrawal not kept: sending stopped, still shown as given'),
+    ('A595', 'lib/journal/pages/journal_home.dart',
+     '      _idle = retries?.idle ?? Future<void>.value();',
+     '      _idle = Future<void>.value();',
+     'test/journal/pages/journal_home_test.dart',
+     'withdrawn mid key fetch: waited for, no stream'),
+    ('A596', 'lib/journal/pages/journal_home.dart',
+     '      ..addListener(_follow)\n      ..stopSending = () => _idle;',
+     '      ..addListener(_follow);',
+     'test/journal/pages/journal_home_test.dart',
+     'withdrawn mid key fetch: waited for, no stream'),
+    ('A597', 'lib/settings/settings_page.dart',
+     '              if (_c.withdrawalNotKept)',
+     '              if (false)',
+     'test/settings/settings_page_test.dart', 'a withdrawal not kept: MP·62, the button stays; tried again, kept'),
+    ('A598', 'lib/settings/settings_page.dart',
+     '                      Lines.MP_62.text(appLanguage),',
+     '                      Lines.MP_61.text(appLanguage),',
+     'test/settings/settings_page_test.dart', 'a withdrawal not kept: MP·62, the button stays; tried again, kept'),
 ]
 
 
