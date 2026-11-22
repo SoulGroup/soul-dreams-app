@@ -10,8 +10,9 @@
 //   phone, so no recording by voice and no retries, every night kept, and a
 //   feature tapped shows the popup instead (MP·101).
 // - Life Context (b): its setting, On or Off, is the consent (C159-I item 5;
-//   MP·83): Off deletes what is kept, On shows its page. Nothing is kept yet
-//   (D121 item 2).
+//   MP·83): Off deletes what is kept (C159-I item 1; D127), On shows its
+//   page. A deletion that cannot be done logs a code; the next sweep, at the
+//   next opening, deletes it (`LifeContext.sweep`).
 // - Night images (MP·85) is a setting, Off, Personal or Random, with no
 //   consent behind it (D125 item 8).
 import 'package:flutter/foundation.dart';
@@ -48,11 +49,18 @@ final class SettingsController extends ChangeNotifier {
   }
 
   /// Gives or turns off [consent] (Life Context's On and Off), then keeps the
-  /// consents with the day.
+  /// consents with the day. Life Context Off deletes what is kept.
   Future<void> answer(Consent consent, bool given) async {
     if (_consents.given(consent) == given) return;
     _consents = _consents.withAnswer(consent, given, _journal.now());
     notifyListeners();
+    if (consent == Consent.lifeContext && !given) {
+      try {
+        await _journal.deleteAllKept();
+      } on Object {
+        SafeLog.event(LogEvent.keptDeleteFailed);
+      }
+    }
     await _keep();
   }
 

@@ -18,7 +18,9 @@
 // consent behind it, D125 item 8), and recording by voice with its retries
 // only once the dreamer has agreed (D128): until then every night stays, the
 // microphone and Start Interpretation show a popup when tapped, and nothing is
-// sent.
+// sent. It holds Life Context too (`LifeContext`, D131 item 4): what is past
+// its window is deleted when the journal opens, when the app comes back, and
+// at each local midnight while it is open.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -27,6 +29,7 @@ import '../../core/always_light.dart';
 import '../../core/app_line.dart' show wordAnimation;
 import '../../core/night_day.dart';
 import '../../core/safe_log.dart';
+import '../../life_context/life_context.dart';
 import '../../onboarding/onboarding.dart';
 import '../../recording/recording.dart';
 import '../../settings/consents.dart';
@@ -74,6 +77,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   Journal? _journal;
   JournalAudio? _audio;
   SettingsController? _settings;
+  LifeContext? _lifeContext;
   Recording? _recording;
   // Null until the consents are read; then whether onboarding has been
   // answered (agreeing or not; `SettingsController.agreed` is the readings'
@@ -92,6 +96,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _journal?.consentGone.removeListener(_restart);
+    _lifeContext?.dispose();
     _settings?.dispose();
     _recording?.retries?.dispose();
     super.dispose();
@@ -101,6 +106,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
   // item 3). `inactive` changes nothing.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _lifeContext?.resumed();
     final retries = _recording?.retries;
     if (retries == null) return;
     if (state == AppLifecycleState.resumed) retries.back();
@@ -156,9 +162,12 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     AlwaysLight.hold(context, false);
     final audio = _audio = JournalAudio(_store!);
     final controller = SettingsController(_journal!, consents: consents, settings: settings)..addListener(_follow);
+    _lifeContext?.dispose();
+    final lifeContext = LifeContext(_journal!, controller)..start();
     setState(() {
       _agreed = true;
       _settings = controller;
+      _lifeContext = lifeContext;
     });
     // D98: the counts at launch and after each retry, for DevTools.
     unawaited(audio.logCounts());
@@ -210,6 +219,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     if (!mounted) return;
     _recording?.retries?.dispose();
     _recording = null;
+    _lifeContext?.dispose();
+    _lifeContext = null;
     _settings?.dispose();
     _settings = null;
     wordAnimation = true;

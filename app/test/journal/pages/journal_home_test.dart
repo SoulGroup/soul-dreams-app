@@ -662,4 +662,42 @@ void main() {
       expect(decodeSettings(files.files[JournalStore.settingsFile]!)!.images, images);
     });
   }
+
+  // D131 item 4: what is past Life Context's window goes when the journal
+  // opens, and when the app comes back; nothing of it is logged but a count.
+  testWidgets('the journal opening sweeps Life Context; coming back too', (tester) async {
+    JournalStore.newQueueForTests();
+    final lines = <String>[];
+    final sink = SafeLog.sink;
+    SafeLog.sink = lines.add;
+    addTearDown(() => SafeLog.sink = sink);
+    final files = answered(MemoryJournalFiles(), const {Consent.readings: true, Consent.lifeContext: true});
+    files.files[JournalStore.settingsFile] = encodeSettings(const Settings(length: LifeContextLength.oneWeek));
+    final night = nightsFromFixtures().first;
+    final passages = [for (final n in inventedNights()) ...n.waking];
+    var now = DateTime.now().toUtc().subtract(const Duration(days: 30));
+    final store = await JournalStore.open(files);
+    await store.save(night);
+    final journal = Journal(store, now: () => now);
+    await journal.keep(night.id, passages[0].text);
+    now = DateTime.now().toUtc().subtract(const Duration(days: 1));
+    await journal.keep(night.id, passages[1].text);
+    lines.clear();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
+    await tester.pumpAndSettle();
+    expect([for (final k in await journal.kept()) k.text], passages[1].sentences);
+    expect(lines, contains('keptExpired ${passages[0].sentences.length}'));
+    lines.clear();
+    // Six more days pass while the app is away (the phone's clock, moved).
+    now = DateTime.now().toUtc().subtract(const Duration(days: 8));
+    await journal.keep(night.id, passages[2].text);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+    tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await tester.pumpAndSettle();
+    expect([for (final k in await journal.kept()) k.text], passages[1].sentences);
+    expect(lines, contains('keptExpired ${passages[2].sentences.length}'));
+    await tester.pumpWidget(const SizedBox());
+  });
 }
