@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `redesign-c` (Settings, the settings button and the two consents, D110, D121 to D128; the owner's look at the founder's corrections, then the merge, next), by Claude Code.
+Last updated: 2026-11-22, in branch `faster-mutations` (the full app mutation run in parallel, D129 and D130; the merge next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,12 +14,14 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`redesign-c`: Settings, the settings button and the agreement (D110, D121 to D128; plan `docs/plans/redesign-c.md`).
-`redesign-b` is merged (`8243128`); its Status was not updated at the merge (this entry records it).
+`faster-mutations`: the full app mutation run in parallel, each worker in its own copy of `app/` (D129, D130; plan
+`docs/plans/faster-mutations.md`). A tooling change only: nothing in `app/` or `server/`.
+`redesign-c` (Settings, the settings button and the agreement, D110, D121 to D128) is merged (`cc2ea8c`); its Status was
+not updated at the merge (this entry records it). `redesign-b` is merged (`8243128`), likewise.
 
 ## Road ahead
 
-- `redesign-c`: the owner's by-eye review (the plan's Task 7), then the merge.
+- `faster-mutations`: the merge (its full parallel run is done, see "The app" and "Rulings during faster-mutations").
 - Then Life Context (its page, MP·86 to MP·92, and what is kept), with C159-I's import, and "Made by AI"; Feedback, with
   its server change (D121 item 4). The curated set of night paintings (about 60, the founder's)
   replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
@@ -311,6 +313,14 @@ rulings given during each branch are listed in this file, one line each, under "
   (expected: `app mutations: 624 run, 624 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95; the full run's timing is
   D126's).
+  Since D129 the run is parallel: the Mac's cores less two, at most 8, each worker in its own copy of `app/` in
+  `$TMPDIR` (the real `app/` is only read), `--jobs N` to change the number; `--serial` is the old way, row by row in
+  `app/` itself. The verdicts and the output are the same either way. `tool/app_mutations_compare.py` is the
+  equivalence proof, run by hand: the 101-row sample by default (every tenth row, every row on `ios/` or `test/`, A1,
+  A13, A481, A664, and eight built rows E1 to E8 that must survive or fail their setup), `--all` for every row. Times,
+  on the owner's Mac: the sample, serial 315 s and parallel 81 s with 8 workers, `101 rows, 101 the same`; the full
+  table in parallel 6 min 50 s (`real 6:50.44`), `app mutations: 624 run, 624 caught`, at `a058895`. Before: about 3.1
+  s a row serially, about 33 minutes for 624 rows measured by the plan, and about an hour at the owner's last full run.
 
 ## The server
 
@@ -995,6 +1005,16 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      "only on Start Interpretation" waits on the readings being built; (4) a journal that has (a) not given from an
      earlier build (a withdrawn or refused one) is "not agreed" now: everything visible, the popup, and MP·100 at the
      end of the disclosure; one with (b) given and (a) not shows Life Context On while its row shows the popup.
+165. The parallel mutation runner (D129) has no standing mutation rows: `tool/checks/tests/mutations.py` breaks
+     `tool/checks/` only. Its tests were proven by hand mutation (M1 to M14 on the runner, C1 to C6 on the comparison,
+     all caught; two first survived and were strengthened), as `app_mutations.py`'s own tests were in journal-core.
+166. Notes from the one Opus review of the runner (`a058895`), no defect found, nothing changed (D91): (a) an
+     interrupt that reaches only Python (`kill -INT <pid>`, not Ctrl-C in the terminal) may leave a copy in
+     `$TMPDIR/app-mutations-*` and a `flutter test` still running; nothing partial is ever printed; (b) up to 8
+     `flutter test` runs at once could change a timing-sensitive test, and a flaky test would show as UNBROKEN or caught
+     where the serial way shows it differently; the tests that look at real time check lower bounds only (plan Part 1,
+     finding 7); (c) the comparison script does not itself prove a copy is put back between rows; the unit test
+     `test_each_row_puts_its_copy_back` does (M8).
 
 ## Before Cohort 1
 
@@ -1430,6 +1450,18 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   text (banked item 164); (6) Settings pills: the inside as before D127 item 2, the gap from the pill's right edge
   to the row's right edge equal to the gap above and below it. Storage: every older consent file still reads.
   Targeted rows only (D126).
+
+## Rulings during faster-mutations
+
+- D129 (owner, the leans for a faster full run): (1) parallel rows, each worker in its own copy of `app/`: built; (2)
+  only the tests that can reach the mutated file: not built, because a row already runs only its one named test and
+  the lean as written would let another test catch a row; (3) fail fast: not built, as there is nothing to stop early;
+  added: one unbroken run per test and name (plan Part 1).
+- D130 (owner, on the plan's Part 4): Q1 to Q3 take the leans (leans 2 and 3 stay unbuilt; the worker count is the
+  Mac's cores less two, at most 8; parallel is the default and `--serial` the old way). Task 4's 40-minute `--all`
+  comparison is replaced: the equivalence is shown by the 101-row sample (the same both ways) plus the last serial
+  full run (D126, above) and the new parallel full run, both at 624 of 624 caught; the parallel full run is the one
+  before the merge, recorded under "The app". D91 and D126 apply.
 
 ## Documents as last imported
 
