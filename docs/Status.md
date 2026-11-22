@@ -1459,9 +1459,11 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   added: one unbroken run per test and name (plan Part 1).
 - D130 (owner, on the plan's Part 4): Q1 to Q3 take the leans (leans 2 and 3 stay unbuilt; the worker count is the
   Mac's cores less two, at most 8; parallel is the default and `--serial` the old way). Task 4's 40-minute `--all`
-  comparison is replaced: the equivalence is shown by the 101-row sample (the same both ways) plus the last serial
-  full run (D126, above) and the new parallel full run, both at 624 of 624 caught; the parallel full run is the one
-  before the merge, recorded under "The app". D91 and D126 apply.
+  comparison is replaced. The last serial full run was 622 of 624 caught at `bb5a15a` (D126, above); its two survivors,
+  A480 and A545, were then fixed in tests only (`cc2ea8c`) and caught. The new parallel full run is 624 of 624 caught
+  at `a058895`, the one before the merge, recorded under "The app". The equivalence rests on the 101-row sample (the
+  same both ways) and on those two rows being the only difference between the two full runs, explained by their
+  changed tests. D91 and D126 apply.
 
 ## Documents as last imported
 
