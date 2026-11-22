@@ -1061,6 +1061,10 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      them); and while `kept.json` does not read, deleting a night leaves that night's sentences in the unreadable file
      until the next capture, Off or Delete journal. The review's one defect, the orphans' sweep at open stopping the
      journal opening when it cannot write, is fixed (`keptDeleteFailed`; row A754).
+     The D133 round's re-review (plausible, for a VoiceOver look in SoulDreams Dev; no test can show them): the tick box
+     is now its own node with a tap, so it may be heard as "selected" without a name beside the sentence, which does not
+     say whether it is selected; and `DoneControl` sets MP·103 as both the Tooltip and the Semantics label, so iOS may
+     speak it twice (`BackControl` uses the Tooltip alone; dropping the label would match it).
 
 ## Before Cohort 1
 
