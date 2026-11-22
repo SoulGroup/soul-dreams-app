@@ -12,11 +12,10 @@
 // "Give consent" (MP·95), and "Delete journal" (EM·11) in the destructive
 // style. No feedback (D121 item 4), no region.
 //
-// What needs a consent asks for it first (ConsentPage): Personal or Random
-// while (c) is not given, Life Context On while (b) is not, Give consent
-// for (a). Turning off asks only where the register has a confirmation:
-// MP·93 for Life Context, MP·96 for the readings; Night images Off withdraws
-// (c) with nothing lost. Delete journal asks once (C4-P·4), then everything
+// What needs a consent asks for it first (ConsentPage): Life Context On
+// while (b) is not given, Give consent for (a); Night images asks nothing
+// (D125 item 8). Turning off asks only where the register has a
+// confirmation: MP·93 for Life Context, MP·96 for the readings. Delete journal asks once (C4-P·4), then everything
 // goes and the app starts again (D110). A withdrawal that cannot be kept
 // shows MP·62 under the button, which stays "Withdraw consent" to try again
 // (D124 item 2). Each confirmation is the phone's
@@ -129,13 +128,8 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _wordAnimation(int i) => _c.change(_c.settings.copyWith(wordAnimation: i == 0));
 
-  Future<void> _nightImages(int i) async {
-    final choice = NightImages.values[i];
-    if (choice != NightImages.off && !_c.consents.given(Consent.images)) {
-      if (!await ConsentPage.ask(context, Consent.images)) return;
-    }
-    await _c.setImages(choice);
-  }
+  // Night images asks nothing: it is a setting, with no consent (D125 item 8).
+  void _nightImages(int i) => _c.change(_c.settings.copyWith(images: NightImages.values[i]));
 
   // Manual keeps the theme on screen (the stop's question 5).
   void _nightDay(int i) => _c.change(
@@ -225,7 +219,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 onChoose: (_) {},
               ),
               row(SettingRow.wordAnimation, Lines.MP_26, s.wordAnimation ? 0 : 1, _wordAnimation),
-              row(SettingRow.nightImages, Lines.MP_85, _c.nightImages.index, _nightImages),
+              row(SettingRow.nightImages, Lines.MP_85, s.images.index, _nightImages),
               row(SettingRow.nightDay, Lines.MP_44, s.nightDay == NightDayMode.automatic ? 0 : 1, _nightDay),
               row(SettingRow.lifeContext, Lines.MP_83, c.given(Consent.lifeContext) ? 0 : 1, _lifeContext),
               row(SettingRow.length, Lines.MP_84, s.length.index, _length),

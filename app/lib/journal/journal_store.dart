@@ -20,7 +20,7 @@
 // open, audio no night names is deleted, and so is an older copy left by
 // a cut that did not finish.
 //
-// The dreamer's three consents (D103; C159-I item 5; D122) are kept here
+// The dreamer's two consents (D103; C159-I item 5; D122; D125 item 8) are kept here
 // too, once answered in onboarding: one small file holding each answer and
 // the day it last changed, and that the dreamer is 18 or over, never the
 // age band (C146-I item 1) (`settings/consents.dart`). So are the settings
@@ -297,14 +297,31 @@ final class JournalStore {
     return bytes == null ? null : decodeConsents(bytes);
   });
 
-  /// Keeps the consents whole (version 2), replacing any before.
+  /// Keeps the consents whole (version 3, only (a) and (b)), replacing any before.
   Future<void> keepConsents(Consents consents) => _run(() => _whole(consentFile, encodeConsents(consents)));
 
   /// The settings, or null when none is kept or the file does not read as
-  /// version 1 exactly: the defaults then stand.
+  /// version 2 or version 1 exactly: the defaults then stand. A version 1
+  /// file is read beside the consents file, which says whether the retired
+  /// consent (c) was given, and kept again as version 2 in the same turn, so
+  /// that the answer it carries is not lost when the consents are kept as
+  /// version 3 (D125 item 8). A keep that fails leaves the old file to be read
+  /// again.
   Future<Settings?> settings() => _run(() async {
     final bytes = await _files.read(settingsFile);
-    return bytes == null ? null : decodeSettings(bytes);
+    if (bytes == null) return null;
+    if (!isOldSettings(bytes)) return decodeSettings(bytes);
+    final consents = await _files.read(consentFile);
+    final given = consents != null && decodeConsents(consents)?.retiredImages == true;
+    final settings = decodeSettings(bytes, imagesGiven: given);
+    if (settings != null) {
+      try {
+        await _whole(settingsFile, encodeSettings(settings));
+      } on Object {
+        // Read again at the next opening.
+      }
+    }
+    return settings;
   });
 
   /// Keeps the settings whole, replacing any before.

@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `redesign-c` (Settings, the gear and the three consents, D110, D121, D122; the owner's by-eye review, then the merge, next), by Claude Code.
+Last updated: 2026-11-22, in branch `redesign-c` (Settings, the settings button and the two consents, D110, D121 to D125; the owner's look at the founder's corrections, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,7 +14,7 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`redesign-c`: Settings, the gear and the three consents (D110, D121, D122; plan `docs/plans/redesign-c.md`).
+`redesign-c`: Settings, the settings button and the two consents (D110, D121 to D125; plan `docs/plans/redesign-c.md`).
 `redesign-b` is merged (`8243128`); its Status was not updated at the merge (this entry records it).
 
 ## Road ahead
@@ -167,10 +167,9 @@ rulings given during each branch are listed in this file, one line each, under "
   and its consent page (W27·14, W27·15, W27·17, MP·57, MP·58, MP·59, then EM·6 left and MP·8 right); EM·6 back to
   the first page; MP·58 opens the disclosure and privacy page (every part, W27·1 to W27·17, in order), whose back
   control returns to the consent. "I agree" keeps `consent.json` in the journal's folder (`{"version":1,"over18":true}`,
-  written whole and renamed; never the band), then the journal opens: the first time, its empty state adds MP·9 and a
-  drawn arrow to the record button, once. The recording and its retries start only then. A consent that cannot be
+  written whole and renamed; never the band), then the journal opens (the first empty journal's MP·9 and arrow went in `redesign-c`, D125 item 3). The recording and its retries start only then. A consent that cannot be
   read or kept logs `consentReadFailed` or `consentKeepFailed`; onboarding asks again at the next opening. Since
-  `redesign-c` the consent step holds the three consents (below), and only Delete journal (`Journal.deleteAll`, which
+  `redesign-c` the full disclosure page ends with the two consents (below), and only Delete journal (`Journal.deleteAll`, which
   takes every file) closes every page and starts onboarding again; a consent withdrawn is an answer kept (D121 item 5). A part with no line
   would show nothing in its place, not its handle (D106 3); since C17-P every part shown has its line. Every step's box is centred between the top and the foot, and scrolls from the top when taller (D106 1), and
   its words appear whole (D106 2). The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
@@ -194,7 +193,7 @@ rulings given during each branch are listed in this file, one line each, under "
   light theme, `#8A8A8A` in the dark, stand-ins in `StandIns`, `Palette.rowBorder`; the gradient rows too, D115), carrying only its date (h6, day/month/yy: `shownDate`; the founder's export keeps `dayDigits`'
   four-digit year) over the night's picture, with a soft dark shade behind the date over a painting, none over the
   painted gradient (`DateShade`, D113; measured on real pixels: 7.2 to 1 at the lowest over the five paintings); month dividers and C4-P·5 as before; the first
-  empty journal's MP·9 under New Dream, its arrow pointing up. A night's page: a header 240 below the status bar,
+  empty journal shows C4-P·5 and nothing more (no MP·9, no arrow, D125 item 3). A night's page: a header 240 below the status bar,
   the night's picture from the screen's top with the back control and the menu over it and the date (h2) at its
   foot (the same shade over a painting), "Dreams" centred, light status-bar text over the header in both themes, and
   everywhere else the status bar follows the app's own theme (D114: light text over the dark theme, dark text over
@@ -255,40 +254,53 @@ rulings given during each branch are listed in this file, one line each, under "
   (D117 Q4), the told dreams in order, never a name, the first place. A result
   opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
   goes. The query is never kept or logged (R3).
-- The three consents (C18-P, MP·66 to MP·70; C159-I item 5; D110; D121; D122; `redesign-c`; `app/lib/settings/`,
-  SoulDreams Dev only): onboarding's second page ends with MP·66, then the readings (a, MP·68), Life Context (b, MP·69)
-  and the night images (c, MP·70), each with MP·67's two choices side by side, equally prominent, neither chosen
-  beforehand, the chosen one filled (`color.button.filled`, a stand-in); EM·6 left as before, Next (MP·30) right,
-  inert until all three are answered; any answers open the journal. MP·68 and MP·70 show their owed sentences in
-  braces (Dev only, D122). Kept in `consent.json`, version 2: "18 or over" and each answer with the UTC day of its last
-  change; version 1 still reads as (a) given, (b) and (c) not (`consents.dart`). (a) not given: nothing leaves the
-  phone, so no microphone and no retries; every night kept; given again, they resume. (b) is the Life Context
-  setting (nothing is kept yet, D121 item 2). (c) not given: Night images is Off, every night the gradient (`lookOf`'s
-  `images`); Personal and Random keep D110's look until the personal painting exists (D121 item 3).
-- Settings (main-path.md, Settings; D110; D121; D122; `settings_page.dart`; TO TRY where a stand-in): the gear top
-  left on the journal, above the search field (drawn, 41 in a 44 tap box, spoken MP·25; the field moves under it and
-  the sky mark stays 140 down). The page: the back control, the quick toggle top centre (the sun or the moon, MP·45),
-  which switches the theme and sets Manual; MP·25 in h2; six rows, each a white rounded row with a value pill opening
-  the phone's menu: Language (EM·9, `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85),
-  Night/Day mode (MP·44; Manual keeps the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48
-  (the full disclosure), MP·95 (Withdraw or Give consent) and Delete journal (EM·11, `color.destructive`). Turning
-  on what a consent covers shows that consent first (`ConsentPage`); Withdraw asks MP·96 (MP·97), Life Context Off
-  MP·93 (MP·94), Night images Off nothing; Delete journal asks C4-P·4 once, then everything goes and onboarding starts
-  again. The setting lines are read by form ("Name (A / B)", `setting_line.dart`). Kept in `settings.json` (version
-  1; Word Animation, Night/Day mode, the painting kept for while (c) is given, Life Context length), followed by the
-  journal's home (`SettingsController`): Word Animation into `AppLine` and the theme's fade (off, instant, as with
-  Reduce Motion), Night/Day mode through `NightDayChoice` above the app. A change that cannot be kept logs
-  `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes; a read that fails, `settingsReadFailed`,
-  and the defaults stand. No feedback (D121 item 4), no region, no Help (R9).
+- The two consents (C18-P, MP·66 to MP·69; C159-I item 5; D110; D121; D122; D125 items 2 and 8; `redesign-c`;
+  `app/lib/settings/`, SoulDreams Dev only): onboarding's second page ends at MP·58 ("Read everything"), with EM·6
+  alone at its foot and no Next; MP·58 opens the full disclosure page, which ends, after every part, with MP·66, then
+  the readings (a, MP·68) and Life Context (b, MP·69), each with MP·67's two choices side by side, equally
+  prominent, neither chosen beforehand, the chosen one filled (`color.button.filled`, a stand-in), then Next (MP·30),
+  inert until both are answered; Next closes the page and any answers open the journal. Settings' "Read disclosure &
+  privacy" shows the same page without them (`DisclosurePage.end`). MP·68 shows its owed sentence in braces (Dev
+  only, D122). Kept in `consent.json`, version 3: "18 or over" and the two answers, each with the UTC day of its
+  last change. Version 2, which also held the night images consent (c, retired by D125 item 8), and version 1 (a
+  given, (b) not) still read (`consents.dart`); only (a) and (b) are written. (a) not given: nothing leaves the
+  phone, so no microphone and no retries; every night kept; given again, they resume; a withdrawal waits for the
+  retry in flight and is shown only once kept (D124). (b) is the Life Context setting (nothing is kept yet, D121
+  item 2). MP·70 is shown nowhere. Night images has no consent: Off by default, every night the gradient
+  (`lookOf`'s `images`); Personal and Random keep D110's look until the personal painting exists (D121 item 3).
+- Settings (main-path.md, Settings; D110; D121; D122; D125; `settings_page.dart`; TO TRY where a stand-in): the
+  settings button top left on the journal, on the search field's row, the field to its right and ending where the
+  rows end (three drawn sliders in place of the gear, 41 in a 44 tap box, its own semantics node, spoken MP·25; the
+  sky mark stays 140 down). The page: the back control, the quick toggle top centre (MP·45), which shows what it
+  switches to, a moon in the light theme drawn in the dark page colour and a sun in the dark, switches the theme in
+  half a second and sets Manual (the 5 s fade stays for the clock's 21:00 and 08:00, `NightDay.fade`; a change the
+  dreamer makes takes `NightDay.quickFade`); MP·25 in h2; six rows of one height, each a white rounded row with a
+  value pill, all one width, its border the row's grey, opening the phone's menu: Language (EM·9,
+  `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44; Manual keeps
+  the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure), MP·95
+  (Withdraw or Give consent) and Delete journal (EM·11, `color.destructive`). Life Context On shows its consent
+  first (`ConsentPage`); Withdraw asks MP·96 (MP·97), Life Context Off MP·93 (MP·94), Night images asks nothing;
+  Delete journal asks C4-P·4 once, then everything goes and onboarding starts again. The setting lines are read by
+  form ("Name (A / B)", `setting_line.dart`). Kept in `settings.json` (version 2; Word Animation, Night/Day mode,
+  Night images, Life Context length; version 1, which chose a painting for while (c) was given, reads as that
+  choice only beside a version 2 consents file with (c) given, else Night images is Off, and is kept again as
+  version 2), followed by the journal's home (`SettingsController`): Word Animation into `AppLine` and the theme's
+  fade (off, instant, as with Reduce Motion), Night/Day mode through `NightDayChoice` above the app. A change that
+  cannot be kept logs `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes (a withdrawal of
+  (a) that cannot be kept, D124 item 2); a read that fails, `settingsReadFailed`, and the defaults stand. No
+  feedback (D121 item 4), no region, no Help (R9).
+- `type.voice.app` is read at line height 1.3, the founder's override of the filed 1.5 (`StandIns.voiceApp`; the
+  generated token keeps 1.5; D125 item 1; for Product's next filing).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 667 tests, and 613 mutation checks (A1 to A600; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 682 tests, and 631 mutation checks (A1 to A629; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A277, A278, A281, A300, A313, A363, A375 and A507 dropped, each with its reason in the file; with the rows A24a to
+  A277, A278, A281, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A541, A549, A550, A566, A578 and A610
+  dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 613 run, 613 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 631 run, 631 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -922,19 +934,39 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      it now writes nothing once the journal is gone (rows A599, A600);
      (c) consents that did not read, answered again, ignore a settings file that did (`_agree` uses the defaults):
      left banked.
-157. The Settings page's notes: the value pill's 44 tap box scales down with its words inside a `FittedBox` at large
-     text (from about 1.2 times for Automatic, Personal, 3 months, 2 weeks; the large-text test checks overflow
-     only; the owner's step 14 looks at it); in an Automatic fade the toggle still reads the theme on screen; a
+157. The Settings page's notes: the value pill's size no longer scales at large text (D125 item 4: every pill one
+     width, its words shrink inside it; the large-text test checks each pill's size and that its words stay inside); in an Automatic fade the toggle still reads the theme on screen; a
      failed deletion shows nothing and may leave some files; choices map to their enum by index, so a later
      register import that changes MP·85's count would throw rather than show a handle (R1); the gear has no guard
      against two taps, or against New Dream still opening.
-158. The storage task's notes: `Settings`' `assert(images != NightImages.off)` is debug only, and a caller that
-     wrote Off would make a file that does not read, so every setting would return to its default; `version` 1.0
-     and 2.0 read as 1 and 2; the day pattern accepts impossible dates (nothing finer than a day passes); the keep
+158. The storage task's notes: `version` 1.0 and 2.0 read as 1 and 2 (the `assert(images != NightImages.off)` went
+     with D125 item 8); the day pattern accepts impossible dates (nothing finer than a day passes); the keep
      tests compare file names after the store's open, which sweeps temporary files, and the cut ones start from an
      empty folder; the test "I agree keeps the consent, then the journal and its retries" kept its old name (rows
      A296, A507 and A508 key on it); `JournalHome` counts any readable consents file as agreed, a withdrawn (a)
      included (D121 item 5).
+159. D125 item 8, for the owner (decided under D91, test-first, rows A615 to A629): (a) Night images is Off by
+     default now, since no consent stands behind it and it was Off while (c) was not given; a journal from before
+     keeps its painting only where (c) was given, and a "no" to (c) makes it Off, the settings kept again as version 2
+     in the same read so the answer is not lost when the consents are next kept as version 3; if that keep fails the
+     old file is read again at the next opening, and a consents keep in between would drop the "no" (Off, the safe
+     way) but could also drop a "yes" (the painting returns to Off); (b) storage changes under docs/workflow.md (c):
+     `consent.json` version 3 and `settings.json` version 2, each with a test that loads the old format and loses
+     nothing; (c) "a storage change ships alone, in a build that changes nothing else" (workflow (c) 3) is the
+     owner's to weigh against shipping it with the founder's corrections; (d) MP·70 (the night images consent) and MP·9
+     are in the register and shown nowhere now; MP·66's "each choice is separate" opens two consents, not three.
+160. D125 item 2, for the owner: "I don't agree" stands alone at the second page's foot, centred, going back to the
+     first page, and the full page has none (its back control returns to the second page); with no Next on the second
+     page, MP·58 is the only way to the consents, and Next sits at the end of the page's scroll, not pinned.
+161. D125 item 6, for the owner: the half second applies to every change the dreamer makes (the toggle and the
+     Night/Day mode row); only the clock's 21:00 and 08:00 keep the five seconds. D125 item 10: the settings
+     button's sliders (`_SlidersLine`) replace the gear, which is in git history (`8674d92`); the founder's eye
+     decides, and nothing here could be looked at (R12).
+162. D125 item 9 is not done: the register has no places for "Back" and "Turn on" on Life Context's consent page
+     (MP·14 is the journal's way back; MP·94 is "Turn off"). Pending lines for the owner to write in
+     `pending-lines.csv`, handles avoiding every one C18-P uses (MP·66 to MP·97): `MP·98` EN "Back" / SV "Tillbaka",
+     and `MP·99` EN "Turn on" / SV "Slå på"; Product's next filing may take those numbers, and then the handles
+     change. Until then the page keeps MP·67's two choices.
 
 ## Before Cohort 1
 
@@ -981,8 +1013,8 @@ message 20 and built in `journal-design`, except the night's page's field in 10,
 
 Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
 
-- None. MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`), and
-  `pending-lines.csv` emptied to its header.
+- None yet in the file. MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`),
+  and `pending-lines.csv` emptied to its header. D125 item 9 needs two, handles proposed in banked item 162.
 
 ## Rulings during branch 2
 
@@ -1325,6 +1357,20 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   still stops sending at once for the session, MP·62 shows, and the button stays "Withdraw consent" so the dreamer
   can try again, never shown as withdrawn when it is not kept; (3) the rest stays banked. Done in the commit after
   8674d92.
+
+- D125 (founder, by-eye corrections, P13, before the merge), items: (1) `type.voice.app` line height 1.3, not the
+  filed 1.5 (for Product's next filing); (2) onboarding's page two ends at MP·58, and the consents (MP·66, the
+  consents, their pairs) and Next move to the end of the full disclosure page shown from onboarding, Settings'
+  "Read disclosure & privacy" showing it without them; (3) MP·9 and its arrow removed from the first empty journal;
+  (4) every Settings value pill one size, its border the setting row's lighter grey, every row one height; (5) the
+  search field on the gear's row, the gear left; (6) the quick toggle's theme change takes 0.5 s, the 5 s fade
+  stays only for the automatic 21:00 and 08:00; (7) the toggle shows what it switches to, a moon in the light theme,
+  in the dark theme's page colour, and a sun in the dark (the journal's greeting mark is unchanged, D112); (8) Night
+  images has no consent at all: (c) is removed from onboarding and Settings, older files that hold (c) still read,
+  only (a) and (b) are written (it amends C159-I item 5; the Build chat carries it to the head); (9) Life
+  Context's consent page buttons read "Back" and "Turn on": the register has no places for them, so this stopped
+  (banked item 162); (10) a different drawn icon for the gear, three sliders as a stand-in, the gear if nothing reads
+  better. Done in `redesign-c` after `2938323`; items 9 and 10's look wait for the owner.
 
 ## Documents as last imported
 

@@ -85,8 +85,8 @@ T answered<T extends MemoryJournalFiles>(T files, Map<Consent, bool> given) {
   return files;
 }
 
-/// Onboarding's answers: (a) given, (b) and (c) not (D122).
-const readingsOnly = {Consent.readings: true, Consent.lifeContext: false, Consent.images: false};
+/// Onboarding's answers: (a) given, (b) not (D122; D125 item 8).
+const readingsOnly = {Consent.readings: true, Consent.lifeContext: false};
 
 /// A night with a recording waiting, its audio kept, in [files].
 Future<void> waiting(MemoryJournalFiles files) async {
@@ -327,9 +327,9 @@ void main() {
     expect(find.bySemanticsLabel(Lines.MP_9.text(Lang.en)), findsNothing);
     expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
     final kept = jsonDecode(utf8.decode(files.files[JournalStore.consentFile]!)) as Map<String, dynamic>;
-    expect(kept.keys, ['version', 'over18', 'readings', 'lifeContext', 'images']);
-    expect([kept['version'], kept['over18']], [2, true]);
-    expect([for (final c in ['readings', 'lifeContext', 'images']) kept[c]['given']], [true, false, false]);
+    expect(kept.keys, ['version', 'over18', 'readings', 'lifeContext']);
+    expect([kept['version'], kept['over18']], [3, true]);
+    expect([for (final c in ['readings', 'lifeContext']) kept[c]['given']], [true, false]);
     // Either side of a UTC midnight crossed while the test ran.
     expect(kept['readings']['day'], anyOf(dayOf(started), dayOf(DateTime.now())));
     expect(links, hasLength(1));
@@ -647,12 +647,12 @@ void main() {
   });
 
   // D122: the settings kept are followed when the journal opens: Word
-  // Animation, Night/Day mode and Night images (consent (c) given); deleting
-  // the journal returns them to their defaults.
+  // Animation, Night/Day mode and Night images (no consent behind it, D125
+  // item 8); deleting the journal returns them to their defaults.
   testWidgets('the settings kept are followed; the deletion resets them', (tester) async {
     JournalStore.newQueueForTests();
     addTearDown(() => wordAnimation = true);
-    final files = answered(MemoryJournalFiles(), {Consent.readings: true, Consent.images: true});
+    final files = answered(MemoryJournalFiles(), {Consent.readings: true});
     files.files[JournalStore.settingsFile] = encodeSettings(
       const Settings(wordAnimation: false, nightDay: NightDayMode.night, images: NightImages.random),
     );
@@ -660,7 +660,7 @@ void main() {
     await tester.pumpAndSettle();
     final page = tester.widget<JournalPage>(find.byType(JournalPage));
     expect(page.images, isTrue);
-    expect(page.settings!.nightImages, NightImages.random);
+    expect(page.settings!.settings.images, NightImages.random);
     expect(wordAnimation, isFalse);
     expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
     await page.journal.deleteAll();
@@ -689,9 +689,9 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  // MP·85: consent (c) not given, Night images is Off: every night the
-  // gradient.
-  testWidgets('consent (c) not given: Night images Off', (tester) async {
+  // MP·85, D125 item 8: Night images is Off until it is chosen: every night
+  // the gradient.
+  testWidgets('Night images is Off by default', (tester) async {
     JournalStore.newQueueForTests();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
     await tester.pumpAndSettle();
@@ -710,22 +710,49 @@ void main() {
     expect(lines, ['settingsReadFailed', 'journalAudio 0 0']);
   });
 
-  // D122: the three answers from onboarding are kept as given, with the
-  // day; (c) given, Night images is Personal (the stop's question 6).
-  testWidgets('the three answers are kept as given', (tester) async {
+  // D122, D125 item 8: the two answers from onboarding are kept as given,
+  // with the day; Night images stays Off, no consent behind it.
+  testWidgets('the two answers are kept as given', (tester) async {
     JournalStore.newQueueForTests();
     final files = MemoryJournalFiles();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
     await tester.pumpAndSettle();
     tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(
-      const {Consent.readings: false, Consent.lifeContext: true, Consent.images: true},
+      const {Consent.readings: false, Consent.lifeContext: true},
     );
     await tester.pumpAndSettle();
     final page = tester.widget<JournalPage>(find.byType(JournalPage));
     expect(page.recording, isNull);
-    expect(page.images, isTrue);
-    expect(page.settings!.nightImages, NightImages.personal);
+    expect(page.images, isFalse);
+    expect(page.settings!.settings.images, NightImages.off);
     final kept = decodeConsents(files.files[JournalStore.consentFile]!)!;
-    expect([for (final c in Consent.values) kept.given(c)], [false, true, true]);
+    expect([for (final c in Consent.values) kept.given(c)], [false, true]);
   });
+
+  // D125 item 8: a journal from before: consents that held (c), settings that
+  // chose a painting for while it was given. A "yes" keeps the painting; a
+  // "no" makes Night images Off, and either is kept as the new version, so
+  // that nothing is sent that was not agreed to.
+  for (final (given, images) in [(true, NightImages.random), (false, NightImages.off)]) {
+    testWidgets('a journal from before, (c) $given: Night images ${images.name}', (tester) async {
+      JournalStore.newQueueForTests();
+      final files = MemoryJournalFiles();
+      files.files[JournalStore.consentFile] = Uint8List.fromList(
+        utf8.encode(
+          '{"version":2,"over18":true,"readings":{"given":true,"day":"2026-11-20"},'
+          '"lifeContext":{"given":false,"day":"2026-11-20"},"images":{"given":$given,"day":"2026-11-21"}}',
+        ),
+      );
+      files.files[JournalStore.settingsFile] = Uint8List.fromList(
+        utf8.encode('{"version":1,"wordAnimation":true,"nightDay":"automatic","images":"random","length":"twoWeeks"}'),
+      );
+      await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
+      await tester.pumpAndSettle();
+      final page = tester.widget<JournalPage>(find.byType(JournalPage));
+      expect(page.settings!.settings.images, images);
+      expect(page.images, images != NightImages.off);
+      expect(jsonDecode(utf8.decode(files.files[JournalStore.settingsFile]!))['version'], 2);
+      expect(decodeSettings(files.files[JournalStore.settingsFile]!)!.images, images);
+    });
+  }
 }

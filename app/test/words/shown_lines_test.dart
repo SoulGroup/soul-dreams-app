@@ -67,10 +67,12 @@ void main() {
     final seen = named(reached('lib/main_dev.dart'));
     // One plain place and one with a slot, so a scan that finds nothing, or
     // misses the places with a slot, fails here and not silently; and the
-    // two consents Dev shows with their braces (D122).
-    expect(seen, containsAll(['MP_11', 'MP_76', 'MP_68', 'MP_70']));
+    // consent Dev shows with its braces (D122); the night images consent,
+    // retired, is shown nowhere (D125 item 8).
+    expect(seen, containsAll(['MP_11', 'MP_76', 'MP_68']));
+    expect(seen, isNot(contains('MP_70')));
     expect(seen, isNot(contains('all')), reason: 'a screen reaching Lines.all would hide what it shows');
-    expect(bracedIn(seen), containsAll(['MP·68', 'MP·70']));
+    expect(bracedIn(seen), contains('MP·68'));
   });
 
   test('every place the screens name is in the register', () {

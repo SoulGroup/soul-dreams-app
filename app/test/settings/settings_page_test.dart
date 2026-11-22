@@ -240,34 +240,28 @@ void main() {
     expect(Theme.of(tester.element(find.byType(SettingsPage))).brightness, Brightness.dark);
   });
 
-  // The stop's question 6: Personal or Random needs consent (c) first; Off
-  // withdraws it.
-  testWidgets('Night images: the consent first; I don\'t consent changes nothing', (tester) async {
+  // D125 item 8: Night images asks nothing: any choice is a setting, kept as
+  // one, and no consent page or dialog stands in front of it.
+  testWidgets('Night images asks nothing: Off by default, any choice at once', (tester) async {
     final c = await open(tester);
+    expect(shown(tester, SettingRow.nightImages), 'Off');
+    expect(c.settings.images, NightImages.off);
     await choose(tester, SettingRow.nightImages, 1);
-    expect(find.byType(ConsentPage), findsOneWidget);
-    expect(find.text(en(Lines.MP_70)), findsOneWidget);
-    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.images, false)));
-    await tester.pumpAndSettle();
     expect(find.byType(ConsentPage), findsNothing);
-    expect(c.nightImages, NightImages.off);
-    // Nothing chosen is kept before the answer: the painting stays as it was.
-    expect(c.settings.images, const Settings().images);
-    expect(files.files.keys, isNot(contains(JournalStore.settingsFile)));
-    await choose(tester, SettingRow.nightImages, 1);
-    await hit(tester, find.byKey(ConsentChoice.keyOf(Consent.images, true)));
-    await tester.pumpAndSettle();
-    expect(c.nightImages, NightImages.random);
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    expect(c.settings.images, NightImages.random);
     expect(shown(tester, SettingRow.nightImages), 'Random');
-    expect(kept(JournalStore.consentFile)['images']['given'], isTrue);
-    // Given now: Personal needs no page.
+    expect(kept(JournalStore.settingsFile)['images'], 'random');
     await choose(tester, SettingRow.nightImages, 0);
     expect(find.byType(ConsentPage), findsNothing);
-    expect(c.nightImages, NightImages.personal);
+    expect(c.settings.images, NightImages.personal);
     await choose(tester, SettingRow.nightImages, 2);
     expect(find.byType(CupertinoAlertDialog), findsNothing);
-    expect(c.consents.given(Consent.images), isFalse);
+    expect(c.settings.images, NightImages.off);
     expect(shown(tester, SettingRow.nightImages), 'Off');
+    expect(kept(JournalStore.settingsFile)['images'], 'off');
+    // No consent stands behind it: the record holds only (a) and (b).
+    expect(kept(JournalStore.consentFile).keys, ['version', 'over18', 'readings', 'lifeContext']);
   });
 
   // The stop's question 7: Life Context On needs consent (b); Off asks MP·93.
@@ -359,6 +353,11 @@ void main() {
     await hit(tester, find.byKey(SettingsPage.disclosureKey));
     await tester.pumpAndSettle();
     expect(tester.widget<DisclosurePage>(find.byType(DisclosurePage)).shown, DisclosurePage.parts);
+    // D125 item 2: from Settings the page is only to read: no consent, no Next.
+    expect(tester.widget<DisclosurePage>(find.byType(DisclosurePage)).end, isEmpty);
+    expect(find.byType(ConsentChoice), findsNothing);
+    expect(find.text(en(Lines.MP_66)), findsNothing);
+    expect(find.text(en(Lines.MP_30)), findsNothing);
   });
 
   // D110: one confirmation; then everything goes, back to the welcome.

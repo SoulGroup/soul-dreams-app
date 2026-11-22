@@ -1,11 +1,13 @@
 // Onboarding (main-path.md, Onboarding; D103), SoulDreams Dev only: the
 // welcome, the founder's note, the age question, then the disclosure's
 // first layer on two pages (C14-P item 1; the plan's question 2 for which
-// part stands on which page), the second ending in the three consents
-// (C18-P, MP·66 to MP·70; C159-I item 5; D110; D122): MP·66, then each
-// consent's text with MP·67's two choices, equally prominent, neither
-// chosen beforehand. Next (MP·30) waits until all three are answered; any
-// answer opens the journal. The page that shows it holds the app light
+// part stands on which page), the second ending at MP·58, which opens the
+// full disclosure page. At the end of that page stand the two consents
+// (C18-P, MP·66 to MP·69; C159-I item 5; D110; D122; D125 items 2 and 8):
+// MP·66, then each consent's text with MP·67's two choices, equally
+// prominent, neither chosen beforehand, then Next (MP·30), which waits until
+// both are answered; any answer opens the journal. Night images has no
+// consent (D125 item 8). The page that shows it holds the app light
 // (AlwaysLight). Every word is the register's; a part with no line yet
 // shows nothing in its place (D106 3; R1). Every box is centred between the
 // top and the foot (D106 1), and the words appear whole (D106 2). Nothing
@@ -15,8 +17,10 @@
 // "I understand", which changes nothing; the card stays until the app
 // closes, and the question is asked again at the next opening, since
 // nothing was kept (C127-I I6). "I don't agree" goes back to the
-// disclosure's first page and asks nothing (C127-I I7). There is no back
-// control: each step goes forward only (the plan's question 8).
+// disclosure's first page and asks nothing (C127-I I7); it stands alone at
+// the second page's foot, which has no Next (D125 item 2). There is no back
+// control on a step: each goes forward only (the plan's question 8); the full
+// page has its own back control, to the second page.
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -40,7 +44,7 @@ import 'disclosure_page.dart';
   return at < 0 ? (line, null) : (line.substring(0, at), line.substring(at + 2));
 }
 
-enum _Step { welcome, note, age, underAge, disclosure, consent }
+enum _Step { welcome, note, age, underAge, disclosure, more }
 
 class Onboarding extends StatefulWidget {
   const Onboarding({
@@ -51,8 +55,8 @@ class Onboarding extends StatefulWidget {
     this.full = DisclosurePage.parts,
   });
 
-  /// Next, once the three consents are answered: each consent, true when
-  /// given (D122).
+  /// Next, once both consents are answered: each consent, true when given
+  /// (D122; D125 item 8).
   final ValueChanged<Map<Consent, bool>> onAgreed;
 
   /// The parts each page shows: [firstPage], [secondPage] and the full
@@ -105,10 +109,8 @@ class _OnboardingState extends State<Onboarding> {
         _band = null;
         _to(underAge(band) ? _Step.underAge : _Step.disclosure);
       case _Step.disclosure:
-        _to(_Step.consent);
-      case _Step.consent:
-        if (_answers.length < Consent.values.length) return;
-        widget.onAgreed(Map.of(_answers));
+        _to(_Step.more);
+      case _Step.more:
       case _Step.underAge:
         return;
     }
@@ -191,35 +193,66 @@ class _OnboardingState extends State<Onboarding> {
         ];
       case _Step.disclosure:
         return [for (final line in written(widget.first)) reads(line)];
-      case _Step.consent:
+      case _Step.more:
         return [
           for (final line in written(widget.second)) reads(line),
-          _one(
-            PlainButton(
-              Lines.MP_58.text(appLanguage),
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute<void>(builder: (_) => DisclosurePage(shown: widget.full))),
-            ),
-          ),
-          reads(Lines.MP_66),
-          for (final consent in Consent.values) ...[
-            reads(consentText(consent)),
-            ConsentChoice(
-              consent: consent,
-              chosen: _answers[consent],
-              onChoose: (given) => setState(() => _answers[consent] = given),
-            ),
-          ],
+          _one(PlainButton(Lines.MP_58.text(appLanguage), onPressed: _openFull)),
         ];
     }
   }
 
+  // The full disclosure page, ending in MP·66, the two consents and Next
+  // (D125 item 2). The answers are held here, so that back keeps them.
+  void _openFull() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (route) => StatefulBuilder(
+          builder: (route, setRoute) {
+            final p = Palette.of(route);
+            final voice = StandIns.voiceApp(p.text);
+            Widget reads(Line line) => Text(
+              line.parts(appLanguage).join('\n'),
+              textAlign: TextAlign.center,
+              style: voice,
+            );
+            return DisclosurePage(
+              shown: widget.full,
+              end: [
+                reads(Lines.MP_66),
+                for (final consent in Consent.values) ...[
+                  const SizedBox(height: StandIns.gap),
+                  reads(consentText(consent)),
+                  const SizedBox(height: StandIns.gap),
+                  ConsentChoice(
+                    consent: consent,
+                    chosen: _answers[consent],
+                    onChoose: (given) {
+                      setState(() => _answers[consent] = given);
+                      setRoute(() {});
+                    },
+                  ),
+                ],
+                const SizedBox(height: StandIns.gap),
+                _one(PlainButton(Lines.MP_30.text(appLanguage), onPressed: () => _agree(route))),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // Next at the end of the full page: both answered, the page closes and the
+  // answers are told once (D122).
+  void _agree(BuildContext route) {
+    if (_answers.length < Consent.values.length) return;
+    Navigator.of(route).pop();
+    widget.onAgreed(Map.of(_answers));
+  }
+
   Widget? _foot() => switch (_step) {
     _Step.underAge => null,
-    _Step.consent => ButtonRow(
-      left: PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _to(_Step.disclosure)),
-      right: PlainButton(Lines.MP_30.text(appLanguage), onPressed: _next),
-    ),
+    _Step.more => _one(PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _to(_Step.disclosure))),
     _ => _one(PlainButton(Lines.MP_30.text(appLanguage), onPressed: _next)),
   };
 

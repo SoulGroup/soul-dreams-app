@@ -208,18 +208,19 @@ void main() {
     expect(told, 1);
   });
 
-  test('Night images is Off while consent (c) is not given', () async {
-    final (c, _) = await make();
-    expect(c.settings.images, NightImages.personal);
-    expect(c.nightImages, NightImages.off);
-    await c.setImages(NightImages.random);
-    expect(c.consents.given(Consent.images), isTrue);
-    expect(c.nightImages, NightImages.random);
-    await c.setImages(NightImages.off);
-    expect(c.consents.given(Consent.images), isFalse);
-    expect(c.nightImages, NightImages.off);
-    // The choice is kept for when (c) is given again.
+  // D125 item 8: Night images is a setting with no consent behind it: Off by
+  // default, any choice kept as a setting alone, the consents untouched.
+  test('Night images is a setting: Off by default, no consent kept', () async {
+    final (c, f) = await make();
+    expect(c.settings.images, NightImages.off);
+    await c.change(c.settings.copyWith(images: NightImages.random));
     expect(c.settings.images, NightImages.random);
+    expect(kept(f, JournalStore.settingsFile)['images'], 'random');
+    await c.change(c.settings.copyWith(images: NightImages.off));
+    expect(kept(f, JournalStore.settingsFile)['images'], 'off');
+    expect(f.files.keys, [JournalStore.settingsFile]);
+    expect(c.consents.answers.keys, Consent.values);
+    expect(lines, isEmpty);
   });
 
   test('a change that cannot be kept logs a code and holds', () async {

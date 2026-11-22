@@ -14,7 +14,8 @@
 // when the app comes back, and when the connection returns; leaving the
 // app cuts a retry short (D92 item 3, D94). Once the journal opens, it
 // holds the settings and the consents (`SettingsController`, D122) and
-// follows them: Word Animation, Night/Day mode, Night images, and recording
+// follows them: Word Animation, Night/Day mode, Night images (a setting, no
+// consent behind it, D125 item 8), and recording
 // by voice with its retries only while consent (a) is given; withdrawn,
 // they pause and every night stays (D121 item 5). A withdrawal waits for
 // the retry in flight to stop before it is kept (D124 item 1).
@@ -235,7 +236,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         nightAction: widget.nightAction,
         read: widget.read,
         settings: _settings,
-        images: _settings?.nightImages != NightImages.off,
+        images: _settings?.settings.images != NightImages.off,
       ),
     };
   }

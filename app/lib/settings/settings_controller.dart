@@ -13,8 +13,8 @@
 //   dreamer can try again (D124 items 1 and 2).
 // - Consent (b), Life Context: its setting, On or Off, is the consent
 //   (C159-I item 5; MP·83). Nothing is kept yet (D121 item 2).
-// - Consent (c), the night images: Night images is Off while it is not
-//   given (MP·85); Personal or Random is the choice kept for while it is.
+// - Night images (MP·85) is a setting, Off, Personal or Random, with no
+//   consent behind it (D125 item 8).
 import 'package:flutter/foundation.dart';
 
 import '../core/safe_log.dart';
@@ -59,9 +59,6 @@ final class SettingsController extends ChangeNotifier {
   void _tell() {
     if (!_disposed) notifyListeners();
   }
-
-  /// Night images as shown: Off while consent (c) is not given.
-  NightImages get nightImages => _consents.given(Consent.images) ? _settings.images : NightImages.off;
 
   /// Changes the settings, then keeps them.
   Future<void> change(Settings next) async {
@@ -121,14 +118,5 @@ final class SettingsController extends ChangeNotifier {
     } finally {
       _withdrawing = false;
     }
-  }
-
-  /// Night images set to [choice]: Off withdraws consent (c); Personal or
-  /// Random is kept, and gives (c) when it is not given. The page asks
-  /// for (c) first (D122, the stop's question 7).
-  Future<void> setImages(NightImages choice) async {
-    if (choice == NightImages.off) return answer(Consent.images, false);
-    await change(_settings.copyWith(images: choice));
-    await answer(Consent.images, true);
   }
 }

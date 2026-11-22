@@ -1,5 +1,5 @@
-// One consent on its own page, from Settings (D122, the stop's questions 6,
-// 7 and 10): its text, then MP·67's two choices; only "I consent" gives it,
+// One consent on its own page, from Settings (D122, the stop's questions 6
+// and 10; D125 item 8: two consents): its text, then MP·67's two choices; only "I consent" gives it,
 // and the back control gives nothing.
 import 'dart:ui' show Tristate;
 
@@ -14,7 +14,7 @@ import 'package:souldreams/words/lines.g.dart';
 
 void main() {
   test('each consent has its text', () {
-    expect([for (final c in Consent.values) consentText(c).handle], ['MP·68', 'MP·69', 'MP·70']);
+    expect([for (final c in Consent.values) consentText(c).handle], ['MP·68', 'MP·69']);
   });
 
   for (final (how, expected) in [('yes', true), ('no', false), ('back', false)]) {

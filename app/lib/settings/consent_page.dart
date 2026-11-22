@@ -1,12 +1,12 @@
-// The three consents' words and their choice (C18-P, MP·66 to MP·70;
-// C159-I item 5; D110; D122): each consent's text, then MP·67's two choices,
-// "I consent" and "I don't consent", side by side, equally prominent,
-// neither chosen beforehand; the chosen one filled (color.button.filled, a
-// stand-in). Onboarding shows all three (MP·66 above them); Settings shows
-// one on its own page when a setting needs it (the stop's questions 6, 7
-// and 10), whose back control gives nothing. MP·68 and MP·70 are "to
-// rewrite" and show their owed sentences in braces, as filed, in SoulDreams
-// Dev only (D119 item 2; D122, Q1 (B)).
+// The two consents' words and their choice (C18-P, MP·66 to MP·69; C159-I
+// item 5; D110; D122; D125 item 8): each consent's text, then MP·67's two
+// choices, "I consent" and "I don't consent", side by side, equally
+// prominent, neither chosen beforehand; the chosen one filled
+// (color.button.filled, a stand-in). Onboarding shows both at the end of the
+// full disclosure page (MP·66 above them); Settings shows one on its own page
+// when a setting needs it (the stop's questions 6 and 10), whose back control
+// gives nothing. MP·68 is "to rewrite" and shows its owed sentence in braces,
+// as filed, in SoulDreams Dev only (D119 item 2; D122, Q1 (B)).
 import 'package:flutter/material.dart';
 
 import '../core/app_line.dart';
@@ -18,11 +18,10 @@ import '../journal/pages/parts.dart';
 import '../words/lines.g.dart';
 import 'consents.dart';
 
-/// The consent's text: MP·68 (a), MP·69 (b), MP·70 (c).
+/// The consent's text: MP·68 (a), MP·69 (b).
 Line consentText(Consent consent) => switch (consent) {
   Consent.readings => Lines.MP_68,
   Consent.lifeContext => Lines.MP_69,
-  Consent.images => Lines.MP_70,
 };
 
 /// MP·67's two choices under one consent: [chosen] is null until one is

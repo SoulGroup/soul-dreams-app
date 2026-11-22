@@ -1,9 +1,10 @@
 // The disclosure and privacy page (MP·48; C14-P item 1): every part of the
 // disclosure, W27·1 to W27·17 (W27·7 is merged into W27·6, W27·16 retired),
-// in order, opened from onboarding's consent by MP·58 and closed by the
-// back control, back to the consent. No consent is asked here. A part with
-// no line yet (to rewrite) shows nothing in its place (D106 3; R1). No
-// title: none is given (the plan's question 4).
+// in order, opened from onboarding's second page by MP·58 and closed by the
+// back control, back to it. From Settings no consent is asked here; from
+// onboarding the page ends with MP·66, the two consents and Next, handed in
+// as [end] (D125 item 2). A part with no line yet (to rewrite) shows nothing
+// in its place (D106 3; R1). No title: none is given (the plan's question 4).
 import 'package:flutter/material.dart';
 
 import '../core/language.dart';
@@ -21,10 +22,14 @@ List<Line> written(List<Line> lines) => [for (final line in lines) if (line.writ
 List<Line> lacking(List<Line> lines) => [for (final line in lines) if (!line.written) line];
 
 class DisclosurePage extends StatelessWidget {
-  const DisclosurePage({super.key, this.shown = DisclosurePage.parts});
+  const DisclosurePage({super.key, this.shown = DisclosurePage.parts, this.end = const []});
 
   /// The parts shown: [parts], unless a test hands in others (D106 3).
   final List<Line> shown;
+
+  /// What stands after the last part, in the list: onboarding's consents and
+  /// Next; none from Settings.
+  final List<Widget> end;
 
   /// Every part, in the register's order.
   static const parts = [
@@ -72,6 +77,7 @@ class DisclosurePage extends StatelessWidget {
                           style: StandIns.voiceApp(p.text),
                         ),
                       ),
+                    ...end,
                   ],
                 ),
               ),
