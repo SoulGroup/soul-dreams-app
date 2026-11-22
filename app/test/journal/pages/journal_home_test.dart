@@ -76,6 +76,9 @@ T answered<T extends MemoryJournalFiles>(T files, Map<Consent, bool> given) {
   return files;
 }
 
+/// Onboarding's answers: (a) given, (b) and (c) not (D122).
+const readingsOnly = {Consent.readings: true, Consent.lifeContext: false, Consent.images: false};
+
 /// A night with a recording waiting, its audio kept, in [files].
 Future<void> waiting(MemoryJournalFiles files) async {
   final store = await JournalStore.open(files);
@@ -302,8 +305,8 @@ void main() {
       home: JournalHome(files: files, recording: counted(links)),
     ));
     await tester.pumpAndSettle();
-    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
-    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
     await tester.pump();
     await tester.pump();
     expect(find.byType(JournalPage), findsOneWidget);
@@ -333,13 +336,13 @@ void main() {
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted(links))));
     await tester.pumpAndSettle();
     final agree = tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed;
-    agree();
+    agree(readingsOnly);
     await tester.pump();
     await tester.pump();
     expect(find.byType(JournalPage), findsOneWidget);
     expect(links, hasLength(1));
     final settings = tester.widget<JournalPage>(find.byType(JournalPage)).settings;
-    agree();
+    agree(readingsOnly);
     await tester.pump();
     await tester.pump();
     expect(links, hasLength(1));
@@ -356,13 +359,13 @@ void main() {
     final files = MemoryJournalFiles();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
     await tester.pumpAndSettle();
-    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
     await tester.widget<JournalPage>(find.byType(JournalPage)).journal.deleteAll();
     await tester.pumpAndSettle();
     expect(find.byType(Onboarding), findsOneWidget);
-    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
     expect(files.files.keys, contains(JournalStore.consentFile));
@@ -377,7 +380,7 @@ void main() {
     final files = NoRename();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
     await tester.pumpAndSettle();
-    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(readingsOnly);
     await tester.pumpAndSettle();
     expect(find.byType(JournalPage), findsOneWidget);
     expect(lines, ['consentKeepFailed', 'journalAudio 0 0']);
@@ -547,5 +550,24 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).settings!.settings, const Settings());
     expect(lines, ['settingsReadFailed', 'journalAudio 0 0']);
+  });
+
+  // D122: the three answers from onboarding are kept as given, with the
+  // day; (c) given, Night images is Personal (the stop's question 6).
+  testWidgets('the three answers are kept as given', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = MemoryJournalFiles();
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
+    await tester.pumpAndSettle();
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(
+      const {Consent.readings: false, Consent.lifeContext: true, Consent.images: true},
+    );
+    await tester.pumpAndSettle();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.recording, isNull);
+    expect(page.images, isTrue);
+    expect(page.settings!.nightImages, NightImages.personal);
+    final kept = decodeConsents(files.files[JournalStore.consentFile]!)!;
+    expect([for (final c in Consent.values) kept.given(c)], [false, true, true]);
   });
 }

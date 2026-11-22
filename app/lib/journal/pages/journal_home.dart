@@ -185,15 +185,14 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
     setState(() {});
   }
 
-  // "I consent": the consents kept, then the journal. Until onboarding asks
-  // the three (D119 item 1), it gives (a) and leaves (b) and (c) not given
-  // (D122). Consents that cannot be kept log a code; the journal opens, and
-  // the next opening asks again.
-  Future<void> _agree() async {
+  // Next, the three consents answered: kept, then the journal (D122).
+  // Consents that cannot be kept log a code; the journal opens, and the
+  // next opening asks again.
+  Future<void> _agree(Map<Consent, bool> given) async {
     if (_agreeing) return;
     _agreeing = true;
     final journal = _journal!;
-    final consents = Consents.answered({Consent.readings: true}, journal.now());
+    final consents = Consents.answered(given, journal.now());
     try {
       await journal.keepConsents(consents);
     } on Object {

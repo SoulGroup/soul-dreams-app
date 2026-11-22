@@ -1,8 +1,10 @@
 // Onboarding (main-path.md, Onboarding; D103): the welcome, the note, the
 // age question, the under-18 card, and the disclosure's first layer on two
-// pages with one consent; MP·58 opens every part, and back returns to the
-// consent. Every word is the register's; a part with no line shows nothing
-// in its place (D106 3).
+// pages, the second ending in the three consents (MP·66 to MP·70; D122);
+// MP·58 opens every part, and back returns to the consents. Every word is
+// the register's; a part with no line shows nothing in its place (D106 3).
+import 'dart:ui' show Tristate;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/app.dart';
@@ -13,24 +15,31 @@ import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/onboarding/age.dart';
 import 'package:souldreams/onboarding/disclosure_page.dart';
 import 'package:souldreams/onboarding/onboarding.dart';
+import 'package:souldreams/settings/consent_page.dart';
+import 'package:souldreams/settings/consents.dart';
 import 'package:souldreams/words/lines.g.dart';
 
 String w(Line line) => line.parts(appLanguage).join('\n');
 
 Finder said(Line line) => find.text(w(line));
 
-/// The consent button: MP·67's first part, in place of the retired MP·8
-/// (D119).
-Finder consent() => find.text(Lines.MP_67.parts(appLanguage).first);
+/// The readings consent's "I consent" (MP·67's first part; D122).
+Finder consent() => find.byKey(ConsentChoice.keyOf(Consent.readings, true));
 
 void main() {
   late int agreed;
+  Map<Consent, bool>? answers;
+
+  void told(Map<Consent, bool> given) {
+    agreed++;
+    answers = given;
+  }
 
   Future<void> start(WidgetTester tester) async {
     agreed = 0;
     await tester.pumpWidget(SoulDreamsApp(
       clock: () => DateTime(2026, 6, 10, 12),
-      home: Onboarding(onAgreed: () => agreed++),
+      home: Onboarding(onAgreed: told),
     ));
     await tester.pumpAndSettle();
   }
@@ -126,12 +135,37 @@ void main() {
       expect(said(line), findsOneWidget, reason: line.handle);
     }
     expect(said(Lines.W27_1), findsNothing);
-    expect(find.byType(ButtonRow), findsOneWidget);
-    expect(consent(), findsOneWidget);
-    expect(find.text(Lines.MP_67.parts(appLanguage)[1]), findsNothing);
-    expect(said(Lines.EM_6), findsOneWidget);
-    // EM·6 left, the consent right (the plan's question 6; D119).
-    expect(tester.getCenter(said(Lines.EM_6)).dx, lessThan(tester.getCenter(consent()).dx));
+    // MP·66, then each consent's text over its two choices, in order (D122).
+    final order = [Lines.MP_57, Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_70];
+    final ys = [for (final line in order) tester.getTopLeft(said(line)).dy];
+    expect(ys, [...ys]..sort());
+    expect(find.byType(ConsentChoice), findsNWidgets(3));
+    for (final (i, c) in Consent.values.indexed) {
+      final yes = find.byKey(ConsentChoice.keyOf(c, true));
+      final no = find.byKey(ConsentChoice.keyOf(c, false));
+      expect(find.descendant(of: yes, matching: find.text(Lines.MP_67.parts(appLanguage)[0])), findsOneWidget);
+      expect(find.descendant(of: no, matching: find.text(Lines.MP_67.parts(appLanguage)[1])), findsOneWidget);
+      // Side by side, under its own text.
+      expect(tester.getCenter(yes).dy, tester.getCenter(no).dy);
+      expect(tester.getTopLeft(yes).dy, greaterThan(ys[i + 2]));
+      // Neither chosen beforehand.
+      expect(tester.getSemantics(yes).flagsCollection.isSelected, Tristate.isFalse);
+      expect(tester.getSemantics(no).flagsCollection.isSelected, Tristate.isFalse);
+    }
+    // EM·6 left, Next right (the stop's question 3; D122).
+    expect(tester.getCenter(said(Lines.EM_6)).dx, lessThan(tester.getCenter(said(Lines.MP_30)).dx));
+  });
+
+  // D122: MP·68 and MP·70 show as filed, their owed sentences in braces
+  // (Dev only), and MP·69 whole.
+  testWidgets('the three consents show their lines as filed', (tester) async {
+    await start(tester);
+    await toDisclosure(tester);
+    await tap(tester, Lines.MP_30);
+    for (final line in [Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_70]) {
+      expect(said(line), findsOneWidget, reason: line.handle);
+    }
+    expect(w(Lines.MP_68), contains('{'));
   });
 
   testWidgets('the first layer only: no part of the full page alone', (tester) async {
@@ -170,7 +204,7 @@ void main() {
     await tester.pumpWidget(SoulDreamsApp(
       clock: () => DateTime(2026, 6, 10, 12),
       home: Onboarding(
-        onAgreed: () => agreed++,
+        onAgreed: told,
         first: const [Lines.W27_1, none],
         second: const [none, Lines.W27_14],
         full: const [none, Lines.W27_3],
@@ -191,7 +225,7 @@ void main() {
   });
 
   test('the pages default to their parts', () {
-    final o = Onboarding(onAgreed: () {});
+    final o = Onboarding(onAgreed: (_) {});
     expect(o.first, Onboarding.firstPage);
     expect(o.second, Onboarding.secondPage);
     expect(o.full, DisclosurePage.parts);
@@ -226,7 +260,7 @@ void main() {
   testWidgets('the words appear all at once, not word by word', (tester) async {
     await tester.pumpWidget(SoulDreamsApp(
       clock: () => DateTime(2026, 6, 10, 12),
-      home: Onboarding(onAgreed: () => agreed++),
+      home: Onboarding(onAgreed: told),
     ));
     await tester.pump();
     final rich = tester.widgetList<RichText>(find.descendant(of: find.byType(AppLine), matching: find.byType(RichText)));
@@ -297,13 +331,32 @@ void main() {
     expect(agreed, 0);
   });
 
-  testWidgets('I agree is told once', (tester) async {
+  Future<void> answer(WidgetTester tester, Consent c, bool given) async {
+    final f = find.byKey(ConsentChoice.keyOf(c, given));
+    await tester.ensureVisible(f);
+    await tester.tap(f);
+    await tester.pumpAndSettle();
+  }
+
+  // D122: Next waits until all three are answered; then the answers are
+  // told once, and any answers open the journal, all three refused too.
+  testWidgets('Next waits for all three answers, then tells them once', (tester) async {
     await start(tester);
     await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
-    await tester.tap(consent());
-    await tester.pumpAndSettle();
+    await answer(tester, Consent.readings, true);
+    await answer(tester, Consent.images, false);
+    await tap(tester, Lines.MP_30);
+    expect(agreed, 0);
+    await answer(tester, Consent.lifeContext, false);
+    // A choice can be changed before Next; the chosen one is marked.
+    await answer(tester, Consent.readings, false);
+    final no = find.byKey(ConsentChoice.keyOf(Consent.readings, false));
+    expect(tester.getSemantics(no).flagsCollection.isSelected, Tristate.isTrue);
+    expect(tester.getSemantics(consent()).flagsCollection.isSelected, Tristate.isFalse);
+    await tap(tester, Lines.MP_30);
     expect(agreed, 1);
+    expect(answers, {Consent.readings: false, Consent.lifeContext: false, Consent.images: false});
   });
 
   testWidgets('Read everything opens every part; back returns to the consent', (tester) async {
