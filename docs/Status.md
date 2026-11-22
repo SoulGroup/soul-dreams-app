@@ -1403,8 +1403,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - D126 (owner, standing; replaces D95's timing): the full app mutation run happens once per branch: after the owner's
   by-eye look has passed and any correction rounds are done, immediately before the merge, when the Build chat asks
-  for it. During tasks and correction rounds, only the rows for the files changed. In `redesign-c` it has not run in
-  full since D124; the rows for the changed files have, and are caught.
+  for it. During tasks and correction rounds, only the rows for the files changed. In `redesign-c` it ran once, at
+  `bb5a15a`, after the owner's look: 624 run, 622 caught; the two survivors (A480 and A545, the braced-sentence
+  scan, which no screen reaches now that D128 took MP·68 off every screen) were fixed by a test of the helper on the
+  filed braced lines and a row that reaches one, and both are caught.
 - D127 (founder, a correction round, by eye): (1) onboarding: no consents inside the full disclosure page (the text
   only, with back); page two ends with the disclosure parts, MP·58 "Read everything" (optional), then EM·6 "I don't
   agree" left and MP·100 "I agree" right, equal, neither pre-chosen; "I agree" accepts the disclosure and gives

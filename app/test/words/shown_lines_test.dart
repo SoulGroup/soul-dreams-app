@@ -92,6 +92,10 @@ void main() {
     expect(seen, isNot(contains('MP_70')));
     expect(seen, isNot(contains('all')), reason: 'a screen reaching Lines.all would hide what it shows');
     expect(bracedIn(seen), isEmpty);
+    // No braced sentence is shown on any screen now; the helper itself is
+    // proved on the filed ones, MP·68 and MP·70 ("to rewrite"), by name.
+    expect(bracedIn({'MP_68', 'MP_70'}), ['MP·68', 'MP·70']);
+    expect(bracedIn({'MP_11', 'MP_76'}), isEmpty);
   });
 
   test('every place the screens name is in the register', () {

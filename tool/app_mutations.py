@@ -2144,7 +2144,7 @@ ROWS = [
     # D119 item 2 (the owner's addition): no shown line holds an unfilled braced sentence
     ('A480', 'lib/main.dart',
      "import 'core/safe_log.dart';\n",
-     "import 'core/safe_log.dart';\nimport 'settings/consent_page.dart';\n",
+     "import 'core/safe_log.dart';\nconst _owed = Lines.MP_68;\n",
      'test/words/shown_lines_test.dart', 'no tester or founder build shows a braced sentence'),
     ('A481', 'test/words/shown_lines_test.dart',
      "    rest = rest.replaceAll(slot, '');\n",
