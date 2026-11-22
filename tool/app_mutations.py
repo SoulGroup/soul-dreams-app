@@ -1,20 +1,27 @@
 # The app's mutation checks (D49 c), run by hand from the repository
 # root: python3 -I -B tool/app_mutations.py
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
+# Parallel by default (D129), each worker in its own copy of app/ in
+# $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
 # Expected: every row "caught" (A1 to A664, A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
 # the later rulings and the final review among them), then "app
-# mutations: 624 run, 624 caught", exit 0. Each row breaks one thing in app/, in place, runs the
+# mutations: 624 run, 624 caught", exit 0. Each row breaks one thing in app/ (with --serial, in
+# place; else in a worker's copy), runs the
 # named test with the pinned Flutter (fvm), which must pass unbroken
 # and fail broken, and puts the file back byte for byte, whatever
 # happens. check_all.sh does not call it. It reports row codes only,
 # through the checks' own writer. Exit 0 when every row is caught, 1
 # otherwise.
 import os
+import queue
+import shutil
 import subprocess
 import sys
+import tempfile
+import threading
 
 TOOL = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(TOOL, 'checks'))
@@ -2702,65 +2709,192 @@ ROWS = [
 ]
 
 
-def run(test, name):
+def run(test, name, app=None):
     r = subprocess.run(['fvm', 'flutter', 'test', '--no-pub', test, '--plain-name', name],
-                       cwd=APP, capture_output=True)
+                       cwd=app or APP, capture_output=True)
     return r.returncode
 
 
-def run_row(code, path, old, new, test, name):
-    full = os.path.join(APP, path)
+PATTERN = 'SETUP FAILED (pattern not found once)'
+UNBROKEN = 'SETUP FAILED (the test fails unbroken)'
+
+
+# Breaks the file in `app`, runs the test, and puts the file back byte
+# for byte, whatever happens. True when the broken test fails.
+def run_broken(app, path, old, new, test, name):
+    full = os.path.join(app, path)
     with open(full, 'rb') as f:
         original = f.read()
-    text = original.decode('utf-8')
-    if text.count(old) != 1:
-        return 'SETUP FAILED (pattern not found once)'
-    if run(test, name) != 0:
-        return 'SETUP FAILED (the test fails unbroken)'
     try:
         with open(full, 'wb') as f:
-            f.write(text.replace(old, new).encode('utf-8'))
-        caught = run(test, name) != 0
+            f.write(original.decode('utf-8').replace(old, new).encode('utf-8'))
+        return run(test, name, app) != 0
     finally:
         with open(full, 'wb') as f:
             f.write(original)
-    return 'caught' if caught else 'SURVIVED'
 
 
-# The rows to run, in order, or None for bad arguments (D95). No argument:
-# every row. `--rows A1,A7` names rows by code; `--files lib/a.dart,lib/b.dart`
-# takes every row that breaks one of those files (a path may start with
-# `app/`). Both together: the rows either asks for.
+def found_once(app, path, old):
+    with open(os.path.join(app, path), 'rb') as f:
+        return f.read().decode('utf-8').count(old) == 1
+
+
+# --serial: one row at a time in app/ itself, as before D129.
+def run_row(code, path, old, new, test, name):
+    if not found_once(APP, path, old):
+        return PATTERN
+    if run(test, name) != 0:
+        return UNBROKEN
+    return 'caught' if run_broken(APP, path, old, new, test, name) else 'SURVIVED'
+
+
+# Not copied: Flutter's caches (each copy makes its own) and the
+# editors' folders.
+SKIP = {'build', '.claude', '.idea', os.path.join('.dart_tool', 'flutter_build')}
+
+
+# A worker's copy: root/wK/app, with root/wK/fixtures beside it, as
+# the tests read ../fixtures/invented-nights.json.
+def copy_app(root, k):
+    top = os.path.join(root, 'w%d' % k)
+
+    def skip(folder, names):
+        here = os.path.relpath(folder, APP)
+        return [n for n in names if os.path.normpath(os.path.join(here, n)) in SKIP]
+
+    shutil.copytree(APP, os.path.join(top, 'app'), symlinks=True, ignore=skip)
+    fixtures = os.path.join(os.path.dirname(APP), 'fixtures')
+    if os.path.isdir(fixtures):
+        shutil.copytree(fixtures, os.path.join(top, 'fixtures'), symlinks=True)
+    return os.path.join(top, 'app')
+
+
+# Each worker owns one copy and takes the next item until none is left.
+# The results come back in the items' order; an error in any worker
+# stops every worker and is raised here.
+def pool(copies, items, work):
+    results = [None] * len(items)
+    todo = queue.Queue()
+    for i in range(len(items)):
+        todo.put(i)
+    errors = []
+    stop = threading.Event()
+
+    def worker(app):
+        while not stop.is_set():
+            try:
+                i = todo.get_nowait()
+            except queue.Empty:
+                return
+            try:
+                results[i] = work(app, items[i])
+            except BaseException as e:  # noqa: B036 (raised again below)
+                errors.append(e)
+                stop.set()
+
+    threads = [threading.Thread(target=worker, args=(app,), daemon=True) for app in copies]
+    for t in threads:
+        t.start()
+    try:
+        for t in threads:
+            t.join()
+    finally:
+        stop.set()
+    if errors:
+        raise errors[0]
+    return results
+
+
+# Parallel (D129), the default: the serial verdicts, faster. The same
+# pattern check, on app/; then each test and name runs once unbroken
+# (nothing in a copy changes between rows, as every row puts its file
+# back), and each row whose test passes runs broken in one copy. The
+# real app/ is only read; the copies go at the end, whatever happens.
+def run_parallel(rows, jobs):
+    results = [PATTERN] * len(rows)
+    ready = [i for i, row in enumerate(rows) if found_once(APP, row[1], row[2])]
+    if not ready:
+        return results
+    root = tempfile.mkdtemp(prefix='app-mutations-')
+    try:
+        copies = [copy_app(root, k) for k in range(min(jobs, len(ready)))]
+        pairs = sorted({(rows[i][4], rows[i][5]) for i in ready})
+        passing = pool(copies, pairs, lambda app, pair: run(pair[0], pair[1], app) == 0)
+        passes = dict(zip(pairs, passing))
+        breaking = [i for i in ready if passes[(rows[i][4], rows[i][5])]]
+        caught = pool(copies, breaking, lambda app, i: run_broken(app, *rows[i][1:]))
+    finally:
+        shutil.rmtree(root, ignore_errors=True)
+    for i in ready:
+        results[i] = UNBROKEN
+    for i, c in zip(breaking, caught):
+        results[i] = 'caught' if c else 'SURVIVED'
+    return results
+
+
+# Two fewer than the Mac's cores, at most JOBS_MAX (D129); --jobs N
+# overrides it.
+JOBS_MAX = 8
+
+
+def default_jobs():
+    return max(1, min(JOBS_MAX, (os.cpu_count() or 1) - 2))
+
+
+# The rows to run, in order, and how, or None for bad arguments (D95,
+# D129). No row argument: every row. `--rows A1,A7` names rows by code;
+# `--files lib/a.dart,lib/b.dart` takes every row that breaks one of
+# those files (a path may start with `app/`). Both together: the rows
+# either asks for. `--jobs N` (N from 1) sets the workers; `--serial`
+# runs as before D129, and takes no --jobs.
 def select(argv):
-    codes, files = None, None
+    codes, files, jobs, serial = None, None, None, False
     i = 0
     while i < len(argv):
         flag = argv[i]
-        if flag not in ('--rows', '--files') or i + 1 >= len(argv) or not argv[i + 1]:
+        if flag == '--serial' and not serial:
+            serial = True
+            i += 1
+            continue
+        if flag not in ('--rows', '--files', '--jobs') or i + 1 >= len(argv) or not argv[i + 1]:
             return None
         values = argv[i + 1].split(',')
         if flag == '--rows':
             codes = (codes or []) + values
-        else:
+        elif flag == '--files':
             files = (files or []) + [v[4:] if v.startswith('app/') else v for v in values]
+        elif jobs is not None or not argv[i + 1].isdigit() or int(argv[i + 1]) < 1:
+            return None
+        else:
+            jobs = int(argv[i + 1])
         i += 2
-    if codes is None and files is None:
-        return list(ROWS)
+    if serial and jobs is not None:
+        return None
     if codes is not None and not set(codes) <= {row[0] for row in ROWS}:
         return None
-    return [row for row in ROWS if row[0] in (codes or []) or row[1] in (files or [])]
+    if codes is None and files is None:
+        rows = list(ROWS)
+    else:
+        rows = [row for row in ROWS if row[0] in (codes or []) or row[1] in (files or [])]
+    return rows, serial, jobs or default_jobs()
 
 
 def main(argv=()):
-    rows = select(list(argv))
-    if rows is None:
+    chosen = select(list(argv))
+    if chosen is None:
         report('app mutations: bad arguments')
         return 2
-    caught = 0
-    for row in rows:
-        result = run_row(*row)
-        caught += result == 'caught'
-        report('%s: %s' % (row[0], result))
+    rows, serial, jobs = chosen
+    if serial:
+        results = []
+        for row in rows:
+            results.append(run_row(*row))
+            report('%s: %s' % (row[0], results[-1]))
+    else:
+        results = run_parallel(rows, jobs)
+        for row, result in zip(rows, results):
+            report('%s: %s' % (row[0], result))
+    caught = results.count('caught')
     report('app mutations: %d run, %d caught' % (len(rows), caught))
     return 0 if caught == len(rows) else 1
 
