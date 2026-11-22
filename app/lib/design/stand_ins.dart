@@ -121,4 +121,14 @@ abstract final class StandIns {
   /// frames it draws (main-path.md, Recording; D71 Q7).
   static const double levelHeight = 24;
   static const int levelFrames = 48;
+
+  /// Life Context's page (D110; D131; the founder's screen, TO TRY): inside
+  /// a kept sentence's box, the space between its words and its date, the
+  /// edit and delete icons and their tap boxes, and the dark theme's delete
+  /// icon, #D0775A, proposed by C18-P for the founder to approve (#8F3D24
+  /// fails on the dark box).
+  static const keptPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 14);
+  static const double keptDateGap = 4;
+  static const double keptIcon = 20;
+  static const keptDeleteDark = Color(0xFFD0775A);
 }

@@ -19,7 +19,8 @@
 // Bold. The query lives only while the page does: never kept, never logged
 // (R3), no recent searches.
 // The search field sits to the right of the settings button, on its row; the
-// sky mark stays 140 down.
+// sky mark stays 140 down. Settings is handed Life Context, whose page opens
+// a night here as a row does (D131).
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
+import '../../life_context/life_context.dart';
 import '../../settings/settings_controller.dart';
 import '../../settings/settings_page.dart';
 import '../greeting.dart';
@@ -56,6 +58,7 @@ class JournalPage extends StatefulWidget {
     this.nightAction,
     this.read = noneRead,
     this.settings,
+    this.lifeContext,
     this.images = true,
     this.agreed = true,
   });
@@ -85,6 +88,9 @@ class JournalPage extends StatefulWidget {
 
   /// The settings and the consents, which the gear opens (D122), or null.
   final SettingsController? settings;
+
+  /// Life Context, handed to Settings (D131), or null.
+  final LifeContext? lifeContext;
 
   /// False while Night images is Off: every night shows the gradient
   /// (D121 item 3).
@@ -186,6 +192,19 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     await _load();
   }
 
+  // A night, as its row opens it, with no search (Life Context's page, D131).
+  Future<void> _openNight(String id) => _push(
+    NightPage(
+      journal: widget.journal,
+      id: id,
+      recording: widget.recording,
+      action: widget.nightAction,
+      read: widget.read,
+      images: widget.images,
+      agreed: widget.agreed,
+    ),
+  );
+
   // A typing screen is opening or open: another tap opens nothing, so one
   // evening's dreams never go to two nights (the final review).
   bool _recording = false;
@@ -251,7 +270,16 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
             Row(
               children: [
                 if (widget.settings case final settings?) ...[
-                  _Gear(onPressed: () => _push(SettingsPage(journal: widget.journal, settings: settings))),
+                  _Gear(
+                    onPressed: () => _push(
+                      SettingsPage(
+                        journal: widget.journal,
+                        settings: settings,
+                        lifeContext: widget.lifeContext,
+                        openNight: _openNight,
+                      ),
+                    ),
+                  ),
                   const SizedBox(width: StandIns.searchGap),
                 ],
                 Expanded(

@@ -102,7 +102,7 @@ void main() {
     expect(tester.widget<CupertinoDialogAction>(back).isDestructiveAction, isFalse);
   }
 
-  testWidgets('the page: its title, six rows, then three actions', (tester) async {
+  testWidgets('the page: its title, six rows, the kept row, the actions', (tester) async {
     await open(tester);
     expect(find.text(en(Lines.MP_25)), findsOneWidget);
     final names = [
@@ -112,6 +112,7 @@ void main() {
       'Night/Day mode',
       'Life Context',
       'Life Context length',
+      en(Lines.MP_86),
     ];
     final ys = [for (final n in names) tester.getCenter(find.text(n)).dy];
     expect(ys, [...ys]..sort());
@@ -129,9 +130,11 @@ void main() {
     // D128 item 2: no Give or Withdraw consent, no row for it.
     expect(find.text(en(Lines.MP_95, 0)), findsNothing);
     expect(find.text(en(Lines.MP_95, 1)), findsNothing);
-    // Nothing of Feedback (D121 item 4) or of what Life Context keeps.
+    // Nothing of Feedback (D121 item 4); What you've told Soul Dreams is the
+    // row after the six (MP·86's flag; D131), above the actions.
     expect(find.text(en(Lines.MP_49)), findsNothing);
-    expect(find.text(en(Lines.MP_86)), findsNothing);
+    final page = tester.getCenter(find.byKey(SettingsPage.keptKey)).dy;
+    expect(tester.getCenter(find.byKey(SettingsPage.disclosureKey)).dy, greaterThan(page));
     final delete = tester.getCenter(find.byKey(SettingsPage.deleteKey)).dy;
     expect(tester.getCenter(find.byKey(SettingsPage.disclosureKey)).dy, lessThan(delete));
   });

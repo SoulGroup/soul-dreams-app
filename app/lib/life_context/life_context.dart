@@ -21,6 +21,7 @@ import '../core/safe_log.dart';
 import '../journal/journal.dart';
 import '../journal/night_rules.dart';
 import '../settings/consents.dart';
+import '../settings/settings.dart';
 import '../settings/settings_controller.dart';
 import 'kept.dart';
 
@@ -33,6 +34,9 @@ final class LifeContext extends ChangeNotifier {
 
   /// Whether Life Context is on: consent (b) is given.
   bool get on => _settings.consents.given(Consent.lifeContext);
+
+  /// The Recent window as set (MP·84).
+  LifeContextLength get length => _settings.settings.length;
 
   /// Keeps the sentences of [text], said now in night [night], when Life
   /// Context is on. Returns how many were kept. Nothing calls it yet: its
@@ -54,7 +58,6 @@ final class LifeContext extends ChangeNotifier {
   Future<List<Kept>> recent() async {
     if (!on) return const [];
     final today = dateOf(_journal.now(), _journal.zone);
-    final length = _settings.settings.length;
     return newestFirst([for (final k in await _journal.kept()) if (inWindow(k, today, length)) k]);
   }
 
@@ -65,7 +68,7 @@ final class LifeContext extends ChangeNotifier {
   Future<void> sweep() async {
     try {
       if (!on) return await _journal.deleteAllKept();
-      final gone = await _journal.sweepKept(_settings.settings.length);
+      final gone = await _journal.sweepKept(length);
       if (gone > 0) SafeLog.event(LogEvent.keptExpired, [gone]);
     } on Object {
       SafeLog.event(LogEvent.keptDeleteFailed);

@@ -2,7 +2,12 @@
 // generated design values (design-system.md §2, §3), so that every page
 // fades with the theme when Night/Day mode changes it (§6). No value is
 // typed here except the dark field's absent border ("no border", §3); the
-// journal row's grey border is a stand-in from stand_ins.dart (D115).
+// journal row's grey border is a stand-in from stand_ins.dart (D115). Life
+// Context's page (§2, §3, color.lifecontext.*): a kept sentence's box, its
+// words and its date; the light box's edge is the surface's (the founder's
+// screen), and the dark delete icon a stand-in, #D0775A, proposed by C18-P
+// and not yet approved; its list labels take color.tag.dream (a stand-in
+// read from the founder's screen).
 import 'package:flutter/material.dart';
 
 import 'stand_ins.dart';
@@ -32,6 +37,15 @@ final class Palette extends ThemeExtension<Palette> {
     required this.sectionBottom,
     required this.sectionText,
     required this.rowBorder,
+    required this.keptTop,
+    required this.keptBottom,
+    required this.keptBorder,
+    required this.keptText,
+    required this.keptDate,
+    required this.keptDelete,
+    required this.tagTop,
+    required this.tagBottom,
+    required this.tagText,
   });
 
   final Color page;
@@ -55,6 +69,15 @@ final class Palette extends ThemeExtension<Palette> {
   final Color sectionBottom;
   final Color sectionText;
   final Color rowBorder;
+  final Color keptTop;
+  final Color keptBottom;
+  final Color keptBorder;
+  final Color keptText;
+  final Color keptDate;
+  final Color keptDelete;
+  final Color tagTop;
+  final Color tagBottom;
+  final Color tagText;
 
   static final light = Palette(
     page: LightColours.page.colour!,
@@ -78,6 +101,15 @@ final class Palette extends ThemeExtension<Palette> {
     sectionBottom: LightColours.labelSection.colourEnd!,
     sectionText: LightColours.labelSection.text!,
     rowBorder: StandIns.rowBorderLight,
+    keptTop: LightColours.lifecontextBox.colour!,
+    keptBottom: LightColours.lifecontextBox.colour!,
+    keptBorder: LightColours.surfaceBorder.border!,
+    keptText: LightColours.text.colour!,
+    keptDate: LightColours.lifecontextDate.colour!,
+    keptDelete: LightColours.lifecontextDelete.colour!,
+    tagTop: LightColours.tagDream.colour!,
+    tagBottom: LightColours.tagDream.colourEnd!,
+    tagText: LightColours.tagDream.text!,
   );
 
   static final dark = Palette(
@@ -102,6 +134,15 @@ final class Palette extends ThemeExtension<Palette> {
     sectionBottom: DarkColours.labelSection.colourEnd!,
     sectionText: DarkColours.labelSection.text!,
     rowBorder: StandIns.rowBorderDark,
+    keptTop: DarkColours.lifecontextBox.colour!,
+    keptBottom: DarkColours.lifecontextBox.colourEnd!,
+    keptBorder: DarkColours.lifecontextBox.border!,
+    keptText: DarkColours.lifecontextText.colour!,
+    keptDate: DarkColours.lifecontextDate.colour!,
+    keptDelete: StandIns.keptDeleteDark,
+    tagTop: DarkColours.tagDream.colour!,
+    tagBottom: DarkColours.tagDream.colourEnd!,
+    tagText: DarkColours.tagDream.text!,
   );
 
   static Palette of(BuildContext context) => Theme.of(context).extension<Palette>()!;
@@ -135,6 +176,15 @@ final class Palette extends ThemeExtension<Palette> {
       sectionBottom: c(sectionBottom, other.sectionBottom),
       sectionText: c(sectionText, other.sectionText),
       rowBorder: c(rowBorder, other.rowBorder),
+      keptTop: c(keptTop, other.keptTop),
+      keptBottom: c(keptBottom, other.keptBottom),
+      keptBorder: c(keptBorder, other.keptBorder),
+      keptText: c(keptText, other.keptText),
+      keptDate: c(keptDate, other.keptDate),
+      keptDelete: c(keptDelete, other.keptDelete),
+      tagTop: c(tagTop, other.tagTop),
+      tagBottom: c(tagBottom, other.tagBottom),
+      tagText: c(tagText, other.tagText),
     );
   }
 }

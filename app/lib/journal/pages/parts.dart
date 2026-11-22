@@ -97,6 +97,36 @@ class ButtonRow extends StatelessWidget {
   );
 }
 
+/// A destructive pill in color.destructive, white words (the Design System
+/// §2): Delete journal, Life Context's Delete all and Delete selected; told
+/// apart by its place and its word as well (§3). Without [onPressed] it is
+/// shown and does nothing.
+class DestructivePill extends StatelessWidget {
+  const DestructivePill(this.text, {super.key, required this.onPressed});
+
+  final String text;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    const role = LightColours.destructive;
+    return Semantics(
+      button: true,
+      enabled: onPressed != null,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: DecoratedBox(
+          decoration: _pill(role.colour!, role.colourEnd!),
+          child: Padding(
+            padding: StandIns.buttonPadding,
+            child: Text(text, textAlign: TextAlign.center, style: TypeRoles.button.style(role.text!)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A surface: a dreamer's bubble (color.surface, radius).
 BoxDecoration surface(Palette p) => BoxDecoration(
   gradient: LinearGradient(

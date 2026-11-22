@@ -9,14 +9,16 @@
 // below it (D128 item 6), opening the phone's menu: Language (EM·9; English
 // only, its name owed, D121 item 1), Word Animation (MP·26), Night images
 // (MP·85), Night/Day mode (MP·44), Life Context (MP·83) and Life Context
-// length (MP·84); then "Read disclosure & privacy" (MP·48) and "Delete
-// journal" (EM·11) in the destructive style. No feedback (D121 item 4), no
+// length (MP·84); then the row opening "What you've told Soul Dreams"
+// (MP·86, its flag; D121 item 2; D131), its name and a chevron; then "Read
+// disclosure & privacy" (MP·48) and "Delete journal" (EM·11) in the
+// destructive style. No feedback (D121 item 4), no
 // region, and no way to give or withdraw consent: each feature is the
 // dreamer's own act (D128 item 2).
 //
 // Life Context On shows its page (ConsentPage: Back, Turn on); Off asks MP·93
-// (what is kept goes). Before the dreamer has agreed, a tap on that row shows
-// the popup (MP·101, MP·102) and changes nothing; the Disclosure & privacy
+// (what is kept goes). Before the dreamer has agreed, a tap on that row, or
+// on MP·86's, shows the popup (MP·101, MP·102) and changes nothing; the Disclosure & privacy
 // page then ends with one button, MP·100, which agrees (D128 item 3). Night
 // images asks nothing (D125 item 8). Delete journal asks once (C4-P·4), then
 // everything goes and the app starts again (D110). Each confirmation is the
@@ -35,6 +37,8 @@ import '../journal/journal.dart';
 import '../journal/pages/parts.dart';
 import '../journal/pages/sky_mark.dart';
 import '../journal/sky.dart';
+import '../life_context/life_context.dart';
+import '../life_context/life_context_page.dart';
 import '../onboarding/disclosure_page.dart';
 import '../words/lines.g.dart';
 import '../words/pending.g.dart';
@@ -53,15 +57,22 @@ const owedLanguage = '[owed·language]';
 enum SettingRow { language, wordAnimation, nightImages, nightDay, lifeContext, length }
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, required this.journal, required this.settings});
+  const SettingsPage({super.key, required this.journal, required this.settings, this.lifeContext, this.openNight});
 
   final Journal journal;
   final SettingsController settings;
+
+  /// Life Context, whose page MP·86's row opens, or null (no row).
+  final LifeContext? lifeContext;
+
+  /// Opens a night from Life Context's page, or null.
+  final Future<void> Function(String id)? openNight;
 
   static const toggleKey = Key('settings-toggle');
   static const disclosureKey = Key('settings-disclosure');
   static const agreeKey = Key('settings-agree');
   static const deleteKey = Key('settings-delete');
+  static const keptKey = Key('settings-kept');
 
   /// A row, whole.
   static Key rowKey(SettingRow row) => ValueKey('setting-row-${row.name}');
@@ -175,6 +186,15 @@ class _SettingsPageState extends State<SettingsPage> {
     ),
   );
 
+  // What you've told Soul Dreams (MP·86); before the dreamer has agreed, the
+  // popup, as for the Life Context row (D128 item 3).
+  Future<void> _openKept(LifeContext life) async {
+    if (!_c.agreed) return showAgreementPopup(context);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => LifeContextPage(lifeContext: life, openNight: widget.openNight)),
+    );
+  }
+
   void _length(int i) => _c.change(_c.settings.copyWith(length: LifeContextLength.values[i]));
 
   // Delete journal (D110): one confirmation; then everything goes, and the
@@ -248,6 +268,8 @@ class _SettingsPageState extends State<SettingsPage> {
               row(SettingRow.nightDay, Lines.MP_44, s.nightDay == NightDayMode.automatic ? 0 : 1, _nightDay),
               row(SettingRow.lifeContext, Lines.MP_83, c.given(Consent.lifeContext) ? 0 : 1, _lifeContext),
               row(SettingRow.length, Lines.MP_84, s.length.index, _length),
+              if (widget.lifeContext case final life?)
+                _PageRow(name: Lines.MP_86.text(appLanguage), onTap: () => _openKept(life)),
               const SizedBox(height: StandIns.listAbove),
               _action(
                 PlainButton(
@@ -257,7 +279,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
               const SizedBox(height: Spacing.journalRow),
-              _action(_Destructive(Lines.EM_11.parts(appLanguage).first, onPressed: _delete)),
+              _action(
+                DestructivePill(key: SettingsPage.deleteKey, Lines.EM_11.parts(appLanguage).first, onPressed: _delete),
+              ),
             ],
           ),
         ),
@@ -365,6 +389,50 @@ class _Row extends StatelessWidget {
   );
 }
 
+/// A row opening a page: a white rounded row as the settings' rows, its
+/// name and a chevron (a stand-in, TO TRY).
+class _PageRow extends StatelessWidget {
+  const _PageRow({required this.name, required this.onTap});
+
+  final String name;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: Spacing.journalRow),
+      child: Semantics(
+        button: true,
+        child: GestureDetector(
+          key: SettingsPage.keptKey,
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: DecoratedBox(
+            decoration: surface(p),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: StandIns.settingRowHeight),
+              child: Padding(
+                padding: StandIns.settingPadding,
+                child: Row(
+                  children: [
+                    Expanded(child: Text(name, style: TypeRoles.button.style(p.text))),
+                    const SizedBox(width: StandIns.searchGap),
+                    Padding(
+                      padding: const EdgeInsets.only(right: StandIns.searchGap),
+                      child: Chevron(colour: p.text, size: StandIns.settingChevron),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// The quick toggle (MP·45): a 41 bordered circle in a 44 tap box, showing
 /// what it switches to: a moon in the light theme, drawn in the dark theme's
 /// page colour, and a sun in the dark (the sky mark's drawing; D125 item 7).
@@ -407,41 +475,6 @@ class _Toggle extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Delete journal: a pill in color.destructive, white words (the Design
-/// System §2), told apart by its place and its word as well (§3).
-class _Destructive extends StatelessWidget {
-  const _Destructive(this.text, {required this.onPressed});
-
-  final String text;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    const role = LightColours.destructive;
-    return Semantics(
-      button: true,
-      child: GestureDetector(
-        key: SettingsPage.deleteKey,
-        onTap: onPressed,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [role.colour!, role.colourEnd!],
-            ),
-            borderRadius: BorderRadius.circular(Spacing.radius),
-          ),
-          child: Padding(
-            padding: StandIns.buttonPadding,
-            child: Text(text, style: TypeRoles.button.style(role.text!)),
           ),
         ),
       ),

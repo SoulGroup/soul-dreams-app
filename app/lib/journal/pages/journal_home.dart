@@ -240,6 +240,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         nightAction: widget.nightAction,
         read: widget.read,
         settings: _settings,
+        lifeContext: _lifeContext,
         images: _settings?.settings.images != NightImages.off,
         agreed: _settings?.agreed ?? true,
       ),
