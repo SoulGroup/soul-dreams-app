@@ -75,10 +75,11 @@ void main() {
     });
   }
 
-  // C17-P filed every pending line, so nothing reaches pending.g.dart
-  // until the owner gives the next one.
+  // C17-P filed every pending line; MP·98 and MP·99 (D125 item 9) are pending
+  // again, on Life Context's consent page: SoulDreams Dev reaches them.
   test('SoulDreams Dev reaches the journal pages', () {
     final files = reached('lib/main_dev.dart');
+    expect(files, contains(pending));
     expect(files, contains('lib/journal/search.dart'));
     expect(files, containsAll(['lib/settings/settings_page.dart', 'lib/settings/consent_page.dart']));
     expect(files, contains('lib/journal/pages/journal_page.dart'));

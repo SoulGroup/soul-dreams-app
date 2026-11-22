@@ -294,13 +294,13 @@ rulings given during each branch are listed in this file, one line each, under "
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 686 tests, and 636 mutation checks (A1 to A634; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 689 tests, and 640 mutation checks (A1 to A638; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A300, A301, A302, A313, A363, A375, A507, A526, A527, A530, A541, A549, A550, A566, A578 and A610
   dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 636 run, 636 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 640 run, 640 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -959,15 +959,17 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
 160. D125 item 2, for the owner: "I don't agree" stands alone at the second page's foot, centred, going back to the
      first page, and the full page has none (its back control returns to the second page); with no Next on the second
      page, MP·58 is the only way to the consents, and Next sits at the end of the page's scroll, not pinned.
-161. D125 item 6, for the owner: the half second applies to every change the dreamer makes (the toggle and the
-     Night/Day mode row); only the clock's 21:00 and 08:00 keep the five seconds. D125 item 10: the settings
+161. D125 item 6, confirmed by the owner: the half second applies to every change the dreamer makes (the toggle and
+     the Night/Day mode row); only the clock's 21:00 and 08:00 keep the five seconds. D125 item 10: the settings
      button's sliders (`_SlidersLine`) replace the gear, which is in git history (`8674d92`); the founder's eye
      decides, and nothing here could be looked at (R12).
-162. D125 item 9 is not done: the register has no places for "Back" and "Turn on" on Life Context's consent page
-     (MP·14 is the journal's way back; MP·94 is "Turn off"). Pending lines for the owner to write in
-     `pending-lines.csv`, handles avoiding every one C18-P uses (MP·66 to MP·97): `MP·98` EN "Back" / SV "Tillbaka",
-     and `MP·99` EN "Turn on" / SV "Slå på"; Product's next filing may take those numbers, and then the handles
-     change. Until then the page keeps MP·67's two choices.
+162. D125 item 9 is done (the owner added the pending lines MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på",
+     `pending-lines.csv` sha256 `1edd342b…a5e`, committed as given): Life Context's consent page, from Settings, has
+     Back on the left (answers no) and Turn on on the right (answers yes), in place of MP·67's pair, same keys, same
+     look, neither filled (`TurnOnChoice`; rows A635 to A638). Their words show in SoulDreams Dev only, a handle
+     elsewhere. Onboarding's end of the full page keeps MP·67's pair for Life Context, and the readings page
+     keeps it, since the ruling names only Life Context's consent page; Product's next filing may take MP·98 and
+     MP·99 (then the handles change).
 
 ## Before Cohort 1
 
@@ -1014,8 +1016,9 @@ message 20 and built in `journal-design`, except the night's page's field in 10,
 
 Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
 
-- None yet in the file. MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`),
-  and `pending-lines.csv` emptied to its header. D125 item 9 needs two, handles proposed in banked item 162.
+- MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
+  founder, 2026-11-22, D125 item 9; the owner wrote them in `pending-lines.csv`; handles proposed to Product, banked
+  item 162). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
 
 ## Rulings during branch 2
 
@@ -1369,8 +1372,8 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   in the dark theme's page colour, and a sun in the dark (the journal's greeting mark is unchanged, D112); (8) Night
   images has no consent at all: (c) is removed from onboarding and Settings, older files that hold (c) still read,
   only (a) and (b) are written (it amends C159-I item 5; the Build chat carries it to the head); (9) Life
-  Context's consent page buttons read "Back" and "Turn on": the register has no places for them, so this stopped
-  (banked item 162); (10) a different drawn icon for the gear, three sliders as a stand-in, the gear if nothing reads
+  Context's consent page buttons read "Back" and "Turn on": the register had no places for them, so this stopped
+  until the owner added the pending lines MP·98 and MP·99 (banked item 162), then it was built; (10) a different drawn icon for the gear, three sliders as a stand-in, the gear if nothing reads
   better. Done in `redesign-c` after `2938323`; items 9 and 10's look wait for the owner.
 
 ## Documents as last imported

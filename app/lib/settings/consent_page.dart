@@ -6,7 +6,10 @@
 // full disclosure page (MP·66 above them); Settings shows one on its own page
 // when a setting needs it (the stop's questions 6 and 10), whose back control
 // gives nothing. MP·68 is "to rewrite" and shows its owed sentence in braces,
-// as filed, in SoulDreams Dev only (D119 item 2; D122, Q1 (B)).
+// as filed, in SoulDreams Dev only (D119 item 2; D122, Q1 (B)). Life Context's
+// own page, from Settings, has two buttons of its own in place of MP·67's
+// pair: Back on the left, Turn on on the right, MP·98 and MP·99, pending
+// lines (D125 item 9), the same two keys, the same look, neither filled.
 import 'package:flutter/material.dart';
 
 import '../core/app_line.dart';
@@ -16,6 +19,7 @@ import '../design/stand_ins.dart';
 import '../design/tokens.g.dart';
 import '../journal/pages/parts.dart';
 import '../words/lines.g.dart';
+import '../words/pending.g.dart';
 import 'consents.dart';
 
 /// The consent's text: MP·68 (a), MP·69 (b).
@@ -81,9 +85,33 @@ class _Choice extends StatelessWidget {
   }
 }
 
+/// Life Context's two buttons, on its page from Settings (D125 item 9): Back
+/// on the left, which answers false, and Turn on on the right, which answers
+/// true, each under its [ConsentChoice] key, neither filled beforehand.
+class TurnOnChoice extends StatelessWidget {
+  const TurnOnChoice({super.key, required this.onChoose});
+
+  final ValueChanged<bool> onChoose;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget one(bool given, String text) => _Choice(
+      key: ConsentChoice.keyOf(Consent.lifeContext, given),
+      text: text,
+      chosen: false,
+      onTap: () => onChoose(given),
+    );
+    return ButtonRow(
+      left: one(false, PendingLines.MP_98.text(appLanguage)),
+      right: one(true, PendingLines.MP_99.text(appLanguage)),
+    );
+  }
+}
+
 /// One consent on its own page, from Settings: its text, then the two
-/// choices. Pops true for "I consent", false for "I don't consent", null
-/// for the back control.
+/// choices (Life Context: Back and Turn on). Pops true for "I consent" or
+/// "Turn on", false for "I don't consent" or "Back", null for the back
+/// control.
 class ConsentPage extends StatelessWidget {
   const ConsentPage({super.key, required this.consent});
 
@@ -116,7 +144,10 @@ class ConsentPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: StandIns.gap),
-              ConsentChoice(consent: consent, chosen: null, onChoose: (given) => Navigator.of(context).pop(given)),
+              if (consent == Consent.lifeContext)
+                TurnOnChoice(onChoose: (given) => Navigator.of(context).pop(given))
+              else
+                ConsentChoice(consent: consent, chosen: null, onChoose: (given) => Navigator.of(context).pop(given)),
             ],
           ),
         ),
