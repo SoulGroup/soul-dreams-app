@@ -69,6 +69,8 @@ void main() {
       expect(files.where((f) => f.startsWith('lib/journal/')), isEmpty);
       expect(files.where((f) => f.startsWith('lib/recording/')), isEmpty);
       expect(files.where((f) => f.startsWith('lib/onboarding/')), isEmpty);
+      // Settings and the consents (D122): SoulDreams Dev only.
+      expect(files.where((f) => f.startsWith('lib/settings/')), isEmpty);
       expect(files, isNot(contains(pending)));
     });
   }
@@ -78,6 +80,7 @@ void main() {
   test('SoulDreams Dev reaches the journal pages', () {
     final files = reached('lib/main_dev.dart');
     expect(files, contains('lib/journal/search.dart'));
+    expect(files, containsAll(['lib/settings/settings_page.dart', 'lib/settings/consent_page.dart']));
     expect(files, contains('lib/journal/pages/journal_page.dart'));
     expect(files, contains('lib/journal/pages/night_page.dart'));
     expect(files, contains('lib/recording/record_microphone.dart'));

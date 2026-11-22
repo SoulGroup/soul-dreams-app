@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-21, in branch `redesign-b` (C18-P imported, D118 and D119; the filed greeting, New Dream and jump buttons; search, D110, D116, D117; the owner's by-eye review, then the merge, next), by Claude Code.
+Last updated: 2026-11-22, in branch `redesign-c` (Settings, the gear and the three consents, D110, D121, D122; the owner's by-eye review, then the merge, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,14 +14,14 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`redesign-b`: C18-P's import (D118, D119), then search (D110, D116, D117; plan `docs/plans/redesign-b.md`).
-`redesign-a` is merged (`e81f29c`); its Status was not updated at the merge (this entry records it).
+`redesign-c`: Settings, the gear and the three consents (D110, D121, D122; plan `docs/plans/redesign-c.md`).
+`redesign-b` is merged (`8243128`); its Status was not updated at the merge (this entry records it).
 
 ## Road ahead
 
-- `redesign-b`: the owner's by-eye review (the plan's Task 6), then the merge.
-- Redesign B's rest and C (D110): Settings (with Word Animation's setting, and the gear, D116 item 5) and the
-  consent's controls, with C18-P's three consents (MP·66 to MP·70, D119 item 1); then Life Context, with C159-I's import, and "Made by AI". The curated set of night paintings (about 60, the founder's)
+- `redesign-c`: the owner's by-eye review (the plan's Task 7), then the merge.
+- Then Life Context (its page, MP·86 to MP·92, and what is kept), with C159-I's import, and "Made by AI"; Feedback, with
+  its server change (D121 item 4). The curated set of night paintings (about 60, the founder's)
   replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
   C17-P (and, for the founder app, with his export).
@@ -169,9 +169,9 @@ rulings given during each branch are listed in this file, one line each, under "
   control returns to the consent. "I agree" keeps `consent.json` in the journal's folder (`{"version":1,"over18":true}`,
   written whole and renamed; never the band), then the journal opens: the first time, its empty state adds MP·9 and a
   drawn arrow to the record button, once. The recording and its retries start only then. A consent that cannot be
-  read or kept logs `consentReadFailed` or `consentKeepFailed`; onboarding asks again at the next opening. When the
-  consent goes (`Journal.withdrawConsent`, or `Journal.deleteAll`, which takes it with every file), every page closes
-  and onboarding starts again; no control calls either yet (Settings, P8; the plan's question 3). A part with no line
+  read or kept logs `consentReadFailed` or `consentKeepFailed`; onboarding asks again at the next opening. Since
+  `redesign-c` the consent step holds the three consents (below), and only Delete journal (`Journal.deleteAll`, which
+  takes every file) closes every page and starts onboarding again; a consent withdrawn is an answer kept (D121 item 5). A part with no line
   would show nothing in its place, not its handle (D106 3); since C17-P every part shown has its line. Every step's box is centred between the top and the foot, and scrolls from the top when taller (D106 1), and
   its words appear whole (D106 2). The stand-ins: the box (`Spacing.onboardingBox` inside `color.surface`), the arrow (`StandIns.firstArrow`,
   `arrowGap`); no logo and no drawn signature (none filed).
@@ -255,14 +255,40 @@ rulings given during each branch are listed in this file, one line each, under "
   (D117 Q4), the told dreams in order, never a name, the first place. A result
   opens its night with the match in Inter Bold in its dream (D117 Q6), found again on each read, gone when the page
   goes. The query is never kept or logged (R3).
+- The three consents (C18-P, MP·66 to MP·70; C159-I item 5; D110; D121; D122; `redesign-c`; `app/lib/settings/`,
+  SoulDreams Dev only): onboarding's second page ends with MP·66, then the readings (a, MP·68), Life Context (b, MP·69)
+  and the night images (c, MP·70), each with MP·67's two choices side by side, equally prominent, neither chosen
+  beforehand, the chosen one filled (`color.button.filled`, a stand-in); EM·6 left as before, Next (MP·30) right,
+  inert until all three are answered; any answers open the journal. MP·68 and MP·70 show their owed sentences in
+  braces (Dev only, D122). Kept in `consent.json`, version 2: "18 or over" and each answer with the UTC day of its last
+  change; version 1 still reads as (a) given, (b) and (c) not (`consents.dart`). (a) not given: nothing leaves the
+  phone, so no microphone and no retries; every night kept; given again, they resume. (b) is the Life Context
+  setting (nothing is kept yet, D121 item 2). (c) not given: Night images is Off, every night the gradient (`lookOf`'s
+  `images`); Personal and Random keep D110's look until the personal painting exists (D121 item 3).
+- Settings (main-path.md, Settings; D110; D121; D122; `settings_page.dart`; TO TRY where a stand-in): the gear top
+  left on the journal, above the search field (drawn, 41 in a 44 tap box, spoken MP·25; the field moves under it and
+  the sky mark stays 140 down). The page: the back control, the quick toggle top centre (the sun or the moon, MP·45),
+  which switches the theme and sets Manual; MP·25 in h2; six rows, each a white rounded row with a value pill opening
+  the phone's menu: Language (EM·9, `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85),
+  Night/Day mode (MP·44; Manual keeps the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48
+  (the full disclosure), MP·95 (Withdraw or Give consent) and Delete journal (EM·11, `color.destructive`). Turning
+  on what a consent covers shows that consent first (`ConsentPage`); Withdraw asks MP·96 (MP·97), Life Context Off
+  MP·93 (MP·94), Night images Off nothing; Delete journal asks C4-P·4 once, then everything goes and onboarding starts
+  again. The setting lines are read by form ("Name (A / B)", `setting_line.dart`). Kept in `settings.json` (version
+  1; Word Animation, Night/Day mode, the painting kept for while (c) is given, Life Context length), followed by the
+  journal's home (`SettingsController`): Word Animation into `AppLine` and the theme's fade (off, instant, as with
+  Reduce Motion), Night/Day mode through `NightDayChoice` above the app. A change that cannot be kept logs
+  `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes; a read that fails, `settingsReadFailed`,
+  and the defaults stand. No feedback (D121 item 4), no region, no Help (R9).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 613 tests, and 514 mutation checks (A1 to A496; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 649 tests, and 583 mutation checks (A1 to A570; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A313, A363 and A375 dropped, each with its reason in the file; with the rows A24a to A24au among them) in
+  A277, A278, A281, A300, A313, A363, A375 and A507 dropped, each with its reason in the file; with the rows A24a to
+  A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
-  (expected: `app mutations: 514 run, 514 caught`); `check_all.sh` does not call it (D55). During a task only the
+  (expected: `app mutations: 583 run, 583 caught`); `check_all.sh` does not call it (D55). During a task only the
   rows that target the files changed are run, with `--rows A1,A7` or `--files lib/a.dart` (D95).
 
 ## The server
@@ -870,6 +896,18 @@ Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D11
      (item 147). `recording_test.dart`, "a stream not open in time: the stop ends, holding nothing", failed once in
      a full run under load and passed on every rerun, alone and with the whole suite: a timing flake, not looked into.
 
+Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 and D122):
+
+152. For Product, through the head (D122): the ten questions in `.scratch/for-build-chat/redesign-c-product-questions.md`,
+     each built as leaned: (a) refused pauses voice too; "recording paused" shows no line; the consent page's layout
+     and Next; the language's name (`[owed·language]`); Manual's "Day" and "Night"; Night images and Life Context
+     after their consent was refused; what Personal and Random show; the consent record; "Give consent" behind
+     MP·68. Also: `main-path.md`, the handover and X2 still describe one consent (C159-I item 5 governs, C18-P).
+153. `JournalPage.didUpdateWidget` moves the list's listener to a new recording's retries when consent (a) is given
+     again; no row proves it (a retry finishing after the consent is given again is a constructed sequence, D17).
+154. The consent record keeps the UTC day, not the instant (decided under D91); Interpretation may want the
+     consent text's version as well (item 152).
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -878,12 +916,12 @@ Banked in redesign-b (D91; none changes what the dreamer sees beyond D116 to D11
 3. No tester or founder build while any disclosure part shown in onboarding or on the full disclosure page lacks a
    line: none since C17-P (D106 3). `Onboarding.missing` lists them (every part shown, MP·57 included), and a test in
    `dev_only_test.dart` fails if either entry point reaches `lib/onboarding/` while it is not empty.
-4. No shown line may contain an unfilled braced sentence (D119 item 2: a place "to rewrite" is built as written, and
-   a sentence still owed in it stays whole in braces, as MP·68 and MP·70 do; neither is shown by any screen yet).
-   `test/words/shown_lines_test.dart` fails if any file in `lib/` outside `lib/words/` names a place whose line, in
-   either language, holds a `{` or `}` that is not one of the four slots (`{n}`, `{pointed image}`, `{tradition}`,
-   `{read image}`). The branch that first shows MP·68 or MP·70 (the consents' controls) meets this test: it passes
-   only once Product has filed the sentence.
+4. No tester or founder build may show an unfilled braced sentence (D119 item 2: a place "to rewrite" is built as
+   written, and a sentence still owed in it stays whole in braces, as MP·68 and MP·70 do). SoulDreams Dev shows both
+   in the three consents, as filed (D122, Q1 (B)). `test/words/shown_lines_test.dart` fails if any file that
+   `main.dart` or `main_founder.dart` reaches (following imports, as `dev_only_test.dart` does) names a place whose
+   line, in either language, holds a `{` or `}` that is not one of the four slots (`{n}`, `{pointed image}`,
+   `{tradition}`, `{read image}`). Onboarding reaches neither app until a later ruling (D103 item 1).
 
 Task 14's questions for Product (D68), from the founder's screenshots; none built, each more than a number
 (questions 2, 7 and 8 were answered by D70 and built in `recording`, TO TRY; questions 1, 3, 4, 5, 7, 9 to 13 by head's
@@ -1235,6 +1273,24 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   magnifier, smart punctuation; rows A492 to A496). A451 followed the code (D67). The widget test for the fold
   derives its night from `two-dreams-en` with a few words changed, since `fixtures/invented-nights.json` could not
   be written to in this session.
+
+## Rulings during redesign-c
+
+- `redesign-b` merged by the owner (`8243128`).
+- D121 (owner, the brainstorm): (1) Language shown, English only selectable (D57); (2) the Life Context rows shown and
+  remembered now, taking effect when Life Context is built; "What you've told Soul Dreams" arrives with Life Context;
+  (3) Night images: Off shows the gradient for every night; Personal and Random both show the curated set until the
+  personal painting exists; (4) Feedback is a later branch (a server change); (5) withdrawn consent: nothing leaves
+  the phone, recording paused, nights kept; which consent gates what mapped from the documents, and asked where they
+  leave it open.
+- D122 (owner, "all fine", on the stop `.scratch/for-build-chat/redesign-c-stop.md`): every lean. Q1 (B): the
+  shown-lines test covers only what the tester and founder apps reach; SoulDreams Dev shows MP·68 and MP·70 as filed,
+  braces included; "Before Cohort 1" item 4 still blocks any tester or founder build. Q2 to Q11 as leaned, sent to
+  Product (banked item 152). Q12 to Q14: consent version 2 and `settings.json` under docs/workflow.md (c), version 1
+  read as (a) given and (b) and (c) not; the setting lines split in Dart; the look as stand-ins.
+- D123 (founder, 2026-11-22): no visible AI mark on images; the invisible machine-readable tag stays on every shipped
+  or generated image; first launch still says the readings come from AI. It amends the head's message 24 item 4 and
+  C159-I item 5 for images; the Build chat carries it to the head. Nothing in this branch builds an image mark.
 
 ## Documents as last imported
 
