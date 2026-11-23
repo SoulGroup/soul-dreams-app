@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S102, D147), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -311,6 +311,29 @@ ROWS = [
     ('S102', 'trial/curated.ts',
      'const from = join(folder, fileOf(item, painted.attempt));', 'const from = join(folder, fileOf(item, 1));',
      'test', 'ship: the last attempts, renamed, with their fingerprints'),
+    # curated-set, Task 3 fix (D147): sips on macOS 26 writes no ICC profile,
+    # so our code embeds the OS's own sRGB profile.
+    ('S103', 'trial/jpeg.ts',
+     " || profile.toString('latin1', 36, 40) !== 'acsp'", '',
+     'test', 'a false or too big profile is refused with a code'),
+    ('S104', 'trial/jpeg.ts',
+     'profile.length > MAX_PROFILE', 'profile.length > 0xffffff',
+     'test', 'a false or too big profile is refused with a code'),
+    ('S105', 'trial/jpeg.ts',
+     'if (!(s.marker === 0xe2 && s.data.subarray(0, ICC.length).equals(ICC))) {', 'if (true) {',
+     'test', 'another profile is replaced, never doubled'),
+    ('S106', 'trial/jpeg.ts',
+     'if (leading && s.marker !== 0xe0 && s.marker !== 0xe1) {', 'if (leading && s.marker !== 0xe0) {',
+     'test', 'a profile is embedded after the leading APP0 and APP1'),
+    ('S107', 'trial/jpeg.ts',
+     '  pieces.push(jpeg.subarray(end));\n', '',
+     'test', 'a profile is embedded after the leading APP0 and APP1'),
+    ('S108', 'trial/curated.ts',
+     'writeFileSync(jpg, withProfile(readFileSync(jpg), icc));', 'writeFileSync(jpg, readFileSync(jpg));',
+     'test', 'sipsConvert: sips leaves no profile, so ours is embedded'),
+    ('S109', 'trial/curated.ts',
+     "  } catch {\n    throw new Error('curated-profile');\n  }\n  await run(", '  } catch {\n    icc = Buffer.alloc(0);\n  }\n  await run(',
+     'test', 'sipsConvert: a missing or false profile stops early'),
 ]
 
 

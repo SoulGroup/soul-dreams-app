@@ -62,6 +62,11 @@ export function fakeJpeg(width: number, height: number, options: JpegOptions = {
   return Buffer.concat(parts);
 }
 
+/** A stand-in ICC profile: the header's 'acsp' mark and a name, nothing more. */
+export function fakeProfile(name = 'sRGB IEC61966-2.1'): Buffer {
+  return Buffer.concat([Buffer.alloc(36), Buffer.from('acsp', 'latin1'), Buffer.alloc(24), Buffer.from(name, 'latin1')]);
+}
+
 /** sips's stand-in: the PNG's size, as a JPEG with an sRGB profile, or as [options] says. */
 export function fakeConvert(options: JpegOptions = {}): { convert: Convert; calls: number } {
   const state = {

@@ -1,10 +1,12 @@
 // The curated set's bytes (D147): sizes, the colour profile and the AI tag
 // (D123), on small JPEGs built here, segment by segment.
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { AI_SOURCE_TYPE } from '../src/hosts.ts';
-import { aiPacket, aiTagged, hasSrgb, jpegSize, pngSize, withAiTag } from '../trial/jpeg.ts';
-import { fakeJpeg, fakePng, segment } from './curated-fakes.ts';
+import { SRGB_PROFILE } from '../trial/curated.ts';
+import { aiPacket, aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile } from '../trial/jpeg.ts';
+import { fakeJpeg, fakePng, fakeProfile, segment } from './curated-fakes.ts';
 
 test("a PNG's size from its header; anything else is none", () => {
   assert.deepEqual(pngSize(fakePng(1600, 1200)), { width: 1600, height: 1200 });
@@ -73,4 +75,44 @@ test('an untagged JPEG, or another packet, is not tagged', () => {
   const jpeg = fakeJpeg(8, 8, { extra: [segment(0xe1, other)] });
   assert.equal(aiTagged(jpeg), false);
   assert.throws(() => withAiTag(jpeg), /^Error: curated-xmp$/);
+});
+
+// macOS 26's sips writes an sRGB JPEG as Exif and no ICC profile (found in
+// the curated set's Task 3), so the profile is embedded by our own code.
+const ICC_HEAD = Buffer.from('ICC_PROFILE\0\x01\x01', 'latin1');
+const EXIF = segment(0xe1, Buffer.from('Exif\0\0MM', 'latin1'));
+const PHOTOSHOP = segment(0xed, Buffer.from('Photoshop 3.0\0', 'latin1'));
+
+test('a profile is embedded after the leading APP0 and APP1', () => {
+  const profile = fakeProfile();
+  const jpeg = fakeJpeg(8, 8, { icc: 'none', extra: [EXIF, PHOTOSHOP] });
+  assert.equal(hasSrgb(jpeg), false);
+  const out = withProfile(jpeg, profile);
+  assert.equal(hasSrgb(out), true);
+  assert.deepEqual(jpegSize(out), { width: 8, height: 8 });
+  const icc = segment(0xe2, Buffer.concat([ICC_HEAD, profile]));
+  const at = out.indexOf(icc);
+  assert.ok(at > out.indexOf(EXIF) && at + icc.length === out.indexOf(PHOTOSHOP));
+  assert.ok(Buffer.concat([out.subarray(0, at), out.subarray(at + icc.length)]).equals(jpeg));
+  assert.equal(aiTagged(withAiTag(out)), true);
+});
+
+test('another profile is replaced, never doubled', () => {
+  const out = withProfile(fakeJpeg(8, 8, { icc: 'p3' }), fakeProfile());
+  assert.equal(hasSrgb(out), true);
+  assert.equal(out.includes('Display P3'), false);
+  assert.equal(out.toString('latin1').split('ICC_PROFILE').length, 2);
+});
+
+test('a false or too big profile is refused with a code', () => {
+  const jpeg = fakeJpeg(8, 8, { icc: 'none' });
+  assert.throws(() => withProfile(jpeg, Buffer.from('not a profile at all')), /^Error: curated-profile$/);
+  assert.throws(() => withProfile(jpeg, Buffer.alloc(60)), /^Error: curated-profile$/);
+  const big = Buffer.concat([fakeProfile(), Buffer.alloc(65520)]);
+  assert.throws(() => withProfile(jpeg, big), /^Error: curated-profile$/);
+});
+
+test("the OS's own sRGB profile satisfies the sRGB check", { skip: !existsSync(SRGB_PROFILE) }, () => {
+  const out = withProfile(fakeJpeg(8, 8, { icc: 'none' }), readFileSync(SRGB_PROFILE));
+  assert.equal(hasSrgb(out), true);
 });

@@ -20,7 +20,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync,
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { paintOnce, type Clock, type Send } from './bfl.ts';
-import { aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, type Size } from './jpeg.ts';
+import { aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile, type Size } from './jpeg.ts';
 import { SCENES, scenePrompt, skyPrompt } from './scenes.ts';
 
 export const MODEL = 'flux-2-klein-4b';
@@ -341,17 +341,40 @@ export function parseArgs(env: Readonly<Record<string, string | undefined>>, arg
   throw new Error('curated-usage');
 }
 
-/** macOS's sips: a JPEG of quality 82, with the sRGB profile when the PNG names none. */
+/** macOS's sips: a JPEG of quality 82, from a PNG that names no profile (sips takes it as sRGB). */
 export function sipsArgs(png: string, jpg: string): string[] {
   return ['-s', 'format', 'jpeg', '-s', 'formatOptions', String(QUALITY), '-E', SRGB_PROFILE, png, '--out', jpg];
 }
 
+/**
+ * sips's JPEG with the OS's own sRGB profile embedded by our code: sips on
+ * macOS 26 states sRGB through Exif and writes no ICC profile, which the
+ * set's check (and a viewer that reads only ICC) needs. A profile file that
+ * is missing or is no ICC profile stops ('curated-profile').
+ */
+export async function sipsConvert(
+  run: (args: string[]) => Promise<void>,
+  png: string,
+  jpg: string,
+  profile: string = SRGB_PROFILE,
+): Promise<void> {
+  let icc: Buffer;
+  try {
+    icc = readFileSync(profile);
+  } catch {
+    throw new Error('curated-profile');
+  }
+  await run(sipsArgs(png, jpg));
+  writeFileSync(jpg, withProfile(readFileSync(jpg), icc));
+}
+
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const args = parseArgs(process.env, process.argv.slice(2));
-  const convert: Convert = (png, jpg) =>
+  const sips = (sipsOptions: string[]): Promise<void> =>
     new Promise((done, fail) => {
-      execFile('/usr/bin/sips', sipsArgs(png, jpg), (error) => (error ? fail(new Error('curated-sips')) : done()));
+      execFile('/usr/bin/sips', sipsOptions, (error) => (error ? fail(new Error('curated-sips')) : done()));
     });
+  const convert: Convert = (png, jpg) => sipsConvert(sips, png, jpg);
   const send: Send = async (url, init) => {
     const r = await fetch(url, { ...init, signal: AbortSignal.timeout(60000) });
     return { status: r.status, json: () => r.json(), bytes: async () => Buffer.from(await r.arrayBuffer()) };

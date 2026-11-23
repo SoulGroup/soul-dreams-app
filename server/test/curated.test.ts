@@ -24,12 +24,13 @@ import {
   seedOf,
   ship,
   sipsArgs,
+  sipsConvert,
   type SetState,
 } from '../trial/curated.ts';
-import { aiTagged, hasSrgb, jpegSize } from '../trial/jpeg.ts';
+import { aiTagged, hasSrgb, jpegSize, withAiTag } from '../trial/jpeg.ts';
 import { STYLE } from '../trial/measure.ts';
 import { FRAME, SCENES, SKY_SCENE, scenePrompt, skyPrompt } from '../trial/scenes.ts';
-import { KEY, fakeApi, fakeConvert, fakeJpeg, fakePng } from './curated-fakes.ts';
+import { KEY, fakeApi, fakeConvert, fakeJpeg, fakePng, fakeProfile } from './curated-fakes.ts';
 
 function folder(): string {
   return mkdtempSync(join(tmpdir(), 'curated-'));
@@ -361,6 +362,55 @@ test('sips makes quality 82 with the sRGB profile', () => {
     '--out',
     'out.jpg',
   ]);
+});
+
+test('sipsConvert: sips leaves no profile, so ours is embedded', async () => {
+  const dir = folder();
+  try {
+    const profile = join(dir, 'srgb.icc');
+    writeFileSync(profile, fakeProfile());
+    const png = join(dir, 'in.png');
+    const jpg = join(dir, 'out.jpg');
+    writeFileSync(png, fakePng(1600, 1200));
+    const seen: string[][] = [];
+    const run = async (args: string[]) => {
+      seen.push(args);
+      writeFileSync(jpg, fakeJpeg(1600, 1200, { icc: 'none' }));
+    };
+    await sipsConvert(run, png, jpg, profile);
+    assert.deepEqual(seen, [sipsArgs(png, jpg)]);
+    const out = readFileSync(jpg);
+    assert.equal(hasSrgb(out), true);
+    checkJpeg(withAiTag(out), PAINTING);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
+});
+
+test('sipsConvert: a missing or false profile stops early', async () => {
+  const dir = folder();
+  try {
+    const png = join(dir, 'in.png');
+    const jpg = join(dir, 'out.jpg');
+    const bare = fakeJpeg(8, 8, { icc: 'none' });
+    let ran = 0;
+    const run = async () => {
+      ran += 1;
+      writeFileSync(jpg, bare);
+    };
+    await assert.rejects(sipsConvert(run, png, jpg, join(dir, 'none.icc')), /^Error: curated-profile$/);
+    assert.equal(ran, 0, 'a missing profile stops before sips runs');
+    const wrong = join(dir, 'wrong.icc');
+    writeFileSync(wrong, 'not a profile');
+    await assert.rejects(sipsConvert(run, png, jpg, wrong), /^Error: curated-profile$/);
+    assert.equal(ran, 1);
+    const failing = async () => {
+      throw new Error('curated-sips');
+    };
+    await assert.rejects(sipsConvert(failing, png, jpg, wrong), /^Error: curated-sips$/);
+  } finally {
+    rmSync(dir, { recursive: true });
+  }
 });
 
 test('proof: a PNG through the same steps, with no request', async () => {

@@ -78,6 +78,46 @@ export function hasSrgb(jpeg: Buffer): boolean {
   );
 }
 
+// The most a profile can be to sit in one APP2 segment: the segment's 16-bit
+// length, less its own two bytes and the 14 of 'ICC_PROFILE\0', a number and
+// a count.
+const MAX_PROFILE = 0xffff - 2 - 14;
+
+/**
+ * The JPEG with [profile] embedded as its colour profile, written by our own
+ * code because macOS 26's sips states sRGB through Exif and writes no ICC
+ * profile (found in the curated set's Task 3). Every ICC segment the JPEG
+ * had is dropped, so a profile is never doubled, and the one segment goes
+ * after the leading APP0 and APP1 segments. A profile that is no ICC profile
+ * (no 'acsp' at byte 36), or too big for one segment, is refused
+ * ('curated-profile').
+ */
+export function withProfile(jpeg: Buffer, profile: Buffer): Buffer {
+  if (profile.length < 40 || profile.length > MAX_PROFILE || profile.toString('latin1', 36, 40) !== 'acsp') {
+    throw new Error('curated-profile');
+  }
+  const found = segments(jpeg);
+  const payload = Buffer.concat([ICC, Buffer.from([1, 1]), profile]);
+  const head = Buffer.from([0xff, 0xe2, 0, 0]);
+  head.writeUInt16BE(payload.length + 2, 2);
+  const icc = Buffer.concat([head, payload]);
+  const pieces: Buffer[] = [jpeg.subarray(0, 2)];
+  let leading = true;
+  let end = 2;
+  for (const s of found) {
+    if (leading && s.marker !== 0xe0 && s.marker !== 0xe1) {
+      pieces.push(icc);
+      leading = false;
+    }
+    end = s.at + 4 + s.data.length;
+    if (!(s.marker === 0xe2 && s.data.subarray(0, ICC.length).equals(ICC))) {
+      pieces.push(jpeg.subarray(s.at, end));
+    }
+  }
+  pieces.push(jpeg.subarray(end));
+  return Buffer.concat(pieces);
+}
+
 const XMP_ID = Buffer.from(`${XMP_HEADER}\0`, 'latin1');
 
 /** The AI tag's XMP packet: the IPTC digital source type, and nothing else. */
