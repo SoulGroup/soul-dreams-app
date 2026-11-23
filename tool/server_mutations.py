@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S46, D135), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S50, D135), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -147,6 +147,19 @@ ROWS = [
     ('S46', 'infra/image-trial.ts',
      "        : which === 'bucket'\n          ? []", "        : which === 'bucket'\n          ? ['sdxl']",
      'test', 'the first stage: the bucket and the budget, no endpoint'),
+    # The image trial: the serving code.
+    ('S47', 'trial/code/inference.py',
+     ", torch_dtype=torch.bfloat16, device_map='cuda')", ', torch_dtype=torch.bfloat16)',
+     'test', 'serving: full precision, straight onto the GPU'),
+    ('S48', 'trial/code/inference.py',
+     "    if not set(settings) <= set(SETTINGS) | {'seed'}:", '    if False:',
+     'test', 'serving: refusals are codes, never the words'),
+    ('S49', 'trial/code/inference.py',
+     "'install', '--no-index', ", "'install', ",
+     'test', 'serving: 8 bits from the pinned wheel, offline'),
+    ('S50', 'trial/code/inference.py',
+     '.manual_seed(seed)', '.manual_seed(0)',
+     'test', 'serving: seeded on the GPU, answered as PNG'),
 ]
 
 
