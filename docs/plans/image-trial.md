@@ -178,9 +178,12 @@ A worked example (the test's invented times, g6e): scale-out 300 s, one painting
 six paintings 5 s apart. Warm USD 0.0038; woken for each at 10 minutes USD 0.7523, at 2 minutes USD 0.3838; a daily
 batch of 60 USD 0.0163 a painting.
 
-What the whole trial may cost [ESTIMATE]: each endpoint runs about three wakes (the deploy's first instance, the
-single round, the batch round), each a cold start plus about 11 minutes of tail: about 1 hour per model, so about
-USD 3 for FLUX on g6e and USD 1.20 for SDXL on g6, with S3 and CloudShell under USD 1. Well inside the USD 30 alarm.
+What the whole trial may cost [ESTIMATE, revised under D140]: each endpoint runs about three wakes (the deploy's first
+instance, the single round, the batch round), each a cold start plus about 11 minutes of tail. FLUX's first create
+took 36 minutes (its container started 33 minutes after the create, and was in service 3 minutes later; one sample),
+so a wake is about 46 minutes and a model about 2.3 hours: about USD 6 to 9 for FLUX on g6e (a capacity wait, if the
+instance is billed during it, adds to that), and about USD 2 for SDXL on g6 (14 GB to copy instead of 34), with S3 and
+CloudShell under USD 1. Well inside the USD 30 alarm.
 
 ### The tests (test-first, on the Mac; no AWS, no network)
 
@@ -2850,7 +2853,7 @@ Expected: `InService  1`; about 12 minutes later, `InService  0` (scaled to zero
 
 ### Task 10 · [OWNER] FLUX's run
 
-Paste 1 — Terminal (no output while it runs; about 45 to 75 minutes [ESTIMATE])
+Paste 1 — Terminal (no output while it runs; about 1.5 to 3 hours [ESTIMATE, D140]: two cold starts of about 35 minutes and their tails, and a capacity wait if there is one; it waits up to 3 hours for each round's results)
 ```
 cd ~/Developer/soul-dreams-app/server && AWS_PROFILE=<workload> node trial/run.ts flux <B> ~/Desktop/image-trial
 ```
@@ -2859,7 +2862,8 @@ It waits for the endpoint to have no instance, sends one painting, waits for it 
 six, waits again, then writes the results. Its progress, in another window:
 `cat ~/Desktop/image-trial/flux-notes.txt` (lines `waitIdle`, `submitted 1`, `singleDone`, `submitted 6`,
 `batchDone`, `finished`, each with its time). A stop prints `Error: trial-<code>` and exits 1: bring the code and
-the notes file. The images then still in the bucket expire within a day.
+the notes file. A stop keeps `fail/`, and after `trial-no-result` also `in/` (D139, D140); what remains in the bucket
+expires by its lifecycle rule within about two days.
 
 Paste 2 — Terminal
 ```
@@ -3077,7 +3081,7 @@ None stops the plan: each is built as leaned. All are the owner's.
 Written 2026-11-23, after Tasks 1 to 5 were committed (`f456a0e`) and before any AWS task but Task 6. The Opus review
 of the branch (read-only, under D91) found one blocker and four defects; the owner's `describe-type` proved the
 blocker, and D138 ruled on three questions. **Where this part differs from Parts 1, 3 and 4, this part governs.**
-Built as one batch, test-first; the counts: server tests 90, mutation rows S1 to S73 less S42 (72), all caught (D139 below changed one row and added S73).
+Built as one batch, test-first; the counts: server tests 90, mutation rows S1 to S73 less S42 (72), all caught (D139 below changed one row and added S73). After D140: tests 93, rows S1 to S76 less S42 (75).
 
 | Finding | What was done |
 |---|---|
@@ -3160,6 +3164,36 @@ Expected: one line, a deletion task's id (the budget's deletion prints nothing).
 the budget is gone (`0`); its log-group line proves the groups went with the stack (`0`).
 
 **Fallback F3 (changes)**: without `-c alertEmail`; the same "still `1` after 20 minutes" step as Task 9.
+
+### D140 · After Task 10's first attempt (the owner, 2026-11-23)
+
+**What happened.** The run sent one painting at 15:59:46Z and stopped with `trial-no-result` an hour later: the wake
+(`HasBacklogWithoutCapacity` alarm, 16:03:55Z) ended at 17:31:00Z, 87 minutes after it began. The endpoint's own
+description says why: `FailureReason` "Unable to provision all the requested ML compute capacity due to
+InsufficientInstanceCapacity error. We are working to provision the remaining capacity", last modified 16:41:36Z, 38
+minutes into the wait. So SageMaker had no ml.g6e.xlarge to give, and kept trying.
+
+**Where the time went.** The first deploy's container log stream began 33 minutes after the endpoint was created
+(14:44Z create, 15:17Z stream), and the endpoint was in service about 3 minutes later (the first create took 36
+minutes in all, with capacity at once). The wake's log stream began at 17:30:25Z, 35 seconds before the scale-out
+ended: the 87 minutes were all before the container existed. If the preparation then took what it took at the deploy
+(about 33 minutes: provisioning, the image and the 34 GB of weights), about 50 minutes of the wake were the
+capacity wait [INFERRED from one create and one wake]. Whether SageMaker bills during the wait is [ASSUMED] not yet
+known: Task 12's bill shows it.
+
+**The cold start for the cost sheet.** Not yet measured cleanly: 36 minutes was a create, and 91 minutes (4 minutes
+to the alarm, 87 to the instance) a wake with a capacity wait. The re-run measures a wake. For the founder's
+decision (owner): g6e scale-to-zero in eu-north-1 risked a capacity wait of about 90 minutes in one sample.
+
+**A second defect, mine.** The stop deleted `in/flux/` while SageMaker still held the queued request, so the endpoint
+found no input when it came up; nothing was written to `fail/flux/` or `out/flux/` (read-only listings after the
+instance had gone).
+
+**Changes (D140).** `run.ts` waits up to 3 hours for each round's results (was 1 hour); a stop with `trial-no-result`
+keeps `in/` and `fail/` and deletes `out/`, every other stop as D139. Tests: a wake of 178 minutes still gets its
+result; one of 181 does not; a no-result stop removes only `out/`. Rows S74 to S76. In Task 10's Paste 3, after a
+`trial-no-result` stop, `in` above `0` is expected as well as `fail`: wait for the endpoint to be at `0` (a
+request already sent can still be processed), then delete them by hand with the Task 10 `rm`.
 
 ### Banked from the review (D91; nothing a dreamer sees changes)
 

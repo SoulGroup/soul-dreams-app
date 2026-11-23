@@ -407,10 +407,10 @@ merge (this entry records it).
   `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 90 tests, and
-  72 mutation checks (S1 to S73, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 72 run,
-  72 caught`); `check_all.sh` does not
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 93 tests, and
+  75 mutation checks (S1 to S76, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 75 run,
+  75 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1601,6 +1601,11 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - D139 (owner, on the re-review's one question): a run that stops keeps `fail/` in the bucket and deletes only `in/`
   and `out/` (the failure objects are the only record of a failure on SageMaker's side); the teardown empties the
   bucket.
+- D140 (owner, after Task 10's first attempt; plan Part 6): the first wake of FLUX's g6e endpoint took 87 minutes
+  (`InsufficientInstanceCapacity`, the endpoint's own `FailureReason`; the first create took 36 minutes). `run.ts`
+  waits up to 3 hours for a round's results, and a stop with no result keeps `in/` as well as `fail/` (SageMaker
+  still holds the request). For the cost sheet and the founder's decision: g6e scale-to-zero in eu-north-1 risked a
+  capacity wait of about 90 minutes in one sample.
 
 ## Documents as last imported
 

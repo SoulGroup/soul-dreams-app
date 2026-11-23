@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S73, D135, D138, D139), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S76, D135, D138, D139, D140), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -217,16 +217,16 @@ ROWS = [
      "for (const prefix of prefixes)", "for (const prefix of prefixes.slice(0, 2))",
      'test', 'the run deletes its requests, results and failures when it ends'),
     ('S68', 'trial/run.ts',
-     "    await cleanup(t, ['in', 'out']).catch(() => undefined);\n    throw error;", '    throw error;',
+     "    await cleanup(t, held ? ['out'] : ['in', 'out']).catch(() => undefined);\n", '',
      'test', 'a stopped run keeps fail/, deletes in/ and out/'),
     ('S69', 'trial/run.ts',
-     "    await cleanup(t, ['in', 'out']).catch(() => undefined);", "    await cleanup(t, ['in', 'out']);",
+     "    await cleanup(t, held ? ['out'] : ['in', 'out']).catch(() => undefined);", "    await cleanup(t, held ? ['out'] : ['in', 'out']);",
      'test', 'a stopped run keeps fail/, deletes in/ and out/'),
     ('S70', 'trial/run.ts',
      "    throw new Error('trial-cleanup');", '    return run;',
      'test', 'a deletion failing after a good run stops with a code'),
     ('S73', 'trial/run.ts',
-     "    await cleanup(t, ['in', 'out']).catch(() => undefined);", "    await cleanup(t, ['in', 'out', 'fail']).catch(() => undefined);",
+     "    await cleanup(t, held ? ['out'] : ['in', 'out']).catch(() => undefined);", "    await cleanup(t, held ? ['out'] : ['in', 'out', 'fail']).catch(() => undefined);",
      'test', 'a stopped run keeps fail/, deletes in/ and out/'),
     ('S71', 'trial/fetch-weights.sh',
      '    staged="$key.unchecked"', '    staged="$key"',
@@ -234,6 +234,15 @@ ROWS = [
     ('S72', 'trial/fetch-weights.sh',
      '    aws s3 rm "s3://$bucket/$key.unchecked" --region eu-north-1 --only-show-errors\n', '',
      'test', 'weights: a staging copy left beside a kept file is removed'),
+    ('S74', 'trial/run.ts',
+     'const WAIT_RESULT_MS = 3 * 60 * 60 * 1000;', 'const WAIT_RESULT_MS = 2 * 60 * 60 * 1000;',
+     'test', 'a wake that waits for capacity still gets its result'),
+    ('S75', 'trial/run.ts',
+     'const WAIT_RESULT_MS = 3 * 60 * 60 * 1000;', 'const WAIT_RESULT_MS = 6 * 60 * 60 * 1000;',
+     'test', 'a result after three hours is not waited for'),
+    ('S76', 'trial/run.ts',
+     "held ? ['out'] : ['in', 'out']", "['in', 'out']",
+     'test', 'a stop with no result keeps in/ and fail/, deletes out/'),
 ]
 
 

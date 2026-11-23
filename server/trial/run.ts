@@ -6,7 +6,8 @@
 // files, and its own notes hold codes and times only.
 // When it ends it deletes the model's requests, results and failures from
 // the bucket (D138); when it stops, only the requests and results, so the
-// failures stay to be read (D139).
+// failures stay to be read (D139); when it stops with no result, the
+// requests stay too, for SageMaker still holds them (D140).
 //   node trial/run.ts <flux|sdxl> <bucket> <folder>
 import { execFile } from 'node:child_process';
 import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -36,7 +37,8 @@ export interface Trial {
 }
 
 const WAIT_IDLE_MS = 60 * 60 * 1000;
-const WAIT_RESULT_MS = 60 * 60 * 1000;
+// A wake from none can wait for capacity: about 90 minutes once (D140).
+const WAIT_RESULT_MS = 3 * 60 * 60 * 1000;
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47]);
 
 async function json(t: Trial, args: readonly string[]): Promise<unknown> {
@@ -251,7 +253,10 @@ export async function trial(t: Trial, instanceType: string, idleMinutes: number)
   try {
     run = await measured(t, instanceType, idleMinutes);
   } catch (error) {
-    await cleanup(t, ['in', 'out']).catch(() => undefined);
+    // With no result, SageMaker still holds the request and needs its input
+    // (D140); the lifecycle rule deletes it.
+    const held = error instanceof Error && error.message === 'trial-no-result';
+    await cleanup(t, held ? ['out'] : ['in', 'out']).catch(() => undefined);
     throw error;
   }
   try {

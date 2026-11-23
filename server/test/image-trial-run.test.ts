@@ -113,7 +113,7 @@ test('the command line', () => {
 });
 
 // The fake AWS: the endpoint wakes 60 s after a request, is in service
-// 300 s later, paints one every 20 s, and is gone 10 minutes after its
+// 300 s later (or coldMs, a wait for capacity), paints one every 20 s, and is gone 10 minutes after its
 // last painting.
 interface Fake {
   aws: Aws;
@@ -122,7 +122,7 @@ interface Fake {
   sleep: (ms: number) => Promise<void>;
 }
 
-function fake(options: { fail?: boolean; notPng?: boolean; rmFails?: boolean } = {}): Fake {
+function fake(options: { fail?: boolean; notPng?: boolean; rmFails?: boolean; coldMs?: number } = {}): Fake {
   let now = T0;
   const calls: string[][] = [];
   const results: { key: string; ready: number }[] = [];
@@ -160,8 +160,9 @@ function fake(options: { fail?: boolean; notPng?: boolean; rmFails?: boolean } =
       } else {
         if (busyUntil < now) {
           // A wake: out from none, in service, then idle.
-          acts.push({ to: 1, start: now + 60000, end: now + 360000 });
-          busyUntil = now + 360000;
+          const cold = options.coldMs ?? 300000;
+          acts.push({ to: 1, start: now + 60000, end: now + 60000 + cold });
+          busyUntil = now + 60000 + cold;
         }
         busyUntil += 20000;
         results.push({ key: `out/flux/${id}.out`, ready: busyUntil });
@@ -338,6 +339,44 @@ test('a stopped run keeps fail/, deletes in/ and out/', async () => {
     } finally {
       rmSync(folder, { recursive: true, force: true });
     }
+  }
+});
+
+// A wake can wait for capacity: about 90 minutes once (D140).
+const MINUTE = 60000;
+
+test('a wake that waits for capacity still gets its result', async () => {
+  const f = fake({ coldMs: 178 * MINUTE });
+  const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
+  try {
+    const r = await round(trialOf(f, folder, []), [0], 'single');
+    assert.deepEqual(r.done, [T0 + 60000 + 178 * MINUTE + 20000]);
+  } finally {
+    rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('a result after three hours is not waited for', async () => {
+  const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
+  try {
+    await assert.rejects(round(trialOf(fake({ coldMs: 181 * MINUTE }), folder, []), [0], 'single'), {
+      message: 'trial-no-result',
+    });
+  } finally {
+    rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+// The request is still in SageMaker's queue after this stop, so its input
+// stays (D140); the lifecycle rule deletes it.
+test('a stop with no result keeps in/ and fail/, deletes out/', async () => {
+  const f = fake({ coldMs: 4 * 60 * MINUTE });
+  const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
+  try {
+    await assert.rejects(trial(trialOf(f, folder, []), 'ml.g6e.xlarge', 10), { message: 'trial-no-result' });
+    assert.deepEqual(removals(f.calls), [REMOVED[1]]);
+  } finally {
+    rmSync(folder, { recursive: true, force: true });
   }
 });
 
