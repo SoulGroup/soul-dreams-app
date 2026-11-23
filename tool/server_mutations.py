@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S46, D135), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -96,6 +96,57 @@ ROWS = [
      'test', 'the temporary-key address is on that host, over https'),
     ('S30', 'src/soniox.ts', "  if (typeof key !== 'string' || key === '' ||", "  if (typeof key !== 'string' ||",
      'test', 'no answer is 0; an unreadable answer is -1'),
+    # The image trial (D135, D136): its stack, its serving code, its run
+    # and its weights script.
+    # The image trial: the stack.
+    ('S31', 'infra/image-trial.ts',
+     's3.BlockPublicAccess.BLOCK_ALL', 's3.BlockPublicAccess.BLOCK_ACLS',
+     'test', 'the bucket: private, encrypted, TLS only, no logging or versions'),
+    ('S32', 'infra/image-trial.ts',
+     '      enforceSSL: true,\n', '',
+     'test', 'the bucket: private, encrypted, TLS only, no logging or versions'),
+    ('S33', 'infra/image-trial.ts',
+     '({ prefix, expiration: Duration.days(1) })', '({ prefix, expiration: Duration.days(2) })',
+     'test', 'requests and results deleted within a day; the weights kept'),
+    ('S34', 'infra/image-trial.ts',
+     '        enableNetworkIsolation: true,\n', '',
+     'test', 'each model: the pinned container, its weights, no network'),
+    ('S35', 'infra/image-trial.ts',
+     '        maxCapacity: 1,', '        maxCapacity: 2,',
+     'test', 'scaling: from none to one on a waiting request'),
+    ('S36', 'infra/image-trial.ts',
+     '        minCapacity: 0,', '        minCapacity: 1,',
+     'test', 'scaling: from none to one on a waiting request'),
+    ('S37', 'infra/image-trial.ts',
+     'cloudwatch.TreatMissingData.BREACHING', 'cloudwatch.TreatMissingData.NOT_BREACHING',
+     'test', 'scaling: to none after 10 idle minutes'),
+    ('S38', 'infra/image-trial.ts',
+     'idleRaw === undefined ? 10 :', 'idleRaw === undefined ? 15 :',
+     'test', 'scaling: to none after 10 idle minutes'),
+    ('S39', 'infra/image-trial.ts',
+     'logs.RetentionDays.ONE_DAY', 'logs.RetentionDays.THREE_DAYS',
+     'test', 'the logs: made first, kept 1 day, gone with the stack'),
+    ('S40', 'infra/image-trial.ts',
+     '      endpoint.node.addDependency(logGroup);\n', '',
+     'test', 'the logs: made first, kept 1 day, gone with the stack'),
+    ('S41', 'infra/image-trial.ts',
+     "bucket.arnForObjects('models/*'), bucket.arnForObjects('in/*')", "bucket.arnForObjects('models/*'), bucket.arnForObjects('in/*'), bucket.arnForObjects('out/*')",
+     'test', "the models' role: its prefixes, its logs, the container, nothing else"),
+    ('S42', 'infra/image-trial.ts',
+     'export const BUDGET_USD = 30;', 'export const BUDGET_USD = 300;',
+     'test', 'the budget: USD 30 a month, three emails to one address'),
+    ('S43', 'infra/image-trial.ts',
+     '      terminationProtection: false,', '      terminationProtection: true,',
+     'test', 'the trial: eu-north-1, destroyable, no version reporting'),
+    ('S44', 'infra/app.ts',
+     "if (app.node.tryGetContext('imageTrial') !== undefined) {", 'if (true) {',
+     'test', 'the app makes the trial only when asked'),
+    ('S45', 'infra/image-trial.ts',
+     "eightBit ? 'ml.g6.xlarge' : 'ml.g6e.xlarge'", "'ml.g6e.xlarge'",
+     'test', "D136's fallback: FLUX in 8 bits on g6.xlarge, alone"),
+    ('S46', 'infra/image-trial.ts',
+     "        : which === 'bucket'\n          ? []", "        : which === 'bucket'\n          ? ['sdxl']",
+     'test', 'the first stage: the bucket and the budget, no endpoint'),
 ]
 
 
