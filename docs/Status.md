@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-23, in branch `image-trial` (the trial of open image models in our own AWS account, D135, D136; the owner's AWS tasks next), by Claude Code.
+Last updated: 2026-11-24, in branch `curated-set` (the curated set of night paintings shipped in the app, D147; the owner's by-eye check next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,13 +14,15 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`image-trial`: a trial of open image models in our own AWS account, for the founder to choose (D135, D136; plan
-`docs/plans/image-trial.md`): FLUX.1 [schnell] on ml.g6e.xlarge and SDXL on ml.g6.xlarge, SageMaker asynchronous
-inference in eu-north-1, scaled to zero, a private bucket whose requests and results the run deletes when it ends
-(its lifecycle rule the backstop, D138), a USD 30 budget alarm made by the owner with the CLI (D138: the budget
-resource does not exist in eu-north-1), the same six invented prompts on each, the times and costs measured, the images on the owner's Mac,
-then a teardown that removes everything. A separate stack (`SoulDreamsImageTrial`), made only when asked; the
-server's own stack is unchanged. The app is unchanged.
+`curated-set`: the curated set of night paintings (D147; plan `docs/plans/curated-set.md`): sixty paintings of
+invented scenery and New Dream's night sky, painted on the owner's Mac with Black Forest Labs' `flux-2-klein-4b` on
+the EU endpoint (D145) in the one style (D146) by `server/trial/curated.ts`, chosen by the owner on a contact sheet,
+shipped in `app/assets/paintings/` as JPEGs (1280 x 960, quality 75, sRGB; the sky 1200 x 336), each carrying the
+invisible AI tag (D123) and fingerprinted under G2. The app's picture choice moves from the placeholders to the set;
+New Dream's words stand on the date's shade over the sky (D113, a stand-in). The sun and the moon stay drawn in code.
+
+`image-trial` is merged (`a8d0099`): the open-model trial in AWS (D135 to D141, torn down), the Nebius test (D142,
+D143, set aside) and the Black Forest Labs test (D144 to D146), whose model and style the set uses.
 
 `life-context` is merged (`eaf0da1`): Life Context, the mechanical part (D110, head's message 24 item 2; C159-I item 1; D127; D128; D131; plan
 `docs/plans/life-context.md`): what counts as a sentence, the kept sentences on the phone, the Recent window's sweep,
@@ -32,15 +34,14 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `image-trial`: the owner's AWS tasks (plan Part 3, Tasks 6 to 12), the founder's choice from the images and the
-  costs, then the teardown and its proof (Task 12). The plan's questions are its Part 4.
+- `curated-set`: the owner's by-eye check in SoulDreams Dev (plan Task 8), the full mutation runs once (D126), then
+  the merge, which is the owner's. The plan's questions are its Part 4.
 - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
   the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
   1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
 - Then "Made by AI"; Feedback, with its server change (D121 item 4). Life Context's sources (the opening's answers,
   what is said after it, the reflection, Waking Life) come with Questions and Reflection, and with them the mark on a
-  tapped sentence's night (D131 item 3). The curated set of night paintings (about 60, the founder's)
-  replaces the placeholders, fingerprinted as the fonts are (a G0 and G2 change, the owner's).
+  tapped sentence's night (D131 item 3).
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
   C17-P (and, for the founder app, with his export).
 - The readings: our server's own spending counter comes with them (D69), and response streaming on the function
@@ -223,7 +224,9 @@ merge (this entry records it).
   `pages/night_art.dart`): a read night's painting chosen from its id alone, nothing stored; an unread night's the
   painted gradient (the dark theme's bubble gradient, both themes); no night is read yet (`noneRead`), and
   SoulDreams Dev built with `--dart-define=PREVIEW_READ=true` shows every night as read, for the owner's review.
-  Five placeholder paintings, drawn in code, stand in the curated set. The words Product owes show as provisional
+  The curated set (D147): sixty paintings in `app/assets/paintings/`, each covering its box from the middle over
+  the gradient, decoded no larger than the box needs; New Dream's sky is the set's strip, its words on the date's
+  shade (D113). The words Product owes show as provisional
   handles, `[owed·…]` (`journal/owed.dart`): four greetings, New Dream, the four jump buttons.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
   first 21:00 after its first recording in the zone then in force (format version 1, D57 Q14); the typing screen's
@@ -350,10 +353,9 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 756 tests (691 at the branch's start: `cc2ea8c` added
-  one after the 690 written here), and 726 mutation checks (A1 to A771; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 760 tests, and 733 mutation checks (A1 to A782; A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
-  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645 and A646
+  A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
   A24au among them) in
   `tool/app_mutations.py`, run by hand from the repository root with `python3 -I -B tool/app_mutations.py`
@@ -407,10 +409,16 @@ merge (this entry records it).
   `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 100 tests, and
-  80 mutation checks (S1 to S81, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 80 run,
-  80 caught`); `check_all.sh` does not
+- The curated set's painter (D147; `docs/plans/curated-set.md`), on the owner's Mac only: `server/trial/curated.ts`
+  (paint, repaint, proof, ship; the USD 3 cap from BFL's own replies), `server/trial/scenes.ts` (the sixty invented
+  scenes and the sky) and `server/trial/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
+  its names in `server/src/hosts.ts`, never fetched). macOS's `sips` makes each JPEG, and our code embeds the OS's own
+  sRGB profile in it, since `sips` on macOS 26 writes none. Tested against fakes.
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 134 tests, and
+  104 mutation checks (S1 to S109, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
+  in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 104 run,
+  104 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -459,7 +467,11 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Task
 - G1 also proves the pending lines against `pending-fingerprint.txt` and `pending.g.dart` against the generator; G2
   also proves every file in `docs/reference/screens/` against its `fingerprints.txt`; G0 knows those two
   fingerprint files by exact path (D57 Q11, D58).
-- Totals: 255 guard tests and 102 mutation checks (c18p-import: the generators' new forms, D118, D119).
+- G2 also proves every file in `app/assets/paintings/` against its `fingerprints.txt`, armed or not; G0 knows that
+  file by exact path (D147).
+- Totals: 255 guard tests and 102 mutation checks (c18p-import: the generators' new forms, D118, D119). Measured at
+  `curated-set`: 279 guard tests (276 at its start, 3 added by D147's Task 1; its plan said 274) and 2 more guard
+  mutation checks.
 
 ## Banked
 
@@ -1642,6 +1654,31 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   `server/trial/measure.ts`). The style test's code was removed again (it is in the history at `4e77e9f`); the plan
   records the wording of both. The owner deletes `~/Desktop/image-trial/bfl-style`. Next: the full server mutation
   run once (D126), then the merge, which is the owner's.
+
+## Rulings during curated-set
+
+- `image-trial` merged by the owner (`a8d0099`); its Status's first line was not updated at the merge (this entry
+  records it).
+- D147 (owner, the brainstorm): (1) about sixty paintings from invented scenery prompts written by Claude Code
+  (landscape, sky, weather, season, light, mood; no people, no text, nothing from any dream); the owner reviews a
+  contact sheet and rejects any, which are painted again with new seeds; (2) JPEG, sRGB (D148 later set 1280 x 960
+  at quality 75), the subject in the middle horizontal band; (3) also New Dream's night-sky strip (about 1200 x 340, D112); the
+  sun and moon stay drawn in code; (4) a cost cap of USD 3 for everything, repaints included. Every shipped image
+  carries the invisible AI tag (IPTC digital source type "trainedAlgorithmicMedia", D123), written by our own script;
+  fingerprinted under G2 like the fonts; the picture choice (from the night's id) moves to the set; the generation
+  runs on the owner's Mac with the BFL key from Parameter Store.
+- Owner, standing for this branch (as D67): a guard-test total higher by the same measured baseline difference
+  is not a stop; re-measure and record it. The 60 scenes (`server/trial/scenes.ts`) were read by the owner and fine.
+- Task 3 found that `sips` on macOS 26.5.2 writes no ICC profile into a JPEG (every variant: `-E`, `-e`, `-E` with
+  `-m`, none), though it reports sRGB: the set's own check refused it. The check is unchanged; `withProfile` and
+  `sipsConvert` embed the OS's own `/System/Library/ColorSync/Profiles/sRGB Profile.icc` (plan Part 6 A1).
+- D148 (owner): Task 3's first proof of 740,928 bytes put sixty paintings at 1600 x 1200 and quality 82 at about 81 MB;
+  paint at 1280 x 960 and save at JPEG quality 75, the count staying 60, and above about 50 MB the next step would be
+  45 paintings, not lower quality. The proof run again: 41.3 MB projected from the image enlarged to 1280 x 960, 49.2
+  MB from a crop at its own detail (the larger is the one to read). Measured after Task 5: `app/assets/paintings` is
+  46M by `du` (1024-based; about 48 MB).
+- Task 4 (owner): all 61 accepted by the founder on the contact sheet, none painted again; BFL counted 91.40 credits
+  (USD 0.914) of the USD 3 cap.
 
 ## Documents as last imported
 
