@@ -3,11 +3,12 @@
 # exists; refuses the marker beside any file in docs/source/. Armed or
 # not, no tracked path anywhere may be privacy-ethics-safety.md or sit in
 # a folder named restricted (D32 Q18): those never leave the documents.
-# The fonts (D49 a) and the screenshots (D58), armed or not: every file
+# The fonts (D49 a), the screenshots (D58) and the night paintings
+# (D147), armed or not: every file
 # in each folder is listed in its fingerprints file with its sha256, and
 # matches it.
-from guardlib import (CSV, FINGERPRINT, FINGERPRINTS, FONTS, LISTS, MARKER, SCREEN_PRINTS,
-                      SCREENS, SOURCES, Finding, parse_sources, sha256)
+from guardlib import (CSV, FINGERPRINT, FINGERPRINTS, FONTS, LISTS, MARKER, PAINTING_PRINTS,
+                      PAINTINGS, SCREEN_PRINTS, SCREENS, SOURCES, Finding, parse_sources, sha256)
 
 CODE = 'G2'
 NAME = 'copies'
@@ -53,6 +54,7 @@ def check(src):
     refused = [Finding(p, 0, 'refused-document') for p in src.paths if refused_document(p)]
     refused += font_findings(src)
     refused += fingerprint_findings(src, SCREENS, SCREEN_PRINTS, 'screen')
+    refused += fingerprint_findings(src, PAINTINGS, PAINTING_PRINTS, 'painting')
     in_dir = [p for p in src.paths if p.startswith(DIR)]
     if src.has(MARKER):
         if in_dir:

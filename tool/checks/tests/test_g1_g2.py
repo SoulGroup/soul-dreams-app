@@ -277,6 +277,36 @@ class G2(GuardTest):
         self.assertEqual(self.refused(tree),
                          [('docs/reference/screens/fingerprints.txt', 0, 'no-fingerprints')])
 
+    # D147: the night paintings, fingerprinted as the fonts are.
+    def paintings(self, listed=None):
+        files = {'01.jpg': b'\xff\xd8\0a', 'sky.jpg': b'\xff\xd8\0b'}
+        listed = files if listed is None else listed
+        tree = {'app/assets/paintings/' + name: body for name, body in files.items()}
+        tree['app/assets/paintings/fingerprints.txt'] = ''.join(
+            hashlib.sha256(body).hexdigest() + '  ' + name + '\n' for name, body in listed.items())
+        tree.update({COPY: 'h\n', SOURCES: line(COPY, 'h\n')})
+        return tree
+
+    def test_paintings_listed_pass(self):
+        self.passed(self.paintings())
+
+    def test_paintings_unlisted_changed_missing_or_unprinted_refuse(self):
+        tree = self.paintings(listed={'01.jpg': b'\xff\xd8\0a'})
+        self.assertEqual(self.refused(tree),
+                         [('app/assets/paintings/sky.jpg', 0, 'painting-unlisted')])
+        tree = self.paintings()
+        tree['app/assets/paintings/01.jpg'] = b'\xff\xd8\0c'
+        self.assertEqual(self.refused(tree),
+                         [('app/assets/paintings/01.jpg', 0, 'painting-hash-mismatch')])
+        tree = self.paintings()
+        del tree['app/assets/paintings/sky.jpg']
+        self.assertEqual(self.refused(tree),
+                         [('app/assets/paintings/sky.jpg', 0, 'painting-missing')])
+        tree = self.paintings()
+        del tree['app/assets/paintings/fingerprints.txt']
+        self.assertEqual(self.refused(tree),
+                         [('app/assets/paintings/fingerprints.txt', 0, 'no-fingerprints')])
+
     def test_fonts_checked_when_not_armed(self):
         tree = self.fonts()
         tree['app/assets/fonts/A-Regular.ttf'] = b'\x00b'

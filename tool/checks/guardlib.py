@@ -43,6 +43,11 @@ FINGERPRINTS = 'app/assets/fonts/fingerprints.txt'
 # G0 knows that one .txt file here. No word is ever taken from them.
 SCREENS = 'docs/reference/screens/'
 SCREEN_PRINTS = 'docs/reference/screens/fingerprints.txt'
+# The night paintings shipped in the app (D147): every file here is
+# listed in PAINTING_PRINTS with its sha256, which G2 proves; G0 knows
+# that one .txt file here, and a painting is binary.
+PAINTINGS = 'app/assets/paintings/'
+PAINTING_PRINTS = 'app/assets/paintings/fingerprints.txt'
 
 CODE_EXT = {'.dart': 'dart', '.ts': 'ts', '.js': 'ts', '.mjs': 'ts', '.cjs': 'ts',
             '.swift': 'swift', '.py': 'py', '.sh': 'sh'}

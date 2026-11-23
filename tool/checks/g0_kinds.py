@@ -7,11 +7,12 @@
 # lists, and the owner approves the change at the prompt. D49 a: .txt is
 # known in the fonts folder only (the licences and the fingerprints);
 # D57 Q11: and the pending lines' fingerprint, by exact path; D58: and
-# the screenshots' fingerprints, by exact path.
+# the screenshots' fingerprints, by exact path; D147: and the night
+# paintings' fingerprints, by exact path.
 import posixpath
 
-from guardlib import (FONTS, LOCKFILES, MARKER, PENDING_FINGERPRINT, SCREEN_PRINTS, SOURCES,
-                      STRINGS_EN, STRINGS_SV, Finding)
+from guardlib import (FONTS, LOCKFILES, MARKER, PAINTING_PRINTS, PENDING_FINGERPRINT, SCREEN_PRINTS,
+                      SOURCES, STRINGS_EN, STRINGS_SV, Finding)
 
 CODE = 'G0'
 NAME = 'file kinds'
@@ -20,7 +21,9 @@ UNSCANNED_NAMES = ('.gitignore',) + LOCKFILES
 # The two generated InfoPlist.strings, by exact path: G1 proves them (D32).
 # The pending lines' fingerprint, by exact path: G1 proves it (D57 Q11).
 # The screenshots' fingerprints, by exact path: G2 proves them (D58).
-UNSCANNED_PATHS = (SOURCES, MARKER, STRINGS_EN, STRINGS_SV, PENDING_FINGERPRINT, SCREEN_PRINTS)
+# The paintings' fingerprints, by exact path: G2 proves them (D147).
+UNSCANNED_PATHS = (SOURCES, MARKER, STRINGS_EN, STRINGS_SV, PENDING_FINGERPRINT, SCREEN_PRINTS,
+                   PAINTING_PRINTS)
 
 
 def known(src, path):

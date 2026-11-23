@@ -215,8 +215,13 @@ MUTATIONS = [
     # journal-screens, Task 3 (D58): the screenshots.
     ('g2_copies.py', "    refused += fingerprint_findings(src, SCREENS, SCREEN_PRINTS, 'screen')\n", "",
      ['test_g1_g2.G2.test_screens_unlisted_changed_or_unprinted_refuse']),
-    ('g0_kinds.py', ", PENDING_FINGERPRINT, SCREEN_PRINTS)", ", PENDING_FINGERPRINT)",
+    ('g0_kinds.py', ", PENDING_FINGERPRINT, SCREEN_PRINTS,\n                   PAINTING", ", PENDING_FINGERPRINT,\n                   PAINTING",
      ['test_g0.G0.test_screen_fingerprints_known_by_path_only']),
+    # curated-set, Task 1 (D147): the night paintings.
+    ('g2_copies.py', "    refused += fingerprint_findings(src, PAINTINGS, PAINTING_PRINTS, 'painting')\n", "",
+     ['test_g1_g2.G2.test_paintings_unlisted_changed_missing_or_unprinted_refuse']),
+    ('g0_kinds.py', "SCREEN_PRINTS,\n                   PAINTING_PRINTS)", "SCREEN_PRINTS)",
+     ['test_g0.G0.test_painting_fingerprints_known_by_path_only']),
     # c17p-import (D109): the status that waits for its Swedish.
     ('wordsgen.py', "'composed, no stand-in',\n           'English written, Swedish to write')",
      "'composed, no stand-in')",

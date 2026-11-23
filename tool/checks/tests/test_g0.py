@@ -28,6 +28,13 @@ class G0(GuardTest):
         self.refused({'docs/reference/screens/notes.txt': 'x\n'}, 'unknown-kind')
         self.refused({'docs/reference/screens/journal.png': b'no nul byte'}, 'unknown-kind')
 
+    # D147: the paintings' fingerprints, by exact path; a painting is binary.
+    def test_painting_fingerprints_known_by_path_only(self):
+        self.passed({'app/assets/paintings/fingerprints.txt': 'x\n',
+                     'app/assets/paintings/01.jpg': b'\xff\xd8\0'})
+        self.refused({'app/assets/paintings/notes.txt': 'x\n'}, 'unknown-kind')
+        self.refused({'app/assets/paintings/01.jpg': b'no nul byte'}, 'unknown-kind')
+
     def test_a_font_is_binary(self):
         self.passed({'app/assets/fonts/A-Regular.ttf': b'\x00\x01font'})
 
