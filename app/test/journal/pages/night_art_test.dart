@@ -1,9 +1,9 @@
 // A night's picture (D110; head's messages 24 and 25): the painted gradient,
-// or one of the placeholder paintings in the curated set's place; heard as
-// nothing; the same in both themes.
+// or one painting of the curated set (D147) covering its box from the
+// middle over the gradient; heard as nothing; the same in both themes. And
+// New Dream's sky, the set's strip (D112; D147 item 3).
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/night_look.dart';
 import 'package:souldreams/journal/pages/night_art.dart';
@@ -11,11 +11,22 @@ import 'package:souldreams/journal/pages/night_art.dart';
 void main() {
   Future<RenderObject> pump(WidgetTester tester, NightLook look) async {
     await tester.pumpWidget(Center(child: SizedBox(width: 300, height: 64, child: NightArt(look))));
-    return tester.renderObject(find.descendant(of: find.byType(NightArt), matching: find.byType(CustomPaint)));
+    return tester.renderObject(find.descendant(of: find.byType(NightArt), matching: find.byType(CustomPaint)).first);
   }
 
-  test('a few placeholder paintings stand in the set', () {
-    expect(NightArt.paintings, 5);
+  /// The one image in the tree, as drawn: its widget and its file.
+  ({Image image, ResizeImage resized, String file}) shown(WidgetTester tester) {
+    final image = tester.widget<Image>(find.byType(Image));
+    final resized = image.image as ResizeImage;
+    return (image: image, resized: resized, file: (resized.imageProvider as AssetImage).assetName);
+  }
+
+  test('sixty paintings in the set, each its own file', () {
+    expect(NightArt.paintings, 60);
+    expect(NightArt.asset(0), 'assets/paintings/01.jpg');
+    expect(NightArt.asset(9), 'assets/paintings/10.jpg');
+    expect(NightArt.asset(59), 'assets/paintings/60.jpg');
+    expect({for (var i = 0; i < NightArt.paintings; i++) NightArt.asset(i)}, hasLength(60));
   });
 
   test("the gradient and the words over it: from the dark theme", () {
@@ -26,25 +37,30 @@ void main() {
   testWidgets('the gradient fills its box, and nothing else is drawn', (tester) async {
     final art = await pump(tester, const PaintedGradient());
     expect(art, paints..rect(rect: const Rect.fromLTWH(0, 0, 300, 64)));
-    expect(art, isNot(paints..circle()));
+    expect(find.byType(Image), findsNothing);
   });
 
-  testWidgets('each painting fills its box and draws its own light', (tester) async {
+  testWidgets('each painting covers its box from the middle', (tester) async {
+    final ratio = tester.view.devicePixelRatio;
     for (var i = 0; i < NightArt.paintings; i++) {
       final art = await pump(tester, Painting(i));
-      expect(art, paints..rect(rect: const Rect.fromLTWH(0, 0, 300, 64))..circle());
+      expect(art, paints..rect(rect: const Rect.fromLTWH(0, 0, 300, 64)));
+      final s = shown(tester);
+      expect(s.file, NightArt.asset(i));
+      expect(s.image.fit, BoxFit.cover);
+      expect(s.image.alignment, Alignment.center);
+      // Decoded no wider than the box on this screen.
+      expect(s.resized.width, (300 * ratio).ceil());
+      expect(s.resized.height, isNull);
+      expect(tester.getRect(find.byType(Image)), tester.getRect(find.byType(NightArt)));
     }
-  });
-
-  testWidgets('no two paintings alike', (tester) async {
-    final skies = {for (var i = 0; i < NightArt.paintings; i++) NightArt.sky(i)};
-    expect(skies, hasLength(NightArt.paintings));
   });
 
   testWidgets('the picture is silent; what stands over it is heard', (tester) async {
     final handle = tester.ensureSemantics();
     await pump(tester, const Painting(0));
     expect(tester.getSemantics(find.byType(NightArt)).label, isEmpty);
+    expect(shown(tester).image.excludeFromSemantics, isTrue);
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: NightArt(Painting(1), child: Text('19/11/2026')),
@@ -53,46 +69,21 @@ void main() {
     handle.dispose();
   });
 
-  // D112: New Dream's night sky, a stand-in drawn in code: the gradient and
-  // stars, kept off the middle band where the words stand.
+  // D112; D147 item 3: New Dream's night sky, the set's strip.
   group('the night sky inside New Dream', () {
-    Future<RenderObject> sky(WidgetTester tester, {double height = 50}) async {
-      await tester.pumpWidget(Center(child: SizedBox(width: 200, height: height, child: const NightSky())));
-      return tester.renderObject(find.descendant(of: find.byType(NightSky), matching: find.byType(CustomPaint)));
-    }
-
-    PaintPattern starry(int n) {
-      final pattern = paints..rect(rect: const Rect.fromLTWH(0, 0, 200, 50));
-      for (var i = 0; i < n; i++) {
-        // Stars past the list repeat the last, so a longer pattern fails.
-        final s = NightSky.stars[i < NightSky.stars.length ? i : NightSky.stars.length - 1];
-        pattern.circle(
-          x: 200 * s.x,
-          y: s.dy >= 0 ? s.dy : 50 + s.dy,
-          radius: s.r,
-          color: NightArt.over.withValues(alpha: NightSky.starAlpha),
-        );
-      }
-      return pattern;
-    }
-
-    test('stars stand in the pill\'s own padding, clear of the words', () {
-      expect(NightSky.stars.length, greaterThanOrEqualTo(8));
-      for (final s in NightSky.stars) {
-        expect(s.x, inInclusiveRange(0, 1));
-        // Within the one side's padding: the top for a star from the top.
-        final side = s.dy >= 0 ? StandIns.buttonPadding.top : StandIns.buttonPadding.bottom;
-        expect(s.dy.abs() + s.r, lessThan(side));
-      }
-      // Some at the top and some at the foot.
-      expect(NightSky.stars.any((s) => s.dy >= 0), isTrue);
-      expect(NightSky.stars.any((s) => s.dy < 0), isTrue);
-    });
-
-    testWidgets('the gradient, then one star each', (tester) async {
-      final art = await sky(tester);
-      expect(art, starry(NightSky.stars.length));
-      expect(art, isNot(starry(NightSky.stars.length + 1)));
+    testWidgets("the sky: the set's strip, covering the pill", (tester) async {
+      await tester.pumpWidget(Center(child: SizedBox(width: 200, height: 50, child: const NightSky())));
+      final gradient = tester.renderObject(
+        find.descendant(of: find.byType(NightSky), matching: find.byType(CustomPaint)).first,
+      );
+      expect(gradient, paints..rect(rect: const Rect.fromLTWH(0, 0, 200, 50)));
+      final s = shown(tester);
+      expect(s.file, 'assets/paintings/sky.jpg');
+      expect(NightSky.asset, 'assets/paintings/sky.jpg');
+      expect(s.image.fit, BoxFit.cover);
+      expect(s.image.alignment, Alignment.center);
+      expect(s.image.excludeFromSemantics, isTrue);
+      expect(tester.getRect(find.byType(Image)), tester.getRect(find.byType(NightSky)));
     });
 
     testWidgets('the sky is silent; the words over it are heard', (tester) async {

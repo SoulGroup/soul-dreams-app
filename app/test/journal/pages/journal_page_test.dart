@@ -170,7 +170,8 @@ void main() {
     expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
   });
 
-  // D112: a night sky inside the pill, drawn in code until the founder's image.
+  // D112: a night sky inside the pill, the set's strip (D147 item 3), the
+  // words on the date's shade (D113; proved on pixels in paintings_test).
   testWidgets('New Dream: centred, on a night sky, a button', (tester) async {
     final h = await Harness.make();
     await h.pump(tester, JournalPage(journal: h.journal));
@@ -179,6 +180,10 @@ void main() {
     expect(find.descendant(of: button, matching: find.byType(NightSky)), findsOneWidget);
     expect(find.descendant(of: button, matching: find.byType(NightArt)), findsNothing);
     final words = tester.widget<Text>(find.text(Lines.MP_11.text(Lang.en)));
+    expect(
+      find.ancestor(of: find.text(Lines.MP_11.text(Lang.en)), matching: find.byType(DateShade)),
+      findsOneWidget,
+    );
     expect(words.style!.color, NightArt.over);
     expect(words.style!.fontFamily, TypeRoles.button.family);
     final handle = tester.ensureSemantics();
@@ -292,7 +297,9 @@ void main() {
     expect(find.descendant(of: find.byType(DateShade), matching: find.text(shownDate(n.date))), findsOneWidget);
     await tester.pumpWidget(const SizedBox());
     await h.pump(tester, JournalPage(journal: h.journal));
-    expect(find.byType(DateShade), findsNothing);
+    // New Dream's words keep theirs (D147 item 3); the row has none.
+    expect(find.descendant(of: find.byKey(JournalPage.rowKey(n.id)), matching: find.byType(DateShade)), findsNothing);
+    expect(find.byType(DateShade), findsOneWidget);
   });
 
   testWidgets("a row: the date over an unread night's gradient", (tester) async {

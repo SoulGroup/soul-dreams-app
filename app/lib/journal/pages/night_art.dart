@@ -1,36 +1,18 @@
 // A night's picture (D110; head's messages 24 and 25): the painted gradient
-// for an unread night, or one painting of the set shipped in the app for a
-// read one. The curated set (about 60, the founder's) is not filed yet, so a
-// few placeholder paintings stand in its place, drawn here in plain layered
-// colour: no file, no package, no words. When the set comes, it replaces
-// `paintings` and the placeholders; nothing else changes. The gradient's
-// colours and the text over a picture are stand-ins until Product sets them
-// (P13): the dark theme's bubble gradient and text, in both themes. Heard
-// as nothing: decoration. Also here: the night sky inside New Dream (D112)
-// and the soft shade behind a date over a painting (D113), both stand-ins.
-import 'dart:math';
-
+// for an unread night, or one painting of the curated set shipped in the
+// app for a read one (D147): sixty paintings in `assets/paintings/`, each
+// fingerprinted (G2) and carrying the invisible AI tag (D123), shown to
+// cover its box from the middle, so a row shows a thin band and the header a
+// wide crop. The gradient lies beneath, so nothing flashes while a painting
+// loads. The gradient's colours and the text over a picture are stand-ins
+// until Product sets them (P13): the dark theme's bubble gradient and text,
+// in both themes. Heard as nothing: decoration. Also here: the night sky
+// inside New Dream (D112; D147 item 3, the set's strip) and the soft shade
+// behind a date over a painting (D113), a stand-in.
 import 'package:flutter/widgets.dart';
 
 import '../../design/tokens.g.dart';
 import '../night_look.dart';
-
-/// One placeholder painting: a sky from top to foot, a soft light in it at
-/// [lightX] across, a far ridge and a near one.
-typedef _Placeholder = ({Color top, Color foot, Color light, double lightX, Color far, Color near});
-
-const _placeholders = <_Placeholder>[
-  // Dusk.
-  (top: Color(0xFF2E2A5C), foot: Color(0xFF8C6A9E), light: Color(0xFFF2D8A7), lightX: 0.72, far: Color(0xFF4A3F6B), near: Color(0xFF231E3D)),
-  // Dawn.
-  (top: Color(0xFF6E7FA8), foot: Color(0xFFE9B9A0), light: Color(0xFFFFF1D6), lightX: 0.28, far: Color(0xFF8A7F9C), near: Color(0xFF4F4866)),
-  // The sea.
-  (top: Color(0xFF1F4E5F), foot: Color(0xFF7FB3B0), light: Color(0xFFE8F1E4), lightX: 0.6, far: Color(0xFF2F6B6E), near: Color(0xFF173B45)),
-  // The forest.
-  (top: Color(0xFF34503A), foot: Color(0xFFB7B98A), light: Color(0xFFF4E9C1), lightX: 0.4, far: Color(0xFF3F5E3F), near: Color(0xFF1E3322)),
-  // The night.
-  (top: Color(0xFF0E1433), foot: Color(0xFF3B4A7A), light: Color(0xFFDCE3F2), lightX: 0.8, far: Color(0xFF26305A), near: Color(0xFF111833)),
-];
 
 class NightArt extends StatelessWidget {
   const NightArt(this.look, {super.key, this.child});
@@ -40,8 +22,14 @@ class NightArt extends StatelessWidget {
   /// What stands over the picture (the date), if anything.
   final Widget? child;
 
-  /// How many paintings the set holds: the placeholders, for now.
-  static const paintings = 5;
+  /// How many paintings the set holds (D147).
+  static const paintings = 60;
+
+  /// Painting [index]'s file: `01.jpg` to `60.jpg`.
+  static String asset(int index) {
+    final number = (index + 1).toString().padLeft(2, '0');
+    return 'assets/paintings/$number.jpg';
+  }
 
   /// The painted gradient, top to foot.
   static final gradient = [DarkColours.surface.colour!, DarkColours.surface.colourEnd!];
@@ -49,16 +37,49 @@ class NightArt extends StatelessWidget {
   /// The colour of words over a picture.
   static final over = DarkColours.text.colour!;
 
-  /// The top of painting [index]'s sky (each painting's own).
-  static Color sky(int index) => _placeholders[index].top;
-
-  // A painter adds nothing a screen reader hears; what stands over it is
-  // heard as itself.
-  // What stands over the picture is clipped to it, so a soft edge (the
-  // date's shade) never runs past the picture's own.
+  // The gradient and the painting add nothing a screen reader hears; what
+  // stands over them is heard as itself. What stands over the picture is
+  // clipped to it, so a soft edge (the date's shade) never runs past the
+  // picture's own.
   @override
-  Widget build(BuildContext context) =>
-      ClipRect(child: CustomPaint(painter: _ArtPainter(look), child: child ?? const SizedBox.expand()));
+  Widget build(BuildContext context) {
+    final look = this.look;
+    return ClipRect(
+      // The box's own constraints pass to what stands over it, as before
+      // the set: a row keeps its least height.
+      child: Stack(
+        alignment: Alignment.topLeft,
+        fit: StackFit.passthrough,
+        children: [
+          Positioned.fill(child: CustomPaint(painter: _GradientPainter())),
+          if (look is Painting) Positioned.fill(child: _Cover(asset(look.index))),
+          child ?? const SizedBox.expand(),
+        ],
+      ),
+    );
+  }
+}
+
+/// An image of the set covering its box from the middle, decoded no larger
+/// than the box needs on this screen, and silent.
+class _Cover extends StatelessWidget {
+  const _Cover(this.asset);
+
+  final String asset;
+
+  @override
+  Widget build(BuildContext context) => LayoutBuilder(
+    builder: (context, box) {
+      final width = (box.maxWidth * MediaQuery.devicePixelRatioOf(context)).ceil();
+      return Image(
+        image: ResizeImage.resizeIfNeeded(width > 0 ? width : null, null, AssetImage(asset)),
+        fit: BoxFit.cover,
+        alignment: Alignment.center,
+        excludeFromSemantics: true,
+        gaplessPlayback: true,
+      );
+    },
+  );
 }
 
 /// A soft dark shade behind a night's date over a painting (D113), so the
@@ -107,103 +128,46 @@ class _ShadePainter extends CustomPainter {
   bool shouldRepaint(_ShadePainter old) => false;
 }
 
-/// New Dream's night sky (D112): the painted gradient with a few stars, a
-/// stand-in drawn in code until the founder supplies the image. The stars
-/// stand in the pill's own padding, above and below the words, never behind
-/// them. Heard as nothing, like the picture.
+/// New Dream's night sky (D112; D147 item 3): the set's strip covering the
+/// pill from the middle, over the painted gradient. Heard as nothing, like
+/// the picture.
 class NightSky extends StatelessWidget {
   const NightSky({super.key, this.child});
 
   /// What stands over the sky (New Dream's words).
   final Widget? child;
 
-  /// How bright a star is.
-  static const double starAlpha = 0.85;
-
-  /// A star: [x] across as a share of the width, [dy] down from the top edge
-  /// (or, when negative, up from the foot) in logical pixels, radius [r].
-  static const stars = <({double x, double dy, double r})>[
-    (x: 0.06, dy: 7, r: 1.2),
-    (x: 0.17, dy: -6, r: 1.0),
-    (x: 0.26, dy: 5, r: 0.9),
-    (x: 0.38, dy: -8, r: 1.4),
-    (x: 0.49, dy: 6, r: 1.0),
-    (x: 0.58, dy: -5, r: 0.9),
-    (x: 0.69, dy: 8, r: 1.3),
-    (x: 0.78, dy: -7, r: 1.0),
-    (x: 0.88, dy: 5, r: 1.1),
-    (x: 0.95, dy: -6, r: 1.2),
-  ];
+  /// The strip's file.
+  static const asset = 'assets/paintings/sky.jpg';
 
   @override
-  Widget build(BuildContext context) =>
-      CustomPaint(painter: _SkyPainter(), child: child ?? const SizedBox.expand());
+  Widget build(BuildContext context) => Stack(
+    alignment: Alignment.topLeft,
+    fit: StackFit.passthrough,
+    children: [
+      Positioned.fill(child: CustomPaint(painter: _GradientPainter())),
+      const Positioned.fill(child: _Cover(asset)),
+      child ?? const SizedBox.expand(),
+    ],
+  );
 }
 
-class _SkyPainter extends CustomPainter {
+/// The painted gradient, top to foot.
+class _GradientPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final box = Offset.zero & size;
-    canvas.drawRect(box, Paint()..shader = _ArtPainter._vertical(box, NightArt.gradient));
-    final star = Paint()..color = NightArt.over.withValues(alpha: NightSky.starAlpha);
-    for (final s in NightSky.stars) {
-      final y = s.dy >= 0 ? s.dy : size.height + s.dy;
-      canvas.drawCircle(Offset(size.width * s.x, y), s.r, star);
-    }
+    canvas.drawRect(
+      box,
+      Paint()
+        ..shader = LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: NightArt.gradient,
+        ).createShader(box),
+    );
   }
 
   @override
-  bool shouldRepaint(_SkyPainter old) => false;
-}
-
-class _ArtPainter extends CustomPainter {
-  _ArtPainter(this.look);
-
-  final NightLook look;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final box = Offset.zero & size;
-    canvas.save();
-    canvas.clipRect(box);
-    switch (look) {
-      case PaintedGradient():
-        canvas.drawRect(box, Paint()..shader = _vertical(box, NightArt.gradient));
-      case Painting(:final index):
-        final p = _placeholders[index];
-        canvas.drawRect(box, Paint()..shader = _vertical(box, [p.top, p.foot]));
-        final r = min(size.width, size.height) * 0.22;
-        canvas.drawCircle(
-          Offset(size.width * p.lightX, size.height * 0.38),
-          r,
-          Paint()
-            ..color = p.light.withValues(alpha: 0.85)
-            ..maskFilter = MaskFilter.blur(BlurStyle.normal, r * 0.35),
-        );
-        canvas.drawPath(_ridge(size, 0.66, 0.06, 1.3), Paint()..color = p.far);
-        canvas.drawPath(_ridge(size, 0.8, 0.05, 2.1), Paint()..color = p.near);
-    }
-    canvas.restore();
-  }
-
-  static Shader _vertical(Rect box, List<Color> colours) =>
-      LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: colours).createShader(box);
-
-  // A gentle ridge across the width at [at] of the height, rising and
-  // falling by [swell] of the height, [waves] times.
-  static Path _ridge(Size size, double at, double swell, double waves) {
-    final path = Path()..moveTo(0, size.height);
-    const steps = 24;
-    for (var i = 0; i <= steps; i++) {
-      final x = size.width * i / steps;
-      final y = size.height * (at + swell * sin(i / steps * waves * pi));
-      path.lineTo(x, y);
-    }
-    return path
-      ..lineTo(size.width, size.height)
-      ..close();
-  }
-
-  @override
-  bool shouldRepaint(_ArtPainter old) => old.look != look;
+  bool shouldRepaint(_GradientPainter old) => false;
 }

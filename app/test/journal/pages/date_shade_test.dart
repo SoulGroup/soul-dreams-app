@@ -1,8 +1,8 @@
 // The soft dark shade behind a night's date over any painting (D113), so the
 // date reads at 4.5 to 1 or better over every painting, in a row and in the
 // header; the painted gradient has none. Proved on real pixels: each
-// painting is drawn with the shade, and every pixel where the date stands is
-// measured against the date's colour.
+// painting of the set (D147) is drawn with the shade, and every pixel where
+// the date stands is measured against the date's colour.
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -59,6 +59,13 @@ void main() {
         ),
       ),
     );
+    // The painting's file decoded before the pixels are read.
+    await tester.runAsync(() async {
+      for (final e in find.byType(Image).evaluate()) {
+        await precacheImage((e.widget as Image).image, e);
+      }
+    });
+    await tester.pump();
     late ByteData data;
     late int width;
     await tester.runAsync(() async {
@@ -117,7 +124,19 @@ void main() {
   // Soft: from far outside to the date's edge the painting darkens
   // gradually, through several steps, not at one hard edge.
   testWidgets('the shade fades in towards the date, in steps', (tester) async {
-    const look = Painting(3);
+    // Over the lightest painting where the date stands, so the shade shows.
+    var look = const Painting(0);
+    var light = 0.0;
+    for (var i = 0; i < NightArt.paintings; i++) {
+      final m =
+          await measure(tester, Painting(i), size: row.size, date: row.date, at: row.at, probe: row.probe, shade: false);
+      final y = (row.at.dy + row.date.height / 2).round();
+      final l = m.light(row.at.dx.round(), y);
+      if (l > light) {
+        light = l;
+        look = Painting(i);
+      }
+    }
     final shaded = await measure(tester, look, size: row.size, date: row.date, at: row.at, probe: row.probe);
     final bare = await measure(tester, look, size: row.size, date: row.date, at: row.at, probe: row.probe, shade: false);
     final y = (row.at.dy + row.date.height / 2).round();

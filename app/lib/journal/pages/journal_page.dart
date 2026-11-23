@@ -507,7 +507,9 @@ class _Magnifier extends CustomPainter {
 }
 
 /// New Dream (D110, D112): a pill on a night sky, its words in the button
-/// type over it, opening the typing screen; heard as a button.
+/// type over it, opening the typing screen; heard as a button. Over the
+/// set's sky (D147 item 3) the words stand on the date's soft shade (D113),
+/// a stand-in, so they read at 4.5 to 1 over its stars.
 class _NewDream extends StatelessWidget {
   const _NewDream({required this.onPressed});
 
@@ -524,7 +526,9 @@ class _NewDream extends StatelessWidget {
         child: NightSky(
           child: Padding(
             padding: StandIns.buttonPadding,
-            child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),
+            child: DateShade(
+              child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),
+            ),
           ),
         ),
       ),

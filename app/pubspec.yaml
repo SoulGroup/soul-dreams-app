@@ -22,6 +22,12 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # The curated set of night paintings and New Dream's sky (D147), bundled:
+  # never fetched at run time (R10). Each file is fingerprinted there (G2);
+  # the folder's fingerprints.txt is bundled with them.
+  assets:
+    - assets/paintings/
+
   # The faces the Design System names (D49 a), bundled: never fetched at
   # run time (R10). Each file is fingerprinted in assets/fonts/.
   fonts:
