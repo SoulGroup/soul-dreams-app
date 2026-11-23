@@ -3077,7 +3077,7 @@ None stops the plan: each is built as leaned. All are the owner's.
 Written 2026-11-23, after Tasks 1 to 5 were committed (`f456a0e`) and before any AWS task but Task 6. The Opus review
 of the branch (read-only, under D91) found one blocker and four defects; the owner's `describe-type` proved the
 blocker, and D138 ruled on three questions. **Where this part differs from Parts 1, 3 and 4, this part governs.**
-Built as one batch, test-first; the counts: server tests 90, mutation rows S1 to S72 less S42 (71), all caught.
+Built as one batch, test-first; the counts: server tests 90, mutation rows S1 to S73 less S42 (72), all caught (D139 below changed one row and added S73).
 
 | Finding | What was done |
 |---|---|
@@ -3085,7 +3085,7 @@ Built as one batch, test-first; the counts: server tests 90, mutation rows S1 to
 | **D2 · a failed endpoint took its logs with it**: the log group was made in the same update as the endpoint, so a rollback deleted it | Both log groups are made with the bucket, in the first stage (`imageTrial=bucket`), and stay when an endpoint update rolls back. Rows S64 and S65. |
 | **D3 · no step if an endpoint does not scale to zero** (about USD 2.76 an hour on g6e) | Task 9 and Fallback F3 gain the step below. |
 | **D4 · a weights file cut during its check was kept by a rerun** | A large file goes up as `<key>.unchecked`, is read back and checked, and only then moved to `<key>` (`aws s3 mv`, server side); a mismatch removes the staging copy; a rerun removes a staging copy beside a kept file. Rows S71 and S72. |
-| **D5 · "deletes within a day" is not what S3 does**: a lifecycle rule expires an object at its creation plus 1 day, rounded up to the next midnight UTC, and removes it asynchronously: up to about 48 hours | D138 (2): `run.ts` deletes the model's `in/`, `out/` and `fail/` objects when it ends, however it ends (after the images are saved); the rule stays as the backstop. Read D135's "deletes within a day" as: deleted by the run; expired by the rule within about two days if the run never ends. Rows S67 to S70. |
+| **D5 · "deletes within a day" is not what S3 does**: a lifecycle rule expires an object at its creation plus 1 day, rounded up to the next midnight UTC, and removes it asynchronously: up to about 48 hours | D138 (2): `run.ts` deletes the model's `in/`, `out/` and `fail/` objects when it ends, however it ends (after the images are saved); the rule stays as the backstop. Read D135's "deletes within a day" as: deleted by the run; expired by the rule within about two days if the run never ends. **D139:** a run that stops deletes only `in/` and `out/` and keeps `fail/`, the only record of a failure on SageMaker's side; the teardown empties the bucket. Rows S67 to S70 and S73. |
 | **S2 · the model server's timeout** (unproven offline) | D138 (3): the model's environment gains `SAGEMAKER_MODEL_SERVER_TIMEOUT=3600`. Row S66. |
 
 ### The owner's tasks, corrected
@@ -3133,15 +3133,16 @@ with the `aws logs tail` command given there. A g6e quota of 0 fails as `Resourc
   alarms and role, and leaves the bucket, the weights and the log groups. It does not ask `y`: removing resources
   is not a broadening. Bring the evidence.
 
-**Task 10 · FLUX's run (changes)**: when the run ends, or stops, it deletes the model's `in/`, `out/` and `fail/`
-objects (a stop prints its code, and the reason is in the endpoint's log). Paste 3 — Terminal, after Paste 1 (after
+**Task 10 · FLUX's run (changes)**: when the run ends it deletes the model's `in/`, `out/` and `fail/` objects; when
+it stops (it prints its code) it deletes `in/` and `out/` and keeps `fail/` (D139): after a stop, read what is in
+`s3://<B>/fail/flux/` (`aws s3 cp` it to the Mac's `~/Desktop/image-trial/`, and bring it), as well as the endpoint's log. Paste 3 — Terminal, after Paste 1 (after
 a stop, first wait until the endpoint is back to `0` instances, since a painting already sent still finishes in
-SageMaker, or fails there, and writes to `out/` or `fail/`; then run Paste 3, and the `rm` below for any prefix
-that shows more than `0`):
+SageMaker, or fails there, and writes to `out/` or `fail/`; then run Paste 3, and the `rm` below for `in` or `out`
+if it shows more than `0`; a `fail` count above `0` after a stop is expected, it is the kept failures):
 ```
 for p in in out fail; do aws s3 ls s3://<B>/$p/flux/ --recursive --profile <workload> --region eu-north-1 | wc -l; done
 ```
-Expected: `0`, `0`, `0`. `Error: trial-cleanup` means the run was good but a deletion failed: the images and
+Expected after a run that finished: `0`, `0`, `0`. `Error: trial-cleanup` means the run was good but a deletion failed: the images and
 `results.md` are on the Mac; delete by hand, for each of `in`, `out` and `fail`:
 ```
 aws s3 rm s3://<B>/in/flux/ --recursive --only-show-errors --profile <workload> --region eu-north-1

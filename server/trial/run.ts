@@ -4,8 +4,9 @@
 // to none. The images and the results go to the folder given, outside
 // the repository. It writes no prompt anywhere: the requests go to S3 as
 // files, and its own notes hold codes and times only.
-// When it ends, or stops, it deletes the model's requests, results and
-// failures from the bucket (D138).
+// When it ends it deletes the model's requests, results and failures from
+// the bucket (D138); when it stops, only the requests and results, so the
+// failures stay to be read (D139).
 //   node trial/run.ts <flux|sdxl> <bucket> <folder>
 import { execFile } from 'node:child_process';
 import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -234,23 +235,27 @@ async function measured(t: Trial, instanceType: string, idleMinutes: number): Pr
  * S3's lifecycle rule expires them at the next midnight UTC after their day,
  * so about two days at most; this is the deletion, and the rule the backstop.
  */
-async function cleanup(t: Trial): Promise<void> {
-  for (const prefix of ['in', 'out', 'fail']) {
+async function cleanup(t: Trial, prefixes: readonly string[]): Promise<void> {
+  for (const prefix of prefixes) {
     await t.aws(['s3', 'rm', `s3://${t.bucket}/${prefix}/${t.model}/`, '--recursive', '--only-show-errors', '--region', REGION]);
   }
 }
 
-/** The run, then the deletion; a stop is reported as itself, whatever the deletion does. */
+/**
+ * The run, then the deletion; a stop is reported as itself, whatever the
+ * deletion does, and keeps fail/: the only record of a failure on SageMaker's
+ * side (D139). The teardown empties the bucket; the lifecycle rule backs it up.
+ */
 export async function trial(t: Trial, instanceType: string, idleMinutes: number): Promise<Run> {
   let run: Run;
   try {
     run = await measured(t, instanceType, idleMinutes);
   } catch (error) {
-    await cleanup(t).catch(() => undefined);
+    await cleanup(t, ['in', 'out']).catch(() => undefined);
     throw error;
   }
   try {
-    await cleanup(t);
+    await cleanup(t, ['in', 'out', 'fail']);
   } catch {
     throw new Error('trial-cleanup');
   }

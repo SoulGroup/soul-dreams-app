@@ -324,7 +324,9 @@ test('the run deletes its requests, results and failures when it ends', async ()
   }
 });
 
-test('a stopped run deletes them too, reporting its own stop', async () => {
+// A stop keeps fail/, the only record of a failure on SageMaker's side
+// (D139): the teardown empties the bucket, the lifecycle rule backs it up.
+test('a stopped run keeps fail/, deletes in/ and out/', async () => {
   for (const options of [{ fail: true }, { notPng: true }, { fail: true, rmFails: true }]) {
     const f = fake(options);
     const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
@@ -332,7 +334,7 @@ test('a stopped run deletes them too, reporting its own stop', async () => {
       await assert.rejects(trial(trialOf(f, folder, []), 'ml.g6e.xlarge', 10), {
         message: options.notPng ? 'trial-not-png' : 'trial-failed',
       });
-      assert.equal(removals(f.calls).length, options.rmFails ? 1 : 3);
+      assert.deepEqual(removals(f.calls), options.rmFails ? REMOVED.slice(0, 1) : REMOVED.slice(0, 2));
     } finally {
       rmSync(folder, { recursive: true, force: true });
     }

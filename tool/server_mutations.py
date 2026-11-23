@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S72, D135, D138), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S73, D135, D138, D139), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -214,17 +214,20 @@ ROWS = [
      "SAGEMAKER_MODEL_SERVER_TIMEOUT: '3600'", "SAGEMAKER_MODEL_SERVER_TIMEOUT: '60'",
      'test', 'each model: the pinned container, its weights, no network'),
     ('S67', 'trial/run.ts',
-     "for (const prefix of ['in', 'out', 'fail'])", "for (const prefix of ['in', 'out'])",
+     "for (const prefix of prefixes)", "for (const prefix of prefixes.slice(0, 2))",
      'test', 'the run deletes its requests, results and failures when it ends'),
     ('S68', 'trial/run.ts',
-     '    await cleanup(t).catch(() => undefined);\n    throw error;', '    throw error;',
-     'test', 'a stopped run deletes them too, reporting its own stop'),
+     "    await cleanup(t, ['in', 'out']).catch(() => undefined);\n    throw error;", '    throw error;',
+     'test', 'a stopped run keeps fail/, deletes in/ and out/'),
     ('S69', 'trial/run.ts',
-     '    await cleanup(t).catch(() => undefined);', '    await cleanup(t);',
-     'test', 'a stopped run deletes them too, reporting its own stop'),
+     "    await cleanup(t, ['in', 'out']).catch(() => undefined);", "    await cleanup(t, ['in', 'out']);",
+     'test', 'a stopped run keeps fail/, deletes in/ and out/'),
     ('S70', 'trial/run.ts',
      "    throw new Error('trial-cleanup');", '    return run;',
      'test', 'a deletion failing after a good run stops with a code'),
+    ('S73', 'trial/run.ts',
+     "    await cleanup(t, ['in', 'out']).catch(() => undefined);", "    await cleanup(t, ['in', 'out', 'fail']).catch(() => undefined);",
+     'test', 'a stopped run keeps fail/, deletes in/ and out/'),
     ('S71', 'trial/fetch-weights.sh',
      '    staged="$key.unchecked"', '    staged="$key"',
      'test', 'weights: a check cut short leaves nothing a rerun would keep'),

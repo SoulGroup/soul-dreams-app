@@ -408,9 +408,9 @@ merge (this entry records it).
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
 - The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 90 tests, and
-  71 mutation checks (S1 to S72, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 71 run,
-  71 caught`); `check_all.sh` does not
+  72 mutation checks (S1 to S73, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 72 run,
+  72 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1598,6 +1598,9 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   gone; (2) `run.ts` deletes its model's `in/`, `out/` and `fail/` objects when it ends, the lifecycle rule the
   backstop, and the wording is corrected; (3) `SAGEMAKER_MODEL_SERVER_TIMEOUT=3600`. With the review's D2 to D4 (the
   log groups with the bucket, a recovery step if an endpoint does not scale to zero, the weights' staging name).
+- D139 (owner, on the re-review's one question): a run that stops keeps `fail/` in the bucket and deletes only `in/`
+  and `out/` (the failure objects are the only record of a failure on SageMaker's side); the teardown empties the
+  bucket.
 
 ## Documents as last imported
 
