@@ -3174,6 +3174,10 @@ the budget is gone (`0`); its log-group line proves the groups went with the sta
 - The role has no `logs:CreateLogGroup` or `logs:DescribeLogStreams` [ASSUMED enough, the groups exist]; Task 11's
   Paste 5 shows it (no "Predict time" lines would be the sign).
 - The first instance's scale-in rests on SageMaker publishing `ApproximateBacklogSize` 0 when idle, or the policy
-  running on missing data [ASSUMED]; Task 9's `InService  0` proves it.
+  running on missing data [ASSUMED]; Task 9's `InService  0` proves it. Proved: the owner read `InService  0` about
+  15 minutes after the deploy ended (the `InService  1` reading was missed; `run.ts`'s scaling activities show both).
+- The CDK prints "CfnResource#addDependency is deprecated" when the stack is made (owner, Task 9). Find which line of
+  `server/infra/image-trial.ts` calls it, and replace it with the supported call, in a later task; nothing deployed
+  changes.
 
 *No matter where you are on your journey, the steps you take are equally important.*
