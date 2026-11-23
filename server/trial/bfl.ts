@@ -82,17 +82,21 @@ interface Variant {
   readonly text: (i: number) => string;
 }
 
-/** One painting: the request, the polling, the image's bytes and the credits. */
-async function paint(
+/**
+ * One painting: the request with [fields] to [model], the polling, the
+ * image's bytes and the credits BFL's reply names. Also the curated set's
+ * (D147, `curated.ts`).
+ */
+export async function paintOnce(
   send: Send,
   key: string,
   clock: Clock,
-  variant: Variant,
-  i: number,
+  model: string,
+  fields: Record<string, string | number>,
 ): Promise<{ png: Buffer; credits: number }> {
   const headers = { 'x-key': key };
-  const body = JSON.stringify({ prompt: variant.text(i), ...variant.size, seed: 1000 + i, output_format: 'png' });
-  const made = await call(send, `${BFL_API_URL}/${variant.model}`, {
+  const body = JSON.stringify({ ...fields, output_format: 'png' });
+  const made = await call(send, `${BFL_API_URL}/${model}`, {
     method: 'POST',
     headers: { ...headers, 'Content-Type': 'application/json' },
     body,
@@ -142,7 +146,8 @@ async function run(send: Send, key: string, folder: string, clock: Clock, varian
     const credits: number[] = [];
     for (const [i] of SCENES.entries()) {
       const start = clock.now();
-      const made = await paint(send, key, clock, variant, i);
+      const fields = { prompt: variant.text(i), ...variant.size, seed: 1000 + i };
+      const made = await paintOnce(send, key, clock, variant.model, fields);
       milliseconds.push(clock.now() - start);
       credits.push(made.credits);
       if (!made.png.subarray(0, 4).equals(PNG)) {

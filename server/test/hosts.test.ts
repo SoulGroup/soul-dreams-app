@@ -4,7 +4,16 @@ import { test } from 'node:test';
 import * as hosts from '../src/hosts.ts';
 
 test("Soniox's EU REST host only", () => {
-  assert.deepEqual(Object.keys(hosts).sort(), ['BFL_API_URL', 'BFL_HOST_SUFFIX', 'HOSTS', 'SONIOX_TEMPORARY_KEY_URL']);
+  assert.deepEqual(Object.keys(hosts).sort(), [
+    'AI_SOURCE_TYPE',
+    'BFL_API_URL',
+    'BFL_HOST_SUFFIX',
+    'HOSTS',
+    'SONIOX_TEMPORARY_KEY_URL',
+    'XMP_HEADER',
+    'XMP_IPTC_EXT',
+    'XMP_RDF',
+  ]);
   assert.deepEqual(hosts.HOSTS, ['api.eu.soniox.com']);
   assert.ok(Object.isFrozen(hosts.HOSTS));
 });
@@ -23,4 +32,14 @@ test("the image test's address is the EU endpoint's, not the server's", () => {
   assert.equal(url.pathname, '/v1');
   assert.ok(url.host.endsWith(hosts.BFL_HOST_SUFFIX));
   assert.equal(hosts.HOSTS.includes(url.host), false);
+});
+
+test("the AI tag's names: IPTC's and Adobe's, no server host", () => {
+  assert.equal(hosts.AI_SOURCE_TYPE, 'http://cv.iptc.org/newscodes/digitalsourcetype/trainedAlgorithmicMedia');
+  assert.equal(hosts.XMP_IPTC_EXT, 'http://iptc.org/std/Iptc4xmpExt/2008-02-29/');
+  assert.equal(hosts.XMP_RDF, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#');
+  assert.equal(hosts.XMP_HEADER, 'http://ns.adobe.com/xap/1.0/');
+  for (const name of [hosts.AI_SOURCE_TYPE, hosts.XMP_IPTC_EXT, hosts.XMP_RDF, hosts.XMP_HEADER]) {
+    assert.equal(hosts.HOSTS.includes(new URL(name).host), false);
+  }
 });
