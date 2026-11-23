@@ -192,7 +192,7 @@ ROWS = [
      '    *.fp16.*) continue ;;\n', '',
      'test', "weights: only the parts' files, checked, kept on a rerun"),
     ('S61', 'trial/fetch-weights.sh',
-     '      aws s3 rm "s3://$bucket/$key" --region eu-north-1 --only-show-errors\n', '',
+     '      aws s3 rm "s3://$bucket/$staged" --region eu-north-1 --only-show-errors\n', '',
      'test', 'weights: a large file read back wrong is removed; a stop'),
     ('S62', 'trial/fetch-weights.sh',
      '    [ "$got" = "$oid" ] || fail "fetch-hash $path" 3\n', '',
