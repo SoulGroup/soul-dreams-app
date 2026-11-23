@@ -1617,6 +1617,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   goes in Parameter Store (owner task). Nebius's own pages do not show that image requests are processed in the EU
   (public endpoints are "Global") or that Zero Data Retention covers images: written answers are needed before any
   night's text is sent (plan, "What this means for the founder's ruling").
+- D143 (the founder; settles D142's open point): the painting's prompt is written inside our own chain (the readings'
+  model) as a neutral scenery description (no names, places, people, dates or anything identifying; landscape,
+  light, weather, colour and mood only), so no dreamer's words reach Nebius and its "Global" processing is not a
+  blocker. ZDR stays on. The three questions to Nebius (EU processing of image requests, ZDR on images, a dedicated
+  EU endpoint's terms) are sent for the record, not as a gate. The prompt-writing comes with the readings (R7). The
+  Nebius address in `server/src/hosts.ts` is fine as it is (the R10 question, answered). Task 12 is done by the
+  owner (the AWS trial torn down, its proof read).
 
 ## Documents as last imported
 

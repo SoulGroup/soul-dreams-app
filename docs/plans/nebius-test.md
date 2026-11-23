@@ -23,7 +23,14 @@ out; **[ASSUMED]** believed, with what proves it.
 | Getting a key | Billing set-up with a bank card is mandatory to finish onboarding; no free credit or minimum top-up is stated. | `/quickstart` |
 | The request | `POST` to the images address in `server/src/hosts.ts`, `Authorization: Bearer <key>`, fields `model`, `prompt`, `width`, `height`, `num_inference_steps`, `seed`, `response_format` (`b64_json`) and `response_extension` (`png`); the reply is `{"data":[{"b64_json": ...}], "id": ...}`. Limits are dynamic per minute; bursts may be throttled, so the script sends one at a time. | image-generation page; `/ai-models-inference/rate-limits` |
 
-**What this means for the founder's ruling.** The DPA and the retention terms look in order. But two things D142
+**D143 (the founder, 2026-11-23) settles this section's gate.** The painting's prompt is written inside our own
+chain (the readings' model) as a neutral scenery description (no names, places, people, dates or anything
+identifying; landscape, light, weather, colour and mood only), so no dreamer's words reach Nebius, and Nebius's
+"Global" processing is not a blocker. ZDR stays on. The three questions below are sent to Nebius for the record, not
+as a gate. The prompt-writing itself comes with the readings (R7: nothing is drafted here). The six invented scenes
+of this test are already of that kind. What follows is the reading that led to D143, kept as it was written.
+
+**What this meant for the founder's ruling.** The DPA and the retention terms look in order. But two things D142
 rests on are **not shown** by Nebius's public pages: that image requests are processed in the EU (on public
 endpoints the pages say the opposite: "Global", can change without notice), and that Zero Data Retention covers
 image prompts and images. Neither is a thing the test can show. **Before any night's text is sent to Nebius**, the
