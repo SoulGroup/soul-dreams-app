@@ -407,10 +407,10 @@ merge (this entry records it).
   `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 100 tests, and
-  80 mutation checks (S1 to S81, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 80 run,
-  80 caught`); `check_all.sh` does not
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 102 tests, and
+  84 mutation checks (S1 to S85, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 84 run,
+  84 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1631,6 +1631,15 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   in Parameter Store (owner task), and the Nebius key is removed in the same step. BFL's pages: training on inputs and
   outputs is allowed by default (opt-out by email), no DPA or zero-retention statement found, and the EU endpoint
   is "routing limited to EU regions"; under D143 these are for the record, not a gate.
+- D145 (the founder): the night's painting uses Black Forest Labs' `flux-2-klein-4b` on the EU endpoint
+  (`api.eu.bfl.ai`): about 4 seconds and 1.4 US cents per 1024 x 1024 painting in the test. The BFL key stays in
+  Parameter Store for the build (renamed when the painting is built). The AWS GPU trial and the Nebius test stay set
+  aside in the branch.
+- D146 (the founder): the paintings should be more dreamlike, a blend of "dreamlike Van Gogh" and "ethereal". Before
+  the merge, a style test on `flux-2-klein-4b` (`node trial/bfl.ts <folder> style`): the same six invented scenes in
+  two strengths, AC1 (more Van Gogh) and AC2 (more ethereal), the same seeds, in `~/Desktop/image-trial/bfl-style/`.
+  The styles are `STYLES` in `server/trial/measure.ts`, so the chosen one is a one-line change. After the founder
+  picks: the full server mutation run once (D126), then the merge, which is the owner's.
 
 ## Documents as last imported
 

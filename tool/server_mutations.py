@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S81, D135, D138, D139, D141, D144), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144, D146), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -258,6 +258,18 @@ ROWS = [
     ('S81', 'trial/bfl.ts',
      "const GIVE_UP_MS = 120000;", "const GIVE_UP_MS = 1200000;",
      'test', 'a result not in two minutes stops the test'),
+    ('S82', 'trial/bfl.ts',
+     "text: (i: number) => prompt(i, STYLES[code])", "text: (i: number) => prompt(i, STYLES.AC1)",
+     'test', 'the style test: both styles, the same scenes and seeds'),
+    ('S83', 'trial/bfl.ts',
+     "seed: 1000 + i", "seed: 2000 + i",
+     'test', 'the style test: both styles, the same scenes and seeds'),
+    ('S84', 'trial/measure.ts',
+     "    'edges dissolving, slightly surreal',\n    'no people, no text',\n", "    'edges dissolving, slightly surreal',\n",
+     'test', 'the two styles are different and keep no people, no text'),
+    ('S85', 'trial/bfl.ts',
+     "(mode !== undefined && mode !== 'style')", "false",
+     'test', 'the command: a key, a folder, optionally the style'),
 ]
 
 

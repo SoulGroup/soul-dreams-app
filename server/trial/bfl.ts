@@ -5,12 +5,14 @@
 // Parameter Store); nothing sent or received is written anywhere, and an
 // error is a code. The API answers at once with an address to poll; the
 // finished image is fetched from the address it names (which gets no key).
-//   BFL_API_KEY=... node trial/bfl.ts <folder>
+//   BFL_API_KEY=... node trial/bfl.ts <folder> [style]
+// With `style` it runs the style test (D146) instead: the second model, each
+// scene in two strengths of the dreamlike blend, the same seeds.
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { BFL_API_URL, BFL_HOST_SUFFIX } from '../src/hosts.ts';
-import { prompt, SCENES } from './measure.ts';
+import { prompt, SCENES, STYLES } from './measure.ts';
 
 export interface Reply {
   readonly status: number;
@@ -74,17 +76,25 @@ function pollingUrl(value: unknown): string {
   return url.href;
 }
 
+/** What one run paints: a model, a size, the folder it is saved in and the words. */
+interface Variant {
+  readonly dir: string;
+  readonly model: string;
+  readonly size: Record<string, string | number>;
+  readonly text: (i: number) => string;
+}
+
 /** One painting: the request, the polling, the image's bytes and the credits. */
 async function paint(
   send: Send,
   key: string,
   clock: Clock,
-  model: (typeof BFL_MODELS)[number],
+  variant: Variant,
   i: number,
 ): Promise<{ png: Buffer; credits: number }> {
   const headers = { 'x-key': key };
-  const body = JSON.stringify({ prompt: prompt(i), ...model.size, seed: 1000 + i, output_format: 'png' });
-  const made = await call(send, `${BFL_API_URL}/${model.name}`, {
+  const body = JSON.stringify({ prompt: variant.text(i), ...variant.size, seed: 1000 + i, output_format: 'png' });
+  const made = await call(send, `${BFL_API_URL}/${variant.model}`, {
     method: 'POST',
     headers: { ...headers, 'Content-Type': 'application/json' },
     body,
@@ -126,15 +136,15 @@ async function paint(
   }
 }
 
-export async function measure(send: Send, key: string, folder: string, clock: Clock): Promise<void> {
-  for (const model of BFL_MODELS) {
-    const dir = join(folder, model.name);
+async function run(send: Send, key: string, folder: string, clock: Clock, variants: readonly Variant[]): Promise<void> {
+  for (const variant of variants) {
+    const dir = join(folder, variant.dir);
     mkdirSync(dir, { recursive: true });
     const milliseconds: number[] = [];
     const credits: number[] = [];
     for (const [i] of SCENES.entries()) {
       const start = clock.now();
-      const made = await paint(send, key, clock, model, i);
+      const made = await paint(send, key, clock, variant, i);
       milliseconds.push(clock.now() - start);
       credits.push(made.credits);
       if (!made.png.subarray(0, 4).equals(PNG)) {
@@ -143,8 +153,36 @@ export async function measure(send: Send, key: string, folder: string, clock: Cl
       writeFileSync(join(dir, `${i + 1}.png`), made.png);
     }
     writeFileSync(join(dir, 'timings.json'), `${JSON.stringify({ milliseconds, credits }, null, 2)}\n`);
-    writeFileSync(join(dir, 'results.md'), table(model.name, milliseconds, credits));
+    writeFileSync(join(dir, 'results.md'), table(variant.dir, milliseconds, credits));
   }
+}
+
+/** The two models, each with the trial's one style. */
+export function measure(send: Send, key: string, folder: string, clock: Clock): Promise<void> {
+  return run(
+    send,
+    key,
+    folder,
+    clock,
+    BFL_MODELS.map((m) => ({ dir: m.name, model: m.name, size: m.size, text: (i: number) => prompt(i) })),
+  );
+}
+
+/** The style test (D146): the second model, each scene in both styles, the same seeds. */
+export function measureStyles(send: Send, key: string, folder: string, clock: Clock): Promise<void> {
+  const klein = BFL_MODELS[1];
+  return run(
+    send,
+    key,
+    folder,
+    clock,
+    (['AC1', 'AC2'] as const).map((code) => ({
+      dir: code,
+      model: klein.name,
+      size: klein.size,
+      text: (i: number) => prompt(i, STYLES[code]),
+    })),
+  );
 }
 
 // One credit is USD 0.01 [READ, docs.bfl.ai, 2026-11-23].
@@ -169,21 +207,29 @@ function table(name: string, milliseconds: readonly number[], credits: readonly 
   ].join('\n');
 }
 
+/** The command line: <folder> [style]. */
 export function parseArgs(
   env: Readonly<Record<string, string | undefined>>,
   argv: readonly string[],
-): { key: string; folder: string } {
+): { key: string; folder: string; styles: boolean } {
   const key = env.BFL_API_KEY;
-  const [folder] = argv;
-  if (key === undefined || key === '' || folder === undefined || folder === '' || argv.length > 1) {
+  const [folder, mode] = argv;
+  if (
+    key === undefined ||
+    key === '' ||
+    folder === undefined ||
+    folder === '' ||
+    argv.length > 2 ||
+    (mode !== undefined && mode !== 'style')
+  ) {
     throw new Error('bfl-usage');
   }
-  return { key, folder };
+  return { key, folder, styles: mode === 'style' };
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const { key, folder } = parseArgs(process.env, process.argv.slice(2));
-  await measure(
+  const { key, folder, styles } = parseArgs(process.env, process.argv.slice(2));
+  await (styles ? measureStyles : measure)(
     async (url, init) => {
       const r = await fetch(url, { ...init, signal: AbortSignal.timeout(60000) });
       return { status: r.status, json: () => r.json(), bytes: async () => Buffer.from(await r.arrayBuffer()) };

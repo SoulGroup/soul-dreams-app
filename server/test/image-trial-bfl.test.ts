@@ -6,8 +6,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { BFL_API_URL } from '../src/hosts.ts';
-import { prompt } from '../trial/measure.ts';
-import { measure, parseArgs, type Clock, type Reply, type Send } from '../trial/bfl.ts';
+import { prompt, SCENES, STYLES } from '../trial/measure.ts';
+import { measure, measureStyles, parseArgs, type Clock, type Reply, type Send } from '../trial/bfl.ts';
 
 const KEY = 'invented-key-0123456789';
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 1, 2, 3]);
@@ -168,15 +168,52 @@ test('an image that is not a PNG stops the test', async () => {
   }
 });
 
-test('the command needs the key from the environment and a folder', () => {
-  assert.deepEqual(parseArgs({ BFL_API_KEY: KEY }, ['/tmp/x']), { key: KEY, folder: '/tmp/x' });
+test('the command: a key, a folder, optionally the style', () => {
+  assert.deepEqual(parseArgs({ BFL_API_KEY: KEY }, ['/tmp/x']), { key: KEY, folder: '/tmp/x', styles: false });
+  assert.deepEqual(parseArgs({ BFL_API_KEY: KEY }, ['/tmp/x', 'style']), { key: KEY, folder: '/tmp/x', styles: true });
   for (const [env, argv] of [
     [{}, ['/tmp/x']],
     [{ BFL_API_KEY: '' }, ['/tmp/x']],
     [{ BFL_API_KEY: KEY }, []],
     [{ BFL_API_KEY: KEY }, ['']],
     [{ BFL_API_KEY: KEY }, ['/tmp/x', 'more']],
+    [{ BFL_API_KEY: KEY }, ['/tmp/x', 'style', 'more']],
   ] as const) {
     assert.throws(() => parseArgs(env, argv), { message: 'bfl-usage' });
+  }
+});
+
+// D146: two strengths of the dreamlike blend, the same scenes and seeds.
+test('the two styles are different and keep no people, no text', () => {
+  assert.notEqual(STYLES.AC1, STYLES.AC2);
+  for (const style of Object.values(STYLES)) {
+    assert.ok(style.includes('no people') && style.includes('no text'), style);
+  }
+  assert.ok(STYLES.AC1.includes('Van Gogh') && STYLES.AC2.includes('Van Gogh'));
+  assert.ok(STYLES.AC1.includes('swirling impasto brushwork') && STYLES.AC2.includes('half-remembered dream'));
+});
+
+test('the style test: both styles, the same scenes and seeds', async () => {
+  const f = fake();
+  const folder = mkdtempSync(join(tmpdir(), 'trial-bfl-'));
+  try {
+    await measureStyles(f.send, KEY, folder, f.clock);
+    const posts = f.seen.filter((s) => s.method === 'POST');
+    assert.equal(posts.length, 12);
+    for (const s of posts) {
+      assert.equal(s.url, `${BFL_API_URL}/flux-2-klein-4b`);
+      assert.equal(s.body?.width, 1024);
+      assert.equal(s.body?.height, 1024);
+    }
+    for (const [n, code] of (['AC1', 'AC2'] as const).entries()) {
+      assert.deepEqual(
+        posts.slice(n * 6, n * 6 + 6).map((s) => [s.body?.prompt, s.body?.seed]),
+        SCENES.map((scene, i) => [`${scene}, ${STYLES[code]}`, 1000 + i]),
+      );
+      assert.deepEqual(readdirSync(join(folder, code)).sort(), ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png', 'results.md', 'timings.json']);
+    }
+    assert.equal(existsSync(join(folder, 'flux-3-image-klein')), false);
+  } finally {
+    rmSync(folder, { recursive: true, force: true });
   }
 });

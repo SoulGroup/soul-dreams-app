@@ -1,5 +1,11 @@
 # Plan: the Black Forest Labs image test (image-trial branch)
 
+> **D145 (the founder): the night's painting uses Black Forest Labs' `flux-2-klein-4b` on the EU endpoint
+> (`api.eu.bfl.ai`): about 4 seconds and 1.4 US cents per 1024 x 1024 painting in the test.** The BFL key stays in
+> Parameter Store for the build (renamed when the painting is built). The AWS GPU trial and the Nebius test stay set
+> aside in the branch. **D146 (the founder): the paintings should be more dreamlike**, a blend of "dreamlike Van
+> Gogh" and "ethereal": see "The style test (D146)" below.
+
 Governs: the founder's D144 (the test moves to Black Forest Labs' own API, FLUX, EU endpoint), under D143 (only a
 neutral scenery description leaves our chain, so the provider's terms on prompts matter less). It replaces the
 Nebius test (`docs/plans/nebius-test.md`, set aside: Nebius's catalogue no longer lists image generation). Written by
@@ -51,6 +57,31 @@ against a fake API (no key, no network). `nebius.ts` and its tests are gone.
 **[ASSUMED] until the first run proves it:** the exact endpoint path and field names, which were read from BFL's
 reference by a fetch of each page. A wrong path or field comes back as `bfl-http-404` or `bfl-http-422`: bring the
 code, and nothing was charged.
+
+## The style test (D146)
+
+Before the merge, a small test on `flux-2-klein-4b`: the same six invented scenes in two strengths of the blend, the
+same seeds (1000 to 1005), 1024 x 1024, saved to `~/Desktop/image-trial/bfl-style/AC1/` and `.../AC2/`. The styles
+are `STYLES` in `server/trial/measure.ts`, one constant each, so the chosen one is a one-line change. Both end in
+"no people, no text".
+
+- **AC1 (more Van Gogh):** "swirling impasto brushwork and glowing light, softened by a gentle dreamy haze, edges
+  dissolving, slightly surreal".
+- **AC2 (more ethereal):** "hazy, luminous, floating, soft focus, gentle colour, like a half-remembered dream, with
+  swirling Van Gogh brushwork still visible underneath".
+
+The founder's wording is kept; the one thing added is a lead phrase naming each side of the blend ("dreamlike Van
+Gogh style oil painting" before AC1, "ethereal dreamlike painting" before AC2), since AC1's wording does not itself
+name Van Gogh. Say if you would rather have the wording bare. Run it with `node trial/bfl.ts <folder> style`. Built
+test-first (102 tests, rows S82 to S85). 12 paintings, about USD 0.17. After the founder picks a style: the full
+server mutation run once (D126), then the merge, which is the owner's.
+
+**S1 · The style run (Terminal; about a minute).**
+```
+cd ~/Developer/soul-dreams-app/server && BFL_API_KEY=$(aws ssm get-parameter --name /souldreams/trial/bfl-key --with-decryption --query Parameter.Value --output text --profile soul-dreams-workload --region eu-north-1) node trial/bfl.ts ~/Desktop/image-trial/bfl-style style && cat ~/Desktop/image-trial/bfl-style/*/results.md
+```
+Expected: two tables of six, AC1 then AC2, each with seconds and credits (about 0.07 USD for each style). Look at
+the twelve images side by side, scene by scene, and bring the founder's pick.
 
 ## The owner's steps
 

@@ -14,12 +14,33 @@ export const SCENES = [
 ] as const;
 export const STYLE = 'Van Gogh style oil painting, thick impasto brushstrokes, no people';
 
-export function prompt(index: number): string {
+// The two strengths of the dreamlike blend (D146): AC1 more Van Gogh, AC2
+// more ethereal; the lead phrase names the blend's side, the rest is the
+// founder's wording. The chosen style is one line to change.
+// not-dreamer-facing: the style of the image prompt, not shown to anyone.
+export const STYLES = {
+  AC1: [
+    'dreamlike Van Gogh style oil painting',
+    'swirling impasto brushwork and glowing light',
+    'softened by a gentle dreamy haze',
+    'edges dissolving, slightly surreal',
+    'no people, no text',
+  ].join(', '),
+  AC2: [
+    'ethereal dreamlike painting',
+    'hazy, luminous, floating, soft focus, gentle colour',
+    'like a half-remembered dream',
+    'with swirling Van Gogh brushwork still visible underneath',
+    'no people, no text',
+  ].join(', '),
+} as const;
+
+export function prompt(index: number, style: string = STYLE): string {
   const scene = SCENES[index];
   if (scene === undefined) {
     throw new Error('trial-prompt');
   }
-  return `${scene}, ${STYLE}`;
+  return `${scene}, ${style}`;
 }
 
 // Each model's settings as its card or the library sets them, square
