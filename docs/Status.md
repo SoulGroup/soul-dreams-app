@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `life-context` (Life Context, the mechanical part, D110 item 2, D131 to D134; the owner's look passed and the full mutation run done; the merge next), by Claude Code.
+Last updated: 2026-11-22, in branch `image-trial` (the trial of open image models in our own AWS account, D135, D136; the owner's AWS tasks next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,7 +14,14 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`life-context`: Life Context, the mechanical part (D110, head's message 24 item 2; C159-I item 1; D127; D128; D131; plan
+`image-trial`: a trial of open image models in our own AWS account, for the founder to choose (D135, D136; plan
+`docs/plans/image-trial.md`): FLUX.1 [schnell] on ml.g6e.xlarge and SDXL on ml.g6.xlarge, SageMaker asynchronous
+inference in eu-north-1, scaled to zero, a private bucket deleting requests and results within a day, a USD 30
+budget alarm, the same six invented prompts on each, the times and costs measured, the images on the owner's Mac,
+then a teardown that removes everything. A separate stack (`SoulDreamsImageTrial`), made only when asked; the
+server's own stack is unchanged. The app is unchanged.
+
+`life-context` is merged (`eaf0da1`): Life Context, the mechanical part (D110, head's message 24 item 2; C159-I item 1; D127; D128; D131; plan
 `docs/plans/life-context.md`): what counts as a sentence, the kept sentences on the phone, the Recent window's sweep,
 Off deleting what is kept, the page "What you've told Soul Dreams" from Settings, and SoulDreams Dev's invented kept
 sentences. Nothing calls the capture yet: a night holds only dreams, and its real sources come with Questions and
@@ -24,9 +31,11 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `life-context`: the merge. The owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
-  the full pass, D98) and the full mutation run is done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min 1 s
-  on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
+- `image-trial`: the owner's AWS tasks (plan Part 3, Tasks 6 to 12), the founder's choice from the images and the
+  costs, then the teardown and its proof (Task 12). The plan's questions are its Part 4.
+- `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
+  the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
+  1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
 - Then "Made by AI"; Feedback, with its server change (D121 item 4). Life Context's sources (the opening's answers,
   what is said after it, the reflection, Waking Life) come with Questions and Reflection, and with them the mark on a
   tapped sentence's night (D131 item 3). The curated set of night paintings (about 60, the founder's)
@@ -391,9 +400,15 @@ merge (this entry records it).
   and that the log group is deleted with the stack (D44 a, b, c).
 - The CDK CLI's own synth was run once, with no credentials (Task 8, D45): the `Resources` section holds the nine
   types of `test/stack.test.ts` and no `AWS::CDK::Metadata`; `Parameters` holds only `BootstrapVersion`.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 47 tests, and
-  30 mutation checks (S1 to S30) in `tool/server_mutations.py`, run by hand from the repository root with
-  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 30 run, 30 caught`); `check_all.sh` does not
+- The image trial (D135, D136; `docs/plans/image-trial.md`), beside the server and not part of it:
+  `server/infra/image-trial.ts` (the stack `SoulDreamsImageTrial`, made by `infra/app.ts` only with
+  `-c imageTrial=...`), `server/trial/code/inference.py` (the serving code, run in AWS's Hugging Face container),
+  `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
+  costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
+  tests run with the server's, against fakes: no AWS, no network.
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 85 tests, and
+  63 mutation checks (S1 to S63) in `tool/server_mutations.py`, run by hand from the repository root with
+  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 63 run, 63 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1072,6 +1087,17 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      above the lists, or alone when nothing is kept, where MP·92 ("What you share about your waking life will appear
      here.") would stand (plan Part 4, question 5).
 
+Banked in image-trial (D91; nothing a dreamer sees changes):
+
+170. For Product, through the head, before any image model ships (licences read 2026-11-22 on each model's page):
+     SDXL's licence (CreativeML Open RAIL++-M) requires its use restrictions (Attachment A) as an enforceable
+     provision in the agreement with every user; FLUX.1 [schnell] is Apache-2.0 (its page; its LICENSE link gave 404)
+     and gated: the download needs a Hugging Face account that shares its contact details; SD 3.5 Medium, skipped
+     (D136), would have required registration and "Powered by Stability AI" shown publicly.
+171. The trial's price basis: AWS's Price List for eu-north-1 has no hosting or asynchronous-inference entry for any
+     g6e size (published 2026-11-22), though the console offers ml.g6e.xlarge (D136). The trial's g6e cost uses the
+     Training price, USD 2.7636 per hour, until the owner's bill shows the rate (plan Task 12).
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -1547,6 +1573,20 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   sentences was not found by reading or by any test (the seed works from "I agree", on real files and through the
   real `--dart-define-from-file` parsing); the one dependency that could have hidden them, the seed keeping
   sentences only while Life Context was On at that moment, is gone, and the seed logs `previewSeeded`.
+
+## Rulings during image-trial
+
+- `life-context` merged by the owner (`eaf0da1`).
+- D135 (owner, the brainstorm): (1) a trial of FLUX.1 [schnell] on ml.g6e.xlarge and SDXL on ml.g6.xlarge (SD 3.5
+  Medium if simple), each licence read on its own page; (2) eu-north-1 only; SageMaker asynchronous inference; the
+  requests and results in a private, encrypted bucket that deletes them within a day; no logging of prompts; (3) a
+  USD 30 budget alarm, at most one instance per endpoint, scale to zero after 10 idle minutes, a teardown removing
+  everything; (4) the owner runs every AWS step. Also: the cost per painting when each wakes the machine, at idle
+  times of 2 and 10 minutes, against warm, and a daily batch's.
+- D136 (owner, on the stop `.scratch/for-build-chat/image-trial-stop.md`): the console offers ml.g6e.xlarge in
+  eu-north-1. FLUX.1 [schnell] at full precision on ml.g6e.xlarge, SDXL on ml.g6.xlarge; SD 3.5 Medium skipped. The
+  plan's first AWS task proves g6e; if it fails as unsupported, FLUX in 8 bits on ml.g6.xlarge (one package inside
+  the serving container, pinned). The Hugging Face token, if needed, an owner task, kept in Parameter Store (R5).
 
 ## Documents as last imported
 
