@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S76, D135, D138, D139, D141), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S79, D135, D138, D139, D141, D142), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -243,6 +243,15 @@ ROWS = [
     ('S76', 'trial/run.ts',
      "held ? ['out'] : ['in', 'out']", "['in', 'out']",
      'test', 'a stop with no result keeps in/ and fail/, deletes out/'),
+    ('S77', 'trial/nebius.ts',
+     "Authorization: `Bearer ${key}`", "Authorization: key",
+     'test', 'each model paints the six prompts; images and times are saved'),
+    ('S78', 'trial/nebius.ts',
+     "if (!png.subarray(0, 4).equals(PNG))", "if (false)",
+     'test', 'a reply that is not a PNG stops the test'),
+    ('S79', 'trial/nebius.ts',
+     "throw new Error(`nebius-http-${reply.status}`);", "throw new Error(`nebius-http-${reply.status} ${key}`);",
+     'test', 'an error stops with a code, nothing of the reply'),
 ]
 
 

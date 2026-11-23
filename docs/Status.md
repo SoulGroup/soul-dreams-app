@@ -407,10 +407,10 @@ merge (this entry records it).
   `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 93 tests, and
-  75 mutation checks (S1 to S76, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 75 run,
-  75 caught`); `check_all.sh` does not
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 98 tests, and
+  78 mutation checks (S1 to S79, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 78 run,
+  78 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1610,6 +1610,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   SDXL on ml.g6.xlarge, follows. `run.ts` waits 20 minutes for a round's results, the trial's give-up time; a stop
   there is reported as the finding. FLUX 8-bit on g6.xlarge (Fallback F) stays the fallback if SDXL's quality
   disappoints.
+- D142 (the founder): the night's painting uses Nebius Token Factory (an image API with zero data retention), not our
+  own AWS GPUs. The AWS trial is set aside: the owner tears it down (plan Task 12, rewritten for any state) and its code
+  stays in the branch, unused. The Nebius test (`docs/plans/nebius-test.md`): `server/trial/nebius.ts` sends the six
+  invented prompts to FLUX schnell and SDXL on Nebius and saves the images and times on the owner's Mac; the API key
+  goes in Parameter Store (owner task). Nebius's own pages do not show that image requests are processed in the EU
+  (public endpoints are "Global") or that Zero Data Retention covers images: written answers are needed before any
+  night's text is sent (plan, "What this means for the founder's ruling").
 
 ## Documents as last imported
 

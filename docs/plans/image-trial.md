@@ -5,6 +5,13 @@ Branch `image-trial`, from `main` at `eaf0da1`. Investigation, spec and plan in 
 brainstorm) and D136 (on the stop `.scratch/for-build-chat/image-trial-stop.md`), with D123 (no visible AI mark on
 images). Nothing in the app changes. The server's own stack (`SoulDreamsServer`) is unchanged. **Amended by Part 6 (D138), which governs where it differs.**
 
+> **SET ASIDE (D141, D142).** FLUX on g6e showed a capacity wait of about 90 minutes; the founder then chose Nebius
+> Token Factory for the night's painting (`docs/plans/nebius-test.md`). The owner tears the AWS trial down with Task 12
+> below (now written for any state, without the budget's email and with `-c imageTrial=bucket`: Pastes 1 to 4 as
+> given to the owner on 2026-11-23). The code stays in the branch, unused: `server/infra/image-trial.ts`,
+> `server/trial/run.ts`, `measure.ts`, `fetch-weights.sh`, `code/inference.py` and their tests. Tasks 10 and 11 are not
+> run.
+
 Markers: **[READ]** a fact read on its source page on the date given; **[ASSUMED]** believed, not proven, with what
 proves it; **[ESTIMATE]** arithmetic on assumptions.
 
