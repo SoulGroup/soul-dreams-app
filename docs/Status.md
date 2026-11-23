@@ -1602,10 +1602,14 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   and `out/` (the failure objects are the only record of a failure on SageMaker's side); the teardown empties the
   bucket.
 - D140 (owner, after Task 10's first attempt; plan Part 6): the first wake of FLUX's g6e endpoint took 87 minutes
-  (`InsufficientInstanceCapacity`, the endpoint's own `FailureReason`; the first create took 36 minutes). `run.ts`
-  waits up to 3 hours for a round's results, and a stop with no result keeps `in/` as well as `fail/` (SageMaker
-  still holds the request). For the cost sheet and the founder's decision: g6e scale-to-zero in eu-north-1 risked a
-  capacity wait of about 90 minutes in one sample.
+  (`InsufficientInstanceCapacity`, the endpoint's own `FailureReason`; the first create took 36 minutes). A stop
+  with no result keeps `in/` as well as `fail/` (SageMaker still holds the request).
+- D141 (the founder; replaces D140's three-hour wait): FLUX on g6e is set aside (for the cost sheet and the
+  founder's decision: g6e scale-to-zero in eu-north-1 risked a capacity wait of about 90 minutes in one sample).
+  FLUX's endpoint is removed (the bucket, the FLUX weights and the log groups stay until the teardown); Task 11,
+  SDXL on ml.g6.xlarge, follows. `run.ts` waits 20 minutes for a round's results, the trial's give-up time; a stop
+  there is reported as the finding. FLUX 8-bit on g6.xlarge (Fallback F) stays the fallback if SDXL's quality
+  disappoints.
 
 ## Documents as last imported
 

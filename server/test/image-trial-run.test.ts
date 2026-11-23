@@ -342,24 +342,24 @@ test('a stopped run keeps fail/, deletes in/ and out/', async () => {
   }
 });
 
-// A wake can wait for capacity: about 90 minutes once (D140).
+// The first result is waited for twenty minutes, the trial's give-up time (D141).
 const MINUTE = 60000;
 
-test('a wake that waits for capacity still gets its result', async () => {
-  const f = fake({ coldMs: 178 * MINUTE });
+test('a wake of eighteen minutes still gets its result', async () => {
+  const f = fake({ coldMs: 18 * MINUTE });
   const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
   try {
     const r = await round(trialOf(f, folder, []), [0], 'single');
-    assert.deepEqual(r.done, [T0 + 60000 + 178 * MINUTE + 20000]);
+    assert.deepEqual(r.done, [T0 + 60000 + 18 * MINUTE + 20000]);
   } finally {
     rmSync(folder, { recursive: true, force: true });
   }
 });
 
-test('a result after three hours is not waited for', async () => {
+test('a result after twenty minutes is not waited for', async () => {
   const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
   try {
-    await assert.rejects(round(trialOf(fake({ coldMs: 181 * MINUTE }), folder, []), [0], 'single'), {
+    await assert.rejects(round(trialOf(fake({ coldMs: 19 * MINUTE }), folder, []), [0], 'single'), {
       message: 'trial-no-result',
     });
   } finally {
@@ -368,9 +368,9 @@ test('a result after three hours is not waited for', async () => {
 });
 
 // The request is still in SageMaker's queue after this stop, so its input
-// stays (D140); the lifecycle rule deletes it.
+// stays (D140, D141); the lifecycle rule deletes it.
 test('a stop with no result keeps in/ and fail/, deletes out/', async () => {
-  const f = fake({ coldMs: 4 * 60 * MINUTE });
+  const f = fake({ coldMs: 30 * MINUTE });
   const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
   try {
     await assert.rejects(trial(trialOf(f, folder, []), 'ml.g6e.xlarge', 10), { message: 'trial-no-result' });

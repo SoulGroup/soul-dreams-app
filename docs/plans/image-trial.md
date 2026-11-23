@@ -2851,7 +2851,7 @@ aws sagemaker describe-endpoint --endpoint-name souldreams-trial-flux --profile 
 
 Expected: `InService  1`; about 12 minutes later, `InService  0` (scaled to zero, nothing asked).
 
-### Task 10 · [OWNER] FLUX's run
+### Task 10 · [OWNER] FLUX's run [SET ASIDE, D141: not run; Task 11 follows Task 9's removal, Part 6]
 
 Paste 1 — Terminal (no output while it runs; about 1.5 to 3 hours [ESTIMATE, D140]: two cold starts of about 35 minutes and their tails, and a capacity wait if there is one; it waits up to 3 hours for each round's results)
 ```
@@ -3189,11 +3189,26 @@ decision (owner): g6e scale-to-zero in eu-north-1 risked a capacity wait of abou
 found no input when it came up; nothing was written to `fail/flux/` or `out/flux/` (read-only listings after the
 instance had gone).
 
-**Changes (D140).** `run.ts` waits up to 3 hours for each round's results (was 1 hour); a stop with `trial-no-result`
-keeps `in/` and `fail/` and deletes `out/`, every other stop as D139. Tests: a wake of 178 minutes still gets its
-result; one of 181 does not; a no-result stop removes only `out/`. Rows S74 to S76. In Task 10's Paste 3, after a
-`trial-no-result` stop, `in` above `0` is expected as well as `fail`: wait for the endpoint to be at `0` (a
-request already sent can still be processed), then delete them by hand with the Task 10 `rm`.
+**Changes (D140, the wait then set by D141).** A stop with `trial-no-result` keeps `in/` and `fail/` and deletes
+`out/`, every other stop as D139. `run.ts` first waited up to 3 hours for each round's results (was 1 hour); D141
+below made it 20 minutes. Tests: a wake of 18 minutes still gets its result; one of 19 does not; a no-result stop
+removes only `out/`. Rows S74 to S76. After a `trial-no-result` stop, `in` above `0` is expected in the bucket check
+as well as `fail`: wait for the endpoint to be at `0` (a request already sent can still be processed), then delete
+`in` by hand with the `rm` below.
+
+### D141 · FLUX on g6e is set aside (the founder, 2026-11-23; replaces D140's three hours)
+
+ml.g6e.xlarge in eu-north-1 showed a capacity wait of about 90 minutes in one sample, which rules it out for
+on-demand paintings. So: Task 10 is not run; FLUX's endpoint is removed (`-c imageTrial=bucket`: the bucket, the
+FLUX weights and the log groups stay until Task 12); Task 11 (SDXL on ml.g6.xlarge) follows. The first-result wait is
+the trial's give-up time, **20 minutes**: if no result comes by then, the run stops with `trial-no-result`, which
+keeps `in/` (D140) and is reported, since a capacity wait or a slow wake is itself the finding. Lean and fast is the
+requirement. FLUX 8-bit on ml.g6.xlarge (Fallback F) stays as the fallback if SDXL's quality disappoints. **For the
+cost sheet:** g6e scale-to-zero in eu-north-1 risked a capacity wait of about 90 minutes (one sample, 2026-11-23);
+FLUX at full precision is set aside; the first FLUX create took 36 minutes (33 before its container started).
+Task 11's Paste 3 is `-c imageTrial=sdxl` (not `both`), Paste 5 reads SDXL's log only, and Task 12's Paste 2 uses
+`-c imageTrial=sdxl`, none with `-c alertEmail`. The 20 minutes may be shorter than SDXL's own cold start; if so the
+stop is the answer, with the notes' times. Rows S74 and S75 follow the 20 minutes.
 
 ### Banked from the review (D91; nothing a dreamer sees changes)
 

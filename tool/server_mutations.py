@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S76, D135, D138, D139, D140), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S76, D135, D138, D139, D141), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -235,11 +235,11 @@ ROWS = [
      '    aws s3 rm "s3://$bucket/$key.unchecked" --region eu-north-1 --only-show-errors\n', '',
      'test', 'weights: a staging copy left beside a kept file is removed'),
     ('S74', 'trial/run.ts',
-     'const WAIT_RESULT_MS = 3 * 60 * 60 * 1000;', 'const WAIT_RESULT_MS = 2 * 60 * 60 * 1000;',
-     'test', 'a wake that waits for capacity still gets its result'),
+     'const WAIT_RESULT_MS = 20 * 60 * 1000;', 'const WAIT_RESULT_MS = 10 * 60 * 1000;',
+     'test', 'a wake of eighteen minutes still gets its result'),
     ('S75', 'trial/run.ts',
-     'const WAIT_RESULT_MS = 3 * 60 * 60 * 1000;', 'const WAIT_RESULT_MS = 6 * 60 * 60 * 1000;',
-     'test', 'a result after three hours is not waited for'),
+     'const WAIT_RESULT_MS = 20 * 60 * 1000;', 'const WAIT_RESULT_MS = 60 * 60 * 1000;',
+     'test', 'a result after twenty minutes is not waited for'),
     ('S76', 'trial/run.ts',
      "held ? ['out'] : ['in', 'out']", "['in', 'out']",
      'test', 'a stop with no result keeps in/ and fail/, deletes out/'),
