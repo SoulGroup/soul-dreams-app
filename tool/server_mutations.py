@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S63, D135), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S72, D135, D138), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -132,9 +132,8 @@ ROWS = [
     ('S41', 'infra/image-trial.ts',
      "bucket.arnForObjects('models/*'), bucket.arnForObjects('in/*')", "bucket.arnForObjects('models/*'), bucket.arnForObjects('in/*'), bucket.arnForObjects('out/*')",
      'test', "the models' role: its prefixes, its logs, the container, nothing else"),
-    ('S42', 'infra/image-trial.ts',
-     'export const BUDGET_USD = 30;', 'export const BUDGET_USD = 300;',
-     'test', 'the budget: USD 30 a month, three emails to one address'),
+    # S42, the budget row, went with the budget resource (D138): it does
+    # not exist in eu-north-1; the owner makes the budget with the CLI.
     ('S43', 'infra/image-trial.ts',
      '      terminationProtection: false,', '      terminationProtection: true,',
      'test', 'the trial: eu-north-1, destroyable, no version reporting'),
@@ -146,7 +145,7 @@ ROWS = [
      'test', "D136's fallback: FLUX in 8 bits on g6.xlarge, alone"),
     ('S46', 'infra/image-trial.ts',
      "        : which === 'bucket'\n          ? []", "        : which === 'bucket'\n          ? ['sdxl']",
-     'test', 'the first stage: the bucket and the budget, no endpoint'),
+     'test', 'the first stage: the bucket and both log groups, no endpoint'),
     # The image trial: the serving code.
     ('S47', 'trial/code/inference.py',
      ", torch_dtype=torch.bfloat16, device_map='cuda')", ', torch_dtype=torch.bfloat16)',
@@ -201,6 +200,37 @@ ROWS = [
     ('S63', 'trial/fetch-weights.sh',
      '[ "${#rev}" -eq 40 ] || fail fetch-revision 2\n', '',
      'test', 'weights: the arguments are refused unless exact'),
+    # D138: the logs with the bucket, the model server's timeout, the run's
+    # deletions, the weights' staging name.
+    ('S64', 'infra/image-trial.ts',
+     '      MODEL_KEYS.map((key) => [',
+     '      MODEL_KEYS.filter(() => models.length > 0).map((key) => [',
+     'test', 'the first stage: the bucket and both log groups, no endpoint'),
+    ('S65', 'infra/image-trial.ts',
+     '    const logGroups = new Map<ModelKey, logs.LogGroup>(\n      MODEL_KEYS.map((key) => [',
+     '    const logGroups = new Map<ModelKey, logs.LogGroup>(\n      models.map(({ key }) => [',
+     'test', "a failed endpoint leaves its logs, made with the bucket"),
+    ('S66', 'infra/image-trial.ts',
+     "SAGEMAKER_MODEL_SERVER_TIMEOUT: '3600'", "SAGEMAKER_MODEL_SERVER_TIMEOUT: '60'",
+     'test', 'each model: the pinned container, its weights, no network'),
+    ('S67', 'trial/run.ts',
+     "for (const prefix of ['in', 'out', 'fail'])", "for (const prefix of ['in', 'out'])",
+     'test', 'the run deletes its requests, results and failures when it ends'),
+    ('S68', 'trial/run.ts',
+     '    await cleanup(t).catch(() => undefined);\n    throw error;', '    throw error;',
+     'test', 'a stopped run deletes them too, reporting its own stop'),
+    ('S69', 'trial/run.ts',
+     '    await cleanup(t).catch(() => undefined);', '    await cleanup(t);',
+     'test', 'a stopped run deletes them too, reporting its own stop'),
+    ('S70', 'trial/run.ts',
+     "    throw new Error('trial-cleanup');", '    return run;',
+     'test', 'a deletion failing after a good run stops with a code'),
+    ('S71', 'trial/fetch-weights.sh',
+     '    staged="$key.unchecked"', '    staged="$key"',
+     'test', 'weights: a check cut short leaves nothing a rerun would keep'),
+    ('S72', 'trial/fetch-weights.sh',
+     '    aws s3 rm "s3://$bucket/$key.unchecked" --region eu-north-1 --only-show-errors\n', '',
+     'test', 'weights: a staging copy left beside a kept file is removed'),
 ]
 
 

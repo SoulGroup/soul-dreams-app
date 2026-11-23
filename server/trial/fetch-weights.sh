@@ -5,7 +5,9 @@
 # the pinned revision: no single-file copies, no fp16 copies, no other
 # formats. A file already in the bucket at its size is kept, so a cut
 # session simply runs again. Each new file is checked against the hub's
-# hash: a large one read back from S3, a small one before it goes up.
+# hash: a large one is uploaded under a staging name, read back from S3 and
+# only then moved to its name, so a session cut during the check leaves
+# nothing a rerun would keep (D138); a small one is checked before it goes up.
 # The hub's address is the owner's argument. The token is read from
 # Parameter Store into a header file, never onto a command line or the
 # screen (R5). It writes counts and codes only.
@@ -76,6 +78,8 @@ while IFS=$'\t' read -r path size sha oid <&3; do
   have=$(aws s3api head-object --region eu-north-1 --bucket "$bucket" --key "$key" \
     --query ContentLength --output text 2>/dev/null || true)
   if [ "$have" = "$size" ]; then
+    # A staging copy left by a cut session is not part of the weights.
+    aws s3 rm "s3://$bucket/$key.unchecked" --region eu-north-1 --only-show-errors
     kept=$((kept + 1))
     continue
   fi
@@ -85,13 +89,15 @@ while IFS=$'\t' read -r path size sha oid <&3; do
     [ "$got" = "$oid" ] || fail "fetch-hash $path" 3
     aws s3 cp "$work/small" "s3://$bucket/$key" --region eu-north-1 --only-show-errors
   else
+    staged="$key.unchecked"
     get "$repo/resolve/$rev/$path" |
-      aws s3 cp - "s3://$bucket/$key" --region eu-north-1 --expected-size "$size" --only-show-errors
-    got=$(aws s3 cp "s3://$bucket/$key" - --region eu-north-1 --only-show-errors | sha256sum | cut -c1-64)
+      aws s3 cp - "s3://$bucket/$staged" --region eu-north-1 --expected-size "$size" --only-show-errors
+    got=$(aws s3 cp "s3://$bucket/$staged" - --region eu-north-1 --only-show-errors | sha256sum | cut -c1-64)
     if [ "$got" != "$sha" ]; then
-      aws s3 rm "s3://$bucket/$key" --region eu-north-1 --only-show-errors
+      aws s3 rm "s3://$bucket/$staged" --region eu-north-1 --only-show-errors
       fail "fetch-hash $path" 3
     fi
+    aws s3 mv "s3://$bucket/$staged" "s3://$bucket/$key" --region eu-north-1 --only-show-errors
   fi
   fetched=$((fetched + 1))
 done 3<"$work/files"

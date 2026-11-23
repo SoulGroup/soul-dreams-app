@@ -13,10 +13,15 @@ if (args[0] === 's3api' && args[1] === 'head-object') {
 }
 if (args[0] === 's3' && args[1] === 'cp') {
   const [from, to] = [args[2], args[3]];
+  if (to === '-' && process.env.FAKE_CUT && from.includes(process.env.FAKE_CUT)) { process.exit(1); }
   const data = from === '-' ? fs.readFileSync(0) : from.startsWith('s3://') ? fs.readFileSync(s3(from)) : fs.readFileSync(from);
   if (to === '-') { out(data); process.exit(0); }
   const stored = process.env.FAKE_CORRUPT && to.includes(process.env.FAKE_CORRUPT) ? Buffer.from('corrupt') : data;
   fs.mkdirSync(path.dirname(s3(to)), { recursive: true }); fs.writeFileSync(s3(to), stored); process.exit(0);
 }
-if (args[0] === 's3' && args[1] === 'rm') { fs.rmSync(s3(args[2])); process.exit(0); }
+if (args[0] === 's3' && args[1] === 'rm') { fs.rmSync(s3(args[2]), { force: true }); process.exit(0); }
+if (args[0] === 's3' && args[1] === 'mv') {
+  fs.mkdirSync(path.dirname(s3(args[3])), { recursive: true });
+  fs.renameSync(s3(args[2]), s3(args[3])); process.exit(0);
+}
 process.exit(99);

@@ -4,6 +4,8 @@
 // to none. The images and the results go to the folder given, outside
 // the repository. It writes no prompt anywhere: the requests go to S3 as
 // files, and its own notes hold codes and times only.
+// When it ends, or stops, it deletes the model's requests, results and
+// failures from the bucket (D138).
 //   node trial/run.ts <flux|sdxl> <bucket> <folder>
 import { execFile } from 'node:child_process';
 import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -198,7 +200,7 @@ async function save(t: Trial, outputs: readonly string[], names: readonly string
   }
 }
 
-export async function trial(t: Trial, instanceType: string, idleMinutes: number): Promise<Run> {
+async function measured(t: Trial, instanceType: string, idleMinutes: number): Promise<Run> {
   mkdirSync(join(t.folder, t.model), { recursive: true });
   t.note('waitIdle');
   await waitIdle(t);
@@ -224,6 +226,34 @@ export async function trial(t: Trial, instanceType: string, idleMinutes: number)
   writeFileSync(join(t.folder, t.model, 'results.json'), `${JSON.stringify(run, null, 2)}\n`);
   writeFileSync(join(t.folder, t.model, 'results.md'), report(run));
   t.note('finished');
+  return run;
+}
+
+/**
+ * Deletes the model's requests, results and failures from the bucket (D138):
+ * S3's lifecycle rule expires them at the next midnight UTC after their day,
+ * so about two days at most; this is the deletion, and the rule the backstop.
+ */
+async function cleanup(t: Trial): Promise<void> {
+  for (const prefix of ['in', 'out', 'fail']) {
+    await t.aws(['s3', 'rm', `s3://${t.bucket}/${prefix}/${t.model}/`, '--recursive', '--only-show-errors', '--region', REGION]);
+  }
+}
+
+/** The run, then the deletion; a stop is reported as itself, whatever the deletion does. */
+export async function trial(t: Trial, instanceType: string, idleMinutes: number): Promise<Run> {
+  let run: Run;
+  try {
+    run = await measured(t, instanceType, idleMinutes);
+  } catch (error) {
+    await cleanup(t).catch(() => undefined);
+    throw error;
+  }
+  try {
+    await cleanup(t);
+  } catch {
+    throw new Error('trial-cleanup');
+  }
   return run;
 }
 

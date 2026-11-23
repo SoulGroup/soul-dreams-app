@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-22, in branch `image-trial` (the trial of open image models in our own AWS account, D135, D136; the owner's AWS tasks next), by Claude Code.
+Last updated: 2026-11-23, in branch `image-trial` (the trial of open image models in our own AWS account, D135, D136; the owner's AWS tasks next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -16,8 +16,9 @@ rulings given during each branch are listed in this file, one line each, under "
 
 `image-trial`: a trial of open image models in our own AWS account, for the founder to choose (D135, D136; plan
 `docs/plans/image-trial.md`): FLUX.1 [schnell] on ml.g6e.xlarge and SDXL on ml.g6.xlarge, SageMaker asynchronous
-inference in eu-north-1, scaled to zero, a private bucket deleting requests and results within a day, a USD 30
-budget alarm, the same six invented prompts on each, the times and costs measured, the images on the owner's Mac,
+inference in eu-north-1, scaled to zero, a private bucket whose requests and results the run deletes when it ends
+(its lifecycle rule the backstop, D138), a USD 30 budget alarm made by the owner with the CLI (D138: the budget
+resource does not exist in eu-north-1), the same six invented prompts on each, the times and costs measured, the images on the owner's Mac,
 then a teardown that removes everything. A separate stack (`SoulDreamsImageTrial`), made only when asked; the
 server's own stack is unchanged. The app is unchanged.
 
@@ -402,13 +403,14 @@ merge (this entry records it).
   types of `test/stack.test.ts` and no `AWS::CDK::Metadata`; `Parameters` holds only `BootstrapVersion`.
 - The image trial (D135, D136; `docs/plans/image-trial.md`), beside the server and not part of it:
   `server/infra/image-trial.ts` (the stack `SoulDreamsImageTrial`, made by `infra/app.ts` only with
-  `-c imageTrial=...`), `server/trial/code/inference.py` (the serving code, run in AWS's Hugging Face container),
+  `-c imageTrial=...`; its log groups are made with the bucket, D138), `server/trial/code/inference.py` (the serving code, run in AWS's Hugging Face container),
   `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 85 tests, and
-  63 mutation checks (S1 to S63) in `tool/server_mutations.py`, run by hand from the repository root with
-  `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 63 run, 63 caught`); `check_all.sh` does not
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 90 tests, and
+  71 mutation checks (S1 to S72, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 71 run,
+  71 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1098,6 +1100,10 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
      g6e size (published 2026-11-22), though the console offers ml.g6e.xlarge (D136). The trial's g6e cost uses the
      Training price, USD 2.7636 per hour, until the owner's bill shows the rate (plan Task 12).
 
+172. The Opus review of image-trial (D138; plan Part 6, "Banked from the review"): the CDK's staging copy of the
+     template stays after the teardown; the forecast budget alert is likely silent for lack of history; diffusers
+     logs the cut-off words of an over-long prompt, which matters for the production painting under R3.
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -1587,6 +1593,11 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   eu-north-1. FLUX.1 [schnell] at full precision on ml.g6e.xlarge, SDXL on ml.g6.xlarge; SD 3.5 Medium skipped. The
   plan's first AWS task proves g6e; if it fails as unsupported, FLUX in 8 bits on ml.g6.xlarge (one package inside
   the serving container, pinned). The Hugging Face token, if needed, an owner task, kept in Parameter Store (R5).
+- D138 (owner, on the Opus review; the owner's `describe-type` found `AWS::Budgets::Budget` missing in eu-north-1):
+  (1) the budget is made with `aws budgets create-budget` in Task 7 and deleted in Task 12, whose proof checks it is
+  gone; (2) `run.ts` deletes its model's `in/`, `out/` and `fail/` objects when it ends, the lifecycle rule the
+  backstop, and the wording is corrected; (3) `SAGEMAKER_MODEL_SERVER_TIMEOUT=3600`. With the review's D2 to D4 (the
+  log groups with the bucket, a recovery step if an endpoint does not scale to zero, the weights' staging name).
 
 ## Documents as last imported
 

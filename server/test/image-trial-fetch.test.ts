@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -95,6 +95,12 @@ function uploaded(state: string): string[] {
   );
 }
 
+// Everything the bucket's folder holds, the files only, sorted.
+function stored(state: string): string[] {
+  const root = join(state, 's3', BUCKET, 'models', 'sdxl');
+  return existsSync(root) ? readdirSync(root, { recursive: true, withFileTypes: true }).filter((e) => e.isFile()).map((e) => join(e.parentPath.slice(root.length), e.name).replace(/^\//, '')).sort() : [];
+}
+
 test("weights: only the parts' files, checked, kept on a rerun", () => {
   const { state, run } = setup();
   try {
@@ -102,6 +108,8 @@ test("weights: only the parts' files, checked, kept on a rerun", () => {
     assert.equal(first.status, 0, first.stderr);
     assert.equal(first.stdout, 'fetched 6 kept 0\n');
     assert.deepEqual(uploaded(state), WANTED);
+    // Nothing else is in the folder, no staging copy included.
+    assert.deepEqual(stored(state), [...WANTED].sort());
     for (const p of WANTED) {
       const content = FILES.find(([q]) => q === p)?.[1] ?? '';
       assert.equal(readFileSync(join(state, 's3', BUCKET, 'models', 'sdxl', p), 'utf8'), content);
@@ -141,6 +149,42 @@ test('weights: a large file read back wrong is removed; a stop', () => {
     assert.equal(r.status, 3);
     assert.equal(r.stderr, 'fetch-hash unet/diffusion_pytorch_model.safetensors\n');
     assert.equal(existsSync(join(state, 's3', BUCKET, 'models', 'sdxl', 'unet', 'diffusion_pytorch_model.safetensors')), false);
+    // Not under its staging name either.
+    assert.equal(stored(state).some((p) => p.endsWith('.unchecked')), false);
+  } finally {
+    rmSync(state, { recursive: true, force: true });
+  }
+});
+
+const LARGE = 'unet/diffusion_pytorch_model.safetensors';
+
+test('weights: a check cut short leaves nothing a rerun would keep', () => {
+  const { state, run } = setup();
+  try {
+    const cut = run(undefined, { FAKE_CUT: LARGE });
+    assert.notEqual(cut.status, 0);
+    // The file is in the bucket only under its staging name.
+    assert.equal(existsSync(join(state, 's3', BUCKET, 'models', 'sdxl', LARGE)), false);
+    assert.equal(existsSync(join(state, 's3', BUCKET, 'models', 'sdxl', `${LARGE}.unchecked`)), true);
+    const again = run();
+    assert.equal(again.status, 0, again.stderr);
+    assert.match(again.stdout, /^fetched \d+ kept \d+\n$/);
+    assert.deepEqual(stored(state), [...WANTED].sort());
+    assert.equal(run().stdout, 'fetched 0 kept 6\n');
+  } finally {
+    rmSync(state, { recursive: true, force: true });
+  }
+});
+
+test('weights: a staging copy left beside a kept file is removed', () => {
+  const { state, run } = setup();
+  try {
+    assert.equal(run().status, 0);
+    const root = join(state, 's3', BUCKET, 'models', 'sdxl');
+    writeFileSync(join(root, `${LARGE}.unchecked`), 'left by a cut session');
+    const again = run();
+    assert.equal(again.stdout, 'fetched 0 kept 6\n');
+    assert.deepEqual(stored(state), [...WANTED].sort());
   } finally {
     rmSync(state, { recursive: true, force: true });
   }

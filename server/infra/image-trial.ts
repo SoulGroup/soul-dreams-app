@@ -1,12 +1,13 @@
 // The image trial (D135, D136): open image models on SageMaker
 // asynchronous inference in eu-north-1, each endpoint at most one
 // instance, scaled to zero after its idle minutes, its requests and
-// results in a private bucket that deletes them within a day, and a
-// budget alarm. A trial: the owner deploys it, runs it and destroys it
-// (docs/plans/image-trial.md). Nothing here is used by the server.
+// results in a private bucket that expires them after a day. A trial: the
+// owner deploys it, runs it and destroys it (docs/plans/image-trial.md).
+// Its budget alarm is made and deleted by the owner with the CLI: the
+// budget resource does not exist in eu-north-1 (D138). Nothing here is
+// used by the server.
 import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib';
 import * as appscaling from 'aws-cdk-lib/aws-applicationautoscaling';
-import * as budgets from 'aws-cdk-lib/aws-budgets';
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as logs from 'aws-cdk-lib/aws-logs';
@@ -23,12 +24,13 @@ export const IMAGE_TAG = '2.6.0-transformers5.5.3-gpu-py312-cu124-ubuntu22.04';
 export const IMAGE = `${IMAGE_ACCOUNT}.dkr.ecr.${REGION}.amazonaws.com/${IMAGE_REPOSITORY}:${IMAGE_TAG}`;
 
 export const VARIANT = 'main';
-export const BUDGET_USD = 30;
+const SERVER_ENV = { HF_HUB_OFFLINE: '1', SAGEMAKER_MODEL_SERVER_TIMEOUT: '3600' };
 // The prefixes deleted within a day (D135 item 2). The weights, under
 // models/, stay until the teardown empties the bucket.
 export const SHORT_LIVED = ['in/', 'out/', 'fail/'] as const;
 
 export type ModelKey = 'flux' | 'sdxl';
+export const MODEL_KEYS: readonly ModelKey[] = ['flux', 'sdxl'];
 
 export interface TrialModel {
   readonly key: ModelKey;
@@ -39,7 +41,6 @@ export interface TrialModel {
 
 export interface TrialSettings {
   readonly models: readonly TrialModel[];
-  readonly alertEmail: string;
   readonly idleMinutes: number;
 }
 
@@ -49,8 +50,8 @@ export function endpointName(key: ModelKey): string {
 
 /** The trial's settings from the CDK context, or a refusal's code. */
 export function trialSettings(context: (key: string) => unknown): TrialSettings {
-  // 'bucket' first: the bucket and the budget alone, so the weights can
-  // go in before any endpoint loads them.
+  // 'bucket' first: the bucket and the log groups alone, so the weights
+  // can go in before any endpoint loads them.
   const which = context('imageTrial');
   const keys: ModelKey[] | undefined =
     which === 'both'
@@ -63,10 +64,6 @@ export function trialSettings(context: (key: string) => unknown): TrialSettings 
   if (keys === undefined) {
     throw new Error('trial-models');
   }
-  const email = context('alertEmail');
-  if (typeof email !== 'string' || !/^[^@\s]+@[^@\s]+$/.test(email)) {
-    throw new Error('trial-email');
-  }
   const idleRaw = context('idleMinutes');
   const idle = idleRaw === undefined ? 10 : Number(idleRaw);
   if (!Number.isInteger(idle) || idle < 2 || idle > 60) {
@@ -77,7 +74,7 @@ export function trialSettings(context: (key: string) => unknown): TrialSettings 
     throw new Error('trial-eight-bit');
   }
   const eightBit = eightBitRaw === 'yes';
-  return { models: keys.map((key) => trialModel(key, eightBit)), alertEmail: email, idleMinutes: idle };
+  return { models: keys.map((key) => trialModel(key, eightBit)), idleMinutes: idle };
 }
 
 /** FLUX on g6e.xlarge, or in 8 bits on g6.xlarge (D136); SDXL on g6.xlarge. */
@@ -100,7 +97,7 @@ export class ImageTrialStack extends Stack {
       // The teardown destroys it whole.
       terminationProtection: false,
     });
-    const { models, alertEmail, idleMinutes } = props.settings;
+    const { models, idleMinutes } = props.settings;
 
     // No access logging, no versioning: nothing kept beyond its day.
     const bucket = new s3.Bucket(this, 'Bucket', {
@@ -124,18 +121,27 @@ export class ImageTrialStack extends Stack {
         'aws-service-role/sagemaker.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_SageMakerEndpoint',
     });
 
+    // SageMaker writes here. Both groups are made with the bucket, before
+    // any endpoint, so a rolled-back endpoint update cannot take the logs
+    // the owner reads to learn why (D138); kept 1 day, not for ever, and
+    // they go with the stack.
+    const logGroups = new Map<ModelKey, logs.LogGroup>(
+      MODEL_KEYS.map((key) => [
+        key,
+        new logs.LogGroup(this, `Logs-${key}`, {
+          logGroupName: `/aws/sagemaker/Endpoints/${endpointName(key)}`,
+          retention: logs.RetentionDays.ONE_DAY,
+          removalPolicy: RemovalPolicy.DESTROY,
+        }),
+      ]),
+    );
+
     // Made with the first endpoint: the bucket's stage has none.
     let role: iam.Role | undefined;
     for (const model of models) {
       role ??= this.modelRole(bucket);
       const name = endpointName(model.key);
-      // SageMaker writes here; made first so it is kept 1 day, not for
-      // ever, and goes with the stack.
-      const logGroup = new logs.LogGroup(this, `Logs-${model.key}`, {
-        logGroupName: `/aws/sagemaker/Endpoints/${name}`,
-        retention: logs.RetentionDays.ONE_DAY,
-        removalPolicy: RemovalPolicy.DESTROY,
-      });
+      const logGroup = logGroups.get(model.key) as logs.LogGroup;
       logGroup.grantWrite(role);
 
       const cfnModel = new sagemaker.CfnModel(this, `Model-${model.key}`, {
@@ -150,9 +156,11 @@ export class ImageTrialStack extends Stack {
               compressionType: 'None',
             },
           },
+          // The model server's own timeout: loading 34 GB takes longer
+          // than its default (D138).
           environment: model.eightBit
-            ? { HF_HUB_OFFLINE: '1', TRIAL_EIGHT_BIT: 'yes' }
-            : { HF_HUB_OFFLINE: '1' },
+            ? { ...SERVER_ENV, TRIAL_EIGHT_BIT: 'yes' }
+            : { ...SERVER_ENV },
         },
       });
       // The role's policy must exist before SageMaker checks the model.
@@ -246,32 +254,6 @@ export class ImageTrialStack extends Stack {
         treatMissingData: cloudwatch.TreatMissingData.BREACHING,
       }).addAlarmAction({ bind: () => ({ alarmActionArn: idle.ref }) });
     }
-
-    // The whole account's month, checked by AWS up to three times a day:
-    // a warning after the fact, not a stop (D135 item 3).
-    new budgets.CfnBudget(this, 'Budget', {
-      budget: {
-        budgetName: 'souldreams-image-trial',
-        budgetType: 'COST',
-        timeUnit: 'MONTHLY',
-        budgetLimit: { amount: BUDGET_USD, unit: 'USD' },
-      },
-      notificationsWithSubscribers: (
-        [
-          ['ACTUAL', 50],
-          ['ACTUAL', 100],
-          ['FORECASTED', 100],
-        ] as const
-      ).map(([notificationType, threshold]) => ({
-        notification: {
-          notificationType,
-          comparisonOperator: 'GREATER_THAN',
-          threshold,
-          thresholdType: 'PERCENTAGE',
-        },
-        subscribers: [{ subscriptionType: 'EMAIL', address: alertEmail }],
-      })),
-    });
 
     new CfnOutput(this, 'BucketName', { value: bucket.bucketName });
   }

@@ -1,5 +1,5 @@
 // The image trial's template (D135, D136), synthesized in-process: no AWS
-// credentials, no CLI and no network. The address is invented.
+// credentials, no CLI and no network.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
@@ -11,8 +11,6 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { IMAGE, ImageTrialStack, trialSettings, type TrialSettings } from '../infra/image-trial.ts';
 
-const EMAIL = 'owner@example.invalid';
-
 function settingsOf(context: Record<string, unknown>): TrialSettings {
   return trialSettings((key) => context[key]);
 }
@@ -23,7 +21,7 @@ function synth(context: Record<string, unknown>): { stack: ImageTrialStack; temp
   return { stack, template: Template.fromStack(stack) };
 }
 
-const both = synth({ imageTrial: 'both', alertEmail: EMAIL });
+const both = synth({ imageTrial: 'both' });
 const template = both.template;
 
 type Resource = { Type: string; Properties?: Record<string, unknown>; DeletionPolicy?: string };
@@ -45,7 +43,6 @@ test('the trial: these resources and no others', () => {
   assert.deepEqual(resourcesOf(template).map((r) => r.Type).sort(), [
     ...two('AWS::ApplicationAutoScaling::ScalableTarget'),
     ...four('AWS::ApplicationAutoScaling::ScalingPolicy'),
-    'AWS::Budgets::Budget',
     ...four('AWS::CloudWatch::Alarm'),
     'AWS::IAM::Policy',
     'AWS::IAM::Role',
@@ -112,7 +109,7 @@ test('each model: the pinned container, its weights, no network', () => {
     assert.equal(props['EnableNetworkIsolation'], true);
     const container = props['PrimaryContainer'] as Record<string, unknown>;
     assert.equal(container['Image'], IMAGE);
-    assert.deepEqual(container['Environment'], { HF_HUB_OFFLINE: '1' });
+    assert.deepEqual(container['Environment'], { HF_HUB_OFFLINE: '1', SAGEMAKER_MODEL_SERVER_TIMEOUT: '3600' });
     const source = (container['ModelDataSource'] as { S3DataSource: Record<string, unknown> }).S3DataSource;
     assert.equal(source['S3DataType'], 'S3Prefix');
     assert.equal(source['CompressionType'], 'None');
@@ -208,7 +205,7 @@ test('scaling: to none after 10 idle minutes', () => {
 });
 
 test('the idle minutes come from the context', () => {
-  const two = synth({ imageTrial: 'sdxl', alertEmail: EMAIL, idleMinutes: '2' }).template;
+  const two = synth({ imageTrial: 'sdxl', idleMinutes: '2' }).template;
   const alarms = idleAlarms(two);
   assert.equal(alarms.length, 1);
   assert.equal(alarms[0]?.Properties?.['EvaluationPeriods'], 2);
@@ -281,46 +278,33 @@ test("the models' role: its prefixes, its logs, the container, nothing else", ()
   }
 });
 
-test('the budget: USD 30 a month, three emails to one address', () => {
-  const budget = ofType(template, 'AWS::Budgets::Budget')[0]?.Properties ?? {};
-  assert.deepEqual(budget['Budget'], {
-    BudgetName: 'souldreams-image-trial',
-    BudgetType: 'COST',
-    TimeUnit: 'MONTHLY',
-    BudgetLimit: { Amount: 30, Unit: 'USD' },
-  });
-  const notes = budget['NotificationsWithSubscribers'] as {
-    Notification: Record<string, unknown>;
-    Subscribers: unknown[];
-  }[];
-  assert.deepEqual(
-    notes.map((n) => [n.Notification['NotificationType'], n.Notification['Threshold']]),
-    [
-      ['ACTUAL', 50],
-      ['ACTUAL', 100],
-      ['FORECASTED', 100],
-    ],
-  );
-  for (const n of notes) {
-    assert.deepEqual(n.Subscribers, [{ SubscriptionType: 'EMAIL', Address: EMAIL }]);
-  }
-});
-
 test("one output, the bucket's name", () => {
   assert.deepEqual(Object.keys(template.toJSON()['Outputs'] as object), ['BucketName']);
 });
 
-test('the first stage: the bucket and the budget, no endpoint', () => {
-  const first = synth({ imageTrial: 'bucket', alertEmail: EMAIL }).template;
+test('the first stage: the bucket and both log groups, no endpoint', () => {
+  const first = synth({ imageTrial: 'bucket' }).template;
   assert.deepEqual(resourcesOf(first).map((r) => r.Type).sort(), [
-    'AWS::Budgets::Budget',
+    'AWS::Logs::LogGroup',
+    'AWS::Logs::LogGroup',
     'AWS::S3::Bucket',
     'AWS::S3::BucketPolicy',
   ]);
 });
 
+test('a failed endpoint leaves its logs, made with the bucket', () => {
+  // Made with the bucket, so a rolled-back endpoint update cannot take
+  // them (D138): a stage with one endpoint still has both groups.
+  const flux = synth({ imageTrial: 'flux' }).template;
+  const names = ofType(flux, 'AWS::Logs::LogGroup').map((r) => r.Properties?.['LogGroupName']).sort();
+  assert.deepEqual(names, [
+    '/aws/sagemaker/Endpoints/souldreams-trial-flux',
+    '/aws/sagemaker/Endpoints/souldreams-trial-sdxl',
+  ]);
+});
+
 test("D136's fallback: FLUX in 8 bits on g6.xlarge, alone", () => {
-  const fallback = synth({ imageTrial: 'flux', alertEmail: EMAIL, fluxEightBit: 'yes' }).template;
+  const fallback = synth({ imageTrial: 'flux', fluxEightBit: 'yes' }).template;
   assert.equal(ofType(fallback, 'AWS::SageMaker::Endpoint').length, 1);
   const variants = ofType(fallback, 'AWS::SageMaker::EndpointConfig')[0]?.Properties?.['ProductionVariants'] as {
     InstanceType: string;
@@ -329,14 +313,16 @@ test("D136's fallback: FLUX in 8 bits on g6.xlarge, alone", () => {
   const container = ofType(fallback, 'AWS::SageMaker::Model')[0]?.Properties?.['PrimaryContainer'] as {
     Environment: unknown;
   };
-  assert.deepEqual(container.Environment, { HF_HUB_OFFLINE: '1', TRIAL_EIGHT_BIT: 'yes' });
+  assert.deepEqual(container.Environment, {
+    HF_HUB_OFFLINE: '1',
+    SAGEMAKER_MODEL_SERVER_TIMEOUT: '3600',
+    TRIAL_EIGHT_BIT: 'yes',
+  });
 });
 
 test('the settings refuse what they do not know', () => {
-  const ok = { imageTrial: 'both', alertEmail: EMAIL };
+  const ok = { imageTrial: 'both' };
   assert.throws(() => settingsOf({ ...ok, imageTrial: 'yes' }), { message: 'trial-models' });
-  assert.throws(() => settingsOf({ ...ok, alertEmail: undefined }), { message: 'trial-email' });
-  assert.throws(() => settingsOf({ ...ok, alertEmail: 'owner' }), { message: 'trial-email' });
   assert.throws(() => settingsOf({ ...ok, idleMinutes: '1' }), { message: 'trial-idle' });
   assert.throws(() => settingsOf({ ...ok, idleMinutes: '61' }), { message: 'trial-idle' });
   assert.throws(() => settingsOf({ ...ok, idleMinutes: 'ten' }), { message: 'trial-idle' });
@@ -373,5 +359,5 @@ function stacksOf(context: Record<string, unknown>): string[] {
 
 test('the app makes the trial only when asked', () => {
   assert.deepEqual(stacksOf({}), ['SoulDreamsServer']);
-  assert.deepEqual(stacksOf({ imageTrial: 'both', alertEmail: EMAIL }), ['SoulDreamsImageTrial', 'SoulDreamsServer']);
+  assert.deepEqual(stacksOf({ imageTrial: 'both' }), ['SoulDreamsImageTrial', 'SoulDreamsServer']);
 });

@@ -122,7 +122,7 @@ interface Fake {
   sleep: (ms: number) => Promise<void>;
 }
 
-function fake(options: { fail?: boolean; notPng?: boolean } = {}): Fake {
+function fake(options: { fail?: boolean; notPng?: boolean; rmFails?: boolean } = {}): Fake {
   let now = T0;
   const calls: string[][] = [];
   const results: { key: string; ready: number }[] = [];
@@ -144,6 +144,12 @@ function fake(options: { fail?: boolean; notPng?: boolean } = {}): Fake {
       const to = args[3] ?? '';
       if (!to.startsWith('s3://')) {
         writeFileSync(to, options.notPng ? 'nope' : Buffer.from([0x89, 0x50, 0x4e, 0x47, 1]));
+      }
+      return '';
+    }
+    if (service === 's3' && op === 'rm') {
+      if (options.rmFails) {
+        throw new Error('fake-rm');
       }
       return '';
     }
@@ -282,6 +288,63 @@ test('the run: one painting, then six, each round back to none', async () => {
       const text = readFileSync(join(folder, 'flux', name), 'utf8');
       assert.equal(text.includes(STYLE), false, name);
     }
+  } finally {
+    rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+// Every request, result and failure of the model is deleted when the run
+// ends, after the images are saved (D138; the lifecycle rule is the backstop).
+function removals(calls: string[][]): string[][] {
+  return calls.filter((c) => c[0] === 's3' && c[1] === 'rm');
+}
+const REMOVED = ['in', 'out', 'fail'].map((p) => [
+  's3',
+  'rm',
+  `s3://${BUCKET}/${p}/flux/`,
+  '--recursive',
+  '--only-show-errors',
+  '--region',
+  'eu-north-1',
+]);
+
+test('the run deletes its requests, results and failures when it ends', async () => {
+  const f = fake();
+  const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
+  try {
+    await trial(trialOf(f, folder, []), 'ml.g6e.xlarge', 10);
+    assert.deepEqual(removals(f.calls), REMOVED);
+    // After the last image is saved, and nothing is read from S3 after.
+    const last = f.calls.length - 1;
+    assert.deepEqual(f.calls.slice(last - 2), REMOVED);
+    const lastCopy = f.calls.map((c) => c[0] === 's3' && c[1] === 'cp').lastIndexOf(true);
+    assert.ok(lastCopy < last - 2);
+  } finally {
+    rmSync(folder, { recursive: true, force: true });
+  }
+});
+
+test('a stopped run deletes them too, reporting its own stop', async () => {
+  for (const options of [{ fail: true }, { notPng: true }, { fail: true, rmFails: true }]) {
+    const f = fake(options);
+    const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
+    try {
+      await assert.rejects(trial(trialOf(f, folder, []), 'ml.g6e.xlarge', 10), {
+        message: options.notPng ? 'trial-not-png' : 'trial-failed',
+      });
+      assert.equal(removals(f.calls).length, options.rmFails ? 1 : 3);
+    } finally {
+      rmSync(folder, { recursive: true, force: true });
+    }
+  }
+});
+
+test('a deletion failing after a good run stops with a code', async () => {
+  const folder = mkdtempSync(join(tmpdir(), 'trial-run-'));
+  try {
+    await assert.rejects(trial(trialOf(fake({ rmFails: true }), folder, []), 'ml.g6e.xlarge', 10), {
+      message: 'trial-cleanup',
+    });
   } finally {
     rmSync(folder, { recursive: true, force: true });
   }
