@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S50, D135), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S59, D135), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -160,6 +160,34 @@ ROWS = [
     ('S50', 'trial/code/inference.py',
      '.manual_seed(seed)', '.manual_seed(0)',
      'test', 'serving: seeded on the GPU, answered as PNG'),
+    # The image trial: the run.
+    ('S51', 'trial/measure.ts',
+     'const shorter = (run.idleMinutes - 2) * 60;', 'const shorter = (run.idleMinutes - 3) * 60;',
+     'test', 'the costs, from what was measured'),
+    ('S52', 'trial/measure.ts',
+     '/ (run.batch.paintings - 1);', '/ run.batch.paintings;',
+     'test', 'the costs, from what was measured'),
+    ('S53', 'trial/measure.ts',
+     "  'ml.g6e.xlarge': 2.7636,", "  'ml.g6e.xlarge': 2.6054,",
+     'test', 'the costs, from what was measured'),
+    ('S54', 'trial/measure.ts',
+     'seed: 1000 + index', 'seed: 1000',
+     'test', "a request: the prompt, the model's settings, the prompt's seed"),
+    ('S55', 'trial/run.ts',
+     "      '--accept',\n      'image/png',", "      '--accept',\n      'application/json',",
+     'test', 'a round: requests through S3, PNG asked, times from S3'),
+    ('S56', 'trial/run.ts',
+     '      rmSync(file, { force: true });\n', '',
+     'test', 'a round: requests through S3, PNG asked, times from S3'),
+    ('S57', 'trial/run.ts',
+     ' || out.end > (r.done[0] ?? NaN)', '',
+     'test', 'a round with no scaling found is refused, not guessed'),
+    ('S58', 'trial/run.ts',
+     "      throw new Error('trial-failed');\n", '',
+     'test', 'a failed painting stops the run with a code'),
+    ('S59', 'trial/run.ts',
+     "      throw new Error('trial-not-png');\n", '',
+     'test', 'a result that is not a PNG stops the run'),
 ]
 
 
