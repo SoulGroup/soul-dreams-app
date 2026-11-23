@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S59, D135), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S63, D135), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -188,6 +188,19 @@ ROWS = [
     ('S59', 'trial/run.ts',
      "      throw new Error('trial-not-png');\n", '',
      'test', 'a result that is not a PNG stops the run'),
+    # The image trial: the weights script.
+    ('S60', 'trial/fetch-weights.sh',
+     '    *.fp16.*) continue ;;\n', '',
+     'test', "weights: only the parts' files, checked, kept on a rerun"),
+    ('S61', 'trial/fetch-weights.sh',
+     '      aws s3 rm "s3://$bucket/$key" --region eu-north-1 --only-show-errors\n', '',
+     'test', 'weights: a large file read back wrong is removed; a stop'),
+    ('S62', 'trial/fetch-weights.sh',
+     '    [ "$got" = "$oid" ] || fail "fetch-hash $path" 3\n', '',
+     'test', 'weights: a small file unlike the hub is never uploaded'),
+    ('S63', 'trial/fetch-weights.sh',
+     '[ "${#rev}" -eq 40 ] || fail fetch-revision 2\n', '',
+     'test', 'weights: the arguments are refused unless exact'),
 ]
 
 
