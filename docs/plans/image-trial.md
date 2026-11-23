@@ -3116,24 +3116,36 @@ aws s3api get-public-access-block --bucket <B> --profile <workload> --region eu-
 ```
 Expected: `PUBLICACCESSBLOCKCONFIGURATION  True  True  True  True`; `AES256`; four rules (`in/`, `out/` and `fail/`
 expiring after 1 day, and unfinished uploads aborted after 1 day); `/aws/sagemaker/Endpoints/souldreams-trial-flux  1`
-and the same for `-sdxl`; `30.0  USD`; `ACTUAL  50.0`, `ACTUAL  100.0`, `FORECASTED  100.0`.
+and the same for `-sdxl`; `30.0  USD` (`30  USD` is the same budget); the three notifications, in any order:
+`ACTUAL  50.0`, `ACTUAL  100.0`, `FORECASTED  100.0`.
 
 **Task 9 · FLUX's endpoint (changes)**: Paste 1 without `-c alertEmail`. If it fails, the log groups stay: read them
 with the `aws logs tail` command given there. A g6e quota of 0 fails as `ResourceLimitExceeded`, not as
 "unsupported": a stop (bring it), not Fallback F. Paste 2 gains:
-- **If the count is still `1` after 20 minutes**: stop. Run Task 7's Paste 1 again (`imageTrial=bucket`): it removes the
-  endpoint, its configuration, model, scaling and role, and leaves the bucket, the weights and the log groups. Then
-  bring `aws application-autoscaling describe-scaling-activities --service-namespace sagemaker --resource-id
-  endpoint/souldreams-trial-flux/variant/main --profile <workload> --region eu-north-1 --max-items 5` and the
-  endpoint's last log lines. The endpoint costs about USD 2.76 an hour while it runs.
+- **If the count is still `1` after 20 minutes**: stop, and first collect the evidence, because the next step removes
+  the alarms and the scaling target with it (a few minutes cost cents; the endpoint costs about USD 2.76 an hour):
+  ```
+  aws application-autoscaling describe-scaling-activities --service-namespace sagemaker --resource-id endpoint/souldreams-trial-flux/variant/main --profile <workload> --region eu-north-1 --max-items 5
+  aws cloudwatch describe-alarms --alarm-name-prefix SoulDreamsImageTrial-IdleAlarm --profile <workload> --region eu-north-1 --query 'MetricAlarms[].[AlarmName,StateValue,StateReason]' --output text
+  aws logs tail /aws/sagemaker/Endpoints/souldreams-trial-flux --since 1h --profile <workload> --region eu-north-1
+  ```
+  Then run Task 7's Paste 1 again (`imageTrial=bucket`). It removes the endpoint, its configuration, model, scaling,
+  alarms and role, and leaves the bucket, the weights and the log groups. It does not ask `y`: removing resources
+  is not a broadening. Bring the evidence.
 
 **Task 10 · FLUX's run (changes)**: when the run ends, or stops, it deletes the model's `in/`, `out/` and `fail/`
-objects (a stop prints its code, and the reason is in the endpoint's log). Paste 3 — Terminal, after Paste 1:
+objects (a stop prints its code, and the reason is in the endpoint's log). Paste 3 — Terminal, after Paste 1 (after
+a stop, first wait until the endpoint is back to `0` instances, since a painting already sent still finishes in
+SageMaker, or fails there, and writes to `out/` or `fail/`; then run Paste 3, and the `rm` below for any prefix
+that shows more than `0`):
 ```
 for p in in out fail; do aws s3 ls s3://<B>/$p/flux/ --recursive --profile <workload> --region eu-north-1 | wc -l; done
 ```
 Expected: `0`, `0`, `0`. `Error: trial-cleanup` means the run was good but a deletion failed: the images and
-`results.md` are on the Mac; run the three `aws s3 rm s3://<B>/<in|out|fail>/flux/ --recursive` by hand.
+`results.md` are on the Mac; delete by hand, for each of `in`, `out` and `fail`:
+```
+aws s3 rm s3://<B>/in/flux/ --recursive --only-show-errors --profile <workload> --region eu-north-1
+```
 
 **Task 11 · SDXL (changes)**: Paste 3 without `-c alertEmail`; the same Paste 3 check as Task 10 after Paste 4, with
 `sdxl` for `flux`.
@@ -3142,7 +3154,8 @@ Expected: `0`, `0`, `0`. `Error: trial-cleanup` means the run was good but a del
 ```
 aws budgets delete-budget --account-id <workload id> --budget-name souldreams-image-trial --profile <workload> && aws ssm delete-parameter --name /souldreams/trial/hf-token --profile <workload> --region eu-north-1 && aws iam delete-service-linked-role --role-name AWSServiceRoleForApplicationAutoScaling_SageMakerEndpoint --profile <workload> --query DeletionTaskId --output text
 ```
-Expected: one line, a deletion task's id (the budget's deletion prints nothing). Paste 4's budget line then proves
+Expected: one line, a deletion task's id (the budget's deletion prints nothing). If the budget is already gone, its
+`NotFound` stops the chain: run the other two commands alone. Paste 4's budget line then proves
 the budget is gone (`0`); its log-group line proves the groups went with the stack (`0`).
 
 **Fallback F3 (changes)**: without `-c alertEmail`; the same "still `1` after 20 minutes" step as Task 9.
