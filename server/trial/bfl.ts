@@ -5,14 +5,12 @@
 // Parameter Store); nothing sent or received is written anywhere, and an
 // error is a code. The API answers at once with an address to poll; the
 // finished image is fetched from the address it names (which gets no key).
-//   BFL_API_KEY=... node trial/bfl.ts <folder> [style]
-// With `style` it runs the style test (D146) instead: the second model, each
-// scene in two strengths of the dreamlike blend, the same seeds.
+//   BFL_API_KEY=... node trial/bfl.ts <folder>
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { BFL_API_URL, BFL_HOST_SUFFIX } from '../src/hosts.ts';
-import { prompt, SCENES, STYLES } from './measure.ts';
+import { prompt, SCENES } from './measure.ts';
 
 export interface Reply {
   readonly status: number;
@@ -168,23 +166,6 @@ export function measure(send: Send, key: string, folder: string, clock: Clock): 
   );
 }
 
-/** The style test (D146): the second model, each scene in both styles, the same seeds. */
-export function measureStyles(send: Send, key: string, folder: string, clock: Clock): Promise<void> {
-  const klein = BFL_MODELS[1];
-  return run(
-    send,
-    key,
-    folder,
-    clock,
-    (['AC1', 'AC2'] as const).map((code) => ({
-      dir: code,
-      model: klein.name,
-      size: klein.size,
-      text: (i: number) => prompt(i, STYLES[code]),
-    })),
-  );
-}
-
 // One credit is USD 0.01 [READ, docs.bfl.ai, 2026-11-23].
 const USD_PER_CREDIT = 0.01;
 
@@ -207,29 +188,21 @@ function table(name: string, milliseconds: readonly number[], credits: readonly 
   ].join('\n');
 }
 
-/** The command line: <folder> [style]. */
 export function parseArgs(
   env: Readonly<Record<string, string | undefined>>,
   argv: readonly string[],
-): { key: string; folder: string; styles: boolean } {
+): { key: string; folder: string } {
   const key = env.BFL_API_KEY;
-  const [folder, mode] = argv;
-  if (
-    key === undefined ||
-    key === '' ||
-    folder === undefined ||
-    folder === '' ||
-    argv.length > 2 ||
-    (mode !== undefined && mode !== 'style')
-  ) {
+  const [folder] = argv;
+  if (key === undefined || key === '' || folder === undefined || folder === '' || argv.length > 1) {
     throw new Error('bfl-usage');
   }
-  return { key, folder, styles: mode === 'style' };
+  return { key, folder };
 }
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const { key, folder, styles } = parseArgs(process.env, process.argv.slice(2));
-  await (styles ? measureStyles : measure)(
+  const { key, folder } = parseArgs(process.env, process.argv.slice(2));
+  await measure(
     async (url, init) => {
       const r = await fetch(url, { ...init, signal: AbortSignal.timeout(60000) });
       return { status: r.status, json: () => r.json(), bytes: async () => Buffer.from(await r.arrayBuffer()) };
