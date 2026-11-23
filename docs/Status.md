@@ -407,10 +407,10 @@ merge (this entry records it).
   `server/trial/measure.ts` and `server/trial/run.ts` (the six invented prompts, the run on the owner's Mac and the
   costs) and `server/trial/fetch-weights.sh` (the weights, from the model hub into the bucket, in CloudShell). Its
   tests run with the server's, against fakes: no AWS, no network.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 98 tests, and
-  78 mutation checks (S1 to S79, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 78 run,
-  78 caught`); `check_all.sh` does not
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 100 tests, and
+  80 mutation checks (S1 to S81, S42 retired with the budget resource, D138) in `tool/server_mutations.py`, run by
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 80 run,
+  80 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1612,7 +1612,7 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   disappoints.
 - D142 (the founder): the night's painting uses Nebius Token Factory (an image API with zero data retention), not our
   own AWS GPUs. The AWS trial is set aside: the owner tears it down (plan Task 12, rewritten for any state) and its code
-  stays in the branch, unused. The Nebius test (`docs/plans/nebius-test.md`): `server/trial/nebius.ts` sends the six
+  stays in the branch, unused. The Nebius test (`docs/plans/nebius-test.md`): `server/trial/nebius.ts` (since replaced, D144) sent the six
   invented prompts to FLUX schnell and SDXL on Nebius and saves the images and times on the owner's Mac; the API key
   goes in Parameter Store (owner task). Nebius's own pages do not show that image requests are processed in the EU
   (public endpoints are "Global") or that Zero Data Retention covers images: written answers are needed before any
@@ -1624,6 +1624,13 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   EU endpoint's terms) are sent for the record, not as a gate. The prompt-writing comes with the readings (R7). The
   Nebius address in `server/src/hosts.ts` is fine as it is (the R10 question, answered). Task 12 is done by the
   owner (the AWS trial torn down, its proof read).
+- D144 (the founder): Nebius no longer offers image generation (the owner's console: the catalogue lists only text,
+  embedding and vision), so the test moves to Black Forest Labs' own API (FLUX), EU endpoint (`api.eu.bfl.ai`).
+  `docs/plans/bfl-test.md`: `server/trial/bfl.ts` (replacing `nebius.ts`) sends the six invented prompts to
+  `flux-3-image-klein` and `flux-2-klein-4b` and saves the images, times and credits on the owner's Mac; the key goes
+  in Parameter Store (owner task), and the Nebius key is removed in the same step. BFL's pages: training on inputs and
+  outputs is allowed by default (opt-out by email), no DPA or zero-retention statement found, and the EU endpoint
+  is "routing limited to EU regions"; under D143 these are for the record, not a gate.
 
 ## Documents as last imported
 

@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S79, D135, D138, D139, D141, D142), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S81, D135, D138, D139, D141, D144), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -243,15 +243,21 @@ ROWS = [
     ('S76', 'trial/run.ts',
      "held ? ['out'] : ['in', 'out']", "['in', 'out']",
      'test', 'a stop with no result keeps in/ and fail/, deletes out/'),
-    ('S77', 'trial/nebius.ts',
-     "Authorization: `Bearer ${key}`", "Authorization: key",
-     'test', 'each model paints the six prompts; images and times are saved'),
-    ('S78', 'trial/nebius.ts',
-     "if (!png.subarray(0, 4).equals(PNG))", "if (false)",
-     'test', 'a reply that is not a PNG stops the test'),
-    ('S79', 'trial/nebius.ts',
-     "throw new Error(`nebius-http-${reply.status}`);", "throw new Error(`nebius-http-${reply.status} ${key}`);",
+    ('S77', 'trial/bfl.ts',
+     "headers: { ...headers, 'Content-Type': 'application/json' },", "headers: { 'Content-Type': 'application/json' },",
+     'test', 'each model paints six prompts; images, times, credits saved'),
+    ('S78', 'trial/bfl.ts',
+     "if (!made.png.subarray(0, 4).equals(PNG))", "if (false)",
+     'test', 'an image that is not a PNG stops the test'),
+    ('S79', 'trial/bfl.ts',
+     "throw new Error(`bfl-http-${made.status}`);", "throw new Error(`bfl-http-${made.status} ${key}`);",
      'test', 'an error stops with a code, nothing of the reply'),
+    ('S80', 'trial/bfl.ts',
+     "url.protocol !== 'https:' || !url.hostname.endsWith(BFL_HOST_SUFFIX)", "false",
+     'test', 'a polling address off the API host gets no request'),
+    ('S81', 'trial/bfl.ts',
+     "const GIVE_UP_MS = 120000;", "const GIVE_UP_MS = 1200000;",
+     'test', 'a result not in two minutes stops the test'),
 ]
 
 

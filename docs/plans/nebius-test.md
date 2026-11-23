@@ -1,5 +1,9 @@
 # Plan: the Nebius image test (image-trial branch)
 
+> **SET ASIDE (D144).** Nebius no longer offers image generation: its Token Factory catalogue's Modality filter lists
+> only Text-to-text, Embedding and Vision (the owner's console, 2026-11-23), and the test's 404 fits. Replaced by
+> `docs/plans/bfl-test.md`. What follows is kept as it was written.
+
 Governs: the founder's D142 (the night's painting uses Nebius Token Factory, an image API with zero data
 retention, not our own AWS GPUs). It replaces the AWS trial (`docs/plans/image-trial.md`, set aside by D141 and
 D142; its code stays in the branch, unused). Written by Claude Code on 2026-11-23. No AWS GPU, no CDK stack, no
