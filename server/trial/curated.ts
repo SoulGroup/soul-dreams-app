@@ -1,7 +1,7 @@
 // The curated set of night paintings (D147), painted on the owner's Mac
 // with Black Forest Labs' flux-2-klein-4b on the EU endpoint (D145) in the
-// one style (D146): sixty invented scenes at 1600 x 1200 and New Dream's
-// night sky at 1200 x 336, each made a JPEG of quality 82 with an sRGB
+// one style (D146): sixty invented scenes at 1280 x 960 and New Dream's
+// night sky at 1200 x 336, each made a JPEG of quality 75 with an sRGB
 // profile by macOS's own sips, then given the invisible AI tag by our own
 // code (D123), and checked. Everything is kept in the folder given,
 // outside the repository: the images, `set.json` (each one's attempt, seed
@@ -24,15 +24,17 @@ import { aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile, type Size
 import { SCENES, scenePrompt, skyPrompt } from './scenes.ts';
 
 export const MODEL = 'flux-2-klein-4b';
-export const PAINTING: Size = { width: 1600, height: 1200 };
+// 1280 x 960 and quality 75 (D148): the first measure, 1600 x 1200 at 82,
+// would have made the set about 81 MB in the app.
+export const PAINTING: Size = { width: 1280, height: 960 };
 // About 1200 x 340 (D147 item 3), at a multiple of 16 [ASSUMED: BFL's
 // pages give no rule; a size it does not paint stops at the size check].
 export const SKY: Size = { width: 1200, height: 336 };
-export const QUALITY = 82;
+export const QUALITY = 75;
 // USD 3 (D147 item 4); one credit is USD 0.01 [READ, docs.bfl.ai].
 export const CAP_CREDITS = 300;
 // What one request is counted as until BFL's reply names its cost, and
-// the most one may cost: 1600 x 1200 is about 1.5 credits [READ: 1.4 for
+// the most one may cost: 1280 x 960 is 1.4 to 1.5 credits [READ: 1.4 for
 // the first megapixel, 0.1 for each more]. A reply naming more stops.
 export const RESERVE_CREDITS = 3;
 export const SRGB_PROFILE = '/System/Library/ColorSync/Profiles/sRGB Profile.icc';
@@ -341,7 +343,7 @@ export function parseArgs(env: Readonly<Record<string, string | undefined>>, arg
   throw new Error('curated-usage');
 }
 
-/** macOS's sips: a JPEG of quality 82, from a PNG that names no profile (sips takes it as sRGB). */
+/** macOS's sips: a JPEG of quality 75, from a PNG that names no profile (sips takes it as sRGB). */
 export function sipsArgs(png: string, jpg: string): string[] {
   return ['-s', 'format', 'jpeg', '-s', 'formatOptions', String(QUALITY), '-E', SRGB_PROFILE, png, '--out', jpg];
 }

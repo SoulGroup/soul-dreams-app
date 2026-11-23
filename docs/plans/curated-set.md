@@ -34,7 +34,7 @@ What changes for the dreamer, in SoulDreams Dev built with `PREVIEW_READ=true` (
 - The gradient lies beneath each painting, so a row never flashes empty while its painting loads.
 
 What the owner does (Tasks 3, 4, 5 and 8): a free proof of the JPEG step, the painting run (about six minutes, about
-USD 0.92), the contact sheet and any repaints (each about 1.5 US cents, under the USD 3 cap), the copy into the app,
+USD 0.85 to 0.92), the contact sheet and any repaints (each about 1.5 US cents, under the USD 3 cap), the copy into the app,
 and the by-eye check in SoulDreams Dev.
 
 ### What this branch builds
@@ -44,9 +44,10 @@ and the by-eye check in SoulDreams Dev.
    knows that one `.txt` by exact path. A painting is binary, which G0 already knows.
 2. **The painter** (Task 2), `server/trial/curated.ts`, beside the BFL test it reuses, on the owner's Mac only:
    - `paint <folder>`: the sixty scenes and the sky, in order, one request each to `flux-2-klein-4b` on
-     `api.eu.bfl.ai`: 1600 x 1200 (the sky 1200 x 336), a seed of its own, PNG. A stopped run goes on from where it
-     stopped.
-   - Each PNG is made a JPEG of quality 82 with the sRGB profile by macOS's own `sips`, given the AI tag by our own
+     `api.eu.bfl.ai`: 1280 x 960 (D148; the sky 1200 x 336), a seed of its own, PNG. A stopped run goes on from where
+     it stopped.
+   - Each PNG is made a JPEG of quality 75 (D148) with the sRGB profile (embedded by our own code, Part 6 A1) by
+     macOS's own `sips`, given the AI tag by our own
      code (`server/trial/jpeg.ts`: an XMP packet naming the IPTC digital source type
      `trainedAlgorithmicMedia`, in an APP1 segment), and checked: its size, the sRGB profile and the tag. Saved as
      `NN-<attempt>.jpg`.
@@ -85,8 +86,9 @@ and the by-eye check in SoulDreams Dev.
 
 - D147 (1): sixty scenes written here; the owner rejects any on the contact sheet; a rejected one is painted again
   with a new seed (`repaint`).
-- D147 (2): 1600 x 1200 JPEG, quality 82, sRGB; the framing words ask for the subject in the middle band, and the app
-  crops from the middle.
+- D147 (2): JPEG, sRGB; the framing words ask for the subject in the middle band, and the app crops from the middle.
+  D148 sets the size and quality: 1280 x 960 at quality 75, over D147's 1600 x 1200 at 82 (Task 3's first proof put
+  that at about 81 MB). The count stays 60.
 - D147 (3): the sky strip at 1200 x 336 (question 2); the sun and moon stay in code.
 - D147 (4): the USD 3 cap, repaints included, counted from BFL's replies, enforced by the script before each request.
 - D123: every shipped image carries the tag, written by our own code; `ship` and the app's test both check it.
@@ -94,19 +96,19 @@ and the by-eye check in SoulDreams Dev.
 
 ### The app's size
 
-Sixty paintings at 1600 x 1200 and quality 82 are about **30 to 50 MB** added to the app, and about as much to its
-download (a JPEG does not compress further in the app's archive). Measured here: sixty stand-ins (crops of the six
-invented trial paintings, enlarged, so smoother than the real set) at a similar quality came to 33 MB; the trial's
-own 1024 x 1024 paintings at that quality average 455 KB, which is about 830 KB at 1600 x 1200, or 50 MB for sixty.
-Task 3's proof measures `sips`'s real bytes for one trial painting at 1024 x 1024; times 1.83 for 1600 x 1200, times
-60, is the estimate to decide question 1 on, before Task 4. The sky strip adds well under 1 MB; the fingerprints
-file about 5 KB (bundled with the folder).
+Sixty paintings are added to the app, and about as much to its download (a JPEG does not compress further in the
+app's archive). The plan's first estimate, 30 to 50 MB at 1600 x 1200 and quality 82, was too low: Task 3's proof of
+one invented trial painting (1024 x 1024) came to 740,928 bytes, which is about 81 MB for sixty (times 1.83 for
+1600 x 1200, times 60). D148 therefore sets 1280 x 960 at quality 75, and the proof is run again at those settings
+(Task 3) before Task 4: its bytes times 60 is the figure for question 1 (the line is about 50 MB; if it is above,
+the next step is fewer paintings, not lower quality). The sky strip adds well under 1 MB; the fingerprints file about
+5 KB (bundled with the folder).
 
 ### Decided under D91 (how to build only)
 
 1. The painter sits in `server/trial/` beside `bfl.ts`, whose request and polling it reuses (`paintOnce`, exported;
    `bfl.ts`'s own run is unchanged), with the server's tests and type check; no configuration changes.
-2. BFL is asked for a PNG and `sips` makes the one JPEG, so the quality is exactly 82: BFL's pages offer JPEG but no
+2. BFL is asked for a PNG and `sips` makes the one JPEG, so the quality is exactly 75 (D148; first 82): BFL's pages offer JPEG but no
    quality setting [READ, docs.bfl.ai, 2026-11-23].
 3. Seeds: painting *n*, attempt *a*: 20000 + 100*n* + *a*; the sky: 29900 + *a*. Never one used twice.
 4. The XMP namespace names and the source type are `http://` literals, which G9 allows only in `server/src/hosts.ts`:
@@ -1762,9 +1764,14 @@ proves on your Mac what this sandbox could not run (`sips` cannot write here).
 cd ~/Developer/soul-dreams-app/server && node trial/curated.ts proof ~/Desktop/curated-proof ~/Desktop/image-trial/bfl/flux-2-klein-4b/1.png && cat ~/Desktop/curated-proof/proof.md
 ```
 
-Expected: `Proof: 1024 x 1024, sRGB, tagged, <N> bytes, quality 82.` Bring the line. Times 1.83 times 60 is the set's
-size in the app: answer question 1 before Task 4. A stop prints `Error: curated-<code>` (`curated-sips`: `sips`
-refused; `curated-srgb`: the profile was not embedded): bring the code. Then `rm -rf ~/Desktop/curated-proof`.
+As first run (1024 x 1024 at quality 82): `Proof: 1024 x 1024, sRGB, tagged, 740928 bytes, quality 82.`, about 81 MB for
+sixty, so D148 followed. Task 3 is run again at D148's settings, by the script
+`.scratch/for-build-chat/curated-d148-proof.sh`: the same image enlarged to 1280 x 960 (what D148 asked), and, as a
+cross-check at the image's own detail, a 1024 x 768 crop of it (no enlargement; times 1.5625 for 1280 x 960). It
+prints both proofs and the projected size for sixty; answer question 1 on the larger. A stop prints
+`Error: curated-<code>` (`curated-sips`: `sips` refused; `curated-srgb`: the profile was not embedded;
+`curated-profile`: the OS's profile file is missing or no ICC profile): bring the code. Then
+`rm -rf ~/Desktop/curated-proof`.
 
 ### Task 4 · [OWNER] The painting, the contact sheet and the repaints (Terminal, browser)
 
@@ -1775,8 +1782,8 @@ block (`server/trial/scenes.ts`) first; a scene you want changed is a word to th
 cd ~/Developer/soul-dreams-app/server && BFL_API_KEY=$(aws ssm get-parameter --name /souldreams/trial/bfl-key --with-decryption --query Parameter.Value --output text --profile soul-dreams-workload --region eu-north-1) node trial/curated.ts paint ~/Desktop/curated-set ; cat ~/Desktop/curated-set/set.md
 ```
 
-Expected after about six minutes: `Painted: 61 of 61. Painted again: none.` and `Credits counted: <about 91> of 300,
-USD <about 0.91>.` A stop prints `Error: <code>`; run the same command again and it goes on from where it stopped
+Expected after about six minutes: `Painted: 61 of 61. Painted again: none.` and `Credits counted: <85 to 92> of 300,
+USD <0.85 to 0.92>.` A stop prints `Error: <code>`; run the same command again and it goes on from where it stopped
 (a `bfl-http-4xx` or `curated-cost` is brought to the Build chat instead: nothing more is sent until then).
 
 Then open the contact sheet:
@@ -2438,10 +2445,10 @@ new file mode 100644
 +    expect(names, hasLength(60));
 +  });
 +
-+  test('each painting: 1600 x 1200, sRGB, the AI tag', () {
++  test('each painting: 1280 x 960, sRGB, the AI tag', () {
 +    for (final name in names) {
 +      final r = _read(_folder + name);
-+      expect((r.width, r.height, r.srgb, r.tagged), (1600, 1200, true, true), reason: name);
++      expect((r.width, r.height, r.srgb, r.tagged), (1280, 960, true, true), reason: name);
 +    }
 +  });
 +
@@ -2699,7 +2706,7 @@ diff --git a/docs/Status.md b/docs/Status.md
 +`curated-set`: the curated set of night paintings (D147; plan `docs/plans/curated-set.md`): sixty paintings of
 +invented scenery and New Dream's night sky, painted on the owner's Mac with Black Forest Labs' `flux-2-klein-4b` on
 +the EU endpoint (D145) in the one style (D146) by `server/trial/curated.ts`, chosen by the owner on a contact sheet,
-+shipped in `app/assets/paintings/` as JPEGs (1600 x 1200, quality 82, sRGB; the sky 1200 x 336), each carrying the
++shipped in `app/assets/paintings/` as JPEGs (1280 x 960, quality 75, sRGB; the sky 1200 x 336), each carrying the
 +invisible AI tag (D123) and fingerprinted under G2. The app's picture choice moves from the placeholders to the set;
 +New Dream's words stand on the date's shade over the sky (D113, a stand-in). The sun and the moon stay drawn in code.
 +
@@ -2790,8 +2797,8 @@ diff --git a/docs/Status.md b/docs/Status.md
 +  records it).
 +- D147 (owner, the brainstorm): (1) about sixty paintings from invented scenery prompts written by Claude Code
 +  (landscape, sky, weather, season, light, mood; no people, no text, nothing from any dream); the owner reviews a
-+  contact sheet and rejects any, which are painted again with new seeds; (2) 1600 x 1200 JPEG, quality about 82,
-+  sRGB, the subject in the middle horizontal band; (3) also New Dream's night-sky strip (about 1200 x 340, D112); the
++  contact sheet and rejects any, which are painted again with new seeds; (2) JPEG, sRGB (D148 later set 1280 x 960
++  at quality 75), the subject in the middle horizontal band; (3) also New Dream's night-sky strip (about 1200 x 340, D112); the
 +  sun and moon stay drawn in code; (4) a cost cap of USD 3 for everything, repaints included. Every shipped image
 +  carries the invisible AI tag (IPTC digital source type "trainedAlgorithmicMedia", D123), written by our own script;
 +  fingerprinted under G2 like the fonts; the picture choice (from the night's id) moves to the set; the generation
@@ -2832,10 +2839,11 @@ then the merge, which is the owner's.
 None stops this plan: each is built as leaned, and a look is a stand-in. Question 1 is answered before Task 4.
 
 For the owner:
-1. **The app's size.** Built as D147 rules: 1600 x 1200 at quality 82, about 30 to 50 MB more in the app and its
-   download (Part 1). Lean: keep, if Task 3's figure is under about 50 MB; if you want it smaller, quality 75 is a
-   one-number change (`QUALITY`) before Task 4, about a third smaller, and 1400 x 1050 another third. The quality
-   can only change before painting: the PNGs are not kept.
+1. **The app's size.** Answered by D148: 1600 x 1200 at quality 82 proved to be about 81 MB for sixty (Task 3's
+   first proof, 740,928 bytes), so the set is painted at 1280 x 960 at quality 75, the count staying 60. Task 3 is
+   run again at those settings; if its figure is still above about 50 MB, the plan stops and the owner is told (the
+   next step would be 45 paintings, not lower quality). The size and quality can only change before painting: the
+   PNGs are not kept.
 2. **The sky's size.** 1200 x 336, not 1200 x 340: both sides a multiple of 16 [ASSUMED: BFL's pages give no rule
    for FLUX.2 [klein]; a size it rounds stops at `curated-size`]. Lean: keep.
 3. **New Dream's words on the date's shade.** Over a starry sky, white words read at 4.5 to 1 only with a shade
@@ -2844,8 +2852,8 @@ For the owner:
    Product sets it.
 4. **The AI tag's names in `server/src/hosts.ts`.** Four `http://` names (XMP's and IPTC's), never fetched, live there
    because G9 allows such literals only in that file. Lean: as built; G9 unchanged.
-5. **`sips`.** macOS's own image tool makes the JPEG (quality 82, the sRGB profile); nothing is installed. Lean:
-   approve.
+5. **`sips`.** macOS's own image tool makes the JPEG (quality 75, D148); the sRGB profile is embedded by our own
+   code from the OS's own file (Part 6 A1); nothing is installed. Lean: approve.
 6. **The fingerprints file is bundled** with the folder (about 5 KB in the app), as listing sixty-one files in the
    pubspec one by one would avoid. Lean: keep.
 7. **The count stays 60.** A night's painting is its id modulo the count; changing the count later would give every
@@ -2897,5 +2905,24 @@ For the owner:
      23 app rows `app mutations: 23 run, 23 caught`.
 8. **Not run in the sandbox:** the painting itself (no key, by design, R5), `sips` (Task 3 proves it), the full
    mutation runs (D126: once, after the owner's look), and `tool/check_all.sh` whole (the owner's).
+
+## Part 6 · Amendments, after the plan's commit (`287f64b`)
+
+The blocks above are as proven then; a replay applies them and then these two commits' changes. Counts in Parts 1 to
+5 that these change are given here.
+
+**A1 · Task 3 found that `sips` writes no ICC profile on macOS 26** (commit `7bb410f`). On the owner's Mac (macOS
+26.5.2) every `sips` variant tried (`-E`, `-e`, `-E` with `-m`, none) exits 0 and reports the profile as sRGB
+IEC61966-2.1, but the JPEG holds no ICC segment, only JFIF, Exif and Photoshop segments: the set's own check refused
+it (`curated-srgb`). The check is unchanged. `withProfile` (`jpeg.ts`) embeds the OS's own
+`/System/Library/ColorSync/Profiles/sRGB Profile.icc` after `sips`, replacing any profile and never doubling one, and
+`sipsConvert` (`curated.ts`) reads that file first and runs `sips`. A new error code, `curated-profile`. Tests: 4 in
+`curated-jpeg.test.ts` and 2 in `curated.test.ts` (server tests 128 → 134); rows S103 to S109 (S86 to S109 are 24).
+
+**A2 · D148, the size and the quality** (owner, after Task 3's first proof of 740,928 bytes, about 81 MB for sixty):
+paintings at 1280 x 960 and JPEG quality 75, the count staying 60; Task 3 is run again at those settings before
+Task 4, and above about 50 MB the next step is 45 paintings, not lower quality. `PAINTING` and `QUALITY` in
+`curated.ts`; the tests' sizes and the quality; row S98 (quality 75). The Task 6 block's painting test expects
+1280 x 960. The sky stays 1200 x 336. One request's credits stay counted as 3 (1280 x 960 is 1.4 to 1.5 credits).
 
 *No matter where you are on your journey, the steps you take are equally important.*

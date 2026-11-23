@@ -66,8 +66,8 @@ test('the set: sixty paintings and the sky, sizes, seeds, the model', async () =
     assert.ok(posts.every((p) => p.url === `${BFL_API_URL}/${MODEL}`));
     assert.deepEqual(posts[0]?.body, {
       prompt: scenePrompt(1),
-      width: 1600,
-      height: 1200,
+      width: 1280,
+      height: 960,
       seed: seedOf(1, 1),
       output_format: 'png',
     });
@@ -203,7 +203,7 @@ test('a reply naming no cost, or too much, stops', async () => {
 test('a painting of the wrong size stops', async () => {
   const dir = folder();
   try {
-    const api = fakeApi({ size: { width: 1600, height: 1184 } });
+    const api = fakeApi({ size: { width: 1280, height: 944 } });
     await assert.rejects(paintSet(api.send, KEY, api.clock, fakeConvert().convert, dir), /^Error: curated-size$/);
     assert.deepEqual(state(dir).items, {});
   } finally {
@@ -225,9 +225,9 @@ test('a converter that loses the profile stops', async () => {
 });
 
 test('a finished JPEG is checked for size, sRGB and the tag', () => {
-  assert.throws(() => checkJpeg(fakeJpeg(1600, 1200), PAINTING), /^Error: curated-tag$/);
-  assert.throws(() => checkJpeg(fakeJpeg(1600, 1199), PAINTING), /^Error: curated-size$/);
-  assert.throws(() => checkJpeg(fakeJpeg(1600, 1200, { icc: 'p3' }), PAINTING), /^Error: curated-srgb$/);
+  assert.throws(() => checkJpeg(fakeJpeg(1280, 960), PAINTING), /^Error: curated-tag$/);
+  assert.throws(() => checkJpeg(fakeJpeg(1280, 959), PAINTING), /^Error: curated-size$/);
+  assert.throws(() => checkJpeg(fakeJpeg(1280, 960, { icc: 'p3' }), PAINTING), /^Error: curated-srgb$/);
 });
 
 test('the contact sheet shows each last attempt with its crops', async () => {
@@ -295,7 +295,7 @@ test('ship refuses a set not finished, or a folder holding more', async () => {
     mkdirSync(join(target, 'more'));
     assert.throws(() => ship(dir, target), /^Error: curated-ship-folder$/);
     rmSync(join(target, 'more'), { recursive: true });
-    writeFileSync(join(dir, fileOf(5, 1)), fakeJpeg(1600, 1200));
+    writeFileSync(join(dir, fileOf(5, 1)), fakeJpeg(1280, 960));
     assert.throws(() => ship(dir, target), /^Error: curated-tag$/);
   } finally {
     rmSync(dir, { recursive: true });
@@ -348,14 +348,14 @@ test('the arguments: four modes; items 1 to 60, or sky', () => {
   assert.throws(() => parseArgs({ BFL_API_KEY: '' }, ['repaint', 'f', '1']), /^Error: curated-usage$/);
 });
 
-test('sips makes quality 82 with the sRGB profile', () => {
+test('sips makes quality 75 with the sRGB profile', () => {
   assert.deepEqual(sipsArgs('in.png', 'out.jpg'), [
     '-s',
     'format',
     'jpeg',
     '-s',
     'formatOptions',
-    '82',
+    '75',
     '-E',
     '/System/Library/ColorSync/Profiles/sRGB Profile.icc',
     'in.png',
@@ -371,11 +371,11 @@ test('sipsConvert: sips leaves no profile, so ours is embedded', async () => {
     writeFileSync(profile, fakeProfile());
     const png = join(dir, 'in.png');
     const jpg = join(dir, 'out.jpg');
-    writeFileSync(png, fakePng(1600, 1200));
+    writeFileSync(png, fakePng(1280, 960));
     const seen: string[][] = [];
     const run = async (args: string[]) => {
       seen.push(args);
-      writeFileSync(jpg, fakeJpeg(1600, 1200, { icc: 'none' }));
+      writeFileSync(jpg, fakeJpeg(1280, 960, { icc: 'none' }));
     };
     await sipsConvert(run, png, jpg, profile);
     assert.deepEqual(seen, [sipsArgs(png, jpg)]);
@@ -423,7 +423,7 @@ test('proof: a PNG through the same steps, with no request', async () => {
     assert.equal(aiTagged(jpeg), true);
     assert.match(
       readFileSync(join(dir, 'proof.md'), 'utf8'),
-      new RegExp(`^Proof: 1024 x 1024, sRGB, tagged, ${jpeg.length} bytes, quality 82\\.\\n$`),
+      new RegExp(`^Proof: 1024 x 1024, sRGB, tagged, ${jpeg.length} bytes, quality 75\\.\\n$`),
     );
     await assert.rejects(proof(convert.convert, dir, Buffer.from('no png')), /^Error: curated-not-png$/);
   } finally {
