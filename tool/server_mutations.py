@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S124, D152), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S135, D152), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -38,7 +38,7 @@ ROWS = [
     ('S7', 'infra/stack.ts', 'RetentionDays.ONE_WEEK', 'RetentionDays.ONE_MONTH',
      'test', 'logs: 7 days, JSON, application INFO, system WARN'),
     ('S8', 'infra/stack.ts', '      role,\n', '',
-     'test', 'the role: its own log group, and the two keys only'),
+     'test', 'the role: its log group, the two keys, putting feedback'),
     ('S9', 'infra/account.ts', '  if (wanted !== resolved) {',
      '  if (wanted !== resolved && wanted !== undefined) {',
      'test', 'none passed, or another: refused'),
@@ -56,7 +56,7 @@ ROWS = [
      "      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),\n"
      "      inlinePolicies: { x: new iam.PolicyDocument({ statements: ["
      "new iam.PolicyStatement({ actions: ['logs:*'], resources: ['*'] })] }) },\n",
-     'test', 'the role: its own log group, and the two keys only'),
+     'test', 'the role: its log group, the two keys, putting feedback'),
     ('S15', 'infra/stack.ts', '      logGroup,\n',
      "      logGroup: logs.LogGroup.fromLogGroupName(this, 'Old', 'kept'),\n",
      'test', 'logs: 7 days, JSON, application INFO, system WARN'),
@@ -75,9 +75,9 @@ ROWS = [
      'test', 'Node 24 on arm64, its own handler, 10 seconds'),
     ('S21', 'infra/stack.ts',
      "        conditions: { StringEquals: { 'kms:ViaService': `ssm.${REGION}.amazonaws.com` } },\n", '',
-     'test', 'the role: its own log group, and the two keys only'),
+     'test', 'the role: its log group, the two keys, putting feedback'),
     ('S22', 'infra/stack.ts', "    new CfnOutput(this, 'Url', { value: url.url });", '    void url;',
-     'test', "one output, the URL's address"),
+     'test', "two outputs: the URL and the feedback bucket"),
     ('S23', 'src/soniox.ts', '  max_session_duration_seconds: 1800,\n',
      "  max_session_duration_seconds: 1800,\n  context: 'x',\n",
      'test', 'exactly these four fields and no other (R4)'),
@@ -367,6 +367,30 @@ ROWS = [
      'test', 'another method or path: 404, nothing read'),
     ('S124', 'src/door.ts', 'utcDay(deps.now())', 'utcDay(new Date())',
      'test', 'feedback: kept under its UTC day, 204, one code'),
+    # The feedback bucket in the stack (D152 item 1).
+    ('S125', 'infra/stack.ts', 'expiration: Duration.days(90)', 'expiration: Duration.days(30)',
+     'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
+    ('S126', 'infra/stack.ts', '      versioned: false,', '      versioned: true,',
+     'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
+    ('S127', 'infra/stack.ts', '      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,\n', '',
+     'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
+    ('S128', 'infra/stack.ts', '      removalPolicy: RemovalPolicy.RETAIN,', '      removalPolicy: RemovalPolicy.DESTROY,',
+     'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
+    ('S129', 'infra/stack.ts', 's3.BucketEncryption.S3_MANAGED', 's3.BucketEncryption.KMS_MANAGED',
+     'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
+    ('S130', 'infra/stack.ts', '      enforceSSL: true,\n', '',
+     'test', 'the feedback bucket refuses any request not over TLS'),
+    ('S131', 'infra/stack.ts', "actions: ['s3:PutObject']", "actions: ['s3:PutObject', 's3:GetObject']",
+     'test', 'the role: its log group, the two keys, putting feedback'),
+    ('S132', 'infra/stack.ts', "resources: [feedback.arnForObjects('*')]",
+     "resources: [feedback.bucketArn, feedback.arnForObjects('*')]",
+     'test', 'the role: its log group, the two keys, putting feedback'),
+    ('S133', 'infra/stack.ts', '      environment: { [FEEDBACK_BUCKET_VARIABLE]: feedback.bucketName },\n', '',
+     'test', "one variable, the feedback bucket's name; no tracing"),
+    ('S134', 'infra/stack.ts', "    new CfnOutput(this, 'FeedbackBucket', { value: feedback.bucketName });\n", '',
+     'test', 'two outputs: the URL and the feedback bucket'),
+    ('S135', 'infra/stack.ts', '      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,\n', '',
+     'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
 ]
 
 

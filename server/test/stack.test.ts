@@ -34,6 +34,8 @@ test('these resources and no others', () => {
     'AWS::Lambda::Permission',
     'AWS::Lambda::Url',
     'AWS::Logs::LogGroup',
+    'AWS::S3::Bucket',
+    'AWS::S3::BucketPolicy',
   ]);
 });
 
@@ -75,10 +77,51 @@ test('logs: 7 days, JSON, application INFO, system WARN', () => {
   });
 });
 
-test('no environment, no tracing', () => {
+test("one variable, the feedback bucket's name; no tracing", () => {
   const props = only('AWS::Lambda::Function').Properties ?? {};
-  assert.equal(props['Environment'], undefined);
+  assert.deepEqual(props['Environment'], {
+    Variables: { FEEDBACK_BUCKET: { Ref: Object.keys(template.findResources('AWS::S3::Bucket'))[0] } },
+  });
   assert.equal(props['TracingConfig'], undefined);
+});
+
+test('the feedback bucket: private, encrypted, unversioned, 90 days, kept', () => {
+  const [bucket] = Object.values(template.findResources('AWS::S3::Bucket')) as Resource[];
+  assert.deepEqual(bucket, {
+    Type: 'AWS::S3::Bucket',
+    Properties: {
+      BucketEncryption: { ServerSideEncryptionConfiguration: [{ ServerSideEncryptionByDefault: { SSEAlgorithm: 'AES256' } }] },
+      LifecycleConfiguration: { Rules: [{ ExpirationInDays: 90, Status: 'Enabled' }] },
+      OwnershipControls: { Rules: [{ ObjectOwnership: 'BucketOwnerEnforced' }] },
+      PublicAccessBlockConfiguration: {
+        BlockPublicAcls: true,
+        BlockPublicPolicy: true,
+        IgnorePublicAcls: true,
+        RestrictPublicBuckets: true,
+      },
+    },
+    UpdateReplacePolicy: 'Retain',
+    DeletionPolicy: 'Retain',
+  });
+});
+
+test('the feedback bucket refuses any request not over TLS', () => {
+  const name = Object.keys(template.findResources('AWS::S3::Bucket'))[0] ?? '';
+  const ref = { 'Fn::GetAtt': [name, 'Arn'] };
+  template.hasResourceProperties('AWS::S3::BucketPolicy', {
+    Bucket: { Ref: name },
+    PolicyDocument: {
+      Statement: [
+        {
+          Action: 's3:*',
+          Condition: { Bool: { 'aws:SecureTransport': 'false' } },
+          Effect: 'Deny',
+          Principal: { AWS: '*' },
+          Resource: [ref, { 'Fn::Join': ['', [ref, '/*']] }],
+        },
+      ],
+    },
+  });
 });
 
 test('one function URL: no authentication of its own, no CORS', () => {
@@ -112,13 +155,14 @@ test('anyone may call it, through the URL only', () => {
   });
 });
 
-test("one output, the URL's address", () => {
+test("two outputs: the URL and the feedback bucket", () => {
   const outputs = template.toJSON()['Outputs'] as Record<string, unknown>;
-  assert.deepEqual(Object.keys(outputs), ['Url']);
+  assert.deepEqual(Object.keys(outputs), ['Url', 'FeedbackBucket']);
+  template.hasOutput('FeedbackBucket', { Value: { Ref: Match.stringLikeRegexp('^Feedback') } });
   template.hasOutput('Url', { Value: { 'Fn::GetAtt': [Match.stringLikeRegexp('^HandlerFunctionUrl'), 'FunctionUrl'] } });
 });
 
-test('the role: its own log group, and the two keys only', () => {
+test('the role: its log group, the two keys, putting feedback', () => {
   assert.equal(only('AWS::IAM::Role').Properties?.['ManagedPolicyArns'], undefined);
   // No inline policy on the role either (D44 a).
   assert.equal(only('AWS::IAM::Role').Properties?.['Policies'], undefined);
@@ -146,6 +190,13 @@ test('the role: its own log group, and the two keys only', () => {
           Effect: 'Allow',
           Resource: {
             'Fn::Join': ['', ['arn:', { Ref: 'AWS::Partition' }, ':kms:eu-north-1:', { Ref: 'AWS::AccountId' }, ':key/*']],
+          },
+        },
+        {
+          Action: 's3:PutObject',
+          Effect: 'Allow',
+          Resource: {
+            'Fn::Join': ['', [{ 'Fn::GetAtt': [Match.stringLikeRegexp('^Feedback'), 'Arn'] }, '/*']],
           },
         },
       ],
