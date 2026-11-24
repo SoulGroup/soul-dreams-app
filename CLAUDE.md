@@ -89,7 +89,7 @@ merge command runs all of it. The guards (built in the first task, each with a m
 - **G0 file kinds** — every tracked file is a kind the guards know: code, config, or an unscanned type, name or path
   listed in `tool/checks/g0_kinds.py`. Anything else, an unknown `#!` interpreter included, is refused. A branch that
   brings a new kind of file extends the list, and the owner approves it; and `.txt` in `app/assets/fonts/` only; and the
-  pending lines' and the screenshots' fingerprints by exact path.
+  pending lines', the screenshots' and the paintings' fingerprints by exact path.
 - **G1 words** — the generated words (`lines.g.dart`, `lists.g.dart`, `words.g.xcconfig` and the two
   `InfoPlist.strings`) are exactly what the generator makes from the CSV and the lists, nothing else sits in
   `app/lib/words/` or `app/assets/words/`, and the CSV's and lists' hashes match `docs/source/SOURCES`; and
@@ -97,7 +97,8 @@ merge command runs all of it. The guards (built in the first task, each with a m
   match `pending-fingerprint.txt`, and `pending.g.dart` is what the generator makes from them.
 - **G2 copies** — every file in `docs/source/` matches its listed hash; no tracked `privacy-ethics-safety.md`, and
   nothing in a folder named `restricted`; and every file in `app/assets/fonts/` matches `fingerprints.txt`; and every
-  file in `docs/reference/screens/` matches its `fingerprints.txt`.
+  file in `docs/reference/screens/` matches its `fingerprints.txt`; and every file in `app/assets/paintings/`
+  matches its `fingerprints.txt`.
 - **G3 no literal words** — no string literal shown to a dreamer outside `app/lib/words/`; any other literal of more
   than two words needs `// not-dreamer-facing: <reason>` on its line.
 - **G4 invented only** — no string literal of twelve words or more outside `fixtures/invented-nights.json`,
