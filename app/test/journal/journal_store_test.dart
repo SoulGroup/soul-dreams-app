@@ -387,14 +387,15 @@ void main() {
 
   test('an unreadable file is skipped with a code, never touched', () async {
     final store = await JournalStore.open(files);
-    final [good, other, ...] = nightsFromFixtures();
+    final [good, other, third, ...] = nightsFromFixtures();
     await store.save(good);
     final wrongId = encodeNight(other);
     final bad = <String, Uint8List>{
       'night-${'a' * 32}.json': utf8.encode('not json'),
       'night-${'b' * 32}.json': Uint8List.fromList([0xff, 0xfe, 0x00]),
       'night-${'c' * 32}.json': wrongId,
-      'night-${'d' * 32}.json': utf8.encode(utf8.decode(encodeNight(good)).replaceFirst('"version":3', '"version":4')),
+      // Under its own id, so only the damage (an unknown version) refuses it.
+      JournalStore.fileOf(third.id): utf8.encode(utf8.decode(encodeNight(third)).replaceFirst('"version":3', '"version":4')),
     };
     for (final MapEntry(:key, :value) in bad.entries) {
       await files.write(key, value);
