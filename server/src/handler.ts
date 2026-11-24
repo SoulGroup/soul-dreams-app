@@ -4,13 +4,22 @@
 // and feedback.ts and tested there.
 import { makeDoor } from './door.ts';
 import { FEEDBACK_BUCKET_VARIABLE } from './feedback.ts';
-import { makeFeedbackStore, putToS3 } from './feedback-store.ts';
+import { makeFeedbackStore, putToS3, type Put } from './feedback-store.ts';
 import { readParameter } from './parameters.ts';
 import { requestTemporaryKey } from './soniox.ts';
 
-export const handler = makeDoor({
-  readParameter,
-  temporaryKey: (projectKey) => requestTemporaryKey(projectKey),
-  keepFeedback: makeFeedbackStore(process.env[FEEDBACK_BUCKET_VARIABLE] ?? '', putToS3),
-  now: () => new Date(),
-});
+/** The door, wired: [env] names the feedback bucket, [put] sends to it. */
+export function wire(
+  env: Readonly<Record<string, string | undefined>>,
+  put: Put,
+  read: (name: string) => Promise<string>,
+) {
+  return makeDoor({
+    readParameter: read,
+    temporaryKey: (projectKey) => requestTemporaryKey(projectKey),
+    keepFeedback: makeFeedbackStore(env[FEEDBACK_BUCKET_VARIABLE] ?? '', put),
+    now: () => new Date(),
+  });
+}
+
+export const handler = wire(process.env, putToS3, readParameter);

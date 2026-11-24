@@ -391,6 +391,12 @@ ROWS = [
      'test', 'two outputs: the URL and the feedback bucket'),
     ('S135', 'infra/stack.ts', '      objectOwnership: s3.ObjectOwnership.BUCKET_OWNER_ENFORCED,\n', '',
      'test', 'the feedback bucket: private, encrypted, unversioned, 90 days, kept'),
+    ('S136', 'src/feedback.ts', 'if (body.length > BODY_LIMIT)', 'if (body.length >= BODY_LIMIT)',
+     'test', 'a body too long is refused before it is read'),
+    ('S137', 'src/handler.ts', 'env[FEEDBACK_BUCKET_VARIABLE]', 'env[`${FEEDBACK_BUCKET_VARIABLE}_X`]',
+     'test', 'feedback goes to the bucket the variable names'),
+    ('S138', 'src/handler.ts', "?? ''", "?? 'a-bucket'",
+     'test', 'no bucket named: feedback fails with 502 and nothing is sent'),
 ]
 
 

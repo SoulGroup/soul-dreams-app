@@ -39,6 +39,10 @@ test('exactly 2,000 characters kept; one more refused', () => {
 
 test('a body too long is refused before it is read', () => {
   assert.equal(BODY_LIMIT, 65536);
+  const exact = `${body('a')}${' '.repeat(BODY_LIMIT - body('a').length)}`;
+  assert.equal(exact.length, BODY_LIMIT);
+  assert.deepEqual(parseFeedback(exact), { text: 'a' });
+  assert.deepEqual(parseFeedback(`${exact} `), { refused: 413 });
   assert.deepEqual(parseFeedback(`${body('a')}${' '.repeat(BODY_LIMIT)}`), { refused: 413 });
   assert.deepEqual(parseFeedback(`{${' '.repeat(BODY_LIMIT)}`), { refused: 413 });
 });
