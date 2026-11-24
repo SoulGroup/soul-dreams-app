@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/core/app_line.dart';
 import 'package:souldreams/core/safe_log.dart';
+import 'package:souldreams/design/palette.dart';
 import 'package:souldreams/design/stand_ins.dart';
 import 'package:souldreams/design/tokens.g.dart';
 import 'package:souldreams/journal/greeting.dart';
@@ -157,6 +158,21 @@ void main() {
     Harness.clock = stockholm(2026, 6, 10, 21);
     await tester.pump(const Duration(minutes: 1));
     expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
+  });
+
+  // D151 item 2: over the light theme the moon is drawn in the dark theme's
+  // page colour (dark blue), not a light one that would not show; the dark
+  // theme's moon is as before. The journal's clock is at night in both.
+  testWidgets("the greeting's moon is dark blue in the light theme", (tester) async {
+    for (final (hour, colour) in [(12, DarkColours.page.colour!), (22, StandIns.moonColour)]) {
+      final h = await Harness.make();
+      Harness.clock = stockholm(2026, 6, 10, 22);
+      await h.pump(tester, JournalPage(journal: h.journal), hour: hour);
+      expect(tester.widget<SkyMark>(find.byType(SkyMark)).sky, Sky.moon);
+      final painted = tester.renderObject(find.descendant(of: find.byType(SkyMark), matching: find.byType(CustomPaint)).last);
+      expect(painted, paints..path(color: colour), reason: 'phone hour $hour');
+      await tester.pumpWidget(const SizedBox());
+    }
   });
 
   testWidgets('the mark follows the clock on returning', (tester) async {
@@ -347,8 +363,24 @@ void main() {
       expect(style.fontWeight, FontWeight.w600);
       expect(style.fontSize, 20);
       expect(tester.getSize(row).height, StandIns.rowHeight);
-      final clip = tester.widget<ClipRRect>(find.descendant(of: row, matching: find.byType(ClipRRect)));
-      expect(clip.borderRadius, BorderRadius.circular(Spacing.radius));
+      // D151 item 1: fully rounded ends, the radius half the row's height
+      // whatever it is: a stadium, not a fixed corner.
+      expect(find.descendant(of: row, matching: find.byType(ClipRRect)), findsNothing);
+      final clip = tester.widget<ClipPath>(find.descendant(of: row, matching: find.byType(ClipPath)));
+      expect((clip.clipper! as ShapeBorderClipper).shape, const StadiumBorder());
+      // The border is the same half-circle ends, drawn over the picture.
+      final border = tester.widget<DecoratedBox>(
+        find.descendant(
+          of: row,
+          matching: find.byWidgetPredicate((w) => w is DecoratedBox && w.position == DecorationPosition.foreground),
+        ),
+      );
+      expect(
+        border.decoration,
+        ShapeDecoration(
+          shape: StadiumBorder(side: BorderSide(color: Palette.of(tester.element(row)).rowBorder, width: StandIns.rowBorderWidth)),
+        ),
+      );
     }
     final width = tester.getSize(find.byType(JournalPage)).width;
     final first = tester.getRect(find.byKey(JournalPage.rowKey(newer.id)));
@@ -414,13 +446,30 @@ void main() {
         final mid = top + (rect.height / 2).round();
         final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
         expect(art.look, n.id == read.id ? isA<Painting>() : const PaintedGradient());
-        // The edge, left and right, and the middle of the top: the grey.
-        expect(rgb(data, width, left, mid), theme.grey, reason: 'left edge');
-        expect(rgb(data, width, left + rect.width.round() - 1, mid), theme.grey, reason: 'right edge');
+        // The middle of the top and of the foot, the straight edges: exactly
+        // the grey. The two ends are half circles (D151), so their outermost
+        // pixel is the grey antialiased against the clear: close to it.
         expect(rgb(data, width, left + rect.width ~/ 2, top), theme.grey, reason: 'top edge');
+        expect(rgb(data, width, left + rect.width ~/ 2, top + rect.height.round() - 1), theme.grey, reason: 'foot edge');
+        bool near(int a, int b) =>
+            [16, 8, 0].every((shift) => (((a >> shift) & 0xFF) - ((b >> shift) & 0xFF)).abs() <= 20);
+        expect(near(rgb(data, width, left, mid), theme.grey), isTrue, reason: 'left end');
+        expect(near(rgb(data, width, left + rect.width.round() - 1, mid), theme.grey), isTrue, reason: 'right end');
         // One point wide: the next pixel in is the picture.
         expect(rgb(data, width, left + 1, mid), isNot(theme.grey), reason: 'one wide');
         expect(tester.getSize(row).height, StandIns.rowHeight);
+        // D151 item 1: the ends are half circles of radius 37 (half of 74), the
+        // overlay and the border with them: a point inside the old 30 corner,
+        // outside the half circle, is clear, in all four corners.
+        int alpha(int x, int y) => data.getUint32((y * width + x) * 4) & 0xFF;
+        final right = left + rect.width.round() - 1;
+        final foot = top + rect.height.round() - 1;
+        for (final (x, y) in [(left + 5, top + 15), (right - 5, top + 15), (left + 5, foot - 15), (right - 5, foot - 15)]) {
+          expect(alpha(x, y), 0, reason: 'a corner, $x $y');
+        }
+        // On the half circle, 45 degrees up from its centre: the border.
+        expect(alpha(left + 11, top + 11), greaterThan(0), reason: 'the arc');
+        expect(alpha(left + 37, top + 37), 255, reason: 'inside');
       }
     });
   }

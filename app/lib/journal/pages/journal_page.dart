@@ -585,16 +585,19 @@ class _Row extends StatelessWidget {
     child: GestureDetector(
       key: JournalPage.rowKey(night.id),
       onTap: onTap,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(Spacing.radius),
+      // Fully rounded ends (D151): the radius is half the row's height,
+      // whatever the height is, for the picture, its overlay and the border.
+      child: ClipPath(
+        clipper: const ShapeBorderClipper(shape: StadiumBorder()),
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: StandIns.rowHeight),
           // A thin grey border over the picture, the gradient's too (D115).
           child: DecoratedBox(
             position: DecorationPosition.foreground,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(Spacing.radius),
-              border: Border.all(color: Palette.of(context).rowBorder, width: StandIns.rowBorderWidth),
+            decoration: ShapeDecoration(
+              shape: StadiumBorder(
+                side: BorderSide(color: Palette.of(context).rowBorder, width: StandIns.rowBorderWidth),
+              ),
             ),
             child: NightArt(
               look,

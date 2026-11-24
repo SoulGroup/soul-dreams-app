@@ -208,10 +208,10 @@ merge (this entry records it).
   alone (any other target receives nothing), and deletes it when the share closes; the folder is also emptied before
   each share and at launch. A failure shows nothing and logs `exportFailed`. No package.
 - The redesign A (D110, D112 to D115; `redesign-a`; TO TRY where a stand-in): the journal opens on a sun (08:00 to
-  21:00) or a moon (21:00 to 08:00, the Night/Day hours; `journal/sky.dart`, `pages/sky_mark.dart`, drawn in code,
+  21:00) or a moon (21:00 to 08:00, the Night/Day hours; `journal/sky.dart`, `pages/sky_mark.dart`, drawn in code, the moon dark blue over the light theme and the light colour over the dark, D151,
   silent), then a greeting by the part of the day (05, 12, 17, 21 by the wall clock; `journal/greeting.dart`),
-  centred in h2, then New Dream (a pill on a night sky drawn in code, `NightSky`) opening the typing screen as the record button did, which is gone; each night a rounded row of
-  at least 64, 48 from each side of the screen (`StandIns.rowSide`) and edged by a 1 pt grey border (`#9E9E9E` in the
+  centred in h2, then New Dream (a pill on a night sky drawn in code, `NightSky`) opening the typing screen as the record button did, which is gone; each night a fully rounded row (D151) of
+  at least 74 (D150), 48 from each side of the screen (`StandIns.rowSide`) and edged by a 1 pt grey border (`#9E9E9E` in the
   light theme, `#8A8A8A` in the dark, stand-ins in `StandIns`, `Palette.rowBorder`; the gradient rows too, D115), carrying only its date (h6, day/month/yy: `shownDate`; the founder's export keeps `dayDigits`'
   four-digit year) over the night's picture, with #000000 at 40% over the whole picture over a painting (D150), none over
   the painted gradient (`ArtOverlay.row`, D149), 74 high with the date padded 5 more above and below (D150); month dividers and C4-P·5 as before; the first
@@ -357,7 +357,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 762 tests, and 743 mutation checks (A1 to A802; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 765 tests, and 747 mutation checks (A1 to A808; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -1711,6 +1711,18 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   takes the room under the controls and scales down to it (`FittedBox`), at normal size unchanged; and the divider
   test's set-up scrolls to the last divider, since 74 pt rows push it past the test screen (its assertions are
   unchanged).
+- D151 (the founder's by-eye corrections): (1) journal rows, painted and gradient, have fully rounded ends, the corner
+  radius half the row's height (74 pt, so 37, and following the row when it grows): the picture, its 40% overlay and
+  the border (`ClipPath` with a `StadiumBorder` clip, and a `StadiumBorder` border, in place of the 30 pt corner);
+  (2) the moon over a light background, the greeting's sky mark in the light theme (for example Manual light after
+  21:00) and the Settings quick toggle in the light theme, is drawn in the dark theme's page colour (dark blue), not a
+  light colour; the dark theme's moon is unchanged. The quick toggle already drew its moon so (D125 item 7); the
+  greeting's did not, so `SkyMark` now chooses by the app's theme unless given a colour.
+- D151, one test adjusted, not weakened: the border test's exact-grey check at the rows' outermost left and right
+  pixels (`every row has a 1 pt grey border`) held when those edges were straight; on a half circle that pixel is a
+  tangent and is antialiased (about 93% covered), so the exact check moves to the straight top and foot edges and the
+  two ends are checked to within 20 of the grey, with new checks that all four corners are clear and that the arc and
+  the inside are drawn.
 - The prepared soft text shadow for the row date, not applied: `.scratch/for-build-chat/d150-row-date-shadow.patch`
   (values: #000000 at 65%, blur radius 6, offset 0 and 1 down; over a painting only), for the founder to try if dates
   read poorly.

@@ -3,9 +3,11 @@
 // crescent. No file, no package, no words; heard as nothing.
 import 'dart:math';
 
+import 'package:flutter/material.dart' show Theme;
 import 'package:flutter/widgets.dart';
 
 import '../../design/stand_ins.dart';
+import '../../design/tokens.g.dart';
 import '../sky.dart';
 
 class SkyMark extends StatelessWidget {
@@ -17,15 +19,20 @@ class SkyMark extends StatelessWidget {
   final Size size;
 
   /// The moon's colour, unless given (the quick toggle's, D125 item 7).
+  /// Unless given, it is the light colour over the dark theme, and over the
+  /// light theme the dark theme's page colour (dark blue, D151), which a
+  /// light colour would not show against.
   final Color? moon;
 
   /// How many rays the sun has.
   static const rays = 8;
 
   @override
-  Widget build(BuildContext context) => ExcludeSemantics(
-    child: SizedBox.fromSize(size: size, child: CustomPaint(painter: _SkyPainter(sky, moon ?? StandIns.moonColour))),
-  );
+  Widget build(BuildContext context) {
+    final light = Theme.of(context).brightness == Brightness.light;
+    final colour = moon ?? (light ? DarkColours.page.colour! : StandIns.moonColour);
+    return ExcludeSemantics(child: SizedBox.fromSize(size: size, child: CustomPaint(painter: _SkyPainter(sky, colour))));
+  }
 }
 
 class _SkyPainter extends CustomPainter {

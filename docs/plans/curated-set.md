@@ -2948,4 +2948,11 @@ more, New Dream 5.15; Status.md lists the ten weakest. `art_overlay_test.dart` a
 `journal_page_test.dart` and `night_page_test.dart` follow (app tests 759 → 762); rows A796 to A802 new, A783, A784,
 A791 and A793 repointed (A1 to A802, 743 rows).
 
+**A5 · D151, the founder's by-eye corrections**: rows fully rounded, the radius half the row's height (a `StadiumBorder`
+clip and border; the overlay and border follow), painted and gradient rows alike; the moon over a light background
+drawn in the dark theme's page colour (the greeting's sky mark in the light theme; the Settings toggle already did),
+the dark theme's moon unchanged. Tests: `sky_mark_test.dart` (2 new), `journal_page_test.dart` (1 new, the row and
+border tests changed: the exact-grey check at the curved ends is a tolerance, the exact check moves to the straight
+edges; app tests 762 → 765); rows A805 to A808 new, A402, A439 and A607 repointed (A1 to A808, 747 rows).
+
 *No matter where you are on your journey, the steps you take are equally important.*
