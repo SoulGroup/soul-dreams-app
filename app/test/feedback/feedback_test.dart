@@ -127,6 +127,16 @@ void main() {
       expect(lines, isEmpty);
     });
 
+    test('invisible characters only count as blank: nothing, nothing sent (D156)', () async {
+      final f = form();
+      for (final text in ['\u200B', '\u0000', '\u200B\u0000 \uFEFF\u2060', '\u00AD\u3164\u{E0001}']) {
+        expect(await f.submit(text, agreed: true), Submitted.nothing);
+      }
+      expect(sent, isEmpty);
+      expect(await f.submit('\u200Ba', agreed: true), Submitted.sent);
+      expect(sent, ['\u200Ba']);
+    });
+
     test('before agreeing: the popup, nothing sent', () async {
       final f = form();
       expect(await f.submit('The app opens slowly.', agreed: false), Submitted.popup);

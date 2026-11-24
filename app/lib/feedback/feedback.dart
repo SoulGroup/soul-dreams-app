@@ -3,9 +3,10 @@
 // alone, nothing that names the phone (R4); and what Submit does. Empty or
 // blank, or while a send is under way, it does nothing; before the dreamer
 // has agreed it asks for the popup (MP·101, D128 item 3) and sends nothing;
-// otherwise it sends once. The text is never kept on the phone (R11) and
-// never logged: a failure logs its status alone (R3). SoulDreams Dev only
-// (D152 item 5).
+// otherwise it sends once. A text of invisible characters only (zero-width
+// spaces, U+0000 and the like) is blank too (D156). The text is never kept
+// on the phone (R11) and never logged: a failure logs its status alone
+// (R3). SoulDreams Dev only (D152 item 5).
 import 'dart:convert';
 import 'dart:io';
 
@@ -29,6 +30,11 @@ typedef SendFeedback = Future<void> Function(String text);
 
 const _wait = Duration(seconds: 15);
 final _betaShape = RegExp(r'^[A-Za-z0-9]{48}$');
+
+// Nothing a person can see: whitespace, control characters such as U+0000,
+// and the characters Unicode marks as default-ignorable, such as the
+// zero-width space and the joiners (D156).
+final _invisible = RegExp(r'^[\p{White_Space}\p{Cc}\p{Default_Ignorable_Code_Point}]*$', unicode: true);
 
 /// Sends [text] to [server]'s /feedback; completes when it is kept (204).
 Future<void> postFeedback(Uri server, String betaKey, String text) async {
@@ -80,7 +86,7 @@ final class FeedbackForm extends ChangeNotifier {
 
   /// Submit with [text] in the box.
   Future<Submitted> submit(String text, {required bool agreed}) async {
-    if (_state == FeedbackState.sending || text.trim().isEmpty) return Submitted.nothing;
+    if (_state == FeedbackState.sending || _invisible.hasMatch(text)) return Submitted.nothing;
     if (!agreed) return Submitted.popup;
     _set(FeedbackState.sending);
     try {
