@@ -1,11 +1,14 @@
 # Plan: the readings with a stand-in model, part one: the reading (readings-plumbing)
 
 Branch `readings-plumbing`, from `main` at `de0a315`. Investigation, spec and plan in one (docs/workflow.md steps 3, 5
-and 6), under D91 and D126. Written by Claude Code (Opus) on 2026-11-24. Governs: the head's message 33 (GO on the
+and 6), under D91 and D126. Written by Claude Code (Opus) on 2026-11-24; **amended the same day** for the owner's D157
+(Part 4's questions take their leans) and the head's message 34 (one interface for every model call, token counts and
+cost, caching, the founder's blind comparison planned), and re-proven (Part 5). Governs: the head's message 33 (GO on the
 readings' plumbing with a stand-in model, in SoulDreams Dev only, with invented nights only), as the owner relayed
 it; C3-T 2e (Claude Opus 5.5 runs the readings, later); C4-T item 4 (no provisional instructions); D134 (Life Context
 Off: nothing kept is sent); D128 (the popup before "I agree"); the owner's D155 (the brainstorm) and D156 (banked item
-173 (c)); R1, R3, R4, R7, R10, R11. The owner's checks are by eye only.
+173 (c)); D157; the head's message 34 (2026-11-24, from Organisation's business-model.md); R1, R3, R4, R7, R10, R11.
+The owner's checks are by eye only.
 
 `feedback` is merged (`main` at `de0a315`); Status.md's first line still names it ("the owner's deploy, by-eye check
 and first reading next"), and its Task 9 is recorded as passed: it was not updated at the merge. This is not a stop;
@@ -19,16 +22,17 @@ BFL's `flux-2-klein-4b` on `api.eu.bfl.ai` with the style constant, and the invi
 D146, D123), and the owner's BFL key move (D155 item 3), get their own plan after this part is merged; what it will
 ask is listed in Part 6.
 
-**Imports first (the task asked).** `docs/source/` holds no C19-P filing: the register is at C18-P
-(`places-register.csv`, `cd523e7d6959`), as are the product change record and the design system. The head's message
-33 says to build the readings' screens "from what is filed (main-path.md, How the AI Appears, the register at C19-P,
-the handover at C16-P)". The handover (C16-P), main-path.md (C16-P) and How the AI Appears (C17-P) are here; the
-register at C19-P is not, nor anything else C19-P filed. **The owner imports C19-P's register, and any other document
-C19-P changed that the build reads (the product change record at least), before Task 6** (question 1). This plan is
-written and proven on C18-P's register. If C19-P changes or adds any place this plan uses or owes (Part 1, "The places
-this branch uses"), the plan is amended before Task 6, and nothing is guessed meanwhile.
+**Imports first: C19-P.** The owner's read-only check of the documents repository (at its `8a92a57`) shows three
+documents changed at C19-P since this repository's copies: `product/design-system.md` (`1a07ffc3c3fb`; here C18-P,
+`1c41ff6b3b92`), `product/product-change-record.md` (`505abf1c8ae1`; here C18-P, `2ff467173047`) and
+`product/places-register.csv` (`01328992898907cb`; here C18-P, `cd523e7d6959`). The other eleven are unchanged. Task 0a
+is the owner's one import paste, the register last; Task 0b is Claude Code's reading of what C19-P changed against the
+places this plan uses (Part 1, "The places this branch uses"). **If C19-P changes or adds any of them, the plan is
+amended before Task 6, and nothing is guessed meanwhile.** C19-P could not be read before its import: Claude Code
+never reads the documents repository (R6), so this plan is written and proven on C18-P.
 
-**Nothing here can be built before Part 4 is answered.** No new package, app or server (R10): none is asked.
+**Part 4 is answered (D157): every question takes its lean.** The amendment's own questions are Part 4's 21 to 28;
+until they are answered they too take their leans only if the owner says so. No new package, app or server (R10).
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -59,6 +63,16 @@ In SoulDreams Dev, a night's page gains its reading, with a stand-in where the m
   readings): AI·3 goes and C4-P·6 ("This reading didn't go through. A problem within the app occurred.") stands
   alone where the readings would be. Nothing is kept; the night stays unread; Start Interpretation reads again.
 - **Before "I agree"**, Start Interpretation shows the popup (MP·101) and sends nothing, as now.
+- **Every model call goes through one interface** (head's message 34 item 1): one setting on the server names the
+  model for each step (the opening's steps, the readings, the checks, the painting's scenery description, recurrence);
+  changing a step's model is one line there. Today every step names the stand-in, and only the readings step has code.
+- **Each call is counted** (item 2): its input, output, cache-read and cache-written tokens, and its cost in millionths
+  of a US dollar, per step. The server logs these as numbers only (`modelUsage`), never a word; the reading's answer
+  carries them, and SoulDreams Dev keeps them in the night's file beside its readings. The stand-in counts zero. The
+  testers' app will not keep them; the founder's will, when it reads.
+- **Prompts put fixed text first** (item 3): the instructions, in their order, then the night last, so only fixed text
+  could ever be cached. Caching itself is built switched off: AWS's own pages do not say it fits retention mode none
+  (Part 2, "AWS").
 - **The model's instructions** (R7): our server reads them, once, from the files in `server/instructions/`, copied
   beside its code, and hands them to the model. The folder holds one empty file, `AWAITING-INSTRUCTIONS.md`, which is
   not an instruction. When Interpretation's redrafts come, the owner's import drops them in as files and nothing in
@@ -82,29 +96,40 @@ tests and Task 3's rehearsal).
    version 3; a `readings` field in a version 1 or 2 file, or a misshapen one in version 3, makes the file not a
    night (skipped, never touched, as today). Tests load every invented night as version 1 and as version 2 (waiting
    recordings among them), count nights, dreams told and waiting and every field before and after, and prove a save
-   rewrites only the night saved. Nothing else changes in this task's build, so it can ship alone (Task 3).
-3. **The server's reading** (Task 4): `server/src/reading.ts` (what a request may hold: exactly `lang`, `en` or
-   `sv`; `dreams`, one or more strings, none blank; `kept`, optional, strings; nothing else; at most 262,144
-   characters, longer refused unread; the `Model` type; the stand-in and its three readings), `server/src/
+   rewrites only the night saved. Beside the readings, `usage` (head's message 34 item 2): null, or each model call's
+   `{"step", "model", "input", "output", "cacheRead", "cacheWrite", "cost"}` (`ModelUsage`; names not empty, counts
+   whole and not negative), only on a read night. Nothing else changes in this task's build, so it can ship alone
+   (Task 3).
+3. **The server's reading and the one model interface** (Task 4): `server/src/models.ts` (head's message 34: the
+   steps; `SETUP`, the one setting naming each step's model, with an optional reasoning cap; one `Caller` per model,
+   the stand-in's included; `PRICES` in millionths of a dollar per token; `callModel`, which asks the step's model,
+   costs the call and logs `modelUsage` with the step, the model, the four token counts and the cost, numbers only;
+   `PROMPT_CACHING`, false; a `Prompt` is fixed text first and the dreamer's words last), `server/src/reading.ts`
+   (what a request may hold: exactly `lang`, `en` or `sv`; `dreams`, one or more strings, none blank; `kept`,
+   optional, strings; nothing else; at most 262,144 characters, longer refused unread; the readings' prompt, the
+   instructions first and the night last; the model's text parsed as one to three whole readings, else the night
+   fails; the stand-in's three readings), `server/src/
    instructions.ts` (the folder beside the code; every `.md` file but the placeholder, in name order, word for word;
    no folder is an error, never an empty set), `door.ts` (`POST /reading`, after the beta key; 200
-   `{"readings": [...]}`; 400 or 413 `readingRefused`; the model failing 502 `readingFailed`; `readingGiven` with
-   the count), `handler.ts` (the stand-in by default, the instructions read once, at the first reading),
-   `safe-log.ts` (three codes), `infra/dist.ts` (copies `server/instructions/` into the code folder),
+   `{"readings": [...], "usage": [...]}`; 400 or 413 `readingRefused`; the model failing, or its text not readings,
+   502 `readingFailed`; `readingGiven` with the count), `handler.ts` (each step through `callModel` with `SETUP`, the
+   stand-in's caller by default, caching off; the instructions read once, at the first reading), `safe-log.ts` (four
+   codes), `infra/dist.ts` (copies `server/instructions/` into the code folder),
    `server/instructions/AWAITING-INSTRUCTIONS.md` (empty). The stack, its role and its timeout do not change.
 4. **The app's reading** (Task 5): `app/lib/readings/readings.dart`: `requestOf`, `postReading` (one POST to
    `Hosts.server` + `reading`, the beta key, `application/json`, no user agent; 30 seconds; anything but 200 with one
-   to three whole readings is a `ReadingFailure`: the status, 0 no answer, -1 unreadable, -2 no server or key in this
-   build), `liveReading` (SoulDreams Dev's), `keptFor` (Life Context's Recent list while On, null while Off or
+   to three whole readings and a list of whole calls is a `ReadingFailure`: the status, 0 no answer, -1 unreadable,
+   -2 no server or key in this build), `liveReading` (SoulDreams Dev's; the calls' counts kept only with `keepUsage`,
+   which only `main_dev.dart` sets), `keptFor` (Life Context's Recent list while On, null while Off or
    absent), `Reader` (the request made at the moment of reading), `interpret` (not sent when already read or with no
-   dream in words; the readings kept with `Journal.keepReadings`, which keeps a night's first readings and reports a
-   night gone). Codes: `readingRead` (count), `readingFailed` (status; -3 anything else), `readingKeepFailed`.
+   dream in words; the readings kept with `Journal.keepReadings`, with their counts where kept, which keeps a night's
+   first readings and reports a night gone). Codes: `readingRead` (count), `readingFailed` (status; -3 anything else), `readingKeepFailed`.
 5. **The night's page and the wiring** (Task 6): `night_page.dart` (Start Interpretation reads with the page's
    `Reader`, or does nothing without one; AI·3 and C4-P·6 as live regions; a read night's readings; no Start
    Interpretation once read; the Readings jump; the list lays out every part, so a jump reaches a section below the
    screen), `parts.dart` (`ReadingBubble`), `night_look.dart` (`isRead`), `journal_page.dart` and
    `journal_home.dart` (`readNight`, the `Reader` made with Life Context), `main_dev.dart` (`liveReading` with the
-   build's beta key; `isRead` unless `PREVIEW_READ`). `main.dart` and `main_founder.dart` are unchanged and reach no
+   build's beta key, keeping the counts; `isRead` unless `PREVIEW_READ`). `main.dart` and `main_founder.dart` are unchanged and reach no
    `lib/readings/` (`dev_only_test.dart`).
 6. **Status.md** (Task 7).
 
@@ -113,7 +138,11 @@ tests and Task 3's rehearsal).
 - The mirror, the opening, the questions, Interpret Now, the image line (W8, W9), the arc, the press, the series
   question, the close, the reflection, marking, the cap note, the decline: each comes with its instructions.
 - Any call to Bedrock, any permission for it, or the spending counter (D69): they come with Claude Opus 5.5, after
-  the account checks of C3-T 2d and 2e (question 11). EM·8 (the spending limit) is not shown.
+  the account checks of C3-T 2d and 2e (question 11). EM·8 (the spending limit) is not shown. Claude's callers and
+  prices join `models.ts` then; caching is switched on only after question 25.
+- Any screen for the counts or the cost, or any way out of the phone for them: the founder's comparison export (Part
+  7) is the first.
+- The founder's blind comparison (head's message 34 item 4): planned in Part 7, built later.
 - The shimmer (AI·3 stands still, as AI·6 does: the shimmer is not built yet).
 - Readings in the tester or founder app; the founder's export carrying readings (question 18).
 - Words: none written (R1). The handle `[W13]` shows for every tradition's label (Part 1, "The places").
@@ -130,6 +159,13 @@ tests and Task 3's rehearsal).
   the owner's rehearsal on the phone; (3) the BFL key's permanent name (part two); (4) owed words as handles, listed
   for the head.
 - D156 (owner, banked item 173 (c)): invisible characters only count as blank; not sent; test-first; one row.
+- D157 (owner): Part 4's twenty questions take their leans.
+- The head's message 34 (from Organisation's business-model.md): (1) one interface for every model call, the model
+  named per step in one setting, the stand-in behind it; (2) token counts per call (input, output, cached) and the
+  cost, per step; the server keeps counts only, never text; the app keeps each night's counts and cost beside the
+  night (Dev and the founder's build only); the stand-in reports zero counts the same way; (3) prompts fixed text
+  first, the dreamer's words last, only fixed text cached; caching checked on AWS's own pages, built off until
+  confirmed; (4) the founder's blind comparison planned now, built later, with the seams ready.
 - D128 item 3: the popup before "I agree". D134: Off pauses, and nothing kept is sent while Off.
 - D91, D126 (targeted rows during the tasks; the full runs once, before the merge), D67 (a row whose code or test
   name moved follows it).
@@ -162,6 +198,16 @@ tests and Task 3's rehearsal).
    nothing to stop); question 7 asks.
 10. **A row that survived was a redundant line**, removed (Part 5): a second jump to the end after a failure, which
     the failure sentence never needed, since it takes AI·3's place.
+11. **The model is a `Caller` per model, chosen per step by `SETUP`** (head's message 34 item 1): a step never names a
+    model in its own code. A choice may carry a reasoning cap, unused by the stand-in, there for setup B (Part 7).
+12. **Costs are whole millionths of a dollar** (`PRICES` per token, integers), so a night's cost adds exactly.
+13. **The counts travel in the reading's answer and live in the night's file**, beside the readings, in the same
+    version-3 storage change, deleted with the night (question 21). The server's only record is its log line.
+14. **The stand-in is a `Caller` like any model**: it answers the readings' text whatever step asks, and counts zero.
+15. **The readings step parses the model's text** (one to three `{lens, text}`), so a model that answers otherwise
+    fails the night (502) rather than reaching the phone.
+16. **Existing rows renumbered in task order**: the branch's app rows are A838 to A913, task by task (the amendment
+    added rows inside Tasks 2 and 5).
 
 ### The places this branch uses
 
@@ -183,20 +229,34 @@ tests and Task 3's rehearsal).
 Each task's tests were put on the tree before its code and failed (loading, type-checking or asserting); then the
 code made them pass (Part 5).
 
-- App tests: 790 at the start, then 791 (Task 1), 799 (Task 2), 816 (Task 5) and
-  828 (Task 6). `No issues found!` at each.
-- Server tests: 156 at the start, then 172 (Task 4). `npm run check` clean.
+- App tests: 790 at the start, then 791 (Task 1), 802 (Task 2), 820 (Task 5) and
+  832 (Task 6). `No issues found!` at each.
+- Server tests: 156 at the start, then 183 (Task 4). `npm run check` clean.
 - Guard tests: unchanged (287); `guards.py --walk` passes on every task's tree.
-- App mutation rows: **new** A838 to A898 (61); **following** A7, A148, A150, A264, A385, A391, A656, A752, A815,
-  A816, A835. 776 → 837.
-- Server mutation rows: **new** S139 to S161 (23); **following** S123. 133 → 156.
+- App mutation rows: **new** A838 (Task 1), A839 to A865 (Task 2), A866 to A890 (Task 5), A891 to A913 (Task 6): 76;
+  **following** A7, A148, A150, A264, A385, A391, A656, A752, A815, A816, A835. 776 → 852.
+- Server mutation rows: **new** S139 to S178 (40); **following** S123. 133 → 173.
 - None dropped.
+- **What the amendment changed** (head's message 34): app tests 828 → 832, server tests 172 → 183; app rows 837 → 852,
+  server rows 156 → 173; Tasks 2, 4, 5 and 6 grew (the counts in the night's file; `models.ts` and the readings
+  step; the answer's counts and Dev's keeping; Dev's `keepUsage`); Tasks 1, 3, 7 to 10 kept their scope; Part 7 is
+  new.
 
 ## Part 2 · Settings, packages, AWS and storage
 
 - **Packages:** none, app or server.
 - **AWS** (the owner's, Task 8): one stack update of `SoulDreamsServer`: the Lambda's code (the new route and the
   instructions folder). No new resource, permission, variable, output or timeout. Nothing reaches Bedrock or BFL.
+- **Prompt caching and retention mode none** (head's message 34 item 3), read on AWS's own pages on 2026-11-24:
+  - [READ, Bedrock User Guide, "Prompt caching for faster model inference"]: "A cache entry is stored on the server
+    that processed the request, and a later request can read it only if that server handles it before the entry
+    expires"; Claude models' supported time to live: "5 minutes, 1 hour". The page does not mention retention.
+  - [READ, Bedrock User Guide, "Data retention"]: mode `none` is "Zero data retention. No request or response data is
+    written to durable storage by AWS or shared with the model provider." The page does not mention caching.
+  - [NOT READ: the AWS Security Blog post on enforcing zero data retention; its text did not come through.]
+  - **Not confirmed**: no AWS page read says whether a cache entry is "durable storage" under `none`, or whether
+    caching is allowed, blocked or changed under it. So `PROMPT_CACHING` is false, and the prompts are ordered so it
+    could be switched on with nothing else changing (question 25).
 - **Settings, guards, Swift:** none. `server/instructions/` holds one empty `.md` file, a kind G0 already knows.
 - **Storage on the phone** (R11; docs/workflow.md (c); D155 item 2): the night's file, version 2 to version 3 (Task
   2): tests first (Task 2), then the owner's rehearsal on the simulator and the phone in SoulDreams Dev, holding
@@ -229,6 +289,36 @@ Every task ends green:
   selection), every one caught.
 - The hook prints `guards (staged): all passed`.
 
+### Task 0a · [OWNER] The C19-P import (the register last)
+
+On `readings-plumbing`, before anything else. One paste:
+
+Paste 1 — Terminal
+
+```
+cd ~/Developer/soul-dreams-app && git branch --show-current && git status --short && export SOUL_DREAMS_DOCS=~/Developer/soul-dreams-docs && tool/import.sh product/design-system.md 1a07ffc3c3fbc48a1c9abfba7b5fa1074da4f53b6eda2a74ccc3e89cdebfd4e6 "C19-P" && tool/import.sh product/product-change-record.md 505abf1c8ae14dddb120bf8786b058e5f19f73975fafd143c4111e184d6793a3 "C19-P" && tool/import.sh product/places-register.csv 01328992898907cb8c40cae1b12a5293657ce8c1143676f73e2de90ff7d4071a "C19-P" && python3 -I -B tool/checks/designgen.py --write && git status --short && python3 -I -B tool/checks/guards.py | tail -4
+```
+
+Expected: `readings-plumbing`; nothing from the first `git status`; each import reports its copy and the register's
+regenerates the words; `designgen.py` writes `app/lib/design/tokens.g.dart` (banked item 61: the importer does not);
+the second `git status` lists `docs/source/SOURCES`, `docs/source/design-system.md`,
+`docs/source/product-change-record.md`, `app/assets/words/places-register.csv`, the generated words that changed
+(`app/lib/words/lines.g.dart` at least) and `tokens.g.dart` if the design values changed; the guards end `guards
+(tracked): all passed`. Any refusal (the importer's, `designgen.py`'s new form, `wordsgen.py`'s unknown status, or G1
+on the pending lines): stop and send the whole output; nothing is committed. Otherwise do not commit yet: send the
+output, and Task 0b follows.
+
+### Task 0b · Claude Code: what C19-P changed, against this plan
+
+Claude Code reads the diff of the import (`git diff`: the register's rows, the design system, the product change
+record) for the places Part 1 lists (EM·1, AI·3, MP·20, MP·36, C4-P·6, W13, MP·77, MP·101, MP·102) and for any new
+place on the readings' screen, a pending line now filed (MP·98 to MP·106), or a design value the readings use
+(`color.label.tradition`, `color.surface`, `type.voice.readings`, `space.bubble.tradition`, `space.label.readings`,
+`space.turn.app`). It runs the app's analyzer and tests on the import. Then either: no change touches this plan, and
+the owner commits the import alone (`Import: C19-P, the design system, the product change record and the register`),
+or the plan is amended (and re-proven) before Task 6, and the owner commits the import with that amendment's
+answers. A test failing on the import alone is a stop (R14).
+
 ### Task 0 · Baselines
 
 From the repository root, on `readings-plumbing`:
@@ -237,7 +327,8 @@ From the repository root, on `readings-plumbing`:
 git status --short && git log --oneline -1 && python3 -I -B tool/checks/guards.py | tail -1 ; (cd app && fvm flutter analyze --no-pub | tail -1 && fvm flutter test --no-pub | tail -1) ; (cd server && npm run check | tail -1 && npm test 2>&1 | grep -E '^ℹ (tests|fail)')
 ```
 
-Expected: nothing from `git status`; this plan's commit; `guards (tracked): all passed`; `No issues found!`;
+Run after Task 0b's commit. Expected: nothing from `git status`; Task 0b's commit; `guards (tracked): all passed`;
+`No issues found!`;
 `+790: All tests passed!`; `> tsc -p tsconfig.json`; `ℹ tests 156`, `ℹ fail 0`. Anything else: stop (R14).
 
 ### Task 1 · App: a feedback of invisible characters only is blank (D156)
@@ -356,15 +447,15 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 ### Task 2 · App: the night's file, version 3, holds its readings (D155 item 2; storage change)
 
 Changed: `app/lib/journal/night.dart`, `app/test/journal/night_test.dart`, `app/test/journal/journal_store_test.dart`,
-`tool/app_mutations.py`. Rows A839 to A855 new; A7, A148 and A150 follow (D67). Nothing else changes in this task's
+`tool/app_mutations.py`. Rows A839 to A865 new; A7, A148 and A150 follow (D67). Nothing else changes in this task's
 build: it is the build Task 3 rehearses, and the storage change ships alone (docs/workflow.md (c) item 3).
 
-Checks: `No issues found!`; `+799`; `--rows A7,A148,A150,A839,…,A855`: `20 run, 20 caught`; and every row of
-the file, `--files lib/journal/night.dart`: `26 run, 26 caught`.
+Checks: `No issues found!`; `+802`; `--rows A7,A148,A150,A839,…,A865`: `30 run, 30 caught`; and every row of
+the file, `--files lib/journal/night.dart`.
 
 Commit:
 
-> App: the night's file is version 3 and holds its readings; versions 1 and 2 read unread (D155)
+> App: the night's file is version 3, its readings and their calls' counts; versions 1 and 2 read unread (D155)
 
 **The block:**
 
@@ -372,19 +463,21 @@ Commit:
 diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
 --- a/app/lib/journal/night.dart
 +++ b/app/lib/journal/night.dart
-@@ -4,8 +4,9 @@
+@@ -4,8 +4,11 @@
  // freely (D49, O5). After that, any change is a storage change
  // (docs/workflow.md, "On-phone storage changes"). Version 2 (D92, D93
  // Q2): a dream may be a recording that waits on the phone to be turned
 -// into text; version 1 files still read, and are written as version 2
 -// when next saved.
 +// into text. Version 3 (D155 item 2): a read night holds its readings,
-+// an unread one null. Version 1 and 2 files still read, unread, and are
-+// written as version 3 when next saved.
++// an unread one null; and, beside them, each model call's counts and cost
++// (head's message 34), in the builds that keep them, else null. Version 1
++// and 2 files still read, unread, and are written as version 3 when next
++// saved.
  import 'dart:convert';
  import 'dart:math';
  
-@@ -14,15 +15,21 @@ import 'package:flutter/foundation.dart';
+@@ -14,15 +17,22 @@ import 'package:flutter/foundation.dart';
  import '../words/lines.g.dart' show Lang;
  
  /// The file format's version, written in every night's file.
@@ -403,12 +496,13 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
  const _waitingKeys = {'waiting', 'from'};
  final _date = RegExp(r'^(\d{4})-(\d{2})-(\d{2})$');
  const _keys = {'version', 'id', 'firstRecorded', 'date', 'closes', 'lang', 'name', 'dreams'};
-+const _readKeys = {..._keys, 'readings'};
++const _readKeys = {..._keys, 'readings', 'usage'};
 +const _readingKeys = {'lens', 'text'};
++const _usageKeys = {'step', 'model', 'input', 'output', 'cacheRead', 'cacheWrite', 'cost'};
  
  /// A new night's id: 128 bits from the system's secure source, as 32 hex
  /// digits. It names a file on the phone and is never sent anywhere (R4).
-@@ -86,9 +93,28 @@ final class Waiting extends Dream {
+@@ -86,9 +96,103 @@ final class Waiting extends Dream {
    int get hashCode => Object.hash(audio, from);
  }
  
@@ -431,32 +525,114 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
 +  int get hashCode => Object.hash(lens, text);
 +}
 +
++/// One model call's counts, as our server gave them (head's message 34): its
++/// step and model by name, its input, output, cache-read and cache-written
++/// tokens, and its cost in millionths of a US dollar. Never a word.
++final class ModelUsage {
++  ModelUsage({
++    required this.step,
++    required this.model,
++    required this.input,
++    required this.output,
++    required this.cacheRead,
++    required this.cacheWrite,
++    required this.cost,
++  }) {
++    if (step.isEmpty) throw ArgumentError('step');
++    if (model.isEmpty) throw ArgumentError('model');
++    if ([input, output, cacheRead, cacheWrite, cost].any((n) => n < 0)) throw ArgumentError('count');
++  }
++
++  final String step;
++  final String model;
++  final int input;
++  final int output;
++  final int cacheRead;
++  final int cacheWrite;
++  final int cost;
++
++  /// As its file and our server's answer hold it.
++  Map<String, Object> toJson() => {
++    'step': step,
++    'model': model,
++    'input': input,
++    'output': output,
++    'cacheRead': cacheRead,
++    'cacheWrite': cacheWrite,
++    'cost': cost,
++  };
++
++  /// The call in [json], or null when it is not one whole call.
++  static ModelUsage? fromJson(Object? json) {
++    if (json is! Map<String, Object?> || !setEquals(json.keys.toSet(), _usageKeys)) return null;
++    if (json
++        case {
++          'step': final String step,
++          'model': final String model,
++          'input': final int input,
++          'output': final int output,
++          'cacheRead': final int cacheRead,
++          'cacheWrite': final int cacheWrite,
++          'cost': final int cost,
++        }) {
++      if (step.isEmpty || model.isEmpty || [input, output, cacheRead, cacheWrite, cost].any((n) => n < 0)) {
++        return null;
++      }
++      return ModelUsage(
++        step: step,
++        model: model,
++        input: input,
++        output: output,
++        cacheRead: cacheRead,
++        cacheWrite: cacheWrite,
++        cost: cost,
++      );
++    }
++    return null;
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      other is ModelUsage && mapEquals(other.toJson(), toJson());
++
++  @override
++  int get hashCode => Object.hashAll(toJson().values);
++}
++
  final class Night {
    /// A night of [dreams] told in words, or of [entries] (told or waiting);
 -  /// never both.
-+  /// never both. Read when it holds [readings], one to three.
++  /// never both. Read when it holds [readings], one to three; [usage] only
++  /// beside them.
    Night({
      required this.id,
      required this.firstRecorded,
-@@ -98,8 +124,11 @@ final class Night {
+@@ -98,8 +202,14 @@ final class Night {
      this.name,
      List<String> dreams = const [],
      List<Dream>? entries,
 -  }) : entries = List.unmodifiable(entries ?? [for (final d in dreams) Told(d)]) {
 +    List<Reading>? readings,
++    List<ModelUsage>? usage,
 +  }) : entries = List.unmodifiable(entries ?? [for (final d in dreams) Told(d)]),
-+       readings = readings == null ? null : List.unmodifiable(readings) {
++       readings = readings == null ? null : List.unmodifiable(readings),
++       usage = usage == null ? null : List.unmodifiable(usage) {
++    if (usage != null && readings == null) throw ArgumentError('usage');
      if (entries != null && dreams.isNotEmpty) throw ArgumentError('dreams');
 +    if (readings != null && (readings.isEmpty || readings.length > maxReadings)) throw ArgumentError('readings');
      final audio = [for (final e in this.entries) if (e is Waiting) e.audio];
      if (audio.toSet().length != audio.length) throw ArgumentError('entries');
      if (!_id.hasMatch(id)) throw ArgumentError('id');
-@@ -132,12 +161,33 @@ final class Night {
+@@ -132,12 +242,39 @@ final class Night {
    /// The dreams, in order: told, or waiting to be turned into text.
    final List<Dream> entries;
  
 +  /// Its readings, in the order given, once read; null while unread.
 +  final List<Reading>? readings;
++
++  /// The model calls that made its readings, where the build keeps them
++  /// (SoulDreams Dev, the founder's); else null.
++  final List<ModelUsage>? usage;
 +
    /// The dreams told in words, in order.
    List<String> get dreams => List.unmodifiable([for (final e in entries) if (e is Told) e.text]);
@@ -472,10 +648,11 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
 +      lang: lang,
 +      name: name,
 +      entries: entries,
-+      readings: readings);
++      readings: readings,
++      usage: usage);
 +
-+  /// The same night, read: holding [readings].
-+  Night withReadings(List<Reading> readings) => Night(
++  /// The same night, read: holding [readings], and [usage] if kept.
++  Night withReadings(List<Reading> readings, {List<ModelUsage>? usage}) => Night(
 +      id: id,
 +      firstRecorded: firstRecorded,
 +      date: date,
@@ -483,26 +660,29 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
 +      lang: lang,
 +      name: name,
 +      entries: entries,
-+      readings: readings);
++      readings: readings,
++      usage: usage);
  
    /// The same night holding [dreams], all told, instead.
    Night withDreams(List<String> dreams) => withEntries([for (final d in dreams) Told(d)]);
-@@ -151,10 +201,12 @@ final class Night {
+@@ -151,10 +288,14 @@ final class Night {
        other.closes == closes &&
        other.lang == lang &&
        other.name == name &&
 -      listEquals(other.entries, entries);
 +      listEquals(other.entries, entries) &&
-+      listEquals(other.readings, readings);
++      listEquals(other.readings, readings) &&
++      listEquals(other.usage, usage);
  
    @override
 -  int get hashCode => Object.hash(id, firstRecorded, date, closes, lang, name, Object.hashAll(entries));
 +  int get hashCode => Object.hash(id, firstRecorded, date, closes, lang, name, Object.hashAll(entries),
-+      switch (readings) { null => null, final r => Object.hashAll(r) });
++      switch (readings) { null => null, final r => Object.hashAll(r) },
++      switch (usage) { null => null, final u => Object.hashAll(u) });
  }
  
  String _two(int n) => n.toString().padLeft(2, '0');
-@@ -175,6 +227,10 @@ Uint8List encodeNight(Night n) => utf8.encode(jsonEncode({
+@@ -175,6 +316,11 @@ Uint8List encodeNight(Night n) => utf8.encode(jsonEncode({
              Waiting(:final audio, :final from) => {'waiting': audio, 'from': from},
            },
        ],
@@ -510,10 +690,11 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
 +        null => null,
 +        final readings => [for (final r in readings) {'lens': r.lens, 'text': r.text}],
 +      },
++      'usage': n.usage?.map((u) => u.toJson()).toList(),
      }));
  
  // One dream as its file holds it: words, or (from version 2) a waiting
-@@ -190,8 +246,24 @@ Dream? _dreamOf(Object? x, int version) {
+@@ -190,8 +336,33 @@ Dream? _dreamOf(Object? x, int version) {
    return Waiting(audio, from);
  }
  
@@ -533,13 +714,22 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
 +  return (readings,);
 +}
 +
++// A version-3 file's usage: (null,) for none; null when it is not a list of
++// whole calls, or held by an unread night.
++(List<ModelUsage>?,)? _usageOf(Object? x, bool read) {
++  if (x == null) return (null,);
++  if (x is! List<Object?> || !read) return null;
++  final usage = [for (final u in x) ModelUsage.fromJson(u)];
++  return usage.contains(null) ? null : (usage.cast<ModelUsage>(),);
++}
++
  /// The night in [bytes], or null when they are not a whole night of
 -/// version 1 or 2. Nothing is guessed or repaired.
 +/// version 1, 2 or 3. Nothing is guessed or repaired.
  Night? decodeNight(Uint8List bytes) {
    final Object? json;
    try {
-@@ -199,7 +271,9 @@ Night? decodeNight(Uint8List bytes) {
+@@ -199,7 +370,9 @@ Night? decodeNight(Uint8List bytes) {
    } on FormatException {
      return null;
    }
@@ -550,7 +740,7 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
    if (json
        case {
          'version': final int version,
-@@ -215,7 +289,7 @@ Night? decodeNight(Uint8List bytes) {
+@@ -215,7 +388,7 @@ Night? decodeNight(Uint8List bytes) {
      final shut = DateTime.tryParse(closes);
      final d = _date.firstMatch(date);
      final language = Lang.values.where((l) => l.name == lang).firstOrNull;
@@ -559,20 +749,23 @@ diff --git a/app/lib/journal/night.dart b/app/lib/journal/night.dart
      if (!_id.hasMatch(id) || at == null || !at.isUtc || d == null || language == null) return null;
      if (shut == null || !shut.isUtc || !shut.isAfter(at) || shut.difference(at) > maxOpen) return null;
      final (y, m, day) = (int.parse(d[1]!), int.parse(d[2]!), int.parse(d[3]!));
-@@ -224,6 +298,8 @@ Night? decodeNight(Uint8List bytes) {
+@@ -224,6 +397,10 @@ Night? decodeNight(Uint8List bytes) {
      if (entries.contains(null)) return null;
      final audio = [for (final e in entries) if (e is Waiting) e.audio];
      if (audio.toSet().length != audio.length) return null;
 +    final read = version == formatVersion ? _readingsOf(json['readings']) : (null,);
 +    if (read == null) return null;
++    final used = version == formatVersion ? _usageOf(json['usage'], read.$1 != null) : (null,);
++    if (used == null) return null;
      return Night(
        id: id,
        firstRecorded: at,
-@@ -232,6 +308,7 @@ Night? decodeNight(Uint8List bytes) {
+@@ -232,6 +409,8 @@ Night? decodeNight(Uint8List bytes) {
        lang: language,
        name: name,
        entries: entries.cast<Dream>(),
 +      readings: read.$1,
++      usage: used.$1,
      );
    }
    return null;
@@ -615,7 +808,7 @@ diff --git a/app/test/journal/journal_store_test.dart b/app/test/journal/journal
 +      await files.open();
 +      for (final n in nights) {
 +        final json = {...jsonDecode(utf8.decode(encodeNight(n))) as Map<String, Object?>, 'version': version};
-+        await files.write(JournalStore.fileOf(n.id), utf8.encode(jsonEncode(json..remove('readings'))));
++        await files.write(JournalStore.fileOf(n.id), utf8.encode(jsonEncode(json..remove('readings')..remove('usage'))));
        }
 -    }
 -    expect(await store.nights(), [for (final n in nights) n == nights[1] ? changed : n]);
@@ -657,24 +850,35 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
  import 'dart:convert';
  import 'dart:math';
  import 'dart:typed_data';
-@@ -15,8 +15,14 @@ Map<String, Object?> fields(Night n) =>
+@@ -15,8 +15,25 @@ Map<String, Object?> fields(Night n) =>
  Uint8List bytesOf(Map<String, Object?> json) => utf8.encode(jsonEncode(json));
  
  /// The night as a version-1 file held it: the same fields, version 1, the
 -/// dreams as words only.
 -Uint8List versionOne(Night n) => bytesOf({...fields(n), 'version': 1});
-+/// dreams as words only, no readings.
-+Uint8List versionOne(Night n) => bytesOf({...fields(n), 'version': 1}..remove('readings'));
++/// dreams as words only, no readings or usage.
++Uint8List versionOne(Night n) => bytesOf({...fields(n), 'version': 1}..remove('readings')..remove('usage'));
 +
-+/// The night as a version-2 file held it: version 2, no readings.
-+Uint8List versionTwo(Night n) => bytesOf({...fields(n), 'version': 2}..remove('readings'));
++/// The night as a version-2 file held it: version 2, no readings or usage.
++Uint8List versionTwo(Night n) => bytesOf({...fields(n), 'version': 2}..remove('readings')..remove('usage'));
++
++/// One model call's counts, made up for the tests.
++ModelUsage call([int input = 1200]) => ModelUsage(
++  step: 'readings',
++  model: 'stand-in',
++  input: input,
++  output: 300,
++  cacheRead: 1000,
++  cacheWrite: 0,
++  cost: 9100,
++);
 +
 +/// Readings made up for the tests: no tradition's words, placeholders.
 +final readings = [Reading(0, '[one]'), Reading(4, '[two]'), Reading(1, '[three]')];
  
  /// Two waiting recordings' ids, made up for the tests.
  final audioA = 'a' * 32;
-@@ -29,12 +35,13 @@ void main() {
+@@ -29,12 +46,14 @@ void main() {
      }
    });
  
@@ -685,13 +889,14 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
      expect(json.keys.toSet(),
 -        {'version', 'id', 'firstRecorded', 'date', 'closes', 'lang', 'name', 'dreams'});
 -    expect(json['version'], 2);
-+        {'version', 'id', 'firstRecorded', 'date', 'closes', 'lang', 'name', 'dreams', 'readings'});
++        {'version', 'id', 'firstRecorded', 'date', 'closes', 'lang', 'name', 'dreams', 'readings', 'usage'});
 +    expect(json['version'], 3);
 +    expect(json['readings'], isNull);
++    expect(json['usage'], isNull);
      expect(json['id'], n.id);
      expect(json['firstRecorded'], '2026-10-12T06:40:00.000Z');
      expect(json['date'], '2026-10-12');
-@@ -45,16 +52,18 @@ void main() {
+@@ -45,16 +64,19 @@ void main() {
  
    // docs/workflow.md (c): the old format loads, and the new one loses
    // nothing; every night, dream and field counted before and after.
@@ -709,12 +914,13 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
 +      expect(read!.readings, isNull);
 +      final saved = fields(read);
 +      expect(saved['version'], 3);
-+      expect(saved.keys.toSet(), {...old.keys, 'readings'});
++      expect(saved.keys.toSet(), {...old.keys, 'readings', 'usage'});
 +      expect(saved['readings'], isNull);
++      expect(saved['usage'], isNull);
        for (final key in old.keys.where((k) => k != 'version')) {
          expect(saved[key], old[key], reason: '${n.id} $key');
        }
-@@ -65,6 +74,100 @@ void main() {
+@@ -65,6 +87,148 @@ void main() {
      expect(dreams, inventedNights().fold<int>(0, (sum, n) => sum + n.dreams.length));
    });
  
@@ -736,7 +942,7 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
 +      expect(read!.readings, isNull);
 +      final saved = fields(read);
 +      expect(saved['version'], 3);
-+      expect(saved.keys.toSet(), {...old.keys, 'readings'});
++      expect(saved.keys.toSet(), {...old.keys, 'readings', 'usage'});
 +      for (final key in old.keys.where((k) => k != 'version')) {
 +        expect(saved[key], old[key], reason: '${n.id} $key');
 +      }
@@ -761,6 +967,54 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
 +    expect(read.dreams, n.dreams);
 +    expect(read == n.withReadings(readings.reversed.toList()), isFalse);
 +    expect(read == nightsFromFixtures().first, isFalse);
++  });
++
++  test("a read night keeps its calls' counts beside its readings", () {
++    final n = nightsFromFixtures().first.withReadings(readings, usage: [call(), call(5)]);
++    expect(fields(n)['usage'], [
++      {'step': 'readings', 'model': 'stand-in', 'input': 1200, 'output': 300, 'cacheRead': 1000, 'cacheWrite': 0, 'cost': 9100},
++      {'step': 'readings', 'model': 'stand-in', 'input': 5, 'output': 300, 'cacheRead': 1000, 'cacheWrite': 0, 'cost': 9100},
++    ]);
++    final read = decodeNight(encodeNight(n))!;
++    expect(read.usage, [call(), call(5)]);
++    expect(read, n);
++    expect(read == n.withReadings(readings, usage: [call(5), call()]), isFalse);
++    expect(read == n.withReadings(readings), isFalse);
++    expect(n.withDreams(['y']).usage, [call(), call(5)]);
++    expect(nightsFromFixtures().first.withReadings(readings, usage: []).usage, isEmpty);
++  });
++
++  test('usage misshapen, or on an unread night, decodes to null', () {
++    final good = fields(nightsFromFixtures().first.withReadings(readings));
++    final whole = call().toJson();
++    for (final (i, u) in <Object?>[
++      {...whole},
++      ['x'],
++      [{...whole, 'input': -1}],
++      [{...whole, 'cost': 1.5}],
++      [{...whole, 'step': ''}],
++      [{...whole, 'model': 7}],
++      [{...whole, 'extra': 1}],
++      [{...whole}..remove('cacheWrite')],
++    ].indexed) {
++      expect(decodeNight(bytesOf({...good, 'usage': u})), isNull, reason: 'case $i');
++    }
++    expect(decodeNight(bytesOf({...good, 'usage': [whole]}))!.usage, [call()]);
++    final unread = fields(nightsFromFixtures().first);
++    expect(decodeNight(bytesOf({...unread, 'usage': [whole]})), isNull);
++  });
++
++  test('usage without readings, or a bad count, is refused', () {
++    final n = nightsFromFixtures().first;
++    expect(
++      () => Night(id: n.id, firstRecorded: n.firstRecorded, date: n.date, closes: n.closes, lang: n.lang, usage: [call()]),
++      throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'usage')),
++    );
++    expect(() => call(-1), throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'count')));
++    expect(() => ModelUsage(step: '', model: 'm', input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0),
++        throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'step')));
++    expect(() => ModelUsage(step: 's', model: '', input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0),
++        throwsA(isA<ArgumentError>().having((e) => e.message, 'message', 'model')));
 +  });
 +
 +  test('a read night stays read when its dreams change', () {
@@ -815,7 +1069,7 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
    test('a waiting recording keeps its place among the told dreams', () {
      final n = nightsFromFixtures().first;
      final night = n.withEntries([Told(n.dreams.first), Waiting(audioA, 64000), Told('x'), Waiting(audioB)]);
-@@ -81,7 +184,8 @@ void main() {
+@@ -81,7 +245,8 @@ void main() {
  
    test('a waiting recording is refused in a version-1 file', () {
      final n = nightsFromFixtures().first.withEntries([Waiting(audioA)]);
@@ -825,7 +1079,7 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
    });
  
    test('a misshapen waiting recording, or one twice, decodes to null', () {
-@@ -121,7 +225,7 @@ void main() {
+@@ -121,7 +286,7 @@ void main() {
      );
    });
  
@@ -834,13 +1088,14 @@ diff --git a/app/test/journal/night_test.dart b/app/test/journal/night_test.dart
      final good = fields(nightsFromFixtures().first);
      Map<String, Object?> without(String key) => {...good}..remove(key);
      Map<String, Object?> with_(String key, Object? value) => {...good, key: value};
-@@ -132,7 +236,8 @@ void main() {
+@@ -132,7 +297,9 @@ void main() {
        bytesOf(without('dreams')),
        bytesOf(with_('extra', 1)),
        bytesOf(with_('version', 0)),
 -      bytesOf(with_('version', 3)),
 +      bytesOf(with_('version', 4)),
 +      bytesOf(without('readings')),
++      bytesOf(without('usage')),
        bytesOf(with_('version', '2')),
        bytesOf(with_('id', 'ABC')),
        bytesOf(with_('firstRecorded', '2026-10-12T06:40:00.000')),
@@ -852,7 +1107,7 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
  # Parallel by default (D129), each worker in its own copy of app/ in
  # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
 -# Expected: every row "caught" (A1 to A838, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
-+# Expected: every row "caught" (A1 to A855, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
++# Expected: every row "caught" (A1 to A865, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
  # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
  # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
  # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
@@ -891,7 +1146,7 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
      ('A151', 'lib/journal/night.dart',
       '    if (audio.toSet().length != audio.length) return null;\n',
       '',
-@@ -3403,6 +3403,75 @@ ROWS = [
+@@ -3403,6 +3403,116 @@ ROWS = [
       '|| _invisible.hasMatch(text)) return Submitted.nothing;',
       '|| text.trim().isEmpty) return Submitted.nothing;',
       'test/feedback/feedback_test.dart', 'invisible characters only count as blank: nothing, nothing sent (D156)'),
@@ -937,16 +1192,16 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 +     'for (final r in readings.reversed) {',
 +     'test/journal/night_test.dart', 'a read night keeps its readings, in order, through its file'),
 +    ('A849', 'lib/journal/night.dart',
-+     ' &&\n      listEquals(other.readings, readings);',
-+     ';',
++     '      listEquals(other.readings, readings) &&\n',
++     '',
 +     'test/journal/night_test.dart', 'a read night keeps its readings, in order, through its file'),
 +    ('A850', 'lib/journal/night.dart',
-+     '      entries: entries,\n      readings: readings);\n\n  /// The same night, read',
-+     '      entries: entries);\n\n  /// The same night, read',
++     '      entries: entries,\n      readings: readings,\n      usage: usage);\n\n  /// The same night, read',
++     '      entries: entries,\n      usage: usage);\n\n  /// The same night, read',
 +     'test/journal/night_test.dart', 'a read night stays read when its dreams change'),
 +    ('A851', 'lib/journal/night.dart',
-+     'readings = readings == null ? null : List.unmodifiable(readings) {',
-+     'readings = readings {',
++     'readings = readings == null ? null : List.unmodifiable(readings),',
++     'readings = readings,',
 +     'test/journal/night_test.dart', "a night's readings cannot be changed in place"),
 +    ('A852', 'lib/journal/night.dart',
 +     '(readings.isEmpty || readings.length > maxReadings)) throw',
@@ -964,6 +1219,47 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 +     "    if (text.isEmpty) throw ArgumentError('text');\n",
 +     '',
 +     'test/journal/night_test.dart', 'a bad lens, no words, or not one to three: refused'),
++    # The night's file, version 3: each call's counts beside its readings (head's message 34).
++    ('A856', 'lib/journal/night.dart',
++     "    if (usage != null && readings == null) throw ArgumentError('usage');\n",
++     '',
++     'test/journal/night_test.dart', 'usage without readings, or a bad count, is refused'),
++    ('A857', 'lib/journal/night.dart',
++     "    if (step.isEmpty) throw ArgumentError('step');\n",
++     '',
++     'test/journal/night_test.dart', 'usage without readings, or a bad count, is refused'),
++    ('A858', 'lib/journal/night.dart',
++     "    if (model.isEmpty) throw ArgumentError('model');\n",
++     '',
++     'test/journal/night_test.dart', 'usage without readings, or a bad count, is refused'),
++    ('A859', 'lib/journal/night.dart',
++     ".any((n) => n < 0)) throw ArgumentError('count');",
++     ".any((n) => n < -1)) throw ArgumentError('count');",
++     'test/journal/night_test.dart', 'usage without readings, or a bad count, is refused'),
++    ('A860', 'lib/journal/night.dart',
++     '!setEquals(json.keys.toSet(), _usageKeys)',
++     'json.isEmpty',
++     'test/journal/night_test.dart', 'usage misshapen, or on an unread night, decodes to null'),
++    ('A861', 'lib/journal/night.dart',
++     '  if (x is! List<Object?> || !read) return null;',
++     '  if (x is! List<Object?>) return null;',
++     'test/journal/night_test.dart', 'usage misshapen, or on an unread night, decodes to null'),
++    ('A862', 'lib/journal/night.dart',
++     "      'usage': n.usage?.map((u) => u.toJson()).toList(),",
++     "      'usage': null,",
++     'test/journal/night_test.dart', "a read night keeps its calls' counts beside its readings"),
++    ('A863', 'lib/journal/night.dart',
++     '      usage: used.$1,',
++     '      usage: null,',
++     'test/journal/night_test.dart', "a read night keeps its calls' counts beside its readings"),
++    ('A864', 'lib/journal/night.dart',
++     ' &&\n      listEquals(other.usage, usage);',
++     ';',
++     'test/journal/night_test.dart', "a read night keeps its calls' counts beside its readings"),
++    ('A865', 'lib/journal/night.dart',
++     '      readings: readings,\n      usage: usage);\n\n  /// The same night, read',
++     '      readings: readings);\n\n  /// The same night, read',
++     'test/journal/night_test.dart', "a read night keeps its calls' counts beside its readings"),
  ]
  
  
@@ -986,21 +1282,21 @@ them from `fixtures/invented-nights.json` (R2).
    chat.
 5. Then check out `readings-plumbing` again. The rehearsal on the phone is repeated at Task 9 with the whole build.
 
-### Task 4 · Server: POST /reading, the stand-in, the instructions' folder (head's message 33)
+### Task 4 · Server: one interface for every model call; POST /reading with the stand-in; the instructions' folder
 
-New: `src/reading.ts`, `src/instructions.ts`, `instructions/AWAITING-INSTRUCTIONS.md` (empty),
-`test/reading.test.ts`, `test/instructions.test.ts`. Changed: `door.ts`, `handler.ts`, `safe-log.ts`,
-`infra/dist.ts`, and the tests of the door, the handler, the logger and the code folder; `tool/server_mutations.py`.
-Rows S139 to S161 new; S123 follows.
+New: `src/models.ts`, `src/reading.ts`, `src/instructions.ts`, `instructions/AWAITING-INSTRUCTIONS.md` (empty),
+`test/models.test.ts`, `test/reading.test.ts`, `test/instructions.test.ts`. Changed: `door.ts`, `handler.ts`,
+`safe-log.ts`, `infra/dist.ts`, and the tests of the door, the handler, the logger and the code folder;
+`tool/server_mutations.py`. Rows S139 to S178 new; S123 follows.
 
-Checks: `npm run check` clean; `ℹ tests 172`, `ℹ fail 0`; rows S119 to S124 and S139 to S161: `29 run, 29
-caught`; every row of the six changed files: `38 run, 38 caught`. `git status` shows the empty
+Checks: `npm run check` clean; `ℹ tests 183`, `ℹ fail 0`; rows S119 to S124 and S139 to S178: `46 run, 46
+caught`; every row of the seven changed files: `55 run, 55 caught`. `git status` shows the empty
 `server/instructions/AWAITING-INSTRUCTIONS.md` as new (an empty file in a patch is a header with no hunk; if `git
 apply` leaves it out, stop, R14).
 
 Commit:
 
-> Server: POST /reading reads one night with the stand-in model; the instructions' folder, empty (head's message 33)
+> Server: one interface for every model call, each step's model in one setting, its counts and cost; POST /reading with the stand-in (head's messages 33, 34)
 
 **The block:**
 
@@ -1053,7 +1349,7 @@ diff --git a/server/src/door.ts b/server/src/door.ts
  import { isBetaKeyShape, sameKey } from './beta-key.ts';
  import { parseFeedback, utcDay } from './feedback.ts';
  import { BETA_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from './parameter-names.ts';
-+import { parseReading, type Reading, type ReadingRequest } from './reading.ts';
++import { parseReading, type Read, type ReadingRequest } from './reading.ts';
  import { safeLog } from './safe-log.ts';
  import { SonioxFailure, type TemporaryKey } from './soniox.ts';
  
@@ -1061,8 +1357,8 @@ diff --git a/server/src/door.ts b/server/src/door.ts
    readonly temporaryKey: (projectKey: string) => Promise<TemporaryKey>;
    /** Keeps one feedback's text under its UTC day (D152). */
    readonly keepFeedback: (day: string, text: string) => Promise<void>;
-+  /** One night's readings, from the model (head's message 33). */
-+  readonly readNight: (request: ReadingRequest) => Promise<readonly Reading[]>;
++  /** One night's readings and the calls that made them (head's messages 33, 34). */
++  readonly readNight: (request: ReadingRequest) => Promise<Read>;
    readonly now: () => Date;
  }
  
@@ -1110,56 +1406,58 @@ diff --git a/server/src/door.ts b/server/src/door.ts
    return { statusCode: 204 };
  }
 +
-+// One night's readings (head's message 33): the night as sent, to the
-+// model; 200 with the readings, nothing else in the reply. The count alone
-+// is logged, never a word (R3).
++// One night's readings (head's messages 33, 34): the night as sent, to the
++// readings step; 200 with the readings and each call's counts and cost,
++// nothing else in the reply. Numbers alone are logged, never a word (R3).
 +async function giveReading(event: DoorEvent, deps: DoorDeps): Promise<Reply> {
 +  const parsed = parseReading(bodyOf(event));
 +  if ('refused' in parsed) {
 +    safeLog('readingRefused', [parsed.refused]);
 +    return { statusCode: parsed.refused };
 +  }
-+  let readings: readonly Reading[];
++  let read: Read;
 +  try {
-+    readings = await deps.readNight(parsed.request);
++    read = await deps.readNight(parsed.request);
 +  } catch {
 +    safeLog('readingFailed');
 +    return { statusCode: 502 };
 +  }
-+  safeLog('readingGiven', [readings.length]);
++  safeLog('readingGiven', [read.readings.length]);
 +  return {
 +    statusCode: 200,
 +    headers: { 'content-type': 'application/json' },
-+    body: JSON.stringify({ readings }),
++    body: JSON.stringify({ readings: read.readings, usage: read.usage }),
 +  };
 +}
 diff --git a/server/src/handler.ts b/server/src/handler.ts
 --- a/server/src/handler.ts
 +++ b/server/src/handler.ts
-@@ -1,11 +1,15 @@
+@@ -1,11 +1,17 @@
  // The server's one entry point, behind its function URL (head's message
 -// 14; D71; D152): the front door (door.ts), wired to Parameter Store, to
 -// Soniox and to the feedback bucket. Everything it decides is in door.ts
 -// and feedback.ts and tested there.
-+// 14; D71; D152; head's message 33): the front door (door.ts), wired to
-+// Parameter Store, to Soniox, to the feedback bucket and to the model: the
-+// stand-in until the instructions come, handed the instructions read once
-+// from the folder beside the code. Everything it decides is in door.ts,
-+// feedback.ts and reading.ts and tested there.
++// 14; D71; D152; head's messages 33 and 34): the front door (door.ts),
++// wired to Parameter Store, to Soniox, to the feedback bucket and to the
++// models through their one interface (models.ts): each step's model from
++// SETUP, its caller from [callers] (the stand-in's until Claude's come),
++// handed the instructions read once from the folder beside the code. What
++// it decides is in door.ts, feedback.ts, reading.ts and models.ts.
  import { makeDoor } from './door.ts';
  import { FEEDBACK_BUCKET_VARIABLE } from './feedback.ts';
  import { makeFeedbackStore, putToS3, type Put } from './feedback-store.ts';
 +import { type Instruction, INSTRUCTIONS, readInstructions } from './instructions.ts';
  import { readParameter } from './parameters.ts';
-+import { type Model, standIn } from './reading.ts';
++import { type Caller, callModel, type ModelName, PROMPT_CACHING, SETUP, standInCaller } from './models.ts';
++import { readNight } from './reading.ts';
  import { requestTemporaryKey } from './soniox.ts';
  
  /** The door, wired: [env] names the feedback bucket, [put] sends to it. */
-@@ -13,11 +17,15 @@ export function wire(
+@@ -13,11 +19,18 @@ export function wire(
    env: Readonly<Record<string, string | undefined>>,
    put: Put,
    read: (name: string) => Promise<string>,
-+  model: Model = standIn,
++  callers: Readonly<Record<ModelName, Caller>> = { 'stand-in': standInCaller },
 +  instructions: () => readonly Instruction[] = () => readInstructions(INSTRUCTIONS),
  ) {
 +  let held: readonly Instruction[] | undefined;
@@ -1167,7 +1465,10 @@ diff --git a/server/src/handler.ts b/server/src/handler.ts
      readParameter: read,
      temporaryKey: (projectKey) => requestTemporaryKey(projectKey),
      keepFeedback: makeFeedbackStore(env[FEEDBACK_BUCKET_VARIABLE] ?? '', put),
-+    readNight: (request) => model((held ??= instructions()), request),
++    readNight: (request) =>
++      readNight((held ??= instructions()), request, (step, prompt) =>
++        callModel(step, prompt, { setup: SETUP, callers, caching: PROMPT_CACHING }),
++      ),
      now: () => new Date(),
    });
  }
@@ -1202,17 +1503,136 @@ new file mode 100644
 +    .sort()
 +    .map((name) => ({ name, text: readFileSync(new URL(name, dir), 'utf8') }));
 +}
+diff --git a/server/src/models.ts b/server/src/models.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/models.ts
+@@ -0,0 +1,113 @@
++// Every model call goes through one interface (head's message 34): the
++// step names its model in one setting, so swapping a step's model is one
++// line in SETUP; each model has one caller, the stand-in's included. Every
++// call's tokens (input, output, read from and written to the cache) and its
++// cost are counted and logged as numbers only, never a word (R3). A prompt is
++// fixed text first (the instructions) and the dreamer's words last, so only
++// fixed text could ever be cached; prompt caching stays off until AWS's own
++// pages say it fits retention mode none (C3-T 2d).
++import { safeLog } from './safe-log.ts';
++
++/** The steps that call a model. Only the readings' is built. */
++export const STEPS = ['opening', 'readings', 'checks', 'scenery', 'recurrence'] as const;
++export type Step = (typeof STEPS)[number];
++
++/** The models with a caller. Claude's are added with their caller. */
++export const MODELS = ['stand-in'] as const;
++export type ModelName = (typeof MODELS)[number];
++
++/** A step's model, with its reasoning capped in tokens where it has one. */
++export interface ModelChoice {
++  readonly model: ModelName;
++  readonly reasoningCap?: number;
++}
++
++export type Setup = Readonly<Record<Step, ModelChoice>>;
++
++/** The one setting: the model for each step. */
++export const SETUP: Setup = Object.freeze({
++  opening: { model: 'stand-in' },
++  readings: { model: 'stand-in' },
++  checks: { model: 'stand-in' },
++  scenery: { model: 'stand-in' },
++  recurrence: { model: 'stand-in' },
++});
++
++/** Off until AWS's pages confirm caching fits retention mode none. */
++export const PROMPT_CACHING = false;
++
++/** Fixed text first, in order (the cacheable part); the dreamer's words last. */
++export interface Prompt {
++  readonly fixed: readonly string[];
++  readonly words: string;
++}
++
++export interface Usage {
++  readonly input: number;
++  readonly output: number;
++  readonly cacheRead: number;
++  readonly cacheWrite: number;
++}
++
++/** A model's answer: its text and what it counted. */
++export interface Answer {
++  readonly text: string;
++  readonly usage: Usage;
++}
++
++/** One model's way of answering a prompt. */
++export type Caller = (choice: ModelChoice, prompt: Prompt, cache: boolean) => Promise<Answer>;
++
++/** Millionths of a US dollar per token. */
++export type Price = Usage;
++
++export const PRICES: Readonly<Record<ModelName, Price>> = Object.freeze({
++  'stand-in': { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
++});
++
++/** One call's counts and cost (millionths of a dollar), as the phone keeps them. */
++export interface Call extends Usage {
++  readonly step: Step;
++  readonly model: ModelName;
++  readonly cost: number;
++}
++
++export function costOf(price: Price, usage: Usage): number {
++  return (
++    usage.input * price.input +
++    usage.output * price.output +
++    usage.cacheRead * price.cacheRead +
++    usage.cacheWrite * price.cacheWrite
++  );
++}
++
++export interface CallDeps {
++  readonly setup: Setup;
++  readonly callers: Readonly<Record<ModelName, Caller>>;
++  readonly caching: boolean;
++}
++
++/** Asks [step]'s model; logs the call's counts and cost, numbers only. */
++export async function callModel(step: Step, prompt: Prompt, deps: CallDeps): Promise<{ text: string; call: Call }> {
++  const choice = deps.setup[step];
++  const answer = await deps.callers[choice.model](choice, prompt, deps.caching);
++  const { input, output, cacheRead, cacheWrite } = answer.usage;
++  const cost = costOf(PRICES[choice.model], answer.usage);
++  safeLog('modelUsage', [STEPS.indexOf(step), MODELS.indexOf(choice.model), input, output, cacheRead, cacheWrite, cost]);
++  return { text: answer.text, call: { step, model: choice.model, input, output, cacheRead, cacheWrite, cost } };
++}
++
++/**
++ * The stand-in (head's message 33): fixed placeholder readings, marked as
++ * such, the same whatever it is asked; it reads nothing of the prompt, writes
++ * nothing that imitates the practice (C4-T item 4) and counts no tokens.
++ */
++export const STAND_IN_READINGS = Object.freeze(
++  [1, 2, 3].map((n) => Object.freeze({ lens: n - 1, text: `[STAND-IN · ${n}]` })),
++);
++export const STAND_IN_TEXT = JSON.stringify({ readings: STAND_IN_READINGS });
++
++export const standInCaller: Caller = async () => ({
++  text: STAND_IN_TEXT,
++  usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
++});
 diff --git a/server/src/reading.ts b/server/src/reading.ts
 new file mode 100644
 --- /dev/null
 +++ b/server/src/reading.ts
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,98 @@
 +// The readings (head's message 33; C3-T 2e): what a request may hold, and
 +// the model behind them. A request holds the night's language, its dreams
 +// in the dreamer's words and, only while Life Context is on, the sentences
 +// it keeps (D134): never an id, a date or anything of the phone (R4).
 +// Nothing here logs or keeps anything (R3).
 +import type { Instruction } from './instructions.ts';
++import { type Call, type Prompt, STAND_IN_READINGS as MODEL_STAND_IN, type Step } from './models.ts';
 +
 +/** A body longer than this is refused before it is read. */
 +export const READING_BODY_LIMIT = 262144;
@@ -1257,24 +1677,57 @@ new file mode 100644
 +  return { request: { lang, dreams, kept } };
 +}
 +
-+/** The model: given its instructions and one night, the night's readings. */
-+export type Model = (instructions: readonly Instruction[], request: ReadingRequest) => Promise<readonly Reading[]>;
++/** The readings' prompt: the instructions first, in their order; the night last. */
++export function promptFor(instructions: readonly Instruction[], request: ReadingRequest): Prompt {
++  return { fixed: instructions.map((i) => i.text), words: JSON.stringify(request) };
++}
 +
-+/**
-+ * The stand-in model (head's message 33): fixed placeholder readings,
-+ * marked as such, the same for every night. It reads nothing of the night
-+ * and writes nothing that imitates the practice (C4-T item 4). Claude Opus
-+ * 5.5 (C3-T 2e) takes its place with the instructions.
-+ */
-+export const STAND_IN_READINGS: readonly Reading[] = Object.freeze(
-+  [1, 2, 3].map((n) => Object.freeze({ lens: n - 1, text: `[STAND-IN · ${n}]` })),
-+);
++const READING_KEYS = ['lens', 'text'];
 +
-+export const standIn: Model = async () => STAND_IN_READINGS;
++/** The model's text as one to three whole readings, or null. */
++export function parseReadings(text: string): Reading[] | null {
++  let parsed: unknown;
++  try {
++    parsed = JSON.parse(text);
++  } catch {
++    return null;
++  }
++  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return null;
++  const json = parsed as Record<string, unknown>;
++  const list = json['readings'];
++  if (Object.keys(json).length !== 1 || !Array.isArray(list) || list.length === 0 || list.length > 3) return null;
++  const readings: Reading[] = [];
++  for (const r of list as unknown[]) {
++    if (typeof r !== 'object' || r === null || Object.keys(r).sort().join() !== READING_KEYS.join()) return null;
++    const { lens, text: words } = r as Record<string, unknown>;
++    if (!Number.isInteger(lens) || (lens as number) < 0 || typeof words !== 'string' || words === '') return null;
++    readings.push({ lens: lens as number, text: words });
++  }
++  return readings;
++}
++
++/** A night's readings, and the calls that made them. */
++export interface Read {
++  readonly readings: readonly Reading[];
++  readonly usage: readonly Call[];
++}
++
++export type Ask = (step: Step, prompt: Prompt) => Promise<{ text: string; call: Call }>;
++
++/** Reads one night: the readings step, through [ask]; an answer that is not readings fails. */
++export async function readNight(instructions: readonly Instruction[], request: ReadingRequest, ask: Ask): Promise<Read> {
++  const { text, call } = await ask('readings', promptFor(instructions, request));
++  const readings = parseReadings(text);
++  if (readings === null) throw new Error('reading-unreadable');
++  return { readings, usage: [call] };
++}
++
++/** The stand-in's readings (models.ts), as a night's readings. */
++export const STAND_IN_READINGS: readonly Reading[] = MODEL_STAND_IN;
 diff --git a/server/src/safe-log.ts b/server/src/safe-log.ts
 --- a/server/src/safe-log.ts
 +++ b/server/src/safe-log.ts
-@@ -17,6 +17,11 @@ export const LOG_EVENTS = [
+@@ -17,6 +17,15 @@ export const LOG_EVENTS = [
    'feedbackKept',
    'feedbackRefused',
    'feedbackFailed',
@@ -1283,6 +1736,10 @@ diff --git a/server/src/safe-log.ts b/server/src/safe-log.ts
 +  'readingGiven',
 +  'readingRefused',
 +  'readingFailed',
++  // Every model call (head's message 34): its step and model (their places
++  // in STEPS and MODELS), its input, output, cache-read and cache-written
++  // tokens, and its cost in millionths of a dollar. Numbers only.
++  'modelUsage',
  ] as const;
  export type LogEvent = (typeof LOG_EVENTS)[number];
  
@@ -1306,13 +1763,14 @@ diff --git a/server/test/dist.test.ts b/server/test/dist.test.ts
    const files = readdirSync(CODE, { recursive: true }).map(String).sort();
    assert.deepEqual(files, [
      'beta-key.js',
-@@ -15,9 +16,13 @@ test('the compiled files and the marker, nothing else', () => {
+@@ -15,9 +16,14 @@ test('the compiled files and the marker, nothing else', () => {
      'feedback.js',
      'handler.js',
      'hosts.js',
 +    'instructions',
 +    'instructions.js',
 +    'instructions/AWAITING-INSTRUCTIONS.md',
++    'models.js',
      'package.json',
      'parameter-names.js',
      'parameters.js',
@@ -1320,7 +1778,7 @@ diff --git a/server/test/dist.test.ts b/server/test/dist.test.ts
      'safe-log.js',
      'soniox.js',
    ]);
-@@ -41,5 +46,9 @@ test("imports: its own, Node's, and the two AWS clients", () => {
+@@ -41,5 +47,9 @@ test("imports: its own, Node's, and the two AWS clients", () => {
        if (!from.startsWith('./')) outside.add(from);
      }
    }
@@ -1334,7 +1792,7 @@ diff --git a/server/test/dist.test.ts b/server/test/dist.test.ts
 diff --git a/server/test/door.test.ts b/server/test/door.test.ts
 --- a/server/test/door.test.ts
 +++ b/server/test/door.test.ts
-@@ -1,12 +1,14 @@
+@@ -1,12 +1,17 @@
 -// The front door (head's message 14; D71; D152): POST / with the beta key
 -// gets a short-lived Soniox key; POST /feedback with it keeps one feedback;
 -// anything else gets nothing, with one code. It never touches the caller's
@@ -1351,10 +1809,13 @@ diff --git a/server/test/door.test.ts b/server/test/door.test.ts
  import { type DoorDeps, type DoorEvent, makeDoor } from '../src/door.ts';
  import { BETA_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from '../src/parameter-names.ts';
 +import { type ReadingRequest, STAND_IN_READINGS } from '../src/reading.ts';
++
++// The stand-in's one call, as the readings step reports it.
++const USAGE = [{ step: 'readings', model: 'stand-in', input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0 }] as const;
  import { setSink } from '../src/safe-log.ts';
  import { SonioxFailure } from '../src/soniox.ts';
  
-@@ -33,10 +35,11 @@ interface Calls {
+@@ -33,10 +38,11 @@ interface Calls {
    read: string[];
    soniox: string[];
    kept: [string, string][];
@@ -1367,18 +1828,18 @@ diff --git a/server/test/door.test.ts b/server/test/door.test.ts
    return {
      calls,
      deps: {
-@@ -51,6 +54,10 @@ function deps(over: Partial<DoorDeps> = {}): { deps: DoorDeps; calls: Calls } {
+@@ -51,6 +57,10 @@ function deps(over: Partial<DoorDeps> = {}): { deps: DoorDeps; calls: Calls } {
        keepFeedback: async (day, text) => {
          calls.kept.push([day, text]);
        },
 +      readNight: async (request) => {
 +        calls.nights.push(request);
-+        return STAND_IN_READINGS;
++        return { readings: STAND_IN_READINGS, usage: USAGE };
 +      },
        now: () => NOW,
        ...over,
      },
-@@ -133,6 +140,9 @@ test('another method or path: 404, nothing read', async () => {
+@@ -133,6 +143,9 @@ test('another method or path: 404, nothing read', async () => {
      ['GET', '/feedback'],
      ['POST', '/feedback/'],
      ['POST', '/Feedback'],
@@ -1388,7 +1849,7 @@ diff --git a/server/test/door.test.ts b/server/test/door.test.ts
    ] as const) {
      const d = deps();
      lines = [];
-@@ -259,3 +269,73 @@ test('feedback: Parameter Store failing: 500, nothing kept', async () => {
+@@ -259,3 +272,73 @@ test('feedback: Parameter Store failing: 500, nothing kept', async () => {
    assert.deepEqual(d.calls.kept, []);
    assert.deepEqual(lines, ['parameterFailed']);
  });
@@ -1401,7 +1862,7 @@ diff --git a/server/test/door.test.ts b/server/test/door.test.ts
 +  assert.deepEqual(reply, {
 +    statusCode: 200,
 +    headers: { 'content-type': 'application/json' },
-+    body: JSON.stringify({ readings: STAND_IN_READINGS }),
++    body: JSON.stringify({ readings: STAND_IN_READINGS, usage: USAGE }),
 +  });
 +  assert.deepEqual(d.calls.nights, [{ lang: 'sv', dreams: ['Ett hus vid vattnet.'], kept: [] }]);
 +  assert.deepEqual(d.calls.read, [BETA_KEY_PARAMETER]);
@@ -1465,27 +1926,30 @@ diff --git a/server/test/door.test.ts b/server/test/door.test.ts
 diff --git a/server/test/handler.test.ts b/server/test/handler.test.ts
 --- a/server/test/handler.test.ts
 +++ b/server/test/handler.test.ts
-@@ -5,6 +5,7 @@ import assert from 'node:assert/strict';
+@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
  import { afterEach, beforeEach, test } from 'node:test';
  import type { PutInput } from '../src/feedback-store.ts';
  import { handler, wire } from '../src/handler.ts';
++import { type Caller, STAND_IN_TEXT } from '../src/models.ts';
 +import { STAND_IN_READINGS } from '../src/reading.ts';
  import { setSink } from '../src/safe-log.ts';
  
  const KEY = 'Ab0'.repeat(16);
-@@ -87,3 +88,42 @@ test('no bucket named: feedback fails with 502 and nothing is sent', async () =>
+@@ -87,3 +89,49 @@ test('no bucket named: feedback fails with 502 and nothing is sent', async () =>
    assert.deepEqual(puts, []);
    assert.deepEqual(lines, ['feedbackFailed']);
  });
 +
-+// The wiring of a reading (head's message 33): the stand-in, handed the
-+// instructions read from the folder beside the code.
-+test('a reading goes to the stand-in with the folder\'s instructions', async () => {
++// The wiring of a reading (head's messages 33 and 34): the readings step's
++// model, through the one interface, handed the instructions read from the
++// folder beside the code, first, and the night last.
++test("a reading goes to its step's model with the folder's instructions", async () => {
 +  const seen: unknown[] = [];
-+  const door = wire({}, async () => {}, async () => KEY, async (instructions, request) => {
-+    seen.push([instructions, request]);
-+    return [{ lens: 1, text: '[x]' }];
-+  }, () => [{ name: 'a.md', text: 'b' }]);
++  const caller: Caller = async (choice, prompt, cache) => {
++    seen.push([choice, prompt, cache]);
++    return { text: JSON.stringify({ readings: [{ lens: 1, text: '[x]' }] }), usage: { input: 3, output: 2, cacheRead: 0, cacheWrite: 0 } };
++  };
++  const door = wire({}, async () => {}, async () => KEY, { 'stand-in': caller }, () => [{ name: 'a.md', text: 'b' }]);
 +  const reply = await door({
 +    rawPath: '/reading',
 +    headers: { authorization: `Bearer ${KEY}` },
@@ -1493,9 +1957,13 @@ diff --git a/server/test/handler.test.ts b/server/test/handler.test.ts
 +    requestContext: { http: { method: 'POST' } },
 +  });
 +  assert.deepEqual(reply.statusCode, 200);
-+  assert.deepEqual(JSON.parse(reply.body ?? ''), { readings: [{ lens: 1, text: '[x]' }] });
-+  assert.deepEqual(seen, [[[{ name: 'a.md', text: 'b' }], { lang: 'en', dreams: ['A red door.'], kept: [] }]]);
-+  assert.deepEqual(lines, ['readingGiven 1']);
++  assert.deepEqual(JSON.parse(reply.body ?? ''), {
++    readings: [{ lens: 1, text: '[x]' }],
++    usage: [{ step: 'readings', model: 'stand-in', input: 3, output: 2, cacheRead: 0, cacheWrite: 0, cost: 0 }],
++  });
++  const night = JSON.stringify({ lang: 'en', dreams: ['A red door.'], kept: [] });
++  assert.deepEqual(seen, [[{ model: 'stand-in' }, { fixed: ['b'], words: night }, false]]);
++  assert.deepEqual(lines, ['modelUsage 1 0 3 2 0 0 0', 'readingGiven 1']);
 +});
 +
 +test('the handler reads with the stand-in, and the instructions once', async () => {
@@ -1514,7 +1982,8 @@ diff --git a/server/test/handler.test.ts b/server/test/handler.test.ts
 +  const first = await send();
 +  await send();
 +  assert.equal(reads, 1);
-+  assert.deepEqual(JSON.parse(first.body ?? ''), { readings: STAND_IN_READINGS });
++  assert.deepEqual(JSON.parse(first.body ?? '').readings, STAND_IN_READINGS);
++  assert.equal(JSON.parse(STAND_IN_TEXT).readings.length, 3);
 +});
 diff --git a/server/test/instructions.test.ts b/server/test/instructions.test.ts
 new file mode 100644
@@ -1558,17 +2027,117 @@ new file mode 100644
 +test('no folder: an error, never an empty set of instructions', () => {
 +  assert.throws(() => readInstructions(new URL('gone/', folder({ 'a.md': 'x' }))));
 +});
+diff --git a/server/test/models.test.ts b/server/test/models.test.ts
+new file mode 100644
+--- /dev/null
++++ b/server/test/models.test.ts
+@@ -0,0 +1,87 @@
++// Every model call through one interface (head's message 34): the model
++// named per step in one setting; each call's tokens and cost counted and
++// logged as numbers only; prompt caching off until AWS's pages say it fits
++// retention mode none; the stand-in behind it like any model.
++import assert from 'node:assert/strict';
++import { afterEach, beforeEach, test } from 'node:test';
++import {
++  type Caller,
++  MODELS,
++  PRICES,
++  PROMPT_CACHING,
++  SETUP,
++  STAND_IN_TEXT,
++  STEPS,
++  callModel,
++  costOf,
++  standInCaller,
++} from '../src/models.ts';
++import { setSink } from '../src/safe-log.ts';
++
++let lines: string[] = [];
++let restore = (): void => {};
++beforeEach(() => {
++  lines = [];
++  restore = setSink((line) => {
++    lines.push(line);
++  });
++});
++afterEach(() => {
++  restore();
++});
++
++const prompt = { fixed: ['instructions'], words: '{"dreams":["a"]}' };
++
++test('the steps, and one setting naming each step its model', () => {
++  assert.deepEqual(STEPS, ['opening', 'readings', 'checks', 'scenery', 'recurrence']);
++  assert.deepEqual(MODELS, ['stand-in']);
++  assert.deepEqual(Object.keys(SETUP), [...STEPS]);
++  for (const step of STEPS) assert.deepEqual(SETUP[step], { model: 'stand-in' });
++  assert.ok(Object.isFrozen(SETUP));
++});
++
++test('prompt caching is off until confirmed', () => {
++  assert.equal(PROMPT_CACHING, false);
++});
++
++test("a call goes to its step's model, prompt and caching switch", async () => {
++  const seen: unknown[] = [];
++  const caller: Caller = async (choice, p, cache) => {
++    seen.push([choice, p, cache]);
++    return { text: 'x', usage: { input: 10, output: 2, cacheRead: 3, cacheWrite: 4 } };
++  };
++  const setup = { ...SETUP, readings: { model: 'stand-in' as const, reasoningCap: 64 } };
++  const answer = await callModel('readings', prompt, { setup, callers: { 'stand-in': caller }, caching: false });
++  assert.deepEqual(seen, [[{ model: 'stand-in', reasoningCap: 64 }, prompt, false]]);
++  assert.deepEqual(answer, {
++    text: 'x',
++    call: { step: 'readings', model: 'stand-in', input: 10, output: 2, cacheRead: 3, cacheWrite: 4, cost: 0 },
++  });
++});
++
++test('each call logs its step, model, tokens and cost, numbers only', async () => {
++  const caller: Caller = async () => ({ text: 'never logged', usage: { input: 7, output: 5, cacheRead: 1, cacheWrite: 2 } });
++  await callModel('scenery', prompt, { setup: SETUP, callers: { 'stand-in': caller }, caching: false });
++  assert.deepEqual(lines, ['modelUsage 3 0 7 5 1 2 0']);
++});
++
++test('the cost: each count at its price, in millionths', () => {
++  assert.deepEqual(PRICES['stand-in'], { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
++  const price = { input: 4, output: 20, cacheRead: 1, cacheWrite: 5 };
++  assert.equal(costOf(price, { input: 1000, output: 100, cacheRead: 10, cacheWrite: 2 }), 4000 + 2000 + 10 + 10);
++});
++
++test("a model failing: the call fails, nothing logged", async () => {
++  const caller: Caller = async () => {
++    throw new Error('invented failure text');
++  };
++  await assert.rejects(callModel('readings', prompt, { setup: SETUP, callers: { 'stand-in': caller }, caching: false }));
++  assert.deepEqual(lines, []);
++});
++
++test('the stand-in: the same placeholder, zero tokens, whatever asked', async () => {
++  const one = await standInCaller({ model: 'stand-in' }, prompt, false);
++  const two = await standInCaller({ model: 'stand-in' }, { fixed: [], words: 'other' }, true);
++  assert.deepEqual(one, { text: STAND_IN_TEXT, usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } });
++  assert.deepEqual(two, one);
++});
 diff --git a/server/test/reading.test.ts b/server/test/reading.test.ts
 new file mode 100644
 --- /dev/null
 +++ b/server/test/reading.test.ts
-@@ -0,0 +1,58 @@
+@@ -0,0 +1,115 @@
 +// The readings' request and the stand-in model (head's message 33; D134):
 +// what a request may hold, and the fixed placeholder readings the stand-in
 +// gives for every night, reading nothing of it.
 +import assert from 'node:assert/strict';
 +import { test } from 'node:test';
-+import { READING_BODY_LIMIT, STAND_IN_READINGS, parseReading, standIn } from '../src/reading.ts';
++import { STAND_IN_TEXT } from '../src/models.ts';
++import {
++  READING_BODY_LIMIT,
++  STAND_IN_READINGS,
++  parseReading,
++  parseReadings,
++  promptFor,
++  readNight,
++} from '../src/reading.ts';
 +
 +const night = (over: Record<string, unknown> = {}): string => JSON.stringify({ lang: 'en', dreams: ['a', 'b'], ...over });
 +
@@ -1609,28 +2178,78 @@ new file mode 100644
 +  assert.deepEqual(parseReading(`${at} `), { refused: 413 });
 +});
 +
++test("the prompt: the instructions first, in their order; the night last", () => {
++  const request = { lang: 'sv' as const, dreams: ['Ett hus.'], kept: ['En mening.'] };
++  const p = promptFor([{ name: 'a.md', text: 'one' }, { name: 'b.md', text: 'two' }], request);
++  assert.deepEqual(p.fixed, ['one', 'two']);
++  assert.equal(p.words, JSON.stringify(request));
++  // Nothing of the night in the fixed, cacheable part.
++  assert.ok(p.fixed.every((f) => !f.includes('Ett hus') && !f.includes('En mening')));
++});
++
++test("the model's answer: one to three whole readings, or null", () => {
++  const r = (n: number) => Array.from({ length: n }, (_, i) => ({ lens: i, text: '[x]' }));
++  assert.deepEqual(parseReadings(JSON.stringify({ readings: r(1) })), r(1));
++  assert.deepEqual(parseReadings(JSON.stringify({ readings: r(3) })), r(3));
++  for (const text of [
++    'not json',
++    '[]',
++    JSON.stringify({ readings: [] }),
++    JSON.stringify({ readings: r(4) }),
++    JSON.stringify({ readings: [{ lens: -1, text: '[x]' }] }),
++    JSON.stringify({ readings: [{ lens: 1.5, text: '[x]' }] }),
++    JSON.stringify({ readings: [{ lens: 1, text: '' }] }),
++    JSON.stringify({ readings: [{ lens: 1, text: '[x]', more: 1 }] }),
++    JSON.stringify({ readings: r(1), more: 1 }),
++  ]) {
++    assert.equal(parseReadings(text), null, text);
++  }
++});
++
 +test('the stand-in: three placeholder readings, marked, the same for every night', async () => {
 +  assert.deepEqual(STAND_IN_READINGS, [
 +    { lens: 0, text: '[STAND-IN · 1]' },
 +    { lens: 1, text: '[STAND-IN · 2]' },
 +    { lens: 2, text: '[STAND-IN · 3]' },
 +  ]);
-+  const one = await standIn([], { lang: 'en', dreams: ['a'], kept: [] });
-+  const two = await standIn([{ name: 'x.md', text: 'y' }], { lang: 'sv', dreams: ['b', 'c'], kept: ['d'] });
-+  assert.deepEqual(one, STAND_IN_READINGS);
-+  assert.deepEqual(two, STAND_IN_READINGS);
++  assert.equal(STAND_IN_TEXT, JSON.stringify({ readings: STAND_IN_READINGS }));
++  assert.deepEqual(parseReadings(STAND_IN_TEXT), STAND_IN_READINGS);
 +  assert.ok(Object.isFrozen(STAND_IN_READINGS) && STAND_IN_READINGS.every((r) => Object.isFrozen(r)));
++});
++
++test('a night read: the readings step, prompt, readings, one call', async () => {
++  const request = { lang: 'en' as const, dreams: ['A red door.'], kept: [] };
++  const seen: unknown[] = [];
++  const read = await readNight([{ name: 'a.md', text: 'one' }], request, async (step, p) => {
++    seen.push([step, p]);
++    return { text: STAND_IN_TEXT, call: { step, model: 'stand-in', input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0 } };
++  });
++  assert.deepEqual(seen, [['readings', { fixed: ['one'], words: JSON.stringify(request) }]]);
++  assert.deepEqual(read, {
++    readings: STAND_IN_READINGS,
++    usage: [{ step: 'readings', model: 'stand-in', input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0 }],
++  });
++});
++
++test('an answer that is not readings fails the night', async () => {
++  await assert.rejects(
++    readNight([], { lang: 'en', dreams: ['a'], kept: [] }, async (step) => ({
++      text: 'not readings',
++      call: { step, model: 'stand-in', input: 1, output: 1, cacheRead: 0, cacheWrite: 0, cost: 0 },
++    })),
++  );
 +});
 diff --git a/server/test/safe-log.test.ts b/server/test/safe-log.test.ts
 --- a/server/test/safe-log.test.ts
 +++ b/server/test/safe-log.test.ts
-@@ -27,6 +27,9 @@ test('the events are these', () => {
+@@ -27,6 +27,10 @@ test('the events are these', () => {
      'feedbackKept',
      'feedbackRefused',
      'feedbackFailed',
 +    'readingGiven',
 +    'readingRefused',
 +    'readingFailed',
++    'modelUsage',
    ]);
  });
  
@@ -1639,7 +2258,7 @@ diff --git a/tool/server_mutations.py b/tool/server_mutations.py
 +++ b/tool/server_mutations.py
 @@ -1,4 +1,4 @@
 -# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S135, D152), run by hand from the repository
-+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S138, D152; S139 to S161, head's message 33), run by hand from the repository
++# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S138, D152; S139 to S161, head's message 33; S162 to S178, head's message 34), run by hand from the repository
  # root: python3 -I -B tool/server_mutations.py
  # First the unbroken server, copied, must pass its type check and tests.
  # Then each row breaks one thing in a copy of server/ in the temporary
@@ -1652,7 +2271,7 @@ diff --git a/tool/server_mutations.py b/tool/server_mutations.py
       'test', 'another method or path: 404, nothing read'),
      ('S124', 'src/door.ts', 'utcDay(deps.now())', 'utcDay(new Date())',
       'test', 'feedback: kept under its UTC day, 204, one code'),
-@@ -397,6 +397,76 @@ ROWS = [
+@@ -397,6 +397,128 @@ ROWS = [
       'test', 'feedback goes to the bucket the variable names'),
      ('S138', 'src/handler.ts', "?? ''", "?? 'a-bucket'",
       'test', 'no bucket named: feedback fails with 502 and nothing is sent'),
@@ -1678,10 +2297,10 @@ diff --git a/tool/server_mutations.py b/tool/server_mutations.py
 +    ('S145', 'src/reading.ts', 'kept = [] }',
 +     "kept = ['x'] }",
 +     'test', 'a night: its language, dreams, and kept sentences when sent'),
-+    ('S146', 'src/reading.ts', 'async () => STAND_IN_READINGS',
-+     'async (_, r) => r.dreams.map((text, lens) => ({ lens, text }))',
-+     'test', 'the stand-in: three placeholder readings, marked, the same for every night'),
-+    ('S147', 'src/reading.ts', 'Object.freeze({ lens',
++    ('S146', 'src/models.ts', 'Caller = async () => ({\n  text: STAND_IN_TEXT,',
++     'Caller = async (_, p) => ({\n  text: p.words,',
++     'test', 'the stand-in: the same placeholder, zero tokens, whatever asked'),
++    ('S147', 'src/models.ts', 'Object.freeze({ lens',
 +     '({ lens',
 +     'test', 'the stand-in: three placeholder readings, marked, the same for every night'),
 +    ('S148', 'src/instructions.ts', ' && f.name !== PLACEHOLDER)',
@@ -1699,7 +2318,7 @@ diff --git a/tool/server_mutations.py b/tool/server_mutations.py
 +    ('S152', 'src/door.ts', "'/feedback', '/reading']",
 +     "'/feedback']",
 +     'test', 'a reading: 200, the readings, the night as sent, its count'),
-+    ('S153', 'src/door.ts', "safeLog('readingGiven', [readings.length]);",
++    ('S153', 'src/door.ts', "safeLog('readingGiven', [read.readings.length]);",
 +     "safeLog('readingGiven');",
 +     'test', 'a reading: 200, the readings, the night as sent, its count'),
 +    ('S154', 'src/door.ts', "safeLog('readingRefused', [parsed.refused]);",
@@ -1711,21 +2330,73 @@ diff --git a/tool/server_mutations.py b/tool/server_mutations.py
 +    ('S156', 'src/door.ts', "return path === '/feedback' ?",
 +     "return path !== '/feedback' ?",
 +     'test', 'a reading: 200, the readings, the night as sent, its count'),
-+    ('S157', 'src/door.ts', 'body: JSON.stringify({ readings }),',
-+     'body: JSON.stringify(readings),',
++    ('S157', 'src/door.ts', 'body: JSON.stringify({ readings: read.readings, usage: read.usage }),',
++     'body: JSON.stringify({ readings: read.readings }),',
 +     'test', 'a reading: 200, the readings, the night as sent, its count'),
 +    ('S158', 'src/handler.ts', '(held ??= instructions())',
 +     '(held ?? instructions())',
 +     'test', 'the handler reads with the stand-in, and the instructions once'),
-+    ('S159', 'src/handler.ts', 'model: Model = standIn,',
-+     'model: Model = async (i, r) => (await standIn(i, r)).slice(1),',
-+     'test', 'the handler reads with the stand-in, and the instructions once'),
-+    ('S160', 'src/handler.ts', 'model((held ??= instructions()), request)',
-+     'model((held ??= instructions()).slice(1), request)',
-+     'test', "a reading goes to the stand-in with the folder's instructions"),
++    ('S159', 'src/door.ts', 'readings: read.readings, usage',
++     'readings: read.readings.slice(1), usage',
++     'test', 'a reading: 200, the readings, the night as sent, its count'),
++    ('S160', 'src/handler.ts', 'readNight((held ??= instructions()), request,',
++     'readNight((held ??= instructions()).slice(1), request,',
++     'test', "a reading goes to its step's model with the folder's instructions"),
 +    ('S161', 'infra/dist.ts', "  cpSync(new URL('../instructions/', import.meta.url), new URL('instructions/', CODE), { recursive: true });\n",
 +     '',
 +     'test', 'the compiled files, the marker and the instructions, nothing else'),
++    # One interface for every model call: the setting, the counts and cost, the prompt's order (head's message 34).
++    ('S162', 'src/models.ts', '(choice, prompt, deps.caching)',
++     '(choice, prompt, true)',
++     'test', "a call goes to its step's model, prompt and caching switch"),
++    ('S163', 'src/models.ts', 'const choice = deps.setup[step];',
++     'const choice = deps.setup.opening;',
++     'test', "a call goes to its step's model, prompt and caching switch"),
++    ('S164', 'src/models.ts', '[STEPS.indexOf(step), MODELS',
++     '[0, MODELS',
++     'test', 'each call logs its step, model, tokens and cost, numbers only'),
++    ('S165', 'src/models.ts', 'usage.output * price.output +',
++     'usage.output * price.input +',
++     'test', 'the cost: each count at its price, in millionths'),
++    ('S166', 'src/models.ts', 'usage.cacheRead * price.cacheRead +',
++     'usage.cacheRead * price.cacheWrite +',
++     'test', 'the cost: each count at its price, in millionths'),
++    ('S167', 'src/models.ts', 'export const PROMPT_CACHING = false;',
++     'export const PROMPT_CACHING = true;',
++     'test', 'prompt caching is off until confirmed'),
++    ('S168', 'src/handler.ts', 'caching: PROMPT_CACHING',
++     'caching: !PROMPT_CACHING',
++     'test', "a reading goes to its step's model with the folder's instructions"),
++    ('S169', 'src/reading.ts', 'fixed: instructions.map((i) => i.text)',
++     'fixed: [...instructions].reverse().map((i) => i.text)',
++     'test', 'the prompt: the instructions first, in their order; the night last'),
++    ('S170', 'src/reading.ts', 'words: JSON.stringify(request) }',
++     'words: JSON.stringify(request.dreams) }',
++     'test', 'the prompt: the instructions first, in their order; the night last'),
++    ('S171', 'src/reading.ts', 'Object.keys(json).length !== 1 || ',
++     '',
++     'test', "the model's answer: one to three whole readings, or null"),
++    ('S172', 'src/reading.ts', 'list.length > 3) return null;',
++     'list.length > 4) return null;',
++     'test', "the model's answer: one to three whole readings, or null"),
++    ('S173', 'src/reading.ts', '!Number.isInteger(lens)',
++     "typeof lens !== 'number'",
++     'test', "the model's answer: one to three whole readings, or null"),
++    ('S174', 'src/reading.ts', '(lens as number) < 0 || ',
++     '',
++     'test', "the model's answer: one to three whole readings, or null"),
++    ('S175', 'src/reading.ts', " || words === '') return null;",
++     ') return null;',
++     'test', "the model's answer: one to three whole readings, or null"),
++    ('S176', 'src/reading.ts', 'Object.keys(r).sort().join() !== READING_KEYS.join()',
++     '!READING_KEYS.length',
++     'test', "the model's answer: one to three whole readings, or null"),
++    ('S177', 'src/reading.ts', "throw new Error('reading-unreadable');",
++     'return { readings: [], usage: [call] };',
++     'test', 'an answer that is not readings fails the night'),
++    ('S178', 'src/reading.ts', "ask('readings',",
++     "ask('opening',",
++     'test', 'a night read: the readings step, prompt, readings, one call'),
  ]
  
  
@@ -1734,13 +2405,13 @@ diff --git a/tool/server_mutations.py b/tool/server_mutations.py
 ### Task 5 · App: a reading's request, its answer, Life Context Off, and Start Interpretation's logic
 
 New: `app/lib/readings/readings.dart`, `app/test/readings/readings_test.dart`. Changed: `journal.dart`
-(`keepReadings`), `safe_log.dart` (three codes), `tool/app_mutations.py`. Rows A856 to A875.
+(`keepReadings`), `safe_log.dart` (three codes), `tool/app_mutations.py`. Rows A866 to A890.
 
-Checks: `No issues found!`; `+816`; `--rows A856,…,A875`: `20 run, 20 caught`.
+Checks: `No issues found!`; `+820`; `--rows A866,…,A890`: `25 run, 25 caught`.
 
 Commit:
 
-> App: a night's reading through our server; Life Context Off sends nothing kept; the readings kept (head's message 33, D134)
+> App: a night's reading through our server; Life Context Off sends nothing kept; the readings and their counts kept (head's messages 33, 34; D134)
 
 **The block:**
 
@@ -1770,11 +2441,11 @@ diff --git a/app/lib/journal/journal.dart b/app/lib/journal/journal.dart
      return best;
    }
  
-+  /// Keeps [readings] in night [id], which is then read (D155 item 2); a
-+  /// night already read keeps its first. Returns whether the night was
-+  /// there.
-+  Future<bool> keepReadings(String id, List<Reading> readings) =>
-+      _store.update(id, (n) => n.readings == null ? n.withReadings(readings) : n);
++  /// Keeps [readings] in night [id], which is then read (D155 item 2), with
++  /// their calls' [usage] where kept (head's message 34); a night already
++  /// read keeps its first. Returns whether the night was there.
++  Future<bool> keepReadings(String id, List<Reading> readings, {List<ModelUsage>? usage}) =>
++      _store.update(id, (n) => n.readings == null ? n.withReadings(readings, usage: usage) : n);
 +
    /// Deletes the night, and everything of it (X11).
    Future<void> delete(String id) => _store.delete(id);
@@ -1783,13 +2454,15 @@ diff --git a/app/lib/readings/readings.dart b/app/lib/readings/readings.dart
 new file mode 100644
 --- /dev/null
 +++ b/app/lib/readings/readings.dart
-@@ -0,0 +1,145 @@
+@@ -0,0 +1,158 @@
 +// The readings, in plain Dart (head's message 33; D155 item 1): one POST to
 +// our server's /reading with the beta key and the night: its language, its
 +// dreams told in words and, only while Life Context is on, the sentences it
 +// keeps (D134; Off sends nothing kept); nothing that names the phone (R4).
 +// The answer is one to three readings, each a tradition (its place among
-+// the lens labels, W13) and its words. What Start Interpretation does: the
++// the lens labels, W13) and its words, and each model call's counts and cost
++// (head's message 34), kept beside the readings only in the builds that keep
++// them (SoulDreams Dev; the founder's, later). What Start Interpretation does: the
 +// readings kept in the night, which is then read; a failure keeps nothing,
 +// and the night stays unread (handover §5). Nothing of a night is ever
 +// logged: a failure logs its status alone (R3). SoulDreams Dev only; until
@@ -1814,12 +2487,16 @@ new file mode 100644
 +  final int status;
 +}
 +
-+/// Sends one night's request; completes with its readings.
-+typedef SendNight = Future<List<Reading>> Function(Map<String, Object?> body);
++/// A night's answer: its readings, and its calls' counts where kept.
++typedef NightAnswer = ({List<Reading> readings, List<ModelUsage>? usage});
++
++/// Sends one night's request; completes with its answer.
++typedef SendNight = Future<NightAnswer> Function(Map<String, Object?> body);
 +
 +const _wait = Duration(seconds: 30);
 +final _betaShape = RegExp(r'^[A-Za-z0-9]{48}$');
 +const _readingKeys = {'lens', 'text'};
++const _answerKeys = {'readings', 'usage'};
 +
 +/// The request for [night]: its language and its dreams in words, and
 +/// [kept] only when given (Life Context on).
@@ -1829,9 +2506,14 @@ new file mode 100644
 +  'kept': ?kept,
 +};
 +
-+// The readings in [json], or null when it is not one to three whole ones.
-+List<Reading>? _readingsOf(Object? json) {
-+  if (json is! Map<String, Object?> || json.length != 1) return null;
++// The answer in [json], or null when it is not one to three whole readings
++// and a list of whole calls.
++NightAnswer? _answerOf(Object? json) {
++  if (json is! Map<String, Object?> || !setEquals(json.keys.toSet(), _answerKeys)) return null;
++  final calls = json['usage'];
++  if (calls is! List<Object?>) return null;
++  final usage = [for (final c in calls) ModelUsage.fromJson(c)];
++  if (usage.contains(null)) return null;
 +  final list = json['readings'];
 +  if (list is! List<Object?> || list.isEmpty || list.length > maxReadings) return null;
 +  final readings = <Reading>[];
@@ -1842,11 +2524,11 @@ new file mode 100644
 +    if (lens is! int || lens < 0 || text is! String || text.isEmpty) return null;
 +    readings.add(Reading(lens, text));
 +  }
-+  return readings;
++  return (readings: readings, usage: usage.cast<ModelUsage>());
 +}
 +
-+/// Sends [body] to [server]'s /reading; completes with the readings (200).
-+Future<List<Reading>> postReading(Uri server, String betaKey, Map<String, Object?> body) async {
++/// Sends [body] to [server]'s /reading; completes with the answer (200).
++Future<NightAnswer> postReading(Uri server, String betaKey, Map<String, Object?> body) async {
 +  final client = HttpClient()
 +    ..userAgent = null
 +    ..connectionTimeout = _wait;
@@ -1874,16 +2556,18 @@ new file mode 100644
 +  } on FormatException {
 +    throw const ReadingFailure(-1);
 +  }
-+  return _readingsOf(json) ?? (throw const ReadingFailure(-1));
++  return _answerOf(json) ?? (throw const ReadingFailure(-1));
 +}
 +
 +/// SoulDreams Dev's own: our server, with the build's beta key; with no
-+/// server or a beta key not of its shape, every reading fails (-2).
-+SendNight liveReading({required String betaKey, String server = Hosts.server}) {
++/// server or a beta key not of its shape, every reading fails (-2). The
++/// calls' counts are kept only when [keepUsage] (head's message 34).
++SendNight liveReading({required String betaKey, String server = Hosts.server, bool keepUsage = false}) {
 +  final on = server.isNotEmpty && _betaShape.hasMatch(betaKey);
 +  return (body) async {
 +    if (!on) throw const ReadingFailure(-2);
-+    return postReading(Uri.parse(server), betaKey, body);
++    final answer = await postReading(Uri.parse(server), betaKey, body);
++    return keepUsage ? answer : (readings: answer.readings, usage: null);
 +  };
 +}
 +
@@ -1901,7 +2585,7 @@ new file mode 100644
 +  final SendNight _send;
 +  final Future<List<String>?> Function() _kept;
 +
-+  Future<List<Reading>> read(Night night) async => _send(requestOf(night, await _kept()));
++  Future<NightAnswer> read(Night night) async => _send(requestOf(night, await _kept()));
 +}
 +
 +/// What one Start Interpretation did.
@@ -1911,29 +2595,29 @@ new file mode 100644
 +/// already read, or with no dream in words yet, is not sent.
 +Future<Interpreted> interpret(Journal journal, Reader reader, Night night) async {
 +  if (night.readings != null || night.dreams.isEmpty) return Interpreted.nothing;
-+  final List<Reading> readings;
++  final NightAnswer answer;
 +  try {
-+    readings = await reader.read(night);
++    answer = await reader.read(night);
 +  } on Object catch (e) {
 +    SafeLog.event(LogEvent.readingFailed, [e is ReadingFailure ? e.status : -3]);
 +    return Interpreted.failed;
 +  }
 +  final bool kept;
 +  try {
-+    kept = await journal.keepReadings(night.id, readings);
++    kept = await journal.keepReadings(night.id, answer.readings, usage: answer.usage);
 +  } on Object {
 +    SafeLog.event(LogEvent.readingKeepFailed);
 +    return Interpreted.failed;
 +  }
 +  if (!kept) return Interpreted.gone;
-+  SafeLog.event(LogEvent.readingRead, [readings.length]);
++  SafeLog.event(LogEvent.readingRead, [answer.readings.length]);
 +  return Interpreted.read;
 +}
 diff --git a/app/test/readings/readings_test.dart b/app/test/readings/readings_test.dart
 new file mode 100644
 --- /dev/null
 +++ b/app/test/readings/readings_test.dart
-@@ -0,0 +1,306 @@
+@@ -0,0 +1,334 @@
 +// The readings, in plain Dart (head's message 33; D134; D155 item 1): one
 +// POST to our server's /reading with the beta key and the night (its
 +// language and its dreams in words) and, only while Life Context is on, the
@@ -1973,6 +2657,7 @@ new file mode 100644
 +      {'lens': 0, 'text': '[one]'},
 +      {'lens': 2, 'text': '[two]'},
 +    ],
++    'usage': [call],
 +  });
 +
 +  Uri get url => Uri.parse('http://127.0.0.1:${_server.port}/');
@@ -1997,9 +2682,15 @@ new file mode 100644
 +  Future<void> stop() => _server.close(force: true);
 +}
 +
++/// One model call's counts, as our server gives them.
++const call = {'step': 'readings', 'model': 'stand-in', 'input': 40, 'output': 9, 'cacheRead': 30, 'cacheWrite': 0, 'cost': 290};
++
 +void main() {
 +  final beta = 'Ab0' * 16;
 +  final readings = [Reading(0, '[one]'), Reading(2, '[two]')];
++  final usage = [ModelUsage.fromJson(call)!];
++  final answer = (readings: readings, usage: usage);
++  final unkept = (readings: readings, usage: null);
 +
 +  late List<String> lines;
 +  setUp(() {
@@ -2009,6 +2700,12 @@ new file mode 100644
 +    SafeLog.sink = lines.add;
 +    addTearDown(() => SafeLog.sink = sink);
 +  });
++
++  // Two answers alike: the same readings and the same counts, or none.
++  void same(NightAnswer a, NightAnswer b) {
++    expect(a.readings, b.readings);
++    expect(a.usage, b.usage);
++  }
 +
 +  Future<int> failure(Future<void> f) async {
 +    try {
@@ -2032,7 +2729,7 @@ new file mode 100644
 +      final server = await FakeServer.start();
 +      addTearDown(server.stop);
 +      final body = {'lang': 'sv', 'dreams': ['Ett hus.']};
-+      expect(await postReading(server.url, beta, body), readings);
++      same(await postReading(server.url, beta, body), answer);
 +      final r = server.requests.single;
 +      expect(r.method, 'POST');
 +      expect(r.path, '/reading');
@@ -2059,14 +2756,18 @@ new file mode 100644
 +      for (final reply in [
 +        'not json',
 +        '[]',
-+        jsonEncode({'readings': []}),
-+        jsonEncode({'readings': 'x'}),
-+        jsonEncode({'readings': [for (var i = 0; i < 4; i++) {'lens': i, 'text': '[x]'}]}),
-+        jsonEncode({'readings': [{'lens': -1, 'text': '[x]'}]}),
-+        jsonEncode({'readings': [{'lens': 1, 'text': ''}]}),
-+        jsonEncode({'readings': [{'lens': '1', 'text': '[x]'}]}),
-+        jsonEncode({'readings': [{'lens': 1, 'text': '[x]', 'extra': 1}]}),
-+        jsonEncode({'readings': [{'lens': 1, 'text': '[x]'}], 'extra': 1}),
++        jsonEncode({'readings': [], 'usage': []}),
++        jsonEncode({'readings': 'x', 'usage': []}),
++        jsonEncode({'readings': [for (var i = 0; i < 4; i++) {'lens': i, 'text': '[x]'}], 'usage': []}),
++        jsonEncode({'readings': [{'lens': -1, 'text': '[x]'}], 'usage': []}),
++        jsonEncode({'readings': [{'lens': 1, 'text': ''}], 'usage': []}),
++        jsonEncode({'readings': [{'lens': '1', 'text': '[x]'}], 'usage': []}),
++        jsonEncode({'readings': [{'lens': 1, 'text': '[x]', 'extra': 1}], 'usage': []}),
++        jsonEncode({'readings': [{'lens': 1, 'text': '[x]'}], 'usage': [], 'extra': 1}),
++        // The calls' counts: missing, or not whole.
++        jsonEncode({'readings': [{'lens': 1, 'text': '[x]'}]}),
++        jsonEncode({'readings': [{'lens': 1, 'text': '[x]'}], 'usage': 'x'}),
++        jsonEncode({'readings': [{'lens': 1, 'text': '[x]'}], 'usage': [{...call, 'input': -1}]}),
 +      ]) {
 +        server.reply = reply;
 +        expect(await failure(postReading(server.url, beta, {})), -1, reason: reply);
@@ -2076,10 +2777,12 @@ new file mode 100644
 +    test("Dev's own: our server, with a well-shaped beta key", () async {
 +      final server = await FakeServer.start();
 +      addTearDown(server.stop);
-+      expect(await liveReading(betaKey: beta, server: '${server.url}')({}), readings);
++      // The calls' counts kept only when asked (head's message 34).
++      same(await liveReading(betaKey: beta, server: '${server.url}')({}), unkept);
++      same(await liveReading(betaKey: beta, server: '${server.url}', keepUsage: true)({}), answer);
 +      expect(await failure(liveReading(betaKey: 'short', server: '${server.url}')({})), -2);
 +      expect(await failure(liveReading(betaKey: beta, server: '')({})), -2);
-+      expect(server.requests, hasLength(1));
++      expect(server.requests, hasLength(2));
 +      expect(Hosts.server, isNotEmpty);
 +    });
 +  });
@@ -2137,9 +2840,9 @@ new file mode 100644
 +      final sent = <Map<String, Object?>>[];
 +      final reader = Reader((body) async {
 +        sent.add(body);
-+        return readings;
++        return answer;
 +      }, () => keptFor(life));
-+      expect(await reader.read(nights[1]), readings);
++      same(await reader.read(nights[1]), answer);
 +      await settings.answer(Consent.lifeContext, false);
 +      await reader.read(nights[1]);
 +      expect(sent, [requestOf(nights[1], passages.first.sentences), requestOf(nights[1], null)]);
@@ -2167,14 +2870,15 @@ new file mode 100644
 +    Reader reader() => Reader((body) async {
 +      sent.add(body);
 +      if (fails case final f?) throw f;
-+      return readings;
++      return answer;
 +    }, () async => null);
 +
 +    test('the readings kept in the night, which is read; one code', () async {
 +      expect(await interpret(journal, reader(), nights[2]), Interpreted.read);
 +      final read = await journal.night(nights[2].id);
 +      expect(read!.readings, readings);
-+      expect(read.withEntries(nights[2].entries), nights[2].withReadings(readings));
++      expect(read.usage, usage);
++      expect(read.withEntries(nights[2].entries), nights[2].withReadings(readings, usage: usage));
 +      expect(sent, [requestOf(nights[2], null)]);
 +      expect(lines, ['readingRead 2']);
 +    });
@@ -2208,7 +2912,7 @@ new file mode 100644
 +    test('a night deleted while read keeps nothing, not made again', () async {
 +      final r = Reader((body) async {
 +        await journal.delete(nights[1].id);
-+        return readings;
++        return answer;
 +      }, () async => null);
 +      expect(await interpret(journal, r, nights[1]), Interpreted.gone);
 +      expect(await journal.night(nights[1].id), isNull);
@@ -2216,12 +2920,20 @@ new file mode 100644
 +    });
 +
 +    test('the readings that cannot be kept: failed, a code', () async {
-+      final r = Reader((body) async => readings, () async => null);
++      final r = Reader((body) async => answer, () async => null);
 +      final files = BrokenFiles();
 +      final broken = Journal(await JournalStore.open(files), random: Random(4));
 +      files.failing = true;
 +      expect(await interpret(broken, r, nights[1]), Interpreted.failed);
 +      expect(lines, ['readingKeepFailed']);
++    });
++
++    test("a build that keeps no counts: the readings kept, no usage", () async {
++      final r = Reader((body) async => unkept, () async => null);
++      expect(await interpret(journal, r, nights[2]), Interpreted.read);
++      final read = await journal.night(nights[2].id);
++      expect(read!.readings, readings);
++      expect(read.usage, isNull);
 +    });
 +
 +    test('keepReadings: a night read keeps its first readings', () async {
@@ -2247,96 +2959,117 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
  # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
  # Parallel by default (D129), each worker in its own copy of app/ in
  # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
--# Expected: every row "caught" (A1 to A855, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
-+# Expected: every row "caught" (A1 to A875, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+-# Expected: every row "caught" (A1 to A865, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
++# Expected: every row "caught" (A1 to A890, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
  # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
  # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
  # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
-@@ -3472,6 +3472,87 @@ ROWS = [
-      "    if (text.isEmpty) throw ArgumentError('text');\n",
-      '',
-      'test/journal/night_test.dart', 'a bad lens, no words, or not one to three: refused'),
+@@ -3513,6 +3513,108 @@ ROWS = [
+      '      readings: readings,\n      usage: usage);\n\n  /// The same night, read',
+      '      readings: readings);\n\n  /// The same night, read',
+      'test/journal/night_test.dart', "a read night keeps its calls' counts beside its readings"),
 +    # A reading: the request, the answer, Life Context Off and Start Interpretation's logic (head's message 33; D134).
-+    ('A856', 'lib/readings/readings.dart',
++    ('A866', 'lib/readings/readings.dart',
 +     "  'kept': ?kept,",
 +     "  'kept': kept ?? [],",
 +     'test/readings/readings_test.dart', "the night's language and dreams in words; kept only when given"),
-+    ('A857', 'lib/readings/readings.dart',
++    ('A867', 'lib/readings/readings.dart',
 +     "  'dreams': night.dreams,",
 +     "  'dreams': [...night.dreams, ''],",
 +     'test/readings/readings_test.dart', "the night's language and dreams in words; kept only when given"),
-+    ('A858', 'lib/readings/readings.dart',
++    ('A868', 'lib/readings/readings.dart',
 +     "server.resolve('reading')",
 +     "server.resolve('readings')",
 +     'test/readings/readings_test.dart', 'one POST to /reading: beta key and the night alone'),
-+    ('A859', 'lib/readings/readings.dart',
++    ('A869', 'lib/readings/readings.dart',
 +     '    ..userAgent = null\n',
 +     '',
 +     'test/readings/readings_test.dart', 'one POST to /reading: beta key and the night alone'),
-+    ('A860', 'lib/readings/readings.dart',
++    ('A870', 'lib/readings/readings.dart',
 +     'if (reply.statusCode != 200) throw',
 +     'if (reply.statusCode != 200 && reply.statusCode != 204) throw',
 +     'test/readings/readings_test.dart', "not 200: the server's status; no answer: 0"),
-+    ('A861', 'lib/readings/readings.dart',
-+     ' || json.length != 1) return null;',
-+     ') return null;',
++    ('A871', 'lib/readings/readings.dart',
++     '!setEquals(json.keys.toSet(), _answerKeys)',
++     'json.isEmpty',
 +     'test/readings/readings_test.dart', 'an answer that is not one to three whole readings: -1'),
-+    ('A862', 'lib/readings/readings.dart',
++    ('A872', 'lib/readings/readings.dart',
 +     'list.isEmpty || list.length > maxReadings',
 +     'list.length > maxReadings',
 +     'test/readings/readings_test.dart', 'an answer that is not one to three whole readings: -1'),
-+    ('A863', 'lib/readings/readings.dart',
++    ('A873', 'lib/readings/readings.dart',
 +     'list.isEmpty || list.length > maxReadings',
 +     'list.isEmpty',
 +     'test/readings/readings_test.dart', 'an answer that is not one to three whole readings: -1'),
-+    ('A864', 'lib/readings/readings.dart',
++    ('A874', 'lib/readings/readings.dart',
 +     ' || lens < 0 || text is! String',
 +     ' || text is! String',
 +     'test/readings/readings_test.dart', 'an answer that is not one to three whole readings: -1'),
-+    ('A865', 'lib/readings/readings.dart',
++    ('A875', 'lib/readings/readings.dart',
 +     '!setEquals(r.keys.toSet(), _readingKeys)',
 +     'r.isEmpty',
 +     'test/readings/readings_test.dart', 'an answer that is not one to three whole readings: -1'),
-+    ('A866', 'lib/readings/readings.dart',
++    ('A876', 'lib/readings/readings.dart',
 +     '  final on = server.isNotEmpty && _betaShape.hasMatch(betaKey);',
 +     '  final on = server.isNotEmpty;',
 +     'test/readings/readings_test.dart', "Dev's own: our server, with a well-shaped beta key"),
-+    ('A867', 'lib/readings/readings.dart',
++    ('A877', 'lib/readings/readings.dart',
 +     '  if (life == null || !life.on) return null;',
 +     '  if (life == null) return null;',
 +     'test/readings/readings_test.dart', 'Off: nothing kept is sent, and it comes back On'),
-+    ('A868', 'lib/readings/readings.dart',
++    ('A878', 'lib/readings/readings.dart',
 +     '_send(requestOf(night, await _kept()))',
 +     '_send(requestOf(night, null))',
 +     'test/readings/readings_test.dart', 'the Reader sends what Life Context gives when it reads'),
-+    ('A869', 'lib/readings/readings.dart',
++    ('A879', 'lib/readings/readings.dart',
 +     'if (night.readings != null || night.dreams.isEmpty)',
 +     'if (night.dreams.isEmpty)',
 +     'test/readings/readings_test.dart', 'a night already read is not read again'),
-+    ('A870', 'lib/readings/readings.dart',
++    ('A880', 'lib/readings/readings.dart',
 +     'if (night.readings != null || night.dreams.isEmpty)',
 +     'if (night.readings != null)',
 +     'test/readings/readings_test.dart', 'a night with no dream in words yet is not sent'),
-+    ('A871', 'lib/readings/readings.dart',
++    ('A881', 'lib/readings/readings.dart',
 +     '[e is ReadingFailure ? e.status : -3]',
 +     '[-3]',
 +     'test/readings/readings_test.dart', 'a failure keeps nothing, the night unread; its status logged'),
-+    ('A872', 'lib/readings/readings.dart',
++    ('A882', 'lib/readings/readings.dart',
 +     '  if (!kept) return Interpreted.gone;\n',
 +     '',
 +     'test/readings/readings_test.dart', 'a night deleted while read keeps nothing, not made again'),
-+    ('A873', 'lib/readings/readings.dart',
++    ('A883', 'lib/readings/readings.dart',
 +     '    SafeLog.event(LogEvent.readingKeepFailed);',
 +     '    SafeLog.event(LogEvent.readingFailed);',
 +     'test/readings/readings_test.dart', 'the readings that cannot be kept: failed, a code'),
-+    ('A874', 'lib/readings/readings.dart',
-+     'SafeLog.event(LogEvent.readingRead, [readings.length]);',
++    ('A884', 'lib/readings/readings.dart',
++     'SafeLog.event(LogEvent.readingRead, [answer.readings.length]);',
 +     'SafeLog.event(LogEvent.readingRead);',
 +     'test/readings/readings_test.dart', 'the readings kept in the night, which is read; one code'),
-+    ('A875', 'lib/journal/journal.dart',
-+     '(n) => n.readings == null ? n.withReadings(readings) : n)',
-+     '(n) => n.withReadings(readings))',
++    ('A885', 'lib/journal/journal.dart',
++     'n.readings == null ? n.withReadings(readings, usage: usage) : n',
++     'n.withReadings(readings, usage: usage)',
 +     'test/readings/readings_test.dart', 'keepReadings: a night read keeps its first readings'),
++    # A reading's calls' counts, kept only where the build keeps them (head's message 34).
++    ('A886', 'lib/readings/readings.dart',
++     'keepUsage ? answer : (readings: answer.readings, usage: null)',
++     'answer',
++     'test/readings/readings_test.dart', "Dev's own: our server, with a well-shaped beta key"),
++    ('A887', 'lib/readings/readings.dart',
++     '  if (usage.contains(null)) return null;\n',
++     '',
++     'test/readings/readings_test.dart', 'an answer that is not one to three whole readings: -1'),
++    ('A888', 'lib/readings/readings.dart',
++     'usage: answer.usage)',
++     'usage: null)',
++     'test/readings/readings_test.dart', 'the readings kept in the night, which is read; one code'),
++    ('A889', 'lib/journal/journal.dart',
++     'n.withReadings(readings, usage: usage)',
++     'n.withReadings(readings)',
++     'test/readings/readings_test.dart', 'the readings kept in the night, which is read; one code'),
++    ('A890', 'lib/main_dev.dart',
++     'keepUsage: true',
++     'keepUsage: false',
++     'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
  ]
  
  
@@ -2344,18 +3077,18 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 
 ### Task 6 · App: the readings on a night's page; SoulDreams Dev's reader
 
-Only after question 1's import (C19-P). If the import changed any place this task uses, stop: the plan is amended.
+Only after Task 0b. If C19-P changed any place this task uses, the plan was amended there first.
 
 Changed: `night_page.dart`, `parts.dart`, `night_look.dart`, `journal_page.dart`, `journal_home.dart`,
 `main_dev.dart`, and the tests of the night's page, the journal list, the home and `dev_only_test.dart`;
-`tool/app_mutations.py`. Rows A876 to A898 new; A264, A385, A391, A656, A752 and A835 follow.
+`tool/app_mutations.py`. Rows A891 to A913 new; A264, A385, A391, A656, A752 and A835 follow.
 
-Checks: `No issues found!`; `+828`; `--rows A264,A385,A391,A656,A752,A835,A876,…,A898`: `29 run, 29 caught`;
+Checks: `No issues found!`; `+832`; `--rows A264,A385,A391,A656,A752,A835,A891,…,A913`: `29 run, 29 caught`;
 and every row of the
 eleven app files this branch changes (`--files lib/feedback/feedback.dart,lib/journal/night.dart,
 lib/journal/journal.dart,lib/core/safe_log.dart,lib/readings/readings.dart,lib/journal/pages/night_page.dart,
 lib/journal/pages/parts.dart,lib/journal/night_look.dart,lib/journal/pages/journal_page.dart,
-lib/journal/pages/journal_home.dart,lib/main_dev.dart`): `app mutations: 276 run, 276 caught`.
+lib/journal/pages/journal_home.dart,lib/main_dev.dart`): `app mutations: 291 run, 291 caught`.
 
 Commit:
 
@@ -2798,12 +3531,13 @@ diff --git a/app/lib/main_dev.dart b/app/lib/main_dev.dart
  import 'recording/connection.dart';
  import 'recording/record_microphone.dart';
  import 'recording/recording.dart';
-@@ -43,14 +46,15 @@ void main() {
+@@ -43,14 +46,16 @@ void main() {
      connection: ChannelConnection(),
    );
    final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));
 -  const read = bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead;
-+  final readNight = liveReading(betaKey: const String.fromEnvironment('BETA_KEY'));
++  // Each night's calls' counts and cost kept beside it (head's message 34).
++  final readNight = liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage: true);
 +  const read = bool.fromEnvironment('PREVIEW_READ') ? allRead : isRead;
    // The keyboard check (D50 1): only in a build made with
    // --dart-define=KEYBOARD_CHECK=true.
@@ -2839,13 +3573,14 @@ diff --git a/app/test/dev_only_test.dart b/app/test/dev_only_test.dart
 diff --git a/app/test/journal/pages/journal_home_test.dart b/app/test/journal/pages/journal_home_test.dart
 --- a/app/test/journal/pages/journal_home_test.dart
 +++ b/app/test/journal/pages/journal_home_test.dart
-@@ -161,6 +161,17 @@ void main() {
+@@ -161,6 +161,18 @@ void main() {
      expect(tester.widget<JournalPage>(find.byType(JournalPage)).read, same(allRead));
    });
  
 +  testWidgets("SoulDreams Dev's reading is handed to the journal; by default none", (tester) async {
 +    JournalStore.newQueueForTests();
-+    Future<List<Reading>> send(Map<String, Object?> body) async => [];
++    Future<({List<Reading> readings, List<ModelUsage>? usage})> send(Map<String, Object?> body) async =>
++        (readings: <Reading>[], usage: null);
 +    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), readNight: send)));
 +    await tester.pumpAndSettle();
 +    expect(tester.widget<JournalPage>(find.byType(JournalPage)).readNight, same(send));
@@ -2857,7 +3592,7 @@ diff --git a/app/test/journal/pages/journal_home_test.dart b/app/test/journal/pa
    testWidgets('by default no night is read', (tester) async {
      JournalStore.newQueueForTests();
      await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
-@@ -255,14 +266,18 @@ void main() {
+@@ -255,14 +267,19 @@ void main() {
        text,
        contains(
          'JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, '
@@ -2874,7 +3609,8 @@ diff --git a/app/test/journal/pages/journal_home_test.dart b/app/test/journal/pa
      expect(text, contains("final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));"));
 +    // The readings, through our server with the same beta key (head's
 +    // message 33: SoulDreams Dev only).
-+    expect(text, contains("final readNight = liveReading(betaKey: const String.fromEnvironment('BETA_KEY'));"));
++    // Each night's calls' counts kept beside it (head's message 34).
++    expect(text, contains("liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage: true);"));
    });
  
    testWidgets('a folder that cannot open: a blank page, a code', (tester) async {
@@ -2908,7 +3644,7 @@ diff --git a/app/test/journal/pages/journal_page_test.dart b/app/test/journal/pa
 +        read: isRead,
 +        readNight: (body) async {
 +          sent.add(body);
-+          return [Reading(0, '[STAND-IN · 1]')];
++          return (readings: [Reading(0, '[STAND-IN · 1]')], usage: null);
 +        },
 +      ),
 +    );
@@ -3019,7 +3755,7 @@ diff --git a/app/test/journal/pages/night_page_test.dart b/app/test/journal/page
 +    var answer = Completer<List<Reading>>();
 +    final reader = Reader((body) {
 +      sent.add(body);
-+      return answer.future;
++      return answer.future.then((r) => (readings: r, usage: null));
 +    }, () async => null);
 +    return (
 +      reader: reader,
@@ -3188,8 +3924,8 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
  # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
  # Parallel by default (D129), each worker in its own copy of app/ in
  # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
--# Expected: every row "caught" (A1 to A875, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
-+# Expected: every row "caught" (A1 to A898, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+-# Expected: every row "caught" (A1 to A890, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
++# Expected: every row "caught" (A1 to A913, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
  # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
  # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
  # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
@@ -3258,102 +3994,102 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
       'test/settings/settings_page_test.dart', 'Feedback: after the kept row, before the actions, given a sender'),
      ('A836', 'lib/main_dev.dart',
       "  final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));",
-@@ -3553,6 +3553,99 @@ ROWS = [
-      '(n) => n.readings == null ? n.withReadings(readings) : n)',
-      '(n) => n.withReadings(readings))',
-      'test/readings/readings_test.dart', 'keepReadings: a night read keeps its first readings'),
+@@ -3615,6 +3615,99 @@ ROWS = [
+      'keepUsage: true',
+      'keepUsage: false',
+      'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
 +    # The readings on a night's page, and SoulDreams Dev's reader (head's message 33).
-+    ('A876', 'lib/journal/pages/night_page.dart',
++    ('A891', 'lib/journal/pages/night_page.dart',
 +     '      return;\n    }\n    final reader = widget.reader;',
 +     '    }\n    final reader = widget.reader;',
 +     'test/journal/pages/night_page_test.dart', 'before agreeing, with a reader: the popup, nothing sent'),
-+    ('A877', 'lib/journal/pages/night_page.dart',
++    ('A892', 'lib/journal/pages/night_page.dart',
 +     ' || _busy || _reading) return;',
 +     ' || _busy) return;',
 +     'test/journal/pages/night_page_test.dart', 'Start Interpretation: AI·3 while it reads, then the readings, kept'),
-+    ('A878', 'lib/journal/pages/night_page.dart',
++    ('A893', 'lib/journal/pages/night_page.dart',
 +     '      _failed = done == Interpreted.failed;',
 +     '      _failed = false;',
 +     'test/journal/pages/night_page_test.dart', 'a failed reading: C4-P·6 alone, unread; Start Interpretation again'),
-+    ('A879', 'lib/journal/pages/night_page.dart',
++    ('A894', 'lib/journal/pages/night_page.dart',
 +     '    _toEnd();\n    final done',
 +     '    final done',
 +     'test/journal/pages/night_page_test.dart', 'Start Interpretation: AI·3 while it reads, then the readings, kept'),
-+    ('A880', 'lib/journal/pages/night_page.dart',
++    ('A895', 'lib/journal/pages/night_page.dart',
 +     '      _reading = false;\n      _failed = done',
 +     '      _reading = true;\n      _failed = done',
 +     'test/journal/pages/night_page_test.dart', 'a failed reading: C4-P·6 alone, unread; Start Interpretation again'),
-+    ('A881', 'lib/journal/pages/night_page.dart',
++    ('A896', 'lib/journal/pages/night_page.dart',
 +     'right: n.readings != null',
 +     'right: n.readings != null && n.dreams.isEmpty',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
-+    ('A882', 'lib/journal/pages/night_page.dart',
++    ('A897', 'lib/journal/pages/night_page.dart',
 +     '                  scrollCacheExtent: const ScrollCacheExtent.pixels(100000),\n',
 +     '',
 +     'test/journal/pages/night_page_test.dart', 'the Readings jump brings "The Readings" to the top'),
-+    ('A883', 'lib/journal/pages/night_page.dart',
++    ('A898', 'lib/journal/pages/night_page.dart',
 +     'lens < parts.length ? parts[lens]',
 +     'lens <= parts.length ? parts[lens]',
 +     'test/journal/pages/night_page_test.dart', "a tradition's label: W13's part at its place, else its handle"),
-+    ('A884', 'lib/journal/pages/night_page.dart',
++    ('A899', 'lib/journal/pages/night_page.dart',
 +     'line(NightPage.waitingKey, Lines.AI_3)',
 +     'line(NightPage.waitingKey, Lines.AI_4)',
 +     'test/journal/pages/night_page_test.dart', 'Start Interpretation: AI·3 while it reads, then the readings, kept'),
-+    ('A885', 'lib/journal/pages/night_page.dart',
++    ('A900', 'lib/journal/pages/night_page.dart',
 +     'line(NightPage.failedKey, Lines.C4_P_6)',
 +     'line(NightPage.failedKey, Lines.EM_8)',
 +     'test/journal/pages/night_page_test.dart', 'a failed reading: C4-P·6 alone, unread; Start Interpretation again'),
-+    ('A886', 'lib/journal/pages/night_page.dart',
++    ('A901', 'lib/journal/pages/night_page.dart',
 +     '        key: key,\n        liveRegion: true,',
 +     '        key: key,\n        liveRegion: false,',
 +     'test/journal/pages/night_page_test.dart', 'the waiting and failure lines are heard as they come'),
-+    ('A887', 'lib/journal/pages/night_page.dart',
++    ('A902', 'lib/journal/pages/night_page.dart',
 +     'child: AppLine(Lines.MP_20.text(appLanguage)',
 +     'child: AppLine(Lines.MP_38.text(appLanguage)',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
-+    ('A888', 'lib/journal/pages/night_page.dart',
++    ('A903', 'lib/journal/pages/night_page.dart',
 +     'for (final (i, r) in readings.indexed)',
 +     'for (final (i, r) in readings.take(1).indexed)',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
-+    ('A889', 'lib/journal/pages/parts.dart',
++    ('A904', 'lib/journal/pages/parts.dart',
 +     '      padding: Spacing.bubbleTradition,',
 +     '      padding: Spacing.bubbleDreamer,',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
-+    ('A890', 'lib/journal/pages/parts.dart',
++    ('A905', 'lib/journal/pages/parts.dart',
 +     '        alignment: Alignment.centerLeft,\n        child: DecoratedBox(\n          decoration: surface(p),',
 +     '        alignment: Alignment.centerRight,\n        child: DecoratedBox(\n          decoration: surface(p),',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
-+    ('A891', 'lib/journal/pages/parts.dart',
++    ('A906', 'lib/journal/pages/parts.dart',
 +     'Text(text, style: TypeRoles.voiceReadings.style(p.text))',
 +     'Text(text, style: TypeRoles.voiceApp.style(p.text))',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
-+    ('A892', 'lib/journal/pages/parts.dart',
++    ('A907', 'lib/journal/pages/parts.dart',
 +     'key: labelKey,\n                  decoration: _pill(role.colour!, role.colourEnd!),',
 +     'key: labelKey,\n                  decoration: _pill(role.colourEnd!, role.colour!),',
 +     'test/journal/pages/night_page_test.dart', "a reading's label: the tradition's pill, in its gradient, white words"),
-+    ('A893', 'lib/journal/pages/parts.dart',
++    ('A908', 'lib/journal/pages/parts.dart',
 +     'child: Text(label, style: TypeRoles.button.style(role.text!)),',
 +     'child: Text(label, style: TypeRoles.button.style(p.text)),',
 +     'test/journal/pages/night_page_test.dart', "a reading's label: the tradition's pill, in its gradient, white words"),
-+    ('A894', 'lib/journal/night_look.dart',
++    ('A909', 'lib/journal/night_look.dart',
 +     'bool isRead(Night night) => night.readings != null;',
 +     'bool isRead(Night night) => false;',
 +     'test/journal/pages/journal_page_test.dart', "with a reading, Start Interpretation reads; the row shows it read"),
-+    ('A895', 'lib/journal/pages/journal_page.dart',
++    ('A910', 'lib/journal/pages/journal_page.dart',
 +     'Reader(send, () => keptFor(widget.lifeContext))',
 +     'Reader(send, () async => <String>[])',
 +     'test/journal/pages/journal_page_test.dart', "with a reading, Start Interpretation reads; the row shows it read"),
-+    ('A896', 'lib/journal/pages/journal_page.dart',
++    ('A911', 'lib/journal/pages/journal_page.dart',
 +     '          query: query,\n          reader: _reader,',
 +     '          query: query,',
 +     'test/journal/pages/journal_page_test.dart', "with a reading, Start Interpretation reads; the row shows it read"),
-+    ('A897', 'lib/journal/pages/journal_home.dart',
++    ('A912', 'lib/journal/pages/journal_home.dart',
 +     '        readNight: widget.readNight,\n',
 +     '',
 +     'test/journal/pages/journal_home_test.dart', "SoulDreams Dev's reading is handed to the journal; by default none"),
-+    ('A898', 'lib/main_dev.dart',
-+     "  final readNight = liveReading(betaKey: const String.fromEnvironment('BETA_KEY'));",
-+     "  final readNight = liveReading(betaKey: '');",
++    ('A913', 'lib/main_dev.dart',
++     "liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage",
++     "liveReading(betaKey: '', keepUsage",
 +     'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
  ]
  
@@ -3364,11 +4100,12 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 
 Changed: `docs/Status.md`: the first line, the current branch (and `feedback`'s merge), the road ahead, the night's
 format, the read look, the readings in the app and on the server, banked item 173 (c), the totals, and "Rulings
-during readings-plumbing" (D155, D156, and the owner's answers to Part 4, added by the owner's session when given).
+during readings-plumbing" (D155 to D157 and the head's message 34, and the answers to questions 21 to 28 when
+given).
 
 Commit:
 
-> Status.md: readings-plumbing part one (D155, D156); feedback's merge recorded
+> Status.md: readings-plumbing part one (D155 to D157, head's message 34); feedback's merge recorded
 
 **The block:**
 
@@ -3380,11 +4117,11 @@ diff --git a/docs/Status.md b/docs/Status.md
  # Status — SoulDreams app
  
 -Last updated: 2026-11-24, in branch `feedback` (the Feedback section of Settings and its server change, D152, D153; built and tested, the owner's deploy, by-eye check and first reading next), by Claude Code.
-+Last updated: 2026-11-24, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155, D156; built and tested, the owner's storage rehearsal, deploy and by-eye check next), by Claude Code.
++Last updated: 2026-11-24, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D157, head's message 34; built and tested, the owner's storage rehearsal, deploy and by-eye check next), by Claude Code.
  
  *No matter where you are on your journey, the steps you take are equally important.*
  
-@@ -14,13 +14,19 @@ rulings given during each branch are listed in this file, one line each, under "
+@@ -14,13 +14,23 @@ rulings given during each branch are listed in this file, one line each, under "
  
  ## Current branch
  
@@ -3403,15 +4140,19 @@ diff --git a/docs/Status.md b/docs/Status.md
 +read (its painting, its jump buttons); a failure shows C4-P·6 alone and the night stays unread. A read night shows
 +MP·20, "The Readings" (MP·36) and its readings, each under its tradition's label, `[W13]` until W13 has a line. The
 +night's file is version 3 (D155 item 2, docs/workflow.md (c)). The model's instructions drop in as files in
-+`server/instructions/`, which holds only the empty placeholder `AWAITING-INSTRUCTIONS.md` (R7). Part two, the
-+painting (D143, D145, D146, D123), is planned after this part's merge. Also D156: a feedback of invisible
-+characters only is blank.
++`server/instructions/`, which holds only the empty placeholder `AWAITING-INSTRUCTIONS.md` (R7). Every model call goes
++through one interface, each step's model named in one setting (`server/src/models.ts`, `SETUP`), its tokens and cost
++counted and logged as numbers, and kept beside the night's readings in SoulDreams Dev (head's message 34); prompts put
++fixed text first and the dreamer's words last, and prompt caching is off until AWS's pages say it fits retention mode
++none. Part two, the painting (D143, D145, D146, D123), is planned after this part's merge; the founder's blind
++comparison (head's message 34 item 4) is planned, not built. Also D156: a feedback of invisible characters only is
++blank.
 +
 +`feedback` is merged (`de0a315`), its by-eye check and first reading passed (Task 9).
  
  `curated-set` is merged (`4a22d1a`): the curated set of night paintings (D147, with D149 to D151). Its Status was not
  updated at the merge (this entry records it).
-@@ -38,8 +44,11 @@ merge (this entry records it).
+@@ -38,8 +48,12 @@ merge (this entry records it).
  
  ## Road ahead
  
@@ -3419,13 +4160,14 @@ diff --git a/docs/Status.md b/docs/Status.md
 -  check and the first reading (Task 9), the full mutation runs once (D126), then the merge, which is the owner's.
 +- `readings-plumbing`, part one: the owner's answers to the plan's Part 4, the storage rehearsal on the phone (Task 3),
 +  the deploy (Task 8), the by-eye check (Task 9), the full mutation runs once (D126), then the merge, which is the
-+  owner's. Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
++  owner's. The C19-P import (the design system, the product change record, the register) comes before Task 6.
++  Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
 +- `readings-plumbing`, part two: the painting (D143, D145, D146, D123; D155 items 1 and 3): its plan after part one's
 +  merge.
  - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
    the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
    1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
-@@ -81,8 +90,9 @@ merge (this entry records it).
+@@ -81,8 +95,11 @@ merge (this entry records it).
  - The fonts (D49 a): Tangerine, Sorts Mill Goudy, Inter (Regular and SemiBold, the 18pt statics), Nunito (Regular,
    Italic) and Habibi, static TTFs with their OFL licences in `app/assets/fonts/`, each listed in `fingerprints.txt`
    (G2), declared in `pubspec.yaml`. The owner's download; never fetched at run time (R10).
@@ -3433,11 +4175,13 @@ diff --git a/docs/Status.md b/docs/Status.md
 -  (version 1 still read; D93 Q2: a dream is told in words or a recording waiting, `{"waiting", "from"}`),
 +- The journal's store (D49 b, c), with no screen yet: `app/lib/journal/`. One JSON file per night, format version 3
 +  (versions 1 and 2 still read; D93 Q2: a dream is told in words or a recording waiting, `{"waiting", "from"}`;
-+  D155 item 2: `readings`, null while unread, else one to three `{"lens", "text"}`),
++  D155 item 2: `readings`, null while unread, else one to three `{"lens", "text"}`; head's message 34: `usage`,
++  each model call's `{"step", "model", "input", "output", "cacheRead", "cacheWrite", "cost"}`, beside the readings
++  only, where the build keeps them),
    in `Library/Application Support/Journal`; the folder excluded from backup; the folder and every file with complete
    file protection, through the Swift channel in `AppDelegate.swift`. A save writes a temporary file, flushes it to the
    disk (F_FULLFSYNC, else fsync) and renames it; a failed save removes its own temporary file. Every store operation
-@@ -227,8 +237,19 @@ merge (this entry records it).
+@@ -227,8 +244,20 @@ merge (this entry records it).
    other three do nothing until the readings); everything below as before. Naming is removed: a name kept in a file
    is not shown (the store's field stays; the export still writes it). A night's picture (`journal/night_look.dart`,
    `pages/night_art.dart`): a read night's painting chosen from its id alone, nothing stored; an unread night's the
@@ -3449,7 +4193,8 @@ diff --git a/docs/Status.md b/docs/Status.md
 +- The readings (head's message 33; `app/lib/readings/readings.dart`; SoulDreams Dev only, `dev_only_test.dart`):
 +  `postReading` (one POST to `Hosts.server` + `reading`, the beta key, `{"lang", "dreams", "kept"?}`, 30 seconds;
 +  anything but 200 with one to three whole readings fails: the status, 0 no answer, -1 unreadable, -2 no server or
-+  key), `keptFor` (Life Context's Recent list while On, nothing while Off, D134), `interpret` (a night already read
++  key; the answer's `usage` kept only by `liveReading(keepUsage: true)`, SoulDreams Dev's), `keptFor` (Life
++  Context's Recent list while On, nothing while Off, D134), `interpret` (a night already read
 +  or with no dream in words is not sent; the readings kept with `Journal.keepReadings`, a night's first kept; codes
 +  `readingRead`, `readingFailed`, `readingKeepFailed`). On the night's page: Start Interpretation (EM·1) reads with
 +  the page's reader, AI·3 (`waitingKey`, brought into view) while it waits, C4-P·6 (`failedKey`) alone on a
@@ -3459,47 +4204,52 @@ diff --git a/docs/Status.md b/docs/Status.md
    The curated set (D147): sixty paintings in `app/assets/paintings/`, each covering its box from the middle over
    the gradient, decoded no larger than the box needs; New Dream's sky is the set's strip, under the row's
    40% (D150). The words Product owes show as provisional
-@@ -368,7 +389,7 @@ merge (this entry records it).
+@@ -368,7 +397,7 @@ merge (this entry records it).
  - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
    founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
    (P13).
 -- The app's analyzer baseline: `No issues found!`. The app has 790 tests, and 776 mutation checks (A1 to A837; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
-+- The app's analyzer baseline: `No issues found!`. The app has 828 tests, and 837 mutation checks (A1 to A898; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
++- The app's analyzer baseline: `No issues found!`. The app has 832 tests, and 852 mutation checks (A1 to A913; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
    A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
    A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
    dropped, each with its reason in the file; with the rows A24a to
-@@ -394,6 +415,14 @@ merge (this entry records it).
+@@ -394,6 +423,19 @@ merge (this entry records it).
    2.1147.0 (D42 Q1, Q14), and `@aws-sdk/client-ssm` and `@aws-sdk/client-s3` at the owner's version, for their types only: the Lambda runtime
    carries its own SDK, and the Lambda's code folder holds no package (D71 Q13 a). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
    --offline` only through `check_all.sh` (D42 Q13).
 +- `server/src/`: the readings (head's message 33): POST `/reading` with the beta key and a JSON body of `lang`
 +  (`en` or `sv`), `dreams` (one or more non-blank strings) and, optionally, `kept` (strings), at most 262,144
-+  characters, gets 200 `{readings}` from the model (`reading.ts`): the stand-in, three fixed `[STAND-IN · n]`
-+  readings; a body that is not that 400, too long 413 (`readingRefused` with the status), the model failing 502
-+  (`readingFailed`), given `readingGiven` with the count. The model is handed the instructions read once from
-+  `dist/src/instructions/` (`instructions.ts`; every `.md` but the placeholder, in name order), which `infra/dist.ts`
++  characters, gets 200 `{readings, usage}` from the readings step (`reading.ts`): its prompt the instructions first
++  and the night last, its model's text parsed as one to three readings, its call's counts and cost; with the
++  stand-in, three fixed `[STAND-IN · n]` readings and zero tokens; a body that is not that 400, too long 413
++  (`readingRefused` with the status), the model failing or its text not readings 502 (`readingFailed`), given
++  `readingGiven` with the count. Every model call goes through `callModel` (`models.ts`, head's message 34): the step's
++  model from `SETUP` (opening, readings, checks, scenery, recurrence; each the stand-in now), its caller, its tokens
++  and cost (`PRICES`, millionths of a dollar) logged as `modelUsage` numbers; `PROMPT_CACHING` false. The steps
++  are handed the instructions read once from `dist/src/instructions/` (`instructions.ts`; every `.md` but the
++  placeholder, in name order), which `infra/dist.ts`
 +  copies from `server/instructions/` (R7: only the empty `AWAITING-INSTRUCTIONS.md`). No Bedrock call, no new
 +  permission, the 10-second timeout unchanged.
  - `server/src/`: the front door (`door.ts`, head's message 14; D71): POST `/` with the beta key as a bearer token gets
    a short-lived Soniox key (200, `{key, expiresAt}`); a missing, wrong or misshapen key 401 with no body, before
    anything is read when misshapen; another method or path 404; Parameter Store failing 500; Soniox failing 502
-@@ -436,11 +465,11 @@ merge (this entry records it).
+@@ -436,11 +478,11 @@ merge (this entry records it).
    scenes and the sky) and `server/trial/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
    its names in `server/src/hosts.ts`, never fetched). macOS's `sips` makes each JPEG, and our code embeds the OS's own
    sRGB profile in it, since `sips` on macOS 26 writes none. Tested against fakes.
 -- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 156 tests, and
 -  133 mutation checks (S1 to S138, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
-+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 172 tests, and
-+  156 mutation checks (S1 to S161, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
++- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 183 tests, and
++  173 mutation checks (S1 to S178, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
    in `tool/server_mutations.py`, run by
 -  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 133 run,
 -  133 caught`); `check_all.sh` does not
-+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 156 run,
-+  156 caught`); `check_all.sh` does not
++  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 173 run,
++  173 caught`); `check_all.sh` does not
    call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
    `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
  
-@@ -1142,7 +1171,7 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
+@@ -1142,7 +1184,7 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
       policy (termination protection is on; the other protections and the 90 days stay); (b) the lifecycle has no
       rule aborting incomplete multipart uploads (our code only puts whole objects); (c) a text of only U+200B or
       U+0000 is not "blank" (`trim` as Dart's does; the app and the server agree), a question for the owner if it
@@ -3508,7 +4258,7 @@ diff --git a/docs/Status.md b/docs/Status.md
       body with a repeated `text` key keeps the last (still one field).
  
  ## Before Cohort 1
-@@ -1778,6 +1807,17 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
+@@ -1778,6 +1820,24 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
  - D154 (the founder's by-eye correction): the Feedback box's border is the colour of the Settings value pills' border
    (`surfaceBorder`), light and dark (it was `fieldBorder`, which is clear in the dark theme). App tests 790, rows 776.
  
@@ -3522,6 +4272,13 @@ diff --git a/docs/Status.md b/docs/Status.md
 +- D156 (owner, on banked item 173 (c)): a feedback text of invisible characters only (zero-width spaces, U+0000 and
 +  the like) counts as blank and is not sent (`feedback.dart`: whitespace, `Cc` and `Default_Ignorable_Code_Point`;
 +  row A838).
++- D157 (owner): the plan's Part 4 questions take their leans (Q2 straight to the readings for now; Q8 the Recent
++  window sent while On; Q15 D156 on the app only; Q19 the storage change ships alone, with the safety export before
++  the founder's app). Added from the head's message 34 (2026-11-24, from Organisation's business-model.md): one
++  interface for every model call, the model per step in one setting; token counts and cost per call, the server
++  logging numbers only and the app keeping each night's beside it (Dev, and the founder's build later); prompts with
++  fixed text first and the dreamer's words last, caching off until AWS's pages confirm it fits retention mode none;
++  the founder's blind comparison planned, not built (plan Part 7).
 +
  ## Documents as last imported
  
@@ -3572,16 +4329,17 @@ Invented nights only (R2): type them from `fixtures/invented-nights.json`.
 8. **The storage**: every night typed before this build still shows whole (Task 3's check again).
 9. **Large text** (Settings → Accessibility → Larger Text, the largest): a read night scrolls through its readings;
    nothing is cut.
-10. **The server's log** (CloudWatch, the Lambda's log group): the readings show as `readingGiven 3` and, for the
-    failure, nothing (it never reached the server); no word of any night.
+10. **The server's log** (CloudWatch, the Lambda's log group): each reading shows as `modelUsage 1 0 0 0 0 0 0` (the
+    readings step, the stand-in, zero tokens, zero cost) then `readingGiven 3`; for the failure, nothing (it never
+    reached the server); no word of any night.
 
 Expected everywhere: nothing else changed. Anything different: stop, and bring what you saw.
 
 ### Task 10 · The full mutation runs (D126)
 
-Once, after Task 9 and before the merge: `python3 -I -B tool/app_mutations.py` (expected `app mutations: 837 run,
-837 caught`) and `python3 -I -B tool/server_mutations.py` (expected `server mutations: 156 run, 156 caught`, about
-30 minutes, serial).
+Once, after Task 9 and before the merge: `python3 -I -B tool/app_mutations.py` (expected `app mutations: 852 run,
+852 caught`) and `python3 -I -B tool/server_mutations.py` (expected `server mutations: 173 run, 173 caught`, about
+35 minutes, serial).
 
 Then, before the merged build reaches the Cohort 0 app (docs/workflow.md (c) items 4 and 5): the owner exports each
 night as C142-I item 3 rules (AirDrop to the Mac, into `restricted/`), installs, checks every night by eye, and deletes
@@ -3590,10 +4348,10 @@ SoulDreams Dev's alone.
 
 ## Part 4 · Questions (numbered; a blank is not a yes)
 
-1. **The C19-P import.** `docs/source/` has no C19-P filing; the register is at C18-P. The head cites "the register at
-   C19-P". Lean: the owner imports C19-P's register (with `tool/import.sh` and C19-P's recorded hash), and any other
-   document C19-P changed that the build reads, before Task 6; if C19-P changes EM·1, AI·3, MP·20, MP·36, C4-P·6, W13
-   or MP·77, or adds a place for the readings' screen, the plan is amended first. Tasks 1 to 5 do not wait.
+Questions 1 to 20: **answered by D157, each its lean** (Q1 as Tasks 0a and 0b). Questions 21 to 28 come with the
+head's message 34 and are open.
+
+1. **The C19-P import.** Answered (D157): before the tasks, now Tasks 0a and 0b (three documents, the register last).
 2. **Scope: Start Interpretation goes straight to the readings** in this branch, on the night's page, with no
    mirror, opening, close or reflection, and in SoulDreams Dev only. main-path.md says it "goes to the mirror": the
    mirror and the opening come with their instructions. Lean: yes; the typing screen's Start Interpretation stays as
@@ -3638,56 +4396,82 @@ SoulDreams Dev's alone.
     with the safety export before (Task 10's note).
 20. **A reading's label inside its bubble**, above the words, with `StandIns.gap` between, is a stand-in: main-path.md
     says "each with its tradition's label" without placing it. Lean: as built, for the founder's by-eye check.
+21. **Where a night's counts live**: inside the night's file, `usage` beside `readings`, in the same version-3
+    storage change (one rehearsal, deleted with the night, never exported), rather than a second file beside it.
+    Lean: in the file.
+22. **Which builds keep the counts**: SoulDreams Dev now (`keepUsage: true`); the founder's build when it reads (its
+    entry point sets the same flag); the testers' app never (the answer's counts dropped on the phone; the server's log
+    still has them). Lean: yes.
+23. **The cost's unit**: whole millionths of a US dollar per call, from a price per token per model in `PRICES`
+    (`models.ts`), each model's prices [READ] from its own pricing page when its caller is built; the stand-in's are
+    zero. Lean: yes.
+24. **What the server keeps**: its log line per call (`modelUsage`: step, model, four token counts, cost; CloudWatch,
+    7 days) and nothing else; the spending counter (D69) comes with Bedrock and may read the same numbers. Lean: yes.
+25. **Prompt caching**: AWS's pages (Part 2) do not say whether a cache entry fits retention mode `none`. Lean: off,
+    and the question goes to AWS in writing (a support case from the workload account, by the owner) or to the head;
+    switching it on is one line (`PROMPT_CACHING`) with a test changed and the answer recorded.
+26. **The steps named now**: opening, readings, checks, scenery, recurrence, each the stand-in; only the readings step
+    has code. The opening's own steps (the framing lines, the questions) may each want their own model later; they
+    then become steps of their own. Lean: one `opening` step until the opening's instructions say otherwise.
+27. **A step's reasoning cap** lives in its setting (`reasoningCap`, tokens), unused until Claude's callers, there for
+    setup B (Part 7). Lean: yes.
+28. **No screen for the counts or the cost** in this branch; the founder's comparison export (Part 7) is the first
+    place they leave the phone. Lean: yes.
 
 ## Part 5 · How this plan was proven
 
+The plan was proven twice: first as written (part one, head's message 33), then again whole after the amendment
+(D157 and the head's message 34). The blocks in Part 3 are the second proof's.
+
 1. **Built task by task in a copy of the tracked tree**, `.scratch/rp/build`, from `git archive` of `de0a315`, with
-   the pinned Flutter (`app/.fvm`) and the server's installed packages; each task's state kept as a snapshot
-   (`.scratch/rp/snaps/t1` to `t6`; `base` is `de0a315`), and each block in Part 3 is `git diff --no-index` between
-   two snapshots. Blocks 1 to 6 are Tasks 1, 2, 4, 5, 6 and 7 (Tasks 3, 8, 9 and 10 are the owner's).
-2. **Test first.** Each task's tests were written before its code and failed: Task 1's new test asserted wrong
-   (`Submitted.sent` for a zero-width space); Task 2's tests did not load (`Reading`, `withReadings`); Task 4's
-   server tests did not type-check (`reading.ts`, `instructions.ts` missing); Task 5's did not load
-   (`readings.dart`); Task 6's did not load (the page's new keys, `ReadingBubble`, `isRead`, `lensLabel`, `readNight`).
-3. **Replayed on a clean copy** (`.scratch/rp/replay`, from `git archive` of `de0a315`; `GIT_CEILING_DIRECTORIES`
+   the pinned Flutter (`app/.fvm`) and the server's installed packages. The amendment was built on the first
+   proof's final tree; then each task's snapshot was made again (`.scratch/rp/snaps2/t1` to `t6`, by
+   `mksnaps2.py`): each task's files at their final content, and `tool/app_mutations.py` cut to the rows each task
+   has, with the rows a later task makes follow kept at their earlier text. The last snapshot is identical to the
+   build. Each block is `git diff --no-index` between two snapshots. Blocks 1 to 6 are Tasks 1, 2, 4, 5, 6 and 7.
+2. **Test first.** Each task's tests were written before its code and failed: Task 1's new test asserted wrong;
+   Task 2's did not load (`Reading`, `withReadings`, then `ModelUsage`); Task 4's did not type-check (`reading.ts`,
+   `instructions.ts`, then `models.ts`, missing); Task 5's did not load (`readings.dart`; then the answer's shape);
+   Task 6's did not load (the page's new keys, `ReadingBubble`, `isRead`, `lensLabel`, `readNight`).
+3. **Replayed on a clean copy** (`.scratch/rp/replay2`, from `git archive` of `de0a315`; `GIT_CEILING_DIRECTORIES`
    set, so `git apply` applies in a folder inside the repository): for each task, its test files applied alone
    first (`--include='*/test/*'`), then the rest. Measured:
-   - Task 1, tests alone: `No issues found!`, the new test fails; whole: `No issues found!`, `+791`.
-   - Task 2, tests alone: the two changed test files fail to load, `+736 -2`; whole: `No issues found!`, `+799`.
-   - Task 4, tests alone: `npm run check` fails, `ℹ tests 143`, `ℹ fail 8`; whole: clean, `ℹ tests 172`,
+   - Task 1, tests alone: `No issues found!`, `+790 -1`; whole: `No issues found!`, `+791`.
+   - Task 2, tests alone: the two changed test files fail to load, `+736 -2`; whole: `No issues found!`, `+802`.
+   - Task 4, tests alone: `npm run check` fails, `ℹ tests 144`, `ℹ fail 9`; whole: clean, `ℹ tests 183`,
      `ℹ fail 0`; the empty `server/instructions/AWAITING-INSTRUCTIONS.md` is made by `git apply` (0 bytes).
-   - Task 5, tests alone: 44 analyzer issues, `+799 -1` (the new file does not load); whole: `No issues found!`,
-     `+816`.
-   - Task 6, tests alone: 39 analyzer issues, `+698 -4`; whole: `No issues found!`, `+828`.
+   - Task 5, tests alone: the new test file does not load, `+802 -1`; whole: `No issues found!`, `+820`.
+   - Task 6, tests alone: `+702 -4`; whole: `No issues found!`, `+832`.
    - Task 7 applied. The replay's final tree is identical, file for file, to the build's, and `guards.py --walk` on
-     it prints `guards (walk): all passed`.
+     it, and on every task's snapshot, prints `guards (walk): all passed`.
 4. **Mutations.**
-   - App, during the build: Task 1 `--rows A838`: 1 of 1; Task 2 `--rows A7,A148,A150,A839…A855`: 20 of 20, and
-     `--files lib/journal/night.dart`: 26 of 26; Task 5 `--rows A856…A875`: 20 of 20; Task 6 `--rows A264,A385,
-     A876…A898`: 24 of 25, A880 surviving: it removed a second jump to the list's end after a failure, which changed
-     nothing, since the failure sentence stands where AI·3 stood, already in view. The line was removed from the code
-     and A880 repointed to what ends a reading (`_reading = false`), caught. Then `--files` of the eleven changed app
-     files found six existing rows whose old text this branch moved (A391, A656, A752, A815, A816, A835, "pattern
-     not found once"); each follows its text (D67) and was caught.
-   - Server, by importing `tool/server_mutations.py` and calling `run_row` (`.scratch/rp/srows.py`): S119 to S124 and
-     S139 to S161, 29 rows: 23 caught at first; six "missed" because the break left something unused, which the type
-     check refuses before any test runs (S140, S156, S158, S159, S160), or because `readdir` already returns names in
-     order on the Mac's disk (S149, `.sort()` removed). Each was rewritten to break the behaviour while still
-     type-checking (S149 now reverses the order), and all 29 were then caught. Then every row of the six changed
-     server files: 38 of 38.
-   - G4 then refused nineteen of the new tests' names and seven of the new rows' fragments (twelve words or more);
-     each was shortened, test and row together, in every snapshot.
-   - **On the replay, after the renames**: the app's `--files` of the eleven changed files: `app mutations: 276 run, 276 caught`; the server's rows
-     of the six changed files: `38 run, 38 caught`.
-5. **Not proven here**: the deploy (Task 8; `cdk diff` against the account); the look on a phone, the dark theme
-   and VoiceOver (Task 9); the storage rehearsal on a phone holding version 2 nights (Task 3). The full mutation runs
-   are Task 10 (D126). `test_check_all.py` cannot run in a copy with no `.git` and was not run there; no guard or
-   guard test changed. Nothing here reached our server, AWS, Soniox or BFL.
+   - First proof (part one): every task's rows caught once rewritten where needed: A880 survived (a redundant second
+     jump after a failure, removed from the code; the row repointed); six server rows were "missed" because the break
+     left something unused, which the type check refuses before any test runs, or because `readdir` already returns
+     names in order on the Mac's disk; each was rewritten to break behaviour and caught. Six existing app rows whose
+     text this branch moved (A391, A656, A752, A815, A816, A835) follow it (D67).
+   - The amendment: server rows S146, S147, S153, S157, S159, S160 followed the code that moved into `models.ts` and
+     the door's reply, and S162 to S178 are new; two "missed" at first for the same type-check reason (S159 was
+     repointed at the reply's readings, S168 became `!PROMPT_CACHING`). App rows A849, A850, A851, A861, A873 to A875
+     and A898 (first numbering) followed the moved code; ten new rows for the counts in the night's file and five for
+     the answer, Dev's keeping and the journal; then every app row of this branch was renumbered in task order
+     (A838 to A913).
+   - G4 refused, twice, test names and row fragments of twelve words or more; each was shortened, test and row
+     together, in every snapshot.
+   - **On the replay of the amended plan**: the app's `--files` of the eleven changed files: `app mutations: 291 run, 291 caught`; the server's rows
+     of the seven changed files: `55 run, 55 caught`.
+5. **Not proven here**: the C19-P import and what it changes (Tasks 0a, 0b); the deploy (Task 8; `cdk diff` against
+   the account); the look on a phone, the dark theme and VoiceOver (Task 9); the storage rehearsal on a phone holding
+   version 2 nights (Task 3). The full mutation runs are Task 10 (D126). `test_check_all.py` cannot run in a copy
+   with no `.git` and was not run there; no guard or guard test changed. Nothing here reached our server, AWS,
+   Soniox or BFL; AWS's two documentation pages were read on the web (Part 2).
 
 ## Part 6 · Part two, the painting: what its plan will ask
 
 Not planned here (D155 item 1). Its plan comes after this part's merge, and will ask, with leans:
 
+0. The scenery description is the `scenery` step of the one model interface (head's message 34): its model named in
+   `SETUP`, its counts and cost kept like the readings'.
 1. Where the painting is made: our server calls BFL's EU API (`api.eu.bfl.ai`, `flux-2-klein-4b`, D145) with the
    style constant (D146) and the neutral scenery description, never the night's words (D143). In this part the
    description is a placeholder: lean, one of the sixty invented scenes the owner read (`server/trial/scenes.ts`),
@@ -3700,5 +4484,40 @@ Not planned here (D155 item 1). Its plan comes after this part's merge, and will
    deleted with the night (docs/workflow.md (d)); what a failed painting shows (the curated painting, lean).
 5. The Lambda's timeout for BFL's polling, and BFL's cost per painting against our spending stop.
 6. Night images Off (D121 item 3): no painting is asked for.
+
+## Part 7 · The founder's blind comparison: planned now, built later (head's message 34 item 4)
+
+Not built in this branch; a later Part with its own plan and proof. What it is: in the founder's Cohort 0 app only, two
+setups per night. **A**: every step on Claude Opus 5.5. **B**: Claude Sonnet 5.5 with its reasoning capped, and Claude
+Haiku 5.5 for the simple steps. The opening is asked by one setup chosen at random; both setups then make the readings
+from his answers, shown as "first" and "second" in random order. He scores the questions, each reading and each
+close from 1 to 10, editable until he exports. The export holds no dream text: the date, which setup asked, which
+made each reading and in what order, the first and final scores, and each reading's cost; by AirDrop, as his night
+export goes (R8).
+
+**The seams this branch leaves ready:**
+- `SETUP` (`models.ts`) is a value of type `Setup`, a model choice per step with an optional reasoning cap; setups A
+  and B are two such values, and a request may later name which to use, with nothing in the steps changing.
+- Every call's counts and cost come back with the answer, step and model named, and SoulDreams Dev already keeps
+  them beside the night: the comparison's cost per reading is a sum over them.
+- The night's file has a version and a storage-change method: the comparison's second readings, their order, the
+  setup that asked and the scores are one more storage change.
+
+**Its tasks, outlined** (each test-first, under D91 and D126, after the instructions and Claude's callers exist):
+1. Server: setups A and B as two `Setup` values; the request names `A` or `B` (nothing else of the phone); the
+   reasoning cap passed to Claude's callers; the counts as now.
+2. App: the night's file gains the comparison (setup that asked, the two readings sets with their setups and the
+   order shown, the scores and their first values), a storage change under (c) with its rehearsal.
+3. App: the random choices (which setup asks; the order "first"/"second"), from the system's secure source, kept with
+   the night so the order never changes on reopening.
+4. App: the scoring (1 to 10 per question, per reading, per close), editable until exported; words for its places
+   asked of Product (R1).
+5. App: the comparison's export, by AirDrop, in the founder's app only (R8; G8), with no dream text, tested to hold
+   exactly the listed fields.
+6. Owner: the founder's by-eye check on invented nights in SoulDreams Dev first, then his Cohort 0 app.
+
+Questions it will ask: Product's words for "first", "second" and the scoring; which steps are "simple" for Haiku;
+B's reasoning cap; whether the close is scored once or per invitation; whether a night's second readings are ever
+shown again after scoring.
 
 *No matter where you are on your journey, the steps you take are equally important.*
