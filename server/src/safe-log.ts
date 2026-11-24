@@ -12,6 +12,11 @@ export const LOG_EVENTS = [
   'keyRefused',
   'sonioxKeyFailed',
   'parameterFailed',
+  // Feedback (D152): one kept; one refused (with its status, 400 or 413);
+  // the bucket failing. Never a word of it (R3).
+  'feedbackKept',
+  'feedbackRefused',
+  'feedbackFailed',
 ] as const;
 export type LogEvent = (typeof LOG_EVENTS)[number];
 

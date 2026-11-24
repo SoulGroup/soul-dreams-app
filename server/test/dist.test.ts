@@ -11,6 +11,8 @@ test('the compiled files and the marker, nothing else', () => {
   assert.deepEqual(files, [
     'beta-key.js',
     'door.js',
+    'feedback-store.js',
+    'feedback.js',
     'handler.js',
     'hosts.js',
     'package.json',
@@ -29,7 +31,7 @@ test('imports end in .js', () => {
   assert.match(readFileSync(new URL('handler.js', CODE), 'utf8'), /from "\.\/door\.js";/);
 });
 
-test("imports: its own files, Node's, and the SSM client only", () => {
+test("imports: its own, Node's, and the two AWS clients", () => {
   const files = readdirSync(CODE).filter((f) => f.endsWith('.js'));
   const outside = new Set<string>();
   for (const file of files) {
@@ -39,5 +41,5 @@ test("imports: its own files, Node's, and the SSM client only", () => {
       if (!from.startsWith('./')) outside.add(from);
     }
   }
-  assert.deepEqual([...outside].sort(), ['@aws-sdk/client-ssm', 'node:crypto']);
+  assert.deepEqual([...outside].sort(), ['@aws-sdk/client-s3', '@aws-sdk/client-ssm', 'node:crypto']);
 });

@@ -24,6 +24,9 @@ test('the events are these', () => {
     'keyRefused',
     'sonioxKeyFailed',
     'parameterFailed',
+    'feedbackKept',
+    'feedbackRefused',
+    'feedbackFailed',
   ]);
 });
 

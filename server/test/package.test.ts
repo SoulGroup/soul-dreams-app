@@ -1,6 +1,6 @@
-// The server's packages (D41; D42 Q1, Q14; D71 Q13): the six named, at
-// exact versions, for development only (the SSM client for its types:
-// the Lambda runtime carries its own), none running a script when installed,
+// The server's packages (D41; D42 Q1, Q14; D71 Q13; D152): the seven named,
+// at exact versions, for development only (the S3 and SSM clients for their
+// types: the Lambda runtime carries its own), none running a script when installed,
 // on Node 24. The owner installs them (D41); the lockfile records it.
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -13,6 +13,7 @@ function read(name: string): Json {
 }
 
 const PACKAGES = {
+  '@aws-sdk/client-s3': '3.1161.0',
   '@aws-sdk/client-ssm': '3.1161.0',
   '@types/node': '24.19.2',
   'aws-cdk': '2.1147.0',
@@ -21,7 +22,7 @@ const PACKAGES = {
   typescript: '6.0.3',
 };
 
-test('the six packages, exact, for development only', () => {
+test('the seven packages, exact, for development only', () => {
   const pkg = read('package.json');
   assert.deepEqual(pkg['devDependencies'], PACKAGES);
   assert.equal(pkg['dependencies'], undefined);

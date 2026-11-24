@@ -33,3 +33,14 @@ test('a misshapen key: 401 before anything is read', async () => {
   assert.deepEqual(reply, { statusCode: 401 });
   assert.deepEqual(lines, ['keyRefused']);
 });
+
+test('feedback with a misshapen key: 401, nothing read or kept', async () => {
+  const reply = await handler({
+    rawPath: '/feedback',
+    headers: { authorization: 'Bearer short' },
+    body: JSON.stringify({ text: 'a' }),
+    requestContext: { http: { method: 'POST' } },
+  });
+  assert.deepEqual(reply, { statusCode: 401 });
+  assert.deepEqual(lines, ['keyRefused']);
+});

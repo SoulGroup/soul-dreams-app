@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S124, D152), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -47,7 +47,7 @@ ROWS = [
     ('S11', 'cdk.json', '"notices": false', '"notices": true',
      'test', 'cdk.json switches off the three reports'),
     ('S12', 'package.json', '"aws-cdk-lib": "2.275.0"', '"aws-cdk-lib": "^2.275.0"',
-     'test', 'the six packages, exact, for development only'),
+     'test', 'the seven packages, exact, for development only'),
     ('S13', 'infra/stack.ts', '    const url = fn.addFunctionUrl(',
      "    new logs.LogGroup(this, 'Extra');\n    const url = fn.addFunctionUrl(",
      'test', 'these resources and no others'),
@@ -87,8 +87,8 @@ ROWS = [
      'test', 'the comparison hashes both keys and takes the same time'),
     ('S26', 'src/door.ts', '  if (!isBetaKeyShape(given)) {', "  if (!isBetaKeyShape(given) && given === '') {",
      'test', 'a misshapen key is refused before anything is read'),
-    ('S27', 'src/door.ts', "  if (event.requestContext?.http?.method !== 'POST'",
-     "  if (JSON.stringify(event) === '' || event.requestContext?.http?.method !== 'POST'",
+    ('S27', 'src/door.ts', "  const post = event.requestContext?.http?.method === 'POST';",
+     "  const post = JSON.stringify(event) !== '' && event.requestContext?.http?.method === 'POST';",
      'test', 'the right key: 200 and a short-lived key, one code'),
     ('S28', 'src/door.ts', '  if (!sameKey(given, betaKey)) {', '  if (!sameKey(given, betaKey) && false) {',
      'test', 'a wrong, missing or misshapen key: 401, Soniox never asked'),
@@ -334,6 +334,39 @@ ROWS = [
     ('S109', 'trial/curated.ts',
      "  } catch {\n    throw new Error('curated-profile');\n  }\n  await run(", '  } catch {\n    icc = Buffer.alloc(0);\n  }\n  await run(',
      'test', 'sipsConvert: a missing or false profile stops early'),
+    # Feedback (D152): what a request may hold, the day, the object, the door.
+    ('S110', 'src/feedback.ts', 'export const FEEDBACK_LIMIT = 2000;', 'export const FEEDBACK_LIMIT = 2001;',
+     'test', 'exactly 2,000 characters kept; one more refused'),
+    ('S111', 'src/feedback.ts', "granularity: 'grapheme'", "granularity: 'word'",
+     'test', 'at most 2,000 characters, as a person counts them'),
+    ('S112', 'src/feedback.ts', "text.trim() === ''", "text === ''",
+     'test', 'empty, blank, not JSON or not one text: refused'),
+    ('S113', 'src/feedback.ts', 'Object.keys(parsed).length !== 1 || ', '',
+     'test', 'empty, blank, not JSON or not one text: refused'),
+    ('S114', 'src/feedback.ts', '  if (body.length > BODY_LIMIT) return { refused: 413 };\n', '',
+     'test', 'a body too long is refused before it is read'),
+    ('S115', 'src/feedback.ts', 'now.toISOString().slice(0, 10)', 'now.toISOString().slice(0, 13)',
+     'test', 'the UTC day, whatever the hour'),
+    ('S116', 'src/feedback-store.ts', "    if (bucket === '') throw new Error('feedback-bucket');\n", '',
+     'test', 'no bucket named: nothing put, a bare failure'),
+    ('S117', 'src/feedback-store.ts', 'Body: text,', 'Body: `${day} ${text}`,',
+     'test', 'the store puts the text alone, as text, under its day'),
+    ('S118', 'src/feedback-store.ts', 'randomBytes(16)', 'randomBytes(4)',
+     'test', 'each feedback its own random name'),
+    ('S119', 'src/door.ts', 'if (refused !== undefined) return refused;',
+     "if (refused && path === '/') return refused;",
+     'test', 'feedback: a bad key refused before the body is read'),
+    ('S120', 'src/door.ts', 'event.isBase64Encoded === true ?', 'false ?',
+     'test', 'feedback: a base64 body is read as its text'),
+    ('S121', 'src/door.ts', "    safeLog('feedbackFailed');\n    return { statusCode: 502 };",
+     "    safeLog('feedbackKept');\n    return { statusCode: 204 };",
+     'test', 'feedback: the store failing: 502 and a code'),
+    ('S122', 'src/door.ts', "safeLog('feedbackRefused', [parsed.refused]);", "safeLog('feedbackRefused');",
+     'test', 'feedback: refused, nothing kept, its status logged'),
+    ('S123', 'src/door.ts', "path !== '/feedback')", "!(path ?? '').startsWith('/feedback'))",
+     'test', 'another method or path: 404, nothing read'),
+    ('S124', 'src/door.ts', 'utcDay(deps.now())', 'utcDay(new Date())',
+     'test', 'feedback: kept under its UTC day, 204, one code'),
 ]
 
 
