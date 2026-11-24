@@ -1,12 +1,16 @@
 // What darkens a painting under a night's date (D149, replacing D113's soft
-// shade): a row's whole picture under #000000 at 30%, a night's header with
-// its bottom half fading from #000000 at 100% at its foot through 70% at the
-// fade's middle to 0% at its top, New Dream's sky under the row's 30%; the
-// painted gradient has none. The date reads at 4.5 to 1 or better over every
-// painting, proved on real pixels (the set, D147): each painting is drawn
-// with its overlay and every pixel where the date stands is measured against
-// the date's colour. A painting under 4.5 is listed with its contrast; the
-// overlay and this measure are never changed for it.
+// shade; D150 sets the 40%): a row's whole picture under #000000 at 40% (the
+// founder's ceiling: never darker), a night's header with its bottom half
+// fading from #000000 at 100% at its foot through 70% at the fade's middle to
+// 0% at its top, New Dream's sky under the row's 40%; the painted gradient
+// has none. On real pixels (the set, D147) each painting is drawn with its
+// overlay and every pixel where the date stands is measured against the
+// date's colour. The header's date reads at 4.5 to 1 or better over every
+// painting (a gate). The rows' contrast is measured and reported, not gated
+// (D150 item 4, the founder's ruling by eye): the test fails only if the
+// overlay is not 40% or the text is missing, and writes each painting's
+// contrast to build/contrast_rows.txt.
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -29,11 +33,11 @@ double _contrast(double a, double b) => (max(a, b) + 0.05) / (min(a, b) + 0.05);
 /// where its box is.
 typedef _Spot = ({Size size, Size date, Offset at});
 
-// A row: 330 by 64, the date centred. The header: 390 by 287 (the status
-// bar's 47 and the 240), the date at the foot. The boxes are the date's
-// text with room to spare.
-const _Spot _row = (size: Size(330, 64), date: Size(80, 24), at: Offset(125, 20));
-const _Spot _header = (size: Size(390, 287), date: Size(150, 46), at: Offset(120, 211));
+// A row: 330 by 74 (D150), the date centred. The header: 390 by 287 (the
+// status bar's 47 and the 240), the 55 pt date (66 high) at the foot, 10 up.
+// The boxes are the date's text with room to spare.
+const _Spot _row = (size: Size(330, 74), date: Size(80, 24), at: Offset(125, 25));
+const _Spot _header = (size: Size(390, 287), date: Size(210, 66), at: Offset(90, 211));
 
 const _key = Key('picture');
 
@@ -106,8 +110,22 @@ void main() {
     return listed;
   }
 
-  testWidgets('row: every painting, the date reads at 4.5 to 1', (tester) async {
-    expect(await under(tester, _row, ArtOverlay.row), isEmpty);
+  // The rows' contrast: measured for each painting and written to a report
+  // (never a gate, D150 item 4). It fails if the overlay is not 40%, or the
+  // date's colour is missing or not light.
+  testWidgets("row: every painting's contrast is measured and reported", (tester) async {
+    expect(NightArt.rowOverlayAlpha, 0.4);
+    expect(NightArt.over.a, 1.0);
+    expect(overLuminance, greaterThan(0.5));
+    final report = StringBuffer();
+    for (var i = 0; i < NightArt.paintings; i++) {
+      final c = await lowest(tester, Painting(i), _row, ArtOverlay.row);
+      expect(c, greaterThan(1), reason: 'a pixel measured, painting $i');
+      report.writeln('${NightArt.asset(i).substring(folder.length)}: ${c.toStringAsFixed(2)}');
+    }
+    Directory('build').createSync(recursive: true);
+    File('build/contrast_rows.txt').writeAsStringSync(report.toString());
+    expect(report.toString().split('\n').where((l) => l.isNotEmpty), hasLength(NightArt.paintings));
   });
 
   testWidgets('header: every painting, the date reads at 4.5 to 1', (tester) async {
@@ -137,11 +155,11 @@ void main() {
     return wrong;
   }
 
-  testWidgets('a row: every painting under #000000 at 30%', (tester) async {
+  testWidgets('a row: every painting under #000000 at 40%', (tester) async {
     for (var i = 0; i < NightArt.paintings; i++) {
       final bare = await _draw(tester, NightArt(Painting(i)), _row.size);
       final dim = await _draw(tester, NightArt(Painting(i), overlay: ArtOverlay.row), _row.size);
-      expect(off(bare.data, dim.data, bare.width, keep: (_) => 0.7), 0, reason: 'painting $i');
+      expect(off(bare.data, dim.data, bare.width, keep: (_) => 0.6), 0, reason: 'painting $i');
     }
   });
 
@@ -172,7 +190,7 @@ void main() {
     }
   });
 
-  testWidgets("New Dream's sky: under the row's 30%", (tester) async {
+  testWidgets("New Dream's sky: under the row's 40%", (tester) async {
     const size = Size(200, 50);
     final width = (size.width * tester.view.devicePixelRatio).ceil();
     // The strip as NightSky shows it, without the overlay.
@@ -186,7 +204,7 @@ void main() {
       size,
     );
     final dim = await _draw(tester, const NightSky(), size);
-    expect(off(bare.data, dim.data, bare.width, keep: (_) => 0.7), 0);
+    expect(off(bare.data, dim.data, bare.width, keep: (_) => 0.6), 0);
   });
 
   testWidgets('the overlays are heard as nothing; the date is', (tester) async {

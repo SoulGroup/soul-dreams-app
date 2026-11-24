@@ -2938,4 +2938,14 @@ fade, the gradient's none, the sky's 30%, all on pixels); `paintings_test.dart`,
 `night_page_test.dart` follow (app tests 760 → 759); rows A418 to A422, A424 to A426, A429 and A781 retired and A783
 to A795 new (A1 to A795, 736 rows).
 
+**A4 · D150, the founder's by-eye corrections** (replaces D149's 30%): rows 5 pt more padding above and below the date
+(`StandIns.rowHeight` 74, `rowDatePadding`); the overlay on painted rows and New Dream's sky #000000 at 40% (the
+founder's ceiling); the header fade as D149; the header's date 55 pt (`StandIns.headerDate`), scaled down to the room
+under the controls so that twice the text size still fits; the rows' and New Dream's contrast measured and reported
+(`build/contrast_rows.txt`, `build/contrast_new_dream.txt`), not gated, the header's 4.5 to 1 gate kept; a soft text
+shadow for the row date prepared and not applied. Measured at 40%: the weakest row 2.70 (39), six of sixty at 4.5 or
+more, New Dream 5.15; Status.md lists the ten weakest. `art_overlay_test.dart` and `paintings_test.dart` report;
+`journal_page_test.dart` and `night_page_test.dart` follow (app tests 759 → 762); rows A796 to A802 new, A783, A784,
+A791 and A793 repointed (A1 to A802, 743 rows).
+
 *No matter where you are on your journey, the steps you take are equally important.*

@@ -24,10 +24,21 @@ abstract final class StandIns {
 
   /// The journal (D110, D115): above the sky mark and the greeting; between
   /// New Dream and the first row or the empty journal's line; a row's least
-  /// height.
+  /// height (D150: 64 and 5 more above and below the date) and the padding
+  /// round a row's date (`labelPadding` and the same 5 more above and below).
   static const double greetingAbove = 140;
   static const double listAbove = 40;
-  static const double rowHeight = 64;
+  static const double rowHeight = 74;
+  static const rowDatePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 13);
+
+  /// A night's header date (D150): `type.h2`'s face and spacing in em at 55.
+  static final headerDate = TypeRole(
+    TypeRoles.h2.family,
+    TypeRoles.h2.weight,
+    55,
+    TypeRoles.h2.height,
+    TypeRoles.h2.letterEm,
+  );
 
   /// A journal row (D115, P13): its distance from each side of the screen,
   /// and the thin grey border round it, one grey for each theme, chosen to

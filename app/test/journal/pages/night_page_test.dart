@@ -439,6 +439,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  // D150: the 55 pt date scales down to the room under the controls rather
+  // than being cut off: at twice the size it is drawn inside the header and
+  // not over the menu.
+  testWidgets('at twice the size the date is drawn inside the header', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    for (final read in [true, false]) {
+      await open(tester, read: read ? (_) => true : noneRead);
+      final header = tester.getRect(find.byType(NightArt));
+      final date = tester.getRect(find.text(shownDate(n.date)));
+      expect(date.top, greaterThanOrEqualTo(header.top), reason: 'read $read');
+      expect(date.bottom, lessThanOrEqualTo(header.bottom + 0.5), reason: 'read $read');
+      expect(date.top, greaterThanOrEqualTo(tester.getRect(find.byKey(NightPage.menuKey)).bottom - 0.5), reason: 'read $read');
+      await tester.pumpWidget(const SizedBox());
+    }
+  });
+
   testWidgets('a read night, text at twice the size: no overflow', (tester) async {
     tester.platformDispatcher.textScaleFactorTestValue = 2;
     addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
@@ -542,6 +559,28 @@ void main() {
     expect(box, Rect.fromLTWH(0, 0, width, StandIns.headerHeight));
     expect(box.bottom - tester.getRect(date).bottom, closeTo(Spacing.nightHeader.bottom, 1));
     expect(tester.getTopLeft(find.text(Lines.MP_38.text(Lang.en))).dy, greaterThan(box.bottom));
+  });
+
+  // D150 item 3: the header's date is 55 pt (it was type.h2's 33), in h2's
+  // face, centred at the header's foot.
+  testWidgets("the header's date is 55 pt, centred at the foot", (tester) async {
+    for (final read in [true, false]) {
+      await open(tester, read: read ? (_) => true : noneRead);
+      final date = find.text(shownDate(n.date));
+      final style = tester.widget<Text>(date).style!;
+      expect(style.fontSize, 55, reason: 'read $read');
+      expect(style.fontFamily, TypeRoles.h2.family);
+      expect(style.fontWeight, TypeRoles.h2.weight);
+      expect(style.height, TypeRoles.h2.height);
+      // h2's spacing in em, at 55.
+      expect(style.letterSpacing, closeTo(TypeRoles.h2.letterEm! * 55, 0.001));
+      expect(style.color, NightArt.over);
+      final width = tester.getSize(find.byType(NightPage)).width;
+      expect(tester.getCenter(date).dx, closeTo(width / 2, 1));
+      final box = tester.getRect(find.byType(NightArt));
+      expect(box.bottom - tester.getRect(date).bottom, closeTo(Spacing.nightHeader.bottom, 1));
+      await tester.pumpWidget(const SizedBox());
+    }
   });
 
   // D110: naming is removed; a name kept from before is not shown.

@@ -135,7 +135,7 @@ void main() {
   });
 
   // The pill as the journal builds it: as wide as its words and its padding,
-  // the sky under its 30% overlay (D149). Every pixel where the words stand
+  // the sky under its 40% overlay (D150). Every pixel where the words stand
   // against their colour, with a box of their size in their place.
   Future<double> wordsOverSky(WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
@@ -164,8 +164,16 @@ void main() {
     return lowest;
   }
 
-  testWidgets("New Dream's words read at 4.5 to 1 over the sky", (tester) async {
-    expect(await wordsOverSky(tester), greaterThanOrEqualTo(4.5));
+  // Measured and reported, not gated (D150 item 4, the founder's ruling by
+  // eye): it fails if the overlay is not 40%, or the words are missing, and
+  // writes the contrast to build/contrast_new_dream.txt.
+  testWidgets("New Dream's words: contrast measured and reported", (tester) async {
+    expect(NightArt.rowOverlayAlpha, 0.4);
+    expect(Lines.MP_11.text(appLanguage), isNotEmpty);
+    final contrast = await wordsOverSky(tester);
+    expect(contrast, greaterThan(1));
+    Directory('build').createSync(recursive: true);
+    File('build/contrast_new_dream.txt').writeAsStringSync('${contrast.toStringAsFixed(2)}\n');
   });
 
 }

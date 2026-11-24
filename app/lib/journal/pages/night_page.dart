@@ -373,23 +373,30 @@ class _NightPageState extends State<NightPage> {
                       child: Padding(
                         padding: EdgeInsets.only(top: top),
                         child: Column(
+                          // The controls at the top, the date at the foot.
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             controls,
-                            const Spacer(),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                left: Spacing.pageSide,
-                                right: Spacing.pageSide,
-                                bottom: Spacing.nightHeader.bottom,
-                              ),
-                              child: Semantics(
-                                header: true,
-                                child: Center(
-                                  child: Text(
-                                    shownDate(n.date),
-                                    textAlign: TextAlign.center,
-                                    style: TypeRoles.h2.style(NightArt.over),
+                            // The date takes the room under the controls and
+                            // scales down to it, so a very large text size
+                            // never overflows the header (D150: it is 55 pt).
+                            Flexible(
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                  left: Spacing.pageSide,
+                                  right: Spacing.pageSide,
+                                  bottom: Spacing.nightHeader.bottom,
+                                ),
+                                child: Semantics(
+                                  header: true,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      shownDate(n.date),
+                                      textAlign: TextAlign.center,
+                                      style: StandIns.headerDate.style(NightArt.over),
+                                    ),
                                   ),
                                 ),
                               ),

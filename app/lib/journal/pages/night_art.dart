@@ -8,9 +8,9 @@
 // until Product sets them (P13): the dark theme's bubble gradient and text,
 // in both themes. Heard as nothing: decoration. Also here: what darkens a
 // painting under a night's date (D149, in place of D113's soft shade): a
-// row's whole picture under #000000 at 30%, a header's bottom half fading to
-// #000000, and the night sky inside New Dream (D112; D147 item 3, the set's
-// strip) under the row's 30%.
+// row's whole picture under #000000 at 40% (D150), a header's bottom half
+// fading to #000000, and the night sky inside New Dream (D112; D147 item 3,
+// the set's strip) under the row's 40%.
 import 'package:flutter/widgets.dart';
 
 import '../../design/tokens.g.dart';
@@ -47,9 +47,10 @@ class NightArt extends StatelessWidget {
   static final over = DarkColours.text.colour!;
 
   /// The overlays' colour (D149): #000000. A row's, and New Dream's sky's,
-  /// is this at 30% over the whole picture.
+  /// is this at 40% (D150; the founder's ceiling, never darker) over the
+  /// whole picture.
   static const overlayColour = Color(0xFF000000);
-  static const double rowOverlayAlpha = 0.3;
+  static const double rowOverlayAlpha = 0.4;
 
   /// A header's: this fading over the picture's bottom half, from the bottom
   /// edge up: 100% there, 70% at the fade's middle, 0% at its top.
@@ -108,8 +109,8 @@ class _Cover extends StatelessWidget {
   );
 }
 
-/// #000000 at 30% over the whole picture (D149): a row's, and New Dream's
-/// sky's. Heard as nothing.
+/// #000000 at 40% over the whole picture (D149, D150): a row's, and New
+/// Dream's sky's. Heard as nothing.
 class _Dim extends StatelessWidget {
   const _Dim();
 
@@ -145,8 +146,8 @@ class _Fade extends StatelessWidget {
 }
 
 /// New Dream's night sky (D112; D147 item 3): the set's strip covering the
-/// pill from the middle, over the painted gradient, under the row's 30%
-/// overlay (D149). Heard as nothing, like the picture.
+/// pill from the middle, over the painted gradient, under the row's 40%
+/// overlay (D149, D150). Heard as nothing, like the picture.
 class NightSky extends StatelessWidget {
   const NightSky({super.key, this.child});
 

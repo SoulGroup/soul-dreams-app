@@ -3,7 +3,7 @@
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
 # Parallel by default (D129), each worker in its own copy of app/ in
 # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
-# Expected: every row "caught" (A1 to A795, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A802, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
@@ -3184,13 +3184,13 @@ ROWS = [
      'test/journal/pages/paintings_test.dart', 'the pubspec bundles the folder'),
     # curated-set (D149): what darkens a painting under a night's date, in place of D113's soft shade.
     ('A783', 'lib/journal/pages/night_art.dart',
-     'static const double rowOverlayAlpha = 0.3;',
+     'static const double rowOverlayAlpha = 0.4;',
      'static const double rowOverlayAlpha = 0.5;',
-     'test/journal/pages/art_overlay_test.dart', 'a row: every painting under #000000 at 30%'),
+     'test/journal/pages/art_overlay_test.dart', 'a row: every painting under #000000 at 40%'),
     ('A784', 'lib/journal/pages/night_art.dart',
      'static const overlayColour = Color(0xFF000000);',
      'static const overlayColour = Color(0xFF202020);',
-     'test/journal/pages/art_overlay_test.dart', 'a row: every painting under #000000 at 30%'),
+     'test/journal/pages/art_overlay_test.dart', 'a row: every painting under #000000 at 40%'),
     ('A785', 'lib/journal/pages/night_art.dart',
      'static const headerFadeAlphas = <double>[1.0, 0.7, 0.0];',
      'static const headerFadeAlphas = <double>[1.0, 0.5, 0.0];',
@@ -3218,7 +3218,7 @@ ROWS = [
     ('A791', 'lib/journal/pages/night_art.dart',
      'ArtOverlay.row => const _Dim(),',
      'ArtOverlay.row => const _Fade(),',
-     'test/journal/pages/art_overlay_test.dart', 'a row: every painting under #000000 at 30%'),
+     'test/journal/pages/art_overlay_test.dart', 'a row: every painting under #000000 at 40%'),
     ('A792', 'lib/journal/pages/night_art.dart',
      'ArtOverlay.header => const _Fade(),',
      'ArtOverlay.header => const _Dim(),',
@@ -3226,7 +3226,7 @@ ROWS = [
     ('A793', 'lib/journal/pages/night_art.dart',
      '      const Positioned.fill(child: _Dim()),\n',
      '',
-     'test/journal/pages/art_overlay_test.dart', "New Dream's sky: under the row's 30%"),
+     'test/journal/pages/art_overlay_test.dart', "New Dream's sky: under the row's 40%"),
     ('A794', 'lib/journal/pages/journal_page.dart',
      '              overlay: ArtOverlay.row,\n',
      '',
@@ -3235,6 +3235,35 @@ ROWS = [
      '                      overlay: ArtOverlay.header,\n',
      '',
      'test/journal/pages/night_page_test.dart', 'a header carries the fade, painting or gradient'),
+    # curated-set (D150): rows 5 more above and below the date, the header's date 55 pt.
+    ('A796', 'lib/design/stand_ins.dart',
+     'static const double rowHeight = 74;',
+     'static const double rowHeight = 64;',
+     'test/journal/pages/journal_page_test.dart', 'a row is 74 high, the date padded 5 more'),
+    ('A797', 'lib/design/stand_ins.dart',
+     'static const rowDatePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 13);',
+     'static const rowDatePadding = EdgeInsets.symmetric(horizontal: 16, vertical: 8);',
+     'test/journal/pages/journal_page_test.dart', 'a row is 74 high, the date padded 5 more'),
+    ('A798', 'lib/journal/pages/journal_page.dart',
+     'padding: StandIns.rowDatePadding,',
+     'padding: StandIns.labelPadding,',
+     'test/journal/pages/journal_page_test.dart', 'a row is 74 high, the date padded 5 more'),
+    ('A799', 'lib/design/stand_ins.dart',
+     '    55,\n    TypeRoles.h2.height,',
+     '    33,\n    TypeRoles.h2.height,',
+     'test/journal/pages/night_page_test.dart', "the header's date is 55 pt, centred at the foot"),
+    ('A800', 'lib/journal/pages/night_page.dart',
+     'style: StandIns.headerDate.style(NightArt.over),',
+     'style: TypeRoles.h2.style(NightArt.over),',
+     'test/journal/pages/night_page_test.dart', "the header's date is 55 pt, centred at the foot"),
+    ('A801', 'lib/journal/pages/night_page.dart',
+     'fit: BoxFit.scaleDown,',
+     'fit: BoxFit.none,',
+     'test/journal/pages/night_page_test.dart', 'at twice the size the date is drawn inside the header'),
+    ('A802', 'lib/journal/pages/night_page.dart',
+     'mainAxisAlignment: MainAxisAlignment.spaceBetween,',
+     'mainAxisAlignment: MainAxisAlignment.start,',
+     'test/journal/pages/night_page_test.dart', "the header: the date centred over an unread night's gradient"),
 ]
 
 

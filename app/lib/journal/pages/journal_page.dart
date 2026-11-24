@@ -601,7 +601,7 @@ class _Row extends StatelessWidget {
               overlay: ArtOverlay.row,
               child: Center(
                 child: Padding(
-                  padding: StandIns.labelPadding,
+                  padding: StandIns.rowDatePadding,
                   child: Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over)),
                 ),
               ),

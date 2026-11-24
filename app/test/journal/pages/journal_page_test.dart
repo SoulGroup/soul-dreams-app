@@ -265,6 +265,13 @@ void main() {
     await keep(h, 'one-dream-sv', stockholm(2026, 5, 8, 23));
     await h.pump(tester, JournalPage(journal: h.journal));
     expect(find.text(monthDivider(2026, 5, 2026, Lang.en)), findsOneWidget);
+    // The list builds what is on screen; the last divider is scrolled to (the
+    // rows are 74 high, D150).
+    await tester.scrollUntilVisible(
+      find.text(monthDivider(2025, 10, 2026, Lang.en)),
+      100,
+      scrollable: find.descendant(of: find.byType(ListView), matching: find.byType(Scrollable)).first,
+    );
     expect(find.text(monthDivider(2025, 10, 2026, Lang.en)), findsOneWidget);
     expect(find.text(monthDivider(2026, 6, 2026, Lang.en)), findsNothing);
     expect(monthDivider(2025, 10, 2026, Lang.en), endsWith(' 2025'));
@@ -299,6 +306,22 @@ void main() {
       expect(find.descendant(of: find.byKey(JournalPage.rowKey(n.id)), matching: find.text(shownDate(n.date))), findsOneWidget);
       await tester.pumpWidget(const SizedBox());
     }
+  });
+
+  // D150 item 1: 5 more above and below the date inside each row: the row
+  // grows by 10, from 64 to 74.
+  testWidgets('a row is 74 high, the date padded 5 more', (tester) async {
+    expect(StandIns.rowHeight, 74);
+    expect(StandIns.rowDatePadding, const EdgeInsets.symmetric(horizontal: 16, vertical: 13));
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal, read: allRead));
+    final date = find.text(shownDate(n.date));
+    final row = find.byKey(JournalPage.rowKey(n.id));
+    expect(tester.getSize(row).height, 74);
+    final padding = tester.widget<Padding>(find.ancestor(of: date, matching: find.byType(Padding)).first);
+    expect(padding.padding, StandIns.rowDatePadding);
+    expect(tester.getCenter(date).dy, closeTo(tester.getCenter(row).dy, 1));
   });
 
   testWidgets("a row: the date over an unread night's gradient", (tester) async {
