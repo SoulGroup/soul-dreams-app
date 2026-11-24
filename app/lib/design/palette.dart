@@ -7,7 +7,8 @@
 // words and its date; the light box's edge is the surface's (the founder's
 // screen), and the dark delete icon a stand-in, #D0775A, proposed by C18-P
 // and not yet approved; its list labels take color.tag.dream (a stand-in
-// read from the founder's screen).
+// read from the founder's screen). Feedback's Submit takes
+// color.button.filled (C11-P; D152).
 import 'package:flutter/material.dart';
 
 import 'stand_ins.dart';
@@ -46,6 +47,9 @@ final class Palette extends ThemeExtension<Palette> {
     required this.tagTop,
     required this.tagBottom,
     required this.tagText,
+    required this.filledTop,
+    required this.filledBottom,
+    required this.filledText,
   });
 
   final Color page;
@@ -78,6 +82,9 @@ final class Palette extends ThemeExtension<Palette> {
   final Color tagTop;
   final Color tagBottom;
   final Color tagText;
+  final Color filledTop;
+  final Color filledBottom;
+  final Color filledText;
 
   static final light = Palette(
     page: LightColours.page.colour!,
@@ -110,6 +117,9 @@ final class Palette extends ThemeExtension<Palette> {
     tagTop: LightColours.tagDream.colour!,
     tagBottom: LightColours.tagDream.colourEnd!,
     tagText: LightColours.tagDream.text!,
+    filledTop: LightColours.buttonFilled.colour!,
+    filledBottom: LightColours.buttonFilled.colour!,
+    filledText: LightColours.buttonFilled.text!,
   );
 
   static final dark = Palette(
@@ -143,6 +153,9 @@ final class Palette extends ThemeExtension<Palette> {
     tagTop: DarkColours.tagDream.colour!,
     tagBottom: DarkColours.tagDream.colourEnd!,
     tagText: DarkColours.tagDream.text!,
+    filledTop: DarkColours.buttonFilled.colour!,
+    filledBottom: DarkColours.buttonFilled.colourEnd!,
+    filledText: DarkColours.buttonFilled.text!,
   );
 
   static Palette of(BuildContext context) => Theme.of(context).extension<Palette>()!;
@@ -185,6 +198,9 @@ final class Palette extends ThemeExtension<Palette> {
       tagTop: c(tagTop, other.tagTop),
       tagBottom: c(tagBottom, other.tagBottom),
       tagText: c(tagText, other.tagText),
+      filledTop: c(filledTop, other.filledTop),
+      filledBottom: c(filledBottom, other.filledBottom),
+      filledText: c(filledText, other.filledText),
     );
   }
 }

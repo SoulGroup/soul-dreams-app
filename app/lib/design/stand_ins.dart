@@ -146,4 +146,12 @@ abstract final class StandIns {
   static const double keptDateGap = 4;
   static const double keptIcon = 20;
   static const keptDeleteDark = Color(0xFFD0775A);
+
+  /// Feedback (D152; the founder's screen, docs/reference/screens/feedback.png):
+  /// the card's inside, the field's least and most lines, Submit's side
+  /// inset, and the gap above the line after a Submit.
+  static const feedbackPadding = EdgeInsets.fromLTRB(24, 30, 24, 30);
+  static const int feedbackLines = 4;
+  static const int feedbackMaxLines = 10;
+  static const double feedbackSubmitInset = 24;
 }

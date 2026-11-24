@@ -31,6 +31,7 @@ import '../../core/safe_log.dart';
 import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
+import '../../feedback/feedback.dart';
 import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
 import '../../life_context/life_context.dart';
@@ -61,6 +62,7 @@ class JournalPage extends StatefulWidget {
     this.lifeContext,
     this.images = true,
     this.agreed = true,
+    this.feedback,
   });
 
   final Journal journal;
@@ -100,6 +102,9 @@ class JournalPage extends StatefulWidget {
   /// a night show the microphone and Start Interpretation, and a tap shows the
   /// popup.
   final bool agreed;
+
+  /// Sends feedback from Settings (D152), or null: no Feedback section.
+  final SendFeedback? feedback;
 
   @override
   State<JournalPage> createState() => _JournalPageState();
@@ -277,6 +282,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
                         settings: settings,
                         lifeContext: widget.lifeContext,
                         openNight: _openNight,
+                        feedback: widget.feedback,
                       ),
                     ),
                   ),

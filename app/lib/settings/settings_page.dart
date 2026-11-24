@@ -12,7 +12,8 @@
 // length (MP·84); then the row opening "What you've told Soul Dreams"
 // (MP·86, its flag; D121 item 2; D131), its name and a chevron; then "Read
 // disclosure & privacy" (MP·48) and "Delete journal" (EM·11) in the
-// destructive style. No feedback (D121 item 4), no
+// destructive style. Between them and the rows, given a sender (SoulDreams
+// Dev's), the Feedback section (D152; `FeedbackSection`). No
 // region, and no way to give or withdraw consent: each feature is the
 // dreamer's own act (D128 item 2).
 //
@@ -33,6 +34,8 @@ import '../core/safe_log.dart';
 import '../design/palette.dart';
 import '../design/stand_ins.dart';
 import '../design/tokens.g.dart';
+import '../feedback/feedback.dart';
+import '../feedback/feedback_section.dart';
 import '../journal/journal.dart';
 import '../journal/pages/parts.dart';
 import '../journal/pages/sky_mark.dart';
@@ -57,7 +60,14 @@ const owedLanguage = '[owed·language]';
 enum SettingRow { language, wordAnimation, nightImages, nightDay, lifeContext, length }
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key, required this.journal, required this.settings, this.lifeContext, this.openNight});
+  const SettingsPage({
+    super.key,
+    required this.journal,
+    required this.settings,
+    this.lifeContext,
+    this.openNight,
+    this.feedback,
+  });
 
   final Journal journal;
   final SettingsController settings;
@@ -67,6 +77,9 @@ class SettingsPage extends StatefulWidget {
 
   /// Opens a night from Life Context's page, or null.
   final Future<void> Function(String id)? openNight;
+
+  /// Sends feedback (D152), or null: no Feedback section.
+  final SendFeedback? feedback;
 
   static const toggleKey = Key('settings-toggle');
   static const disclosureKey = Key('settings-disclosure');
@@ -271,6 +284,10 @@ class _SettingsPageState extends State<SettingsPage> {
               row(SettingRow.length, Lines.MP_84, s.length.index, _length),
               if (widget.lifeContext case final life?)
                 _PageRow(name: Lines.MP_86.text(appLanguage), onTap: () => _openKept(life)),
+              if (widget.feedback case final send?) ...[
+                const SizedBox(height: StandIns.listAbove),
+                FeedbackSection(send: send, agreed: () => _c.agreed),
+              ],
               const SizedBox(height: StandIns.listAbove),
               _action(
                 PlainButton(

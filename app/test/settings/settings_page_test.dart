@@ -12,6 +12,8 @@ import 'package:souldreams/core/language.dart';
 import 'package:souldreams/core/night_day.dart';
 import 'package:souldreams/design/palette.dart';
 import 'package:souldreams/design/tokens.g.dart';
+import 'package:souldreams/feedback/feedback.dart';
+import 'package:souldreams/feedback/feedback_section.dart';
 import 'package:souldreams/journal/journal_store.dart';
 import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
@@ -51,6 +53,7 @@ void main() {
     Map<Consent, bool> given = const {Consent.readings: true},
     int hour = 12,
     MemoryJournalFiles? folder,
+    SendFeedback? feedback,
   }) async {
     phone(tester);
     JournalStore.newQueueForTests();
@@ -59,7 +62,7 @@ void main() {
     files.files[JournalStore.consentFile] = encodeConsents(Consents.answered(given, DateTime.utc(2026)));
     final store = await JournalStore.open(files);
     await store.save(nightsFromFixtures().first);
-    await tester.pumpWidget(SoulDreamsApp(clock: () => DateTime(2026, 6, 10, hour), home: JournalHome(files: files)));
+    await tester.pumpWidget(SoulDreamsApp(clock: () => DateTime(2026, 6, 10, hour), home: JournalHome(files: files, feedback: feedback)));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(JournalPage.gearKey));
     await tester.pumpAndSettle();
@@ -137,6 +140,38 @@ void main() {
     expect(tester.getCenter(find.byKey(SettingsPage.disclosureKey)).dy, greaterThan(page));
     final delete = tester.getCenter(find.byKey(SettingsPage.deleteKey)).dy;
     expect(tester.getCenter(find.byKey(SettingsPage.disclosureKey)).dy, lessThan(delete));
+  });
+
+  // D152 item 5: SoulDreams Dev hands the page its sender; with none, there
+  // is no Feedback section.
+  testWidgets('Feedback: after the kept row, before the actions, given a sender', (tester) async {
+    await open(tester, feedback: (_) async {});
+    expect(find.byType(FeedbackSection), findsOneWidget);
+    final y = tester.getTopLeft(find.text(en(Lines.MP_49))).dy;
+    expect(tester.getBottomLeft(find.byKey(SettingsPage.keptKey)).dy, lessThan(y));
+    expect(tester.getBottomLeft(find.byType(FeedbackSection)).dy, lessThan(tester.getTopLeft(find.byKey(SettingsPage.disclosureKey)).dy));
+  });
+
+  testWidgets('no sender, no Feedback section', (tester) async {
+    await open(tester);
+    expect(find.byType(FeedbackSection), findsNothing);
+    expect(find.text(en(Lines.MP_49)), findsNothing);
+  });
+
+  testWidgets('Feedback before agreeing: the popup, nothing sent; after I agree, sent', (tester) async {
+    final sent = <String>[];
+    await open(tester, given: const {}, feedback: (text) async => sent.add(text));
+    await tester.enterText(find.byKey(FeedbackSection.fieldKey), 'The app opens slowly.');
+    await hit(tester, find.byKey(FeedbackSection.submitKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(appLanguage)), findsOneWidget);
+    expect(sent, isEmpty);
+    await tester.tap(find.text(PendingLines.MP_102.text(appLanguage)));
+    await tester.pumpAndSettle();
+    await tester.widget<SettingsPage>(find.byType(SettingsPage)).settings.agree();
+    await hit(tester, find.byKey(FeedbackSection.submitKey));
+    await tester.pumpAndSettle();
+    expect(sent, ['The app opens slowly.']);
   });
 
   testWidgets('each row offers its line\'s choices; Language only English', (tester) async {

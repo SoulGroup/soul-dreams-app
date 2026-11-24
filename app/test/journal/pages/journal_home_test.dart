@@ -255,12 +255,14 @@ void main() {
       text,
       contains(
         'JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, '
-        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'))",
+        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback)",
       ),
     );
     // Every night read only in a build made for the by-eye preview (D110).
     expect(text, contains("bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead"));
     expect(text, contains("betaKey: const String.fromEnvironment('BETA_KEY')"));
+    // Feedback, to our server with the same beta key (D152 item 5).
+    expect(text, contains("final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));"));
   });
 
   testWidgets('a folder that cannot open: a blank page, a code', (tester) async {

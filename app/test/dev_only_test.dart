@@ -73,6 +73,8 @@ void main() {
       expect(files.where((f) => f.startsWith('lib/settings/')), isEmpty);
       // Life Context, its page and Dev's invented sentences (D131): Dev only.
       expect(files.where((f) => f.startsWith('lib/life_context/')), isEmpty);
+      // Feedback (D152 item 5): Dev only for now.
+      expect(files.where((f) => f.startsWith('lib/feedback/')), isEmpty);
       expect(files, isNot(contains(pending)));
     });
   }
@@ -99,6 +101,7 @@ void main() {
         'lib/life_context/preview.dart',
       ]),
     );
+    expect(files, containsAll(['lib/feedback/feedback.dart', 'lib/feedback/feedback_section.dart']));
   });
 
   // R8, D108: the journal's pages, which testers will get, carry only the

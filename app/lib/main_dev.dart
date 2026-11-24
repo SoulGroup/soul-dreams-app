@@ -6,6 +6,8 @@
 // owner's by-eye review of a read night's look (D110); nothing is stored.
 // Built with tool/preview_kept.py's file, it seeds the invented kept
 // sentences once, for the review of Life Context's page (D131 item 1).
+// Settings' Feedback section sends to our server with the same beta key
+// (D152 item 5: SoulDreams Dev only for now).
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -14,6 +16,7 @@ import 'app.dart';
 import 'core/flavour.dart';
 import 'core/keyboard_check.dart';
 import 'core/safe_log.dart';
+import 'feedback/feedback.dart';
 import 'founder/founder_export.dart';
 import 'journal/channel_journal_files.dart';
 import 'journal/night_look.dart';
@@ -39,6 +42,7 @@ void main() {
     betaKey: const String.fromEnvironment('BETA_KEY'),
     connection: ChannelConnection(),
   );
+  final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));
   const read = bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead;
   // The keyboard check (D50 1): only in a build made with
   // --dart-define=KEYBOARD_CHECK=true.
@@ -46,7 +50,7 @@ void main() {
     SoulDreamsApp(
       home: const bool.fromEnvironment('KEYBOARD_CHECK')
           ? const KeyboardCheck()
-          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read, preview: const String.fromEnvironment('PREVIEW_KEPT')),
+          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback),
     ),
   );
   if (check != null) unawaited(check);

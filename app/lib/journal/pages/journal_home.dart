@@ -31,6 +31,7 @@ import '../../core/always_light.dart';
 import '../../core/app_line.dart' show wordAnimation;
 import '../../core/night_day.dart';
 import '../../core/safe_log.dart';
+import '../../feedback/feedback.dart';
 import '../../life_context/life_context.dart';
 import '../../life_context/preview.dart';
 import '../../onboarding/onboarding.dart';
@@ -55,6 +56,7 @@ class JournalHome extends StatefulWidget {
     this.nightAction,
     this.read = noneRead,
     this.preview = '',
+    this.feedback,
   });
 
   final JournalFiles files;
@@ -75,6 +77,9 @@ class JournalHome extends StatefulWidget {
   /// SoulDreams Dev's invented kept sentences, as tool/preview_kept.py
   /// writes them, or empty (D131 item 1).
   final String preview;
+
+  /// Sends feedback from Settings (D152), or null: no Feedback section.
+  final SendFeedback? feedback;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -263,6 +268,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         lifeContext: _lifeContext,
         images: _settings?.settings.images != NightImages.off,
         agreed: _settings?.agreed ?? true,
+        feedback: widget.feedback,
       ),
     };
   }
