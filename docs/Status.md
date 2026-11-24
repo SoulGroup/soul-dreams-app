@@ -1723,6 +1723,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   tangent and is antialiased (about 93% covered), so the exact check moves to the straight top and foot edges and the
   two ends are checked to within 20 of the grey, with new checks that all four corners are clear and that the arc and
   the inside are drawn.
+- The full mutation runs (D126), once, after the owner's look: the server `104 run, 104 caught`; the app `747 run, 744
+  caught` on two runs, the three uncaught being A261, A387 and A442, stale after D150 (the header date's style became
+  `StandIns.headerDate`; the row date's text lost a bracket with the shade) and missed by the targeted runs. They are
+  repointed and caught, so the app is 747 of 747.
 - The prepared soft text shadow for the row date, not applied: `.scratch/for-build-chat/d150-row-date-shadow.patch`
   (values: #000000 at 65%, blur radius 6, offset 0 and 1 down; over a painting only), for the founder to try if dates
   read poorly.
