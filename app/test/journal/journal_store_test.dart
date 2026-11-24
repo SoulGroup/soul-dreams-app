@@ -119,8 +119,6 @@ void main() {
     expect(lines, isEmpty);
   });
 
-  // docs/workflow.md (c): a journal written in version 1 reads whole; a save
-  // rewrites only its own night, as version 2, and loses nothing.
   // docs/workflow.md (c); D155 item 2: a journal of an older version reads
   // whole and unread; a save rewrites only the night saved, as version 3.
   for (final version in [1, 2]) {
@@ -231,7 +229,7 @@ void main() {
     final (kept, old, damaged, loose) = ('1' * 32, '2' * 32, '3' * 32, '4' * 32);
     await files.write(JournalStore.fileOf(first.id), encodeNight(first.withEntries([Waiting(kept), Waiting(old, 64)])));
     final unreadable = utf8.decode(encodeNight(second.withEntries([Waiting(damaged)])));
-    final damagedBytes = utf8.encode(unreadable.replaceFirst('"version":2', '"version":3'));
+    final damagedBytes = utf8.encode(unreadable.replaceFirst('"version":3', '"version":4'));
     await files.write(JournalStore.fileOf(second.id), damagedBytes);
     for (final name in [
       JournalStore.audioOf(kept, 0),
@@ -396,7 +394,7 @@ void main() {
       'night-${'a' * 32}.json': utf8.encode('not json'),
       'night-${'b' * 32}.json': Uint8List.fromList([0xff, 0xfe, 0x00]),
       'night-${'c' * 32}.json': wrongId,
-      'night-${'d' * 32}.json': utf8.encode(utf8.decode(encodeNight(good)).replaceFirst('"version":2', '"version":3')),
+      'night-${'d' * 32}.json': utf8.encode(utf8.decode(encodeNight(good)).replaceFirst('"version":3', '"version":4')),
     };
     for (final MapEntry(:key, :value) in bad.entries) {
       await files.write(key, value);

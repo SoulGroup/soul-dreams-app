@@ -301,6 +301,10 @@ void main() {
       bytesOf(without('readings')),
       bytesOf(without('usage')),
       bytesOf(with_('version', '2')),
+      // The version check itself: the version-2 keys, so only an unknown
+      // version can refuse them (the cases above fail the key set first).
+      bytesOf({...without('readings')..remove('usage'), 'version': 0}),
+      bytesOf({...without('readings')..remove('usage'), 'version': 4}),
       bytesOf(with_('id', 'ABC')),
       bytesOf(with_('firstRecorded', '2026-10-12T06:40:00.000')),
       bytesOf(with_('firstRecorded', 'tomorrow')),
