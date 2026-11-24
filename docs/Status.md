@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-24, in branch `curated-set` (the curated set of night paintings shipped in the app, D147, with D149's and D150's overlays and sizes; the owner's by-eye check next), by Claude Code.
+Last updated: 2026-11-24, in branch `feedback` (the Feedback section of Settings and its server change, D152, D153; built and tested, the owner's deploy, by-eye check and first reading next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,16 +14,16 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`curated-set`: the curated set of night paintings (D147; plan `docs/plans/curated-set.md`): sixty paintings of
-invented scenery and New Dream's night sky, painted on the owner's Mac with Black Forest Labs' `flux-2-klein-4b` on
-the EU endpoint (D145) in the one style (D146) by `server/trial/curated.ts`, chosen by the owner on a contact sheet,
-shipped in `app/assets/paintings/` as JPEGs (1280 x 960, quality 75, sRGB; the sky 1200 x 336), each carrying the
-invisible AI tag (D123) and fingerprinted under G2. The app's picture choice moves from the placeholders to the set;
-Over a painting a row has #000000 at 40% over its whole picture (the founder's ceiling, never darker), a night's header
-fades its bottom half to #000000, and New Dream's sky has the row's 40% (D149 and D150, the founder's by-eye
-corrections, replacing D113's date shade); a row is 74 high and a header's date 55 pt; the rows' and New Dream's
-contrast is measured and reported, not gated, and the header's is a 4.5 to 1 gate (the rulings below). The sun and the
-moon stay drawn in code.
+`feedback`: the Feedback section of Settings and its server change (D110; C18-P; D152; plan `docs/plans/feedback.md`).
+Settings in SoulDreams Dev gains MP·49, a card with C4-P·8, a field (MP·46 as its hint, at most 2,000 characters)
+and Submit (MP·47). A feedback goes to our server's `POST /feedback` with the beta key and the text alone; the
+server puts the text in a private, encrypted bucket in eu-north-1 under its UTC day, deleted after 90 days; the owner
+reads it with `tool/read_feedback.sh`, which moves it to his Mac and deletes it from the bucket. Before "I agree",
+Submit shows the popup (MP·101); a failed send keeps the text and shows MP·105, a sent one empties the box and shows
+MP·106, the owner's pending lines (D153). The plan's questions are its Part 4.
+
+`curated-set` is merged (`4a22d1a`): the curated set of night paintings (D147, with D149 to D151). Its Status was not
+updated at the merge (this entry records it).
 
 `image-trial` is merged (`a8d0099`): the open-model trial in AWS (D135 to D141, torn down), the Nebius test (D142,
 D143, set aside) and the Black Forest Labs test (D144 to D146), whose model and style the set uses.
@@ -38,11 +38,12 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `curated-set`: the owner's by-eye check in SoulDreams Dev (plan Task 8, with D149 and D150's changes), the full mutation runs once (D126), then the merge, which is the owner's. The plan's questions are its Part 4.
+- `feedback`: the owner's answers to the plan's Part 4, the package (Task 1), the build, the deploy (Task 8), the by-eye
+  check and the first reading (Task 9), the full mutation runs once (D126), then the merge, which is the owner's.
 - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
   the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
   1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
-- Then "Made by AI"; Feedback, with its server change (D121 item 4). Life Context's sources (the opening's answers,
+- Then "Made by AI". Life Context's sources (the opening's answers,
   what is said after it, the reflection, Waking Life) come with Questions and Reflection, and with them the mark on a
   tapped sentence's night (D131 item 3).
 - Onboarding in the founder and tester apps: a later, separate ruling (D103 item 1); the pending lines are filed at
@@ -321,7 +322,17 @@ merge (this entry records it).
   version 2), followed by the journal's home (`SettingsController`): Word Animation into `AppLine` and the theme's
   fade (off, instant, as with Reduce Motion), Night/Day mode through `NightDayChoice` above the app. A change that
   cannot be kept logs `settingsKeepFailed` or `consentKeepFailed` and holds until the app closes; a read that fails, `settingsReadFailed`, and the defaults stand. No
-  feedback (D121 item 4), no region, no Help (R9).
+  region, no Help (R9). Feedback: below.
+- Feedback (D110; C18-P; D152; `app/lib/feedback/`, SoulDreams Dev only, built in `feedback`; TO TRY where a stand-in):
+  on Settings after "What you've told Soul Dreams" and before MP·48, MP·49 in h2, then a white card with C4-P·8 in
+  the app's voice, the field (MP·46 its hint, the dreamer's voice, at most 2,000 characters as a person counts them,
+  no counter) and Submit (MP·47, `color.button.filled`, in the palette as `filledTop`, `filledBottom`, `filledText`).
+  Empty or blank does nothing; before "I agree", the popup (MP·101) and nothing sent; while sending, the box is
+  closed and a second Submit does nothing; sent, the box empties and MP·106 shows; not sent, the text stays and
+  MP·105 shows (both pending lines, D153: their words in SoulDreams Dev only); typing takes either line away. The text is in the box only, never kept on the phone. One POST to
+  `Hosts.server` + `feedback`, the beta key and `{"text": ...}`, no user agent; anything but 204 fails. Logs
+  `feedbackSent`, `feedbackFailed` with the status (0 no answer, -1 other, -2 no server or beta key). The section
+  shows only when SoulDreams Dev hands Settings its sender (`main_dev.dart`, `liveFeedback`).
 - Life Context (C159-I item 1; D110, head's message 24 item 2; D127; D128; D131; `app/lib/life_context/`, SoulDreams
   Dev only; TO TRY where a stand-in): what is kept is each sentence of the dreamer's words said in a night outside the
   dream, word for word (`sentences.dart`: a sentence ends at `.`, `!`, `?` or `…` with any closing quotes, then a space
@@ -357,7 +368,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 765 tests, and 747 mutation checks (A1 to A808; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 789 tests, and 775 mutation checks (A1 to A836; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -378,16 +389,23 @@ merge (this entry records it).
 ## The server
 
 - Node 24, pinned by `engines` in `server/package.json`; `check_all.sh` checks the running major. TypeScript, strict
-  (`server/tsconfig.json`; no `exactOptionalPropertyTypes`, D42 Q6). Six packages, for development only, at exact
+  (`server/tsconfig.json`; no `exactOptionalPropertyTypes`, D42 Q6). Seven packages, for development only, at exact
   versions: `typescript` 6.0.3, `@types/node` 24.19.2, `aws-cdk-lib` 2.275.0, `constructs` 10.8.1, `aws-cdk`
-  2.1147.0 (D42 Q1, Q14), and `@aws-sdk/client-ssm` at the owner's version, for its types only: the Lambda runtime
+  2.1147.0 (D42 Q1, Q14), and `@aws-sdk/client-ssm` and `@aws-sdk/client-s3` at the owner's version, for their types only: the Lambda runtime
   carries its own SDK, and the Lambda's code folder holds no package (D71 Q13 a). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
   --offline` only through `check_all.sh` (D42 Q13).
 - `server/src/`: the front door (`door.ts`, head's message 14; D71): POST `/` with the beta key as a bearer token gets
   a short-lived Soniox key (200, `{key, expiresAt}`); a missing, wrong or misshapen key 401 with no body, before
   anything is read when misshapen; another method or path 404; Parameter Store failing 500; Soniox failing 502
-  with its status logged. It reads the method, the path and the authorization header only, never the caller's
-  address, the body or another header. The beta key's check hashes both keys and compares them in constant time
+  with its status logged. POST `/feedback` with the beta key and a JSON body of one non-blank `text` of at most 2,000
+  characters (graphemes) keeps it (`feedback.ts`, `feedback-store.ts`, D152): 204; a body that is not that 400, too
+  long 413 (`feedbackRefused` with the status), the bucket failing 502 (`feedbackFailed`), kept `feedbackKept`. The
+  object is `<UTC day>/<32 random hex>.txt`, the text alone, `text/plain; charset=utf-8`, in the bucket the
+  Lambda's one variable `FEEDBACK_BUCKET` names. It reads the method, the path and the authorization header, and the
+  body only for feedback after the key, never the caller's address or another header. The stack's bucket
+  (`infra/stack.ts`): SSE-S3, every public access blocked, no ACLs, TLS only, unversioned, objects deleted after 90
+  days, kept if the stack goes; the Lambda may only put objects; output `FeedbackBucket`. The owner reads with
+  `tool/read_feedback.sh <profile>` (`aws s3 mv` into `~/SoulDreams-feedback/<day>/`, each file dated to its day). The beta key's check hashes both keys and compares them in constant time
   (`beta-key.ts`). The temporary key's request is exactly four fields: `transcribe_websocket`, 60 seconds to open,
   single use, 1800 seconds at most (`soniox.ts`, D71 Q10), sent to `api.eu.soniox.com` (`hosts.ts`). The two keys
   are read from Parameter Store as SecureStrings (`parameters.ts`, `parameter-names.ts`); `handler.ts` wires them.
@@ -418,11 +436,11 @@ merge (this entry records it).
   scenes and the sky) and `server/trial/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
   its names in `server/src/hosts.ts`, never fetched). macOS's `sips` makes each JPEG, and our code embeds the OS's own
   sRGB profile in it, since `sips` on macOS 26 writes none. Tested against fakes.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 134 tests, and
-  104 mutation checks (S1 to S109, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 156 tests, and
+  133 mutation checks (S1 to S138, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
   in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 104 run,
-  104 caught`); `check_all.sh` does not
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 133 run,
+  133 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -475,7 +493,7 @@ The owner's, in this order (D42 Q10, Q12, Q16; D44 d; D45; D71). The plan's Task
   file by exact path (D147).
 - Totals: 255 guard tests and 102 mutation checks (c18p-import: the generators' new forms, D118, D119). Measured at
   `curated-set`: 279 guard tests (276 at its start, 3 added by D147's Task 1; its plan said 274) and 2 more guard
-  mutation checks.
+  mutation checks. At `feedback`: 287 guard tests (`test_read_feedback.py`, 8).
 
 ## Banked
 
@@ -1119,6 +1137,13 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
 172. The Opus review of image-trial (D138; plan Part 6, "Banked from the review"): the CDK's staging copy of the
      template stays after the teardown; the forecast budget alert is likely silent for lack of history; diffusers
      logs the cut-off words of an over-long prompt, which matters for the production painting under R3.
+173. The Opus review of feedback's server route and bucket (D91; notes, no defect): (a) the bucket's removal policy
+     is `RETAIN` but its bucket policy has none, so if the stack is ever removed the kept bucket loses its TLS-only
+     policy (termination protection is on; the other protections and the 90 days stay); (b) the lifecycle has no
+     rule aborting incomplete multipart uploads (our code only puts whole objects); (c) a text of only U+200B or
+     U+0000 is not "blank" (`trim` as Dart's does; the app and the server agree), a question for the owner if it
+     matters; (d) a base64 body is decoded before the 65,536 check, which Lambda's own 6 MB limit bounds; (e) a
+     body with a repeated `text` key keeps the last (still one field).
 
 ## Before Cohort 1
 
@@ -1167,7 +1192,7 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 
 - MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
   founder, 2026-11-22, D125 item 9; the owner wrote them in `pending-lines.csv`; handles proposed to Product, banked
-  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164); MP·103 "Done" / "Klar" (the tick that ends selecting on Life Context's page) and MP·104 (the line shown there while Life Context is Off) (the founder, D133; handles proposed to Product). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
+  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164); MP·103 "Done" / "Klar" (the tick that ends selecting on Life Context's page) and MP·104 (the line shown there while Life Context is Off) (the founder, D133; handles proposed to Product). MP·105 (Feedback, a send that failed) and MP·106 (Feedback, a send that worked), added to `pending-lines.csv` by the owner (D153; D152 item 4; plan `docs/plans/feedback.md`, Part 4; handles proposed to Product). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
 
 ## Rulings during branch 2
 
@@ -1730,6 +1755,24 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - The prepared soft text shadow for the row date, not applied: `.scratch/for-build-chat/d150-row-date-shadow.patch`
   (values: #000000 at 65%, blur radius 6, offset 0 and 1 down; over a painting only), for the founder to try if dates
   read poorly.
+
+## Rulings during feedback
+
+- `curated-set` merged by the owner (`4a22d1a`).
+- D152 (owner, the brainstorm): (1) feedback goes through our server to a private S3 bucket in the workload account,
+  eu-north-1, encrypted, blocked from public access, holding only the text and the UTC day (no install ID, device,
+  journal or IP; the Lambda logs codes only), deleted by its lifecycle after 90 days; (2) the owner reads it with
+  one command on his Mac that downloads the new feedback to a folder and then deletes it from the bucket; (3) at
+  most 2,000 characters; an empty Submit does nothing; before "I agree" the D128 popup (MP·101) instead of sending;
+  (4) a failed send keeps the text in the box and shows a "couldn't send" line (a pending line if the register has
+  none); (5) SoulDreams Dev only for now. D91 and D126 apply.
+- D153 (owner): the plan's Part 4 question 1 yes (`@aws-sdk/client-s3` 3.1161.0, installed by the owner); questions 2
+  to 14 their leans; MP·105 and MP·106 added by the owner to `pending-lines.csv` (the lines of question 2; the
+  fingerprint and `pending.g.dart` regenerated), so Feedback shows their words in SoulDreams Dev and no handle is
+  owed; the Opus review of the server route and the bucket under D91; owner tasks 1, 8, 9 and 10 stop.
+- Decided under D91 (after the Opus review of the route and the bucket, which found no defect): two test gaps
+  closed in `0f6518d` (the body limit's edge, rows S136; the bucket variable's wiring, `wire` in `handler.ts`, rows
+  S137, S138), re-reviewed, approved. Server tests 154 to 156, rows 130 to 133.
 
 ## Documents as last imported
 
