@@ -2925,4 +2925,17 @@ Task 4, and above about 50 MB the next step is 45 paintings, not lower quality. 
 `curated.ts`; the tests' sizes and the quality; row S98 (quality 75). The Task 6 block's painting test expects
 1280 x 960. The sky stays 1200 x 336. One request's credits stay counted as 3 (1280 x 960 is 1.4 to 1.5 credits).
 
+**A3 · D149, the founder's by-eye correction** (before the merge; replaces D113 item 2's date shade): a row over a
+painting has #000000 at 30% over its whole picture instead of the soft shade behind the date; a night's header over a
+painting fades its bottom half to #000000 (100% at the very bottom, 70% at the fade's middle, 0% at its top; stops
+0.0, 0.5, 1.0 from the bottom edge) instead of the date's shade; New Dream's sky has the same 30%. The gradient rows
+are unchanged. `ArtOverlay` (`night_art.dart`) replaces `DateShade`, which is gone; Parts 1 and 3 above (the plain
+words, the Task 6 block, "the date's shade") describe the shade as first built. The 4.5 to 1 gate stays, and where it
+fails the overlay and the test are not changed: on the real set **all 60 rows are under it** (2.01 to 4.05), **New
+Dream's pill is 4.01**, and **headers pass** (7.31 at the lowest); the figures and what each row would need are in
+Status.md. The tests: `date_shade_test.dart` is `art_overlay_test.dart` (the gates; the row's 30%, the header's
+fade, the gradient's none, the sky's 30%, all on pixels); `paintings_test.dart`, `journal_page_test.dart` and
+`night_page_test.dart` follow (app tests 760 → 759); rows A418 to A422, A424 to A426, A429 and A781 retired and A783
+to A795 new (A1 to A795, 736 rows).
+
 *No matter where you are on your journey, the steps you take are equally important.*

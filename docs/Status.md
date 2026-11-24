@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-24, in branch `curated-set` (the curated set of night paintings shipped in the app, D147; the owner's by-eye check next), by Claude Code.
+Last updated: 2026-11-24, in branch `curated-set` (the curated set of night paintings shipped in the app, D147, with D149's overlays; the founder's judgment on the contrast findings next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -19,7 +19,9 @@ invented scenery and New Dream's night sky, painted on the owner's Mac with Blac
 the EU endpoint (D145) in the one style (D146) by `server/trial/curated.ts`, chosen by the owner on a contact sheet,
 shipped in `app/assets/paintings/` as JPEGs (1280 x 960, quality 75, sRGB; the sky 1200 x 336), each carrying the
 invisible AI tag (D123) and fingerprinted under G2. The app's picture choice moves from the placeholders to the set;
-New Dream's words stand on the date's shade over the sky (D113, a stand-in). The sun and the moon stay drawn in code.
+Over a painting a row has #000000 at 30% over its whole picture, a night's header fades its bottom half to #000000, and
+New Dream's sky has the row's 30% (D149, the founder's by-eye correction, replacing D113's date shade); the 4.5 to 1
+gate does not hold for the rows or for New Dream (the rulings below). The sun and the moon stay drawn in code.
 
 `image-trial` is merged (`a8d0099`): the open-model trial in AWS (D135 to D141, torn down), the Nebius test (D142,
 D143, set aside) and the Black Forest Labs test (D144 to D146), whose model and style the set uses.
@@ -34,8 +36,8 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `curated-set`: the owner's by-eye check in SoulDreams Dev (plan Task 8), the full mutation runs once (D126), then
-  the merge, which is the owner's. The plan's questions are its Part 4.
+- `curated-set`: the founder's judgment on D149's contrast findings (below), then the owner's by-eye check in SoulDreams
+  Dev (plan Task 8), the full mutation runs once (D126), then the merge, which is the owner's. The plan's questions are its Part 4.
 - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
   the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
   1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
@@ -210,11 +212,12 @@ merge (this entry records it).
   centred in h2, then New Dream (a pill on a night sky drawn in code, `NightSky`) opening the typing screen as the record button did, which is gone; each night a rounded row of
   at least 64, 48 from each side of the screen (`StandIns.rowSide`) and edged by a 1 pt grey border (`#9E9E9E` in the
   light theme, `#8A8A8A` in the dark, stand-ins in `StandIns`, `Palette.rowBorder`; the gradient rows too, D115), carrying only its date (h6, day/month/yy: `shownDate`; the founder's export keeps `dayDigits`'
-  four-digit year) over the night's picture, with a soft dark shade behind the date over a painting, none over the
-  painted gradient (`DateShade`, D113; measured on real pixels: 7.2 to 1 at the lowest over the five paintings); month dividers and C4-P·5 as before; the first
+  four-digit year) over the night's picture, with #000000 at 30% over the whole picture over a painting, none over the
+  painted gradient (`ArtOverlay.row`, D149); month dividers and C4-P·5 as before; the first
   empty journal shows C4-P·5 and nothing more (no MP·9, no arrow, D125 item 3). A night's page: a header 240 below the status bar,
   the night's picture from the screen's top with the back control and the menu over it and the date (h2) at its
-  foot (the same shade over a painting), "Dreams" centred, light status-bar text over the header in both themes, and
+  foot (over a painting its bottom half fades to #000000, 100% at the foot, 70% at the fade's middle, 0% at its top:
+  `ArtOverlay.header`, D149), "Dreams" centred, light status-bar text over the header in both themes, and
   everywhere else the status bar follows the app's own theme (D114: light text over the dark theme, dark text over
   the light, whatever the phone's setting is; `core/status_bar.dart`, held under every page in `app.dart`, since
   Flutter keeps the last style when a frame has none);
@@ -225,8 +228,8 @@ merge (this entry records it).
   painted gradient (the dark theme's bubble gradient, both themes); no night is read yet (`noneRead`), and
   SoulDreams Dev built with `--dart-define=PREVIEW_READ=true` shows every night as read, for the owner's review.
   The curated set (D147): sixty paintings in `app/assets/paintings/`, each covering its box from the middle over
-  the gradient, decoded no larger than the box needs; New Dream's sky is the set's strip, its words on the date's
-  shade (D113). The words Product owes show as provisional
+  the gradient, decoded no larger than the box needs; New Dream's sky is the set's strip, under the row's
+  30% (D149). The words Product owes show as provisional
   handles, `[owed·…]` (`journal/owed.dart`): four greetings, New Dream, the four jump buttons.
 - The night rules (`app/lib/journal/night_rules.dart`, `journal.dart`): a night stores its closing instant, the
   first 21:00 after its first recording in the zone then in force (format version 1, D57 Q14); the typing screen's
@@ -353,7 +356,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 760 tests, and 733 mutation checks (A1 to A782; A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 759 tests, and 736 mutation checks (A1 to A795; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -1679,6 +1682,20 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   46M by `du` (1024-based; about 48 MB).
 - Task 4 (owner): all 61 accepted by the founder on the contact sheet, none painted again; BFL counted 91.40 credits
   (USD 0.914) of the USD 3 cap.
+- D149 (the founder's by-eye correction, before the merge; replaces D113 item 2's date shade): (1) a journal row over a
+  painting has no soft shade behind its date; instead #000000 at 30% over the whole row above the painting (the
+  gradient rows unchanged); (2) a night's header over a painting has no date shade; instead a vertical fade over the
+  bottom half of the header image, #000000 at 100% at the very bottom, 70% at the fade's middle, 0% at its top (stops
+  0.0, 0.5, 1.0 from the bottom edge); (3) New Dream's night-sky pill has the same 30% #000000 instead of the shade
+  behind its words. The date-contrast gate (4.5 to 1) stays; where a painting falls under it the overlay and the test
+  are not changed, and the paintings and their contrast are listed for the founder (keep, repaint, or a darker
+  overlay). Built (`ArtOverlay` in `night_art.dart`; `DateShade` is gone), test first.
+- D149's findings, measured on real pixels, the overlay and the test as the founder specified: **all 60 rows are under
+  4.5 to 1**, from 2.01 (39) to 4.05 (12), the lowest ten being 39, 40, 35, 4, 59, 11, 33, 51, 54 and 56; New Dream's
+  pill is 4.01; **headers pass**, 7.31 at the lowest (42). The overlay each row would need is 35% (12, 25) to 60%
+  (39), about 55% for most. The two gate tests, `row: every painting, the date reads at 4.5 to 1` and `New Dream's
+  words read at 4.5 to 1 over the sky`, fail until the founder rules; every other test passes. Not committed as
+  green: the commit says so.
 
 ## Documents as last imported
 

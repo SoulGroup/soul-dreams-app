@@ -526,9 +526,7 @@ class _NewDream extends StatelessWidget {
         child: NightSky(
           child: Padding(
             padding: StandIns.buttonPadding,
-            child: DateShade(
-              child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),
-            ),
+            child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over)),
           ),
         ),
       ),
@@ -600,10 +598,11 @@ class _Row extends StatelessWidget {
             ),
             child: NightArt(
               look,
+              overlay: ArtOverlay.row,
               child: Center(
                 child: Padding(
                   padding: StandIns.labelPadding,
-                  child: DateShade.over(look, Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over))),
+                  child: Text(shownDate(night.date), style: TypeRoles.rowDate.style(NightArt.over)),
                 ),
               ),
             ),

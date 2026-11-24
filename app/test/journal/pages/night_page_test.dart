@@ -749,25 +749,18 @@ void main() {
     }
   });
 
-  // D113 (the review): the shade is behind the date, as wide as its words,
-  // not a band across the header.
-  testWidgets("the header's shade is as wide as the date", (tester) async {
-    await open(tester, read: (_) => true);
-    final shade = tester.getSize(find.byType(DateShade));
-    final text = tester.getSize(find.text(shownDate(n.date)));
-    expect(shade, text);
-    // Not the page's whole content width, which a stretched date would have.
-    expect(shade.width, lessThan(tester.getSize(find.byType(NightPage)).width - 2 * Spacing.pageSide));
-  });
-
-  // D113: a soft dark shade behind the date over a painting, none over the
-  // painted gradient.
-  testWidgets("a read header shades its date; an unread one does not", (tester) async {
-    await open(tester, read: (_) => true);
-    expect(find.descendant(of: find.byType(DateShade), matching: find.text(shownDate(n.date))), findsOneWidget);
-    await tester.pumpWidget(const SizedBox());
-    await open(tester);
-    expect(find.byType(DateShade), findsNothing);
+  // D149: a night's header over a painting fades its bottom half to black
+  // (the pixels are proved in art_overlay_test); the gradient is not changed
+  // by it. The date stands over it either way.
+  testWidgets("a header carries the fade, painting or gradient", (tester) async {
+    for (final read in [true, false]) {
+      await open(tester, read: read ? (_) => true : noneRead);
+      final art = tester.widget<NightArt>(find.byType(NightArt));
+      expect(art.overlay, ArtOverlay.header, reason: 'read $read');
+      expect(art.look is Painting, read, reason: 'read $read');
+      expect(find.descendant(of: find.byType(NightArt), matching: find.text(shownDate(n.date))), findsOneWidget);
+      await tester.pumpWidget(const SizedBox());
+    }
   });
 
   // D113: over a night's header the status bar's time and battery are light,

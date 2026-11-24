@@ -369,6 +369,7 @@ class _NightPageState extends State<NightPage> {
                   ? Padding(padding: EdgeInsets.only(top: top), child: Align(alignment: Alignment.topCenter, child: controls))
                   : NightArt(
                       look!,
+                      overlay: ArtOverlay.header,
                       child: Padding(
                         padding: EdgeInsets.only(top: top),
                         child: Column(
@@ -384,16 +385,11 @@ class _NightPageState extends State<NightPage> {
                               ),
                               child: Semantics(
                                 header: true,
-                                // As wide as its words, so the shade stands
-                                // behind the date and not across the header.
                                 child: Center(
-                                  child: DateShade.over(
-                                    look,
-                                    Text(
-                                      shownDate(n.date),
-                                      textAlign: TextAlign.center,
-                                      style: TypeRoles.h2.style(NightArt.over),
-                                    ),
+                                  child: Text(
+                                    shownDate(n.date),
+                                    textAlign: TextAlign.center,
+                                    style: TypeRoles.h2.style(NightArt.over),
                                   ),
                                 ),
                               ),

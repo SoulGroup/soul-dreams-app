@@ -135,9 +135,9 @@ void main() {
   });
 
   // The pill as the journal builds it: as wide as its words and its padding,
-  // the words on the date's shade (D113). Every pixel where the words stand
+  // the sky under its 30% overlay (D149). Every pixel where the words stand
   // against their colour, with a box of their size in their place.
-  Future<double> wordsOverSky(WidgetTester tester, {required bool shade}) async {
+  Future<double> wordsOverSky(WidgetTester tester) async {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: Center(child: Text(Lines.MP_11.text(appLanguage), style: TypeRoles.button.style(NightArt.over))),
@@ -148,7 +148,7 @@ void main() {
     final box = SizedBox.fromSize(size: words);
     final sky = await draw(
       tester,
-      NightSky(child: Padding(padding: pad, child: shade ? DateShade(child: box) : box)),
+      NightSky(child: Padding(padding: pad, child: box)),
       size,
     );
     final over = NightArt.over;
@@ -165,7 +165,7 @@ void main() {
   }
 
   testWidgets("New Dream's words read at 4.5 to 1 over the sky", (tester) async {
-    expect(await wordsOverSky(tester, shade: true), greaterThanOrEqualTo(4.5));
+    expect(await wordsOverSky(tester), greaterThanOrEqualTo(4.5));
   });
 
 }
