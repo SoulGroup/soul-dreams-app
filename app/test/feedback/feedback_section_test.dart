@@ -1,8 +1,8 @@
 // The Feedback section of Settings (D110; C18-P; D152): MP·49 over a card
 // holding C4-P·8, the field (MP·46 as its hint, at most 2,000 characters)
 // and Submit (MP·47, color.button.filled). Empty does nothing; before "I
-// agree", the popup; a send that fails keeps the text and shows [MP·105]; one
-// that works empties the box and shows [MP·106]; typing again takes the line
+// agree", the popup; a send that fails keeps the text and shows MP·105; one
+// that works empties the box and shows MP·106; typing again takes the line
 // away. The two lines are owed: their handles show until the owner files
 // them (R1).
 import 'dart:async';
@@ -137,30 +137,30 @@ void main() {
     expect(boxText(tester), 'The app opens slowly.');
   });
 
-  testWidgets('sent: the box empties, [MP·106] shows, typing clears it', (tester) async {
+  testWidgets('sent: the box empties, MP·106 shows, typing clears it', (tester) async {
     await show(tester);
     await type(tester, 'The app opens slowly.');
     await submit(tester);
     expect(sent, ['The app opens slowly.']);
     expect(boxText(tester), '');
-    expect(find.text('[MP·106]'), findsOneWidget);
+    expect(find.text(PendingLines.MP_106.text(appLanguage)), findsOneWidget);
     expect(tester.getSemantics(find.byKey(FeedbackSection.lineKey)).flagsCollection.isLiveRegion, isTrue);
     await type(tester, 'A');
     expect(find.byKey(FeedbackSection.lineKey), findsNothing);
   });
 
-  testWidgets("not sent: the text stays, [MP·105] shows; Submit again sends it", (tester) async {
+  testWidgets('not sent: the text stays, MP·105 shows; Submit again sends it', (tester) async {
     fails = const FeedbackFailure(502);
     await show(tester);
     await type(tester, 'The app opens slowly.');
     await submit(tester);
     expect(boxText(tester), 'The app opens slowly.');
-    expect(find.text('[MP·105]'), findsOneWidget);
+    expect(find.text(PendingLines.MP_105.text(appLanguage)), findsOneWidget);
     fails = null;
     await submit(tester);
     expect(sent, ['The app opens slowly.', 'The app opens slowly.']);
-    expect(find.text('[MP·105]'), findsNothing);
-    expect(find.text('[MP·106]'), findsOneWidget);
+    expect(find.text(PendingLines.MP_105.text(appLanguage)), findsNothing);
+    expect(find.text(PendingLines.MP_106.text(appLanguage)), findsOneWidget);
   });
 
   testWidgets('while sending: the box cannot change, a second Submit does nothing', (tester) async {

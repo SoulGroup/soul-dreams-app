@@ -8,8 +8,8 @@
 // until the answer. Sent: the box empties and MP·106 shows; not sent: the
 // text stays and MP·105 shows. Either line goes when the dreamer types. The
 // text lives in the box only, never kept on the phone (R11). MP·105 and
-// MP·106 have no line yet: their handles show (R1). The card, field and
-// button sizes are stand-ins (TO TRY).
+// MP·106 are pending lines (D153): their words show in SoulDreams Dev only
+// (R1). The card, field and button sizes are stand-ins (TO TRY).
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,13 +21,8 @@ import '../design/tokens.g.dart';
 import '../journal/pages/parts.dart';
 import '../settings/agreement_popup.dart';
 import '../words/lines.g.dart';
+import '../words/pending.g.dart';
 import 'feedback.dart';
-
-/// The line after a send that failed: owed (R1).
-const unsentLine = '[MP·105]';
-
-/// The line after a send that worked: owed (R1).
-const sentLine = '[MP·106]';
 
 class FeedbackSection extends StatefulWidget {
   const FeedbackSection({super.key, required this.send, required this.agreed});
@@ -77,8 +72,8 @@ class _FeedbackSectionState extends State<FeedbackSection> {
   Widget build(BuildContext context) {
     final p = Palette.of(context);
     final line = switch (_form.state) {
-      FeedbackState.sent => sentLine,
-      FeedbackState.unsent => unsentLine,
+      FeedbackState.sent => PendingLines.MP_106.text(appLanguage),
+      FeedbackState.unsent => PendingLines.MP_105.text(appLanguage),
       FeedbackState.idle || FeedbackState.sending => null,
     };
     final edge = OutlineInputBorder(
