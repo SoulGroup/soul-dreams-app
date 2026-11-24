@@ -3,11 +3,12 @@
 Branch `readings-plumbing`, from `main` at `de0a315`. Investigation, spec and plan in one (docs/workflow.md steps 3, 5
 and 6), under D91 and D126. Written by Claude Code (Opus) on 2026-11-24; **amended the same day** for the owner's D157
 (Part 4's questions take their leans) and the head's message 34 (one interface for every model call, token counts and
-cost, caching, the founder's blind comparison planned), and re-proven (Part 5). Governs: the head's message 33 (GO on the
+cost, caching, the founder's blind comparison planned), and re-proven (Part 5); **amended again on 2026-11-25** after the C19-P import's stop (Task 0b: MP·71 under each
+reading) and D158, and re-proven. Governs: the head's message 33 (GO on the
 readings' plumbing with a stand-in model, in SoulDreams Dev only, with invented nights only), as the owner relayed
 it; C3-T 2e (Claude Opus 5.5 runs the readings, later); C4-T item 4 (no provisional instructions); D134 (Life Context
 Off: nothing kept is sent); D128 (the popup before "I agree"); the owner's D155 (the brainstorm) and D156 (banked item
-173 (c)); D157; the head's message 34 (2026-11-24, from Organisation's business-model.md); R1, R3, R4, R7, R10, R11.
+173 (c)); D157; D158; the head's message 34 (2026-11-24, from Organisation's business-model.md); R1, R3, R4, R7, R10, R11.
 The owner's checks are by eye only.
 
 `feedback` is merged (`main` at `de0a315`); Status.md's first line still names it ("the owner's deploy, by-eye check
@@ -31,8 +32,17 @@ places this plan uses (Part 1, "The places this branch uses"). **If C19-P change
 amended before Task 6, and nothing is guessed meanwhile.** C19-P could not be read before its import: Claude Code
 never reads the documents repository (R6), so this plan is written and proven on C18-P.
 
-**Part 4 is answered (D157): every question takes its lean.** The amendment's own questions are Part 4's 21 to 28;
-until they are answered they too take their leans only if the owner says so. No new package, app or server (R10).
+**Part 4 is answered: questions 1 to 20 by D157, 21 to 28 by D158, every one its lean** (question 25: caching built
+off; the Build chat asks AWS in writing and carries the answer to the head). No new package, app or server (R10).
+
+**The C19-P import stopped (Task 0a), and this branch builds on C18-P.** Task 0b's finding: C19-P changes none of the
+places or design values this plan uses, but it cannot be imported on this branch. Its register files **MP·98** (the
+voice paused without consent (a)) and **MP·99** (the language names), the very handles the pending lines give Life
+Context's consent page's Back and Turn on, so the words generator refused (`pending-filed`, row 2); and it retires
+EM·6 (onboarding's decline), gives MP·44 three values where Settings has two, changes MP·67's English, makes MP·66
+"to rewrite" and rules the dark delete icon's colour. That is an import branch's work, with a question for Product on
+the two pending handles (Task 0b). The readings' screen gains one filed place the first plan missed: **MP·71**, "Made
+by AI", under each reading (written since C18-P; C19-P keeps its words and narrows it to readings only).
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -55,7 +65,8 @@ In SoulDreams Dev, a night's page gains its reading, with a stand-in where the m
 - **The answer appears in the night.** AI·3 goes; under the dreams stand MP·20 (the line before the readings), "The
   Readings" (MP·36, the green section pill) and the three readings, each in the readings' bubble from the left (white
   in the light theme, the bubble gradient in the dark), its tradition's terracotta pill on top, `[W13]` until W13 has
-  a line in both languages (R1), then the placeholder in the readings' voice.
+  a line in both languages (R1), then the placeholder in the readings' voice; under each bubble, quietly, "Made by
+  AI" (MP·71).
 - **The night is read.** The readings are kept in the night's file on the phone (version 3). The night's header and
   its row in the journal show its painting from the curated set; the four jump buttons show, and Readings now brings
   "The Readings" to the top. Start Interpretation is gone from a read night; Add dreams stays.
@@ -212,8 +223,9 @@ tests and Task 3's rehearsal).
 ### The places this branch uses
 
 - Filed (C18-P), as written: EM·1 (Start Interpretation), AI·3 (the waiting label), MP·20 (the line before the
-  readings), MP·36 ("The Readings"), C4-P·6 (the failure sentence), MP·77 (the jump buttons, as built), MP·101 and
-  MP·102 (pending, the popup).
+  readings), MP·36 ("The Readings"), MP·71 ("Made by AI", quietly under each reading, its type and grey stand-ins),
+  C4-P·6 (the failure sentence), MP·77 (the jump buttons, as built), MP·101 and MP·102 (pending, the popup). C19-P
+  changes none of them.
 - **Owed, its handle shown** (R1; D155 item 4; for the head): **W13**, the lens labels: "English written, Swedish to
   write", a status the generator builds no line for, so every reading's label shows `[W13]`. When W13 is written in
   both languages, the label is its part at the reading's place, with no change to the code (tested with a filed
@@ -230,15 +242,15 @@ Each task's tests were put on the tree before its code and failed (loading, type
 code made them pass (Part 5).
 
 - App tests: 790 at the start, then 791 (Task 1), 802 (Task 2), 820 (Task 5) and
-  832 (Task 6). `No issues found!` at each.
+  833 (Task 6). `No issues found!` at each.
 - Server tests: 156 at the start, then 183 (Task 4). `npm run check` clean.
 - Guard tests: unchanged (287); `guards.py --walk` passes on every task's tree.
-- App mutation rows: **new** A838 (Task 1), A839 to A865 (Task 2), A866 to A890 (Task 5), A891 to A913 (Task 6): 76;
-  **following** A7, A148, A150, A264, A385, A391, A656, A752, A815, A816, A835. 776 → 852.
+- App mutation rows: **new** A838 (Task 1), A839 to A865 (Task 2), A866 to A890 (Task 5), A891 to A915 (Task 6): 78;
+  **following** A7, A148, A150, A264, A385, A391, A656, A752, A815, A816, A835. 776 → 854.
 - Server mutation rows: **new** S139 to S178 (40); **following** S123. 133 → 173.
 - None dropped.
-- **What the amendment changed** (head's message 34): app tests 828 → 832, server tests 172 → 183; app rows 837 → 852,
-  server rows 156 → 173; Tasks 2, 4, 5 and 6 grew (the counts in the night's file; `models.ts` and the readings
+- **What the amendments changed** (head's message 34, then MP·71): app tests 828 → 833, server tests 172 → 183; app
+  rows 837 → 854, server rows 156 → 173; Tasks 2, 4, 5 and 6 grew (the counts in the night's file; `models.ts` and the readings
   step; the answer's counts and Dev's keeping; Dev's `keepUsage`); Tasks 1, 3, 7 to 10 kept their scope; Part 7 is
   new.
 
@@ -289,9 +301,17 @@ Every task ends green:
   selection), every one caught.
 - The hook prints `guards (staged): all passed`.
 
-### Task 0a · [OWNER] The C19-P import (the register last)
+### Task 0a · [OWNER] The C19-P import (the register last): RUN, STOPPED
 
-On `readings-plumbing`, before anything else. One paste:
+Run by the owner on 2026-11-25 (below); the generator refused `pending-filed` at the pending lines' row 2, and nothing
+was committed. Before Task 0, the owner puts this branch back to its committed C18-P words (the four files the import
+changed; `git status --short` then shows nothing):
+
+```
+cd ~/Developer/soul-dreams-app && git checkout -- docs/source/SOURCES docs/source/design-system.md docs/source/product-change-record.md app/assets/words/places-register.csv && git status --short
+```
+
+The paste as run:
 
 Paste 1 — Terminal
 
@@ -308,7 +328,23 @@ the second `git status` lists `docs/source/SOURCES`, `docs/source/design-system.
 on the pending lines): stop and send the whole output; nothing is committed. Otherwise do not commit yet: send the
 output, and Task 0b follows.
 
-### Task 0b · Claude Code: what C19-P changed, against this plan
+### Task 0b · Claude Code: what C19-P changed, against this plan: DONE
+
+**Finding (2026-11-25).** The register changes MP·44, MP·66, MP·67, MP·68, MP·70, MP·71, EM·6, W27·2 and W27·6, and
+adds MP·98 and MP·99; the design system changes `type.voice.dreamer` and `type.row.date` (Inter for Inter Display) and
+rules the dark `color.lifecontext.delete` (#8F3D24); the product change record gains C19-P. **None of the places or
+values this plan uses changes** (EM·1, AI·3, MP·20, MP·36, C4-P·6, W13, MP·77, MP·101, MP·102; `color.label.tradition`,
+`color.surface`, `type.voice.readings`, `space.bubble.tradition`, `space.label.readings`, `space.turn.app`); MP·71's
+words are the same in both. **It cannot be imported on this branch**: (1) the register's new MP·98 and MP·99 are
+other places than the pending lines' MP·98 ("Back") and MP·99 ("Turn on"), which `consent_page.dart` shows, so the
+generator refuses; renaming the pending handles is the owner's (`pending-lines.csv`, R1) and their new handles are
+Product's to give; (2) the regenerated words retire EM·6, which onboarding's decline shows (`onboarding.dart`), give
+MP·44 three parts where `settings_page.dart` chooses between two, and change MP·67's English and MP·98's meaning on
+screen, each a change to what the dreamer sees beyond this branch. Lean: a `c19p-import` branch of its own, after
+this one or before it as the owner prefers, as `c18p-import` was. **This plan's amendment for it**: MP·71 under each
+reading (Task 6), filed since C18-P and missed by the first plan.
+
+What this task was to do:
 
 Claude Code reads the diff of the import (`git diff`: the register's rows, the design system, the product change
 record) for the places Part 1 lists (EM·1, AI·3, MP·20, MP·36, C4-P·6, W13, MP·77, MP·101, MP·102) and for any new
@@ -327,7 +363,7 @@ From the repository root, on `readings-plumbing`:
 git status --short && git log --oneline -1 && python3 -I -B tool/checks/guards.py | tail -1 ; (cd app && fvm flutter analyze --no-pub | tail -1 && fvm flutter test --no-pub | tail -1) ; (cd server && npm run check | tail -1 && npm test 2>&1 | grep -E '^ℹ (tests|fail)')
 ```
 
-Run after Task 0b's commit. Expected: nothing from `git status`; Task 0b's commit; `guards (tracked): all passed`;
+Run after Task 0a's checkout. Expected: nothing from `git status`; this plan's commit; `guards (tracked): all passed`;
 `No issues found!`;
 `+790: All tests passed!`; `> tsc -p tsconfig.json`; `ℹ tests 156`, `ℹ fail 0`. Anything else: stop (R14).
 
@@ -3077,18 +3113,18 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 
 ### Task 6 · App: the readings on a night's page; SoulDreams Dev's reader
 
-Only after Task 0b. If C19-P changed any place this task uses, the plan was amended there first.
+Task 0b found nothing in C19-P that changes this task; it builds on C18-P's words.
 
-Changed: `night_page.dart`, `parts.dart`, `night_look.dart`, `journal_page.dart`, `journal_home.dart`,
-`main_dev.dart`, and the tests of the night's page, the journal list, the home and `dev_only_test.dart`;
-`tool/app_mutations.py`. Rows A891 to A913 new; A264, A385, A391, A656, A752 and A835 follow.
+Changed: `night_page.dart`, `parts.dart`, `stand_ins.dart` (`aiMarkGap`), `night_look.dart`, `journal_page.dart`,
+`journal_home.dart`, `main_dev.dart`, and the tests of the night's page, the journal list, the home and `dev_only_test.dart`;
+`tool/app_mutations.py`. Rows A891 to A915 new; A264, A385, A391, A656, A752 and A835 follow.
 
-Checks: `No issues found!`; `+832`; `--rows A264,A385,A391,A656,A752,A835,A891,…,A913`: `29 run, 29 caught`;
+Checks: `No issues found!`; `+833`; `--rows A264,A385,A391,A656,A752,A835,A891,…,A915`: `31 run, 31 caught`;
 and every row of the
 eleven app files this branch changes (`--files lib/feedback/feedback.dart,lib/journal/night.dart,
 lib/journal/journal.dart,lib/core/safe_log.dart,lib/readings/readings.dart,lib/journal/pages/night_page.dart,
 lib/journal/pages/parts.dart,lib/journal/night_look.dart,lib/journal/pages/journal_page.dart,
-lib/journal/pages/journal_home.dart,lib/main_dev.dart`): `app mutations: 291 run, 291 caught`.
+lib/journal/pages/journal_home.dart,lib/main_dev.dart,lib/design/stand_ins.dart`): `app mutations: 304 run, 304 caught`.
 
 Commit:
 
@@ -3097,6 +3133,19 @@ Commit:
 **The block:**
 
 ~~~~diff
+diff --git a/app/lib/design/stand_ins.dart b/app/lib/design/stand_ins.dart
+--- a/app/lib/design/stand_ins.dart
++++ b/app/lib/design/stand_ins.dart
+@@ -124,6 +124,9 @@ abstract final class StandIns {
+   static const bubblePadding = EdgeInsets.symmetric(horizontal: 30, vertical: 30);
+   static const double bubbleGap = 12;
+ 
++  /// Between a reading's bubble and its AI mark (MP·71) under it.
++  static const double aiMarkGap = 6;
++
+   /// Inside the typing field, and around the typing screen's parts.
+   static const fieldPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 14);
+   static const double gap = 20;
 diff --git a/app/lib/journal/night_look.dart b/app/lib/journal/night_look.dart
 --- a/app/lib/journal/night_look.dart
 +++ b/app/lib/journal/night_look.dart
@@ -3210,7 +3259,7 @@ diff --git a/app/lib/journal/pages/journal_page.dart b/app/lib/journal/pages/jou
 diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night_page.dart
 --- a/app/lib/journal/pages/night_page.dart
 +++ b/app/lib/journal/pages/night_page.dart
-@@ -16,20 +16,28 @@
+@@ -16,20 +16,29 @@
  // (MP·38, centred, D112), in bubbles 30 from the screen's left edge and 10 from its
  // right (Spacing.bubbleDreamer), each opening the typing screen to edit
  // it; at the foot, "Add dreams" (MP·29) left and Start Interpretation
@@ -3222,7 +3271,8 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
 +// (C4-P·6) alone there, and the night stays unread (handover §5). A read
 +// night shows, under its dreams, MP·20, "The Readings" (MP·36) and its
 +// readings, each in the readings' bubble under its tradition's label (W13,
-+// its handle until it has a line). A recording that
++// its handle until it has a line), with "Made by AI" (MP·71) quietly under
++// each. A recording that
  // waits to be turned into text shows nothing in its place and cannot be
  // tapped; while it is being turned into text, AI·6 shows in its place,
  // heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
@@ -3243,7 +3293,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
  import 'package:flutter/services.dart';
  
  import '../../core/app_line.dart';
-@@ -40,6 +48,7 @@ import '../../design/palette.dart';
+@@ -40,6 +49,7 @@ import '../../design/palette.dart';
  import '../../design/stand_ins.dart';
  import '../../design/tokens.g.dart';
  import '../../words/lines.g.dart';
@@ -3251,7 +3301,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
  import '../../recording/recording.dart';
  import '../journal.dart';
  import '../night.dart';
-@@ -53,6 +62,13 @@ import 'night_art.dart';
+@@ -53,6 +63,13 @@ import 'night_art.dart';
  import 'parts.dart';
  import 'typing_page.dart';
  
@@ -3265,7 +3315,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
  /// A read night's jump buttons, in MP·77's order (C18-P; D119 item 4).
  enum Jump {
    dreams,
-@@ -75,6 +91,7 @@ class NightPage extends StatefulWidget {
+@@ -75,6 +92,7 @@ class NightPage extends StatefulWidget {
      this.images = true,
      this.agreed = true,
      this.query,
@@ -3273,7 +3323,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
    });
  
    static const menuKey = Key('night-menu');
-@@ -84,6 +101,12 @@ class NightPage extends StatefulWidget {
+@@ -84,6 +102,12 @@ class NightPage extends StatefulWidget {
    static const startKey = Key('night-start');
    static const transcribingKey = Key('night-transcribing');
    static const dreamsKey = Key('night-dreams');
@@ -3286,7 +3336,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
  
    /// A read night's jump button.
    static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');
-@@ -110,6 +133,10 @@ class NightPage extends StatefulWidget {
+@@ -110,6 +134,10 @@ class NightPage extends StatefulWidget {
    /// The search this night was opened from, as searched, or null.
    final String? query;
  
@@ -3297,7 +3347,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
    @override
    State<NightPage> createState() => _NightPageState();
  }
-@@ -123,6 +150,21 @@ class _NightPageState extends State<NightPage> {
+@@ -123,6 +151,21 @@ class _NightPageState extends State<NightPage> {
    // The "Dreams" label, which its jump button brings into view.
    final _dreamsLabel = GlobalKey();
  
@@ -3319,7 +3369,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
    @override
    void initState() {
      super.initState();
-@@ -133,6 +175,7 @@ class _NightPageState extends State<NightPage> {
+@@ -133,6 +176,7 @@ class _NightPageState extends State<NightPage> {
    @override
    void dispose() {
      widget.recording?.retries?.removeListener(_retried);
@@ -3327,7 +3377,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
      super.dispose();
    }
  
-@@ -217,6 +260,30 @@ class _NightPageState extends State<NightPage> {
+@@ -217,6 +261,30 @@ class _NightPageState extends State<NightPage> {
      if (mounted) Navigator.of(context).pop();
    }
  
@@ -3358,7 +3408,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
    // The entry point's item, with the night shown; not while a delete runs.
    Future<void> _act() async {
      final night = _night;
-@@ -324,7 +391,7 @@ class _NightPageState extends State<NightPage> {
+@@ -324,7 +392,7 @@ class _NightPageState extends State<NightPage> {
          children: [
            jump(Jump.dreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
            jump(Jump.questions, StandIns.jumpQuestions, null),
@@ -3367,7 +3417,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
            jump(Jump.reflection, [tag.colour!, tag.colourEnd!], null),
          ],
        ),
-@@ -411,6 +478,10 @@ class _NightPageState extends State<NightPage> {
+@@ -411,6 +479,10 @@ class _NightPageState extends State<NightPage> {
                  // The bubbles keep their own margins from the screen's edges
                  // (design-system.md §5); everything else keeps the page's.
                  child: ListView(
@@ -3378,7 +3428,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
                    padding: EdgeInsets.only(top: Spacing.nightHeader.top),
                    children: [
                      // A read night's jump buttons head the part that scrolls.
-@@ -443,6 +514,7 @@ class _NightPageState extends State<NightPage> {
+@@ -443,6 +515,7 @@ class _NightPageState extends State<NightPage> {
                          ),
                          const SizedBox(height: StandIns.bubbleGap),
                        ],
@@ -3386,7 +3436,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
                    ],
                  ),
                ),
-@@ -455,17 +527,13 @@ class _NightPageState extends State<NightPage> {
+@@ -455,17 +528,13 @@ class _NightPageState extends State<NightPage> {
                        key: NightPage.addKey,
                        child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
                      ),
@@ -3411,7 +3461,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
                    ),
                  ),
                ),
-@@ -475,4 +543,40 @@ class _NightPageState extends State<NightPage> {
+@@ -475,4 +544,45 @@ class _NightPageState extends State<NightPage> {
        ),
      );
    }
@@ -3442,7 +3492,12 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
 +        ),
 +        const SizedBox(height: Spacing.labelReadings),
 +        for (final (i, r) in readings.indexed) ...[
-+          ReadingBubble(key: NightPage.readingKey(i), label: lensLabel(Lines.W13, r.lens, appLanguage), text: r.text),
++          ReadingBubble(
++            key: NightPage.readingKey(i),
++            label: lensLabel(Lines.W13, r.lens, appLanguage),
++            text: r.text,
++            mark: Lines.MP_71.text(appLanguage),
++          ),
 +          const SizedBox(height: StandIns.bubbleGap),
 +        ],
 +      ];
@@ -3455,7 +3510,7 @@ diff --git a/app/lib/journal/pages/night_page.dart b/app/lib/journal/pages/night
 diff --git a/app/lib/journal/pages/parts.dart b/app/lib/journal/pages/parts.dart
 --- a/app/lib/journal/pages/parts.dart
 +++ b/app/lib/journal/pages/parts.dart
-@@ -188,6 +188,53 @@ class DreamBubble extends StatelessWidget {
+@@ -188,6 +188,64 @@ class DreamBubble extends StatelessWidget {
    }
  }
  
@@ -3463,14 +3518,18 @@ diff --git a/app/lib/journal/pages/parts.dart b/app/lib/journal/pages/parts.dart
 +/// How the AI Appears §2, §3): white with the surface's edge in the light
 +/// theme, the bubble gradient in the dark; its tradition's [label] on a pill
 +/// in the tradition gradient, white words, above its [text] in the readings'
-+/// voice. The space under the label is a stand-in (StandIns.gap).
++/// voice. Under the bubble, quietly, its AI [mark] (MP·71), in the small
++/// button type and the summary's grey, both stand-ins. The space under the
++/// label is a stand-in (StandIns.gap), as is the mark's (StandIns.aiMarkGap).
 +class ReadingBubble extends StatelessWidget {
-+  const ReadingBubble({super.key, required this.label, required this.text});
++  const ReadingBubble({super.key, required this.label, required this.text, required this.mark});
 +
 +  static const labelKey = Key('reading-label');
++  static const markKey = Key('reading-mark');
 +
 +  final String label;
 +  final String text;
++  final String mark;
 +
 +  @override
 +  Widget build(BuildContext context) {
@@ -3478,29 +3537,36 @@ diff --git a/app/lib/journal/pages/parts.dart b/app/lib/journal/pages/parts.dart
 +    const role = LightColours.labelTradition;
 +    return Padding(
 +      padding: Spacing.bubbleTradition,
-+      child: Align(
-+        alignment: Alignment.centerLeft,
-+        child: DecoratedBox(
-+          decoration: surface(p),
-+          child: Padding(
-+            padding: StandIns.bubblePadding,
-+            child: Column(
-+              crossAxisAlignment: CrossAxisAlignment.start,
-+              children: [
-+                DecoratedBox(
-+                  key: labelKey,
-+                  decoration: _pill(role.colour!, role.colourEnd!),
-+                  child: Padding(
-+                    padding: StandIns.labelPadding,
-+                    child: Text(label, style: TypeRoles.button.style(role.text!)),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          DecoratedBox(
++            decoration: surface(p),
++            child: Padding(
++              padding: StandIns.bubblePadding,
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  DecoratedBox(
++                    key: labelKey,
++                    decoration: _pill(role.colour!, role.colourEnd!),
++                    child: Padding(
++                      padding: StandIns.labelPadding,
++                      child: Text(label, style: TypeRoles.button.style(role.text!)),
++                    ),
 +                  ),
-+                ),
-+                const SizedBox(height: StandIns.gap),
-+                Text(text, style: TypeRoles.voiceReadings.style(p.text)),
-+              ],
++                  const SizedBox(height: StandIns.gap),
++                  Text(text, style: TypeRoles.voiceReadings.style(p.text)),
++                ],
++              ),
 +            ),
 +          ),
-+        ),
++          const SizedBox(height: StandIns.aiMarkGap),
++          KeyedSubtree(
++            key: markKey,
++            child: Text(mark, style: TypeRoles.buttonSmall.style(p.summary)),
++          ),
++        ],
 +      ),
 +    );
 +  }
@@ -3740,7 +3806,7 @@ diff --git a/app/test/journal/pages/night_page_test.dart b/app/test/journal/page
        await tester.tap(find.byKey(NightPage.jumpKey(o)));
        await tester.pumpAndSettle();
        expect(tester.getRect(find.byKey(NightPage.dreamsKey)), at);
-@@ -948,4 +959,176 @@ void main() {
+@@ -948,4 +959,197 @@ void main() {
      expect(actions.first.hitTestable(), findsOneWidget);
      expect(actions.last.hitTestable(), findsOneWidget);
    });
@@ -3890,6 +3956,27 @@ diff --git a/app/test/journal/pages/night_page_test.dart b/app/test/journal/page
 +    expect(words.style!.color, LightColours.labelTradition.text);
 +  });
 +
++  // MP·71 (C18-P, C19-P): "Made by AI", quietly, under each reading only.
++  testWidgets('MP·71 under each reading, quiet, in its margin', (tester) async {
++    await open(tester, readings: three, read: isRead);
++    await tall(tester);
++    final marks = find.text(Lines.MP_71.text(Lang.en));
++    expect(marks, findsNWidgets(3));
++    for (var i = 0; i < 3; i++) {
++      final bubble = find.byKey(NightPage.readingKey(i));
++      final box = find.descendant(of: bubble, matching: find.byType(DecoratedBox)).first;
++      final mark = find.descendant(of: bubble, matching: find.byKey(ReadingBubble.markKey));
++      expect(tester.getRect(mark).top, greaterThan(tester.getRect(box).bottom));
++      expect(tester.getRect(mark).left, closeTo(Spacing.bubbleTradition.left, 1));
++      final words = tester.widget<Text>(find.descendant(of: mark, matching: find.byType(Text)));
++      expect(words.data, Lines.MP_71.text(Lang.en));
++      expect(words.style!.fontSize, TypeRoles.buttonSmall.size);
++      expect(words.style!.color, LightColours.textSummary.colour);
++    }
++    // None elsewhere on the page: not on the painting, not under a dream.
++    expect(find.descendant(of: find.byType(NightArt), matching: marks), findsNothing);
++  });
++
 +  test("a tradition's label: W13's part at its place, else its handle", () {
 +    expect(Lines.W13.written, isFalse);
 +    expect(lensLabel(Lines.W13, 0, Lang.en), '[W13]');
@@ -3925,7 +4012,7 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
  # Parallel by default (D129), each worker in its own copy of app/ in
  # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
 -# Expected: every row "caught" (A1 to A890, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
-+# Expected: every row "caught" (A1 to A913, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
++# Expected: every row "caught" (A1 to A915, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
  # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
  # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
  # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
@@ -3994,7 +4081,7 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
       'test/settings/settings_page_test.dart', 'Feedback: after the kept row, before the actions, given a sender'),
      ('A836', 'lib/main_dev.dart',
       "  final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));",
-@@ -3615,6 +3615,99 @@ ROWS = [
+@@ -3615,6 +3615,107 @@ ROWS = [
       'keepUsage: true',
       'keepUsage: false',
       'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
@@ -4056,16 +4143,16 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 +     '      padding: Spacing.bubbleDreamer,',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
 +    ('A905', 'lib/journal/pages/parts.dart',
-+     '        alignment: Alignment.centerLeft,\n        child: DecoratedBox(\n          decoration: surface(p),',
-+     '        alignment: Alignment.centerRight,\n        child: DecoratedBox(\n          decoration: surface(p),',
++     '        children: [\n          DecoratedBox(\n            decoration: surface(p),',
++     '        children: [\n          Center(child: DecoratedBox(\n            decoration: surface(p),',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
 +    ('A906', 'lib/journal/pages/parts.dart',
 +     'Text(text, style: TypeRoles.voiceReadings.style(p.text))',
 +     'Text(text, style: TypeRoles.voiceApp.style(p.text))',
 +     'test/journal/pages/night_page_test.dart', 'a read night: MP·20, "The Readings", the readings in order, left'),
 +    ('A907', 'lib/journal/pages/parts.dart',
-+     'key: labelKey,\n                  decoration: _pill(role.colour!, role.colourEnd!),',
-+     'key: labelKey,\n                  decoration: _pill(role.colourEnd!, role.colour!),',
++     'key: labelKey,\n                    decoration: _pill(role.colour!, role.colourEnd!),',
++     'key: labelKey,\n                    decoration: _pill(role.colourEnd!, role.colour!),',
 +     'test/journal/pages/night_page_test.dart', "a reading's label: the tradition's pill, in its gradient, white words"),
 +    ('A908', 'lib/journal/pages/parts.dart',
 +     'child: Text(label, style: TypeRoles.button.style(role.text!)),',
@@ -4087,6 +4174,14 @@ diff --git a/tool/app_mutations.py b/tool/app_mutations.py
 +     '        readNight: widget.readNight,\n',
 +     '',
 +     'test/journal/pages/journal_home_test.dart', "SoulDreams Dev's reading is handed to the journal; by default none"),
++    ('A914', 'lib/journal/pages/night_page.dart',
++     '            mark: Lines.MP_71.text(appLanguage),',
++     "            mark: '',",
++     'test/journal/pages/night_page_test.dart', 'MP·71 under each reading, quiet, in its margin'),
++    ('A915', 'lib/journal/pages/parts.dart',
++     'Text(mark, style: TypeRoles.buttonSmall.style(p.summary))',
++     'Text(mark, style: TypeRoles.button.style(p.text))',
++     'test/journal/pages/night_page_test.dart', 'MP·71 under each reading, quiet, in its margin'),
 +    ('A913', 'lib/main_dev.dart',
 +     "liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage",
 +     "liveReading(betaKey: '', keepUsage",
@@ -4117,11 +4212,11 @@ diff --git a/docs/Status.md b/docs/Status.md
  # Status — SoulDreams app
  
 -Last updated: 2026-11-24, in branch `feedback` (the Feedback section of Settings and its server change, D152, D153; built and tested, the owner's deploy, by-eye check and first reading next), by Claude Code.
-+Last updated: 2026-11-24, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D157, head's message 34; built and tested, the owner's storage rehearsal, deploy and by-eye check next), by Claude Code.
++Last updated: 2026-11-24, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D158, head's message 34; built and tested, the owner's storage rehearsal, deploy and by-eye check next), by Claude Code.
  
  *No matter where you are on your journey, the steps you take are equally important.*
  
-@@ -14,13 +14,23 @@ rulings given during each branch are listed in this file, one line each, under "
+@@ -14,13 +14,24 @@ rulings given during each branch are listed in this file, one line each, under "
  
  ## Current branch
  
@@ -4138,7 +4233,8 @@ diff --git a/docs/Status.md b/docs/Status.md
 +hands it to its stand-in model, which answers three fixed placeholder readings marked `[STAND-IN · n]`, the same for
 +every night, reading nothing of it. AI·3 shows while it waits; the readings are kept in the night, which is then
 +read (its painting, its jump buttons); a failure shows C4-P·6 alone and the night stays unread. A read night shows
-+MP·20, "The Readings" (MP·36) and its readings, each under its tradition's label, `[W13]` until W13 has a line. The
++MP·20, "The Readings" (MP·36) and its readings, each under its tradition's label, `[W13]` until W13 has a line,
++with "Made by AI" (MP·71) quietly under each. The
 +night's file is version 3 (D155 item 2, docs/workflow.md (c)). The model's instructions drop in as files in
 +`server/instructions/`, which holds only the empty placeholder `AWAITING-INSTRUCTIONS.md` (R7). Every model call goes
 +through one interface, each step's model named in one setting (`server/src/models.ts`, `SETUP`), its tokens and cost
@@ -4152,7 +4248,7 @@ diff --git a/docs/Status.md b/docs/Status.md
  
  `curated-set` is merged (`4a22d1a`): the curated set of night paintings (D147, with D149 to D151). Its Status was not
  updated at the merge (this entry records it).
-@@ -38,8 +48,12 @@ merge (this entry records it).
+@@ -38,8 +49,12 @@ merge (this entry records it).
  
  ## Road ahead
  
@@ -4167,7 +4263,7 @@ diff --git a/docs/Status.md b/docs/Status.md
  - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
    the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
    1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
-@@ -81,8 +95,11 @@ merge (this entry records it).
+@@ -81,8 +96,11 @@ merge (this entry records it).
  - The fonts (D49 a): Tangerine, Sorts Mill Goudy, Inter (Regular and SemiBold, the 18pt statics), Nunito (Regular,
    Italic) and Habibi, static TTFs with their OFL licences in `app/assets/fonts/`, each listed in `fingerprints.txt`
    (G2), declared in `pubspec.yaml`. The owner's download; never fetched at run time (R10).
@@ -4181,7 +4277,7 @@ diff --git a/docs/Status.md b/docs/Status.md
    in `Library/Application Support/Journal`; the folder excluded from backup; the folder and every file with complete
    file protection, through the Swift channel in `AppDelegate.swift`. A save writes a temporary file, flushes it to the
    disk (F_FULLFSYNC, else fsync) and renames it; a failed save removes its own temporary file. Every store operation
-@@ -227,8 +244,20 @@ merge (this entry records it).
+@@ -227,8 +245,21 @@ merge (this entry records it).
    other three do nothing until the readings); everything below as before. Naming is removed: a name kept in a file
    is not shown (the store's field stays; the export still writes it). A night's picture (`journal/night_look.dart`,
    `pages/night_art.dart`): a read night's painting chosen from its id alone, nothing stored; an unread night's the
@@ -4199,21 +4295,22 @@ diff --git a/docs/Status.md b/docs/Status.md
 +  `readingRead`, `readingFailed`, `readingKeepFailed`). On the night's page: Start Interpretation (EM·1) reads with
 +  the page's reader, AI·3 (`waitingKey`, brought into view) while it waits, C4-P·6 (`failedKey`) alone on a
 +  failure; a read night shows MP·20, MP·36 and each reading in `ReadingBubble` (`parts.dart`: the readings'
-+  bubble from the left, its tradition's pill, the readings' voice), and no Start Interpretation; the Readings jump
++  bubble from the left, its tradition's pill, the readings' voice, MP·71 under it in `type.button.small` and the
++  summary's grey, stand-ins), and no Start Interpretation; the Readings jump
 +  brings "The Readings" to the top; the list lays out every part (`scrollCacheExtent`).
    The curated set (D147): sixty paintings in `app/assets/paintings/`, each covering its box from the middle over
    the gradient, decoded no larger than the box needs; New Dream's sky is the set's strip, under the row's
    40% (D150). The words Product owes show as provisional
-@@ -368,7 +397,7 @@ merge (this entry records it).
+@@ -368,7 +399,7 @@ merge (this entry records it).
  - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
    founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
    (P13).
 -- The app's analyzer baseline: `No issues found!`. The app has 790 tests, and 776 mutation checks (A1 to A837; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
-+- The app's analyzer baseline: `No issues found!`. The app has 832 tests, and 852 mutation checks (A1 to A913; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
++- The app's analyzer baseline: `No issues found!`. The app has 833 tests, and 854 mutation checks (A1 to A915; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
    A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
    A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
    dropped, each with its reason in the file; with the rows A24a to
-@@ -394,6 +423,19 @@ merge (this entry records it).
+@@ -394,6 +425,19 @@ merge (this entry records it).
    2.1147.0 (D42 Q1, Q14), and `@aws-sdk/client-ssm` and `@aws-sdk/client-s3` at the owner's version, for their types only: the Lambda runtime
    carries its own SDK, and the Lambda's code folder holds no package (D71 Q13 a). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
    --offline` only through `check_all.sh` (D42 Q13).
@@ -4233,7 +4330,7 @@ diff --git a/docs/Status.md b/docs/Status.md
  - `server/src/`: the front door (`door.ts`, head's message 14; D71): POST `/` with the beta key as a bearer token gets
    a short-lived Soniox key (200, `{key, expiresAt}`); a missing, wrong or misshapen key 401 with no body, before
    anything is read when misshapen; another method or path 404; Parameter Store failing 500; Soniox failing 502
-@@ -436,11 +478,11 @@ merge (this entry records it).
+@@ -436,11 +480,11 @@ merge (this entry records it).
    scenes and the sky) and `server/trial/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
    its names in `server/src/hosts.ts`, never fetched). macOS's `sips` makes each JPEG, and our code embeds the OS's own
    sRGB profile in it, since `sips` on macOS 26 writes none. Tested against fakes.
@@ -4249,7 +4346,7 @@ diff --git a/docs/Status.md b/docs/Status.md
    call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
    `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
  
-@@ -1142,7 +1184,7 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
+@@ -1142,7 +1186,7 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
       policy (termination protection is on; the other protections and the 90 days stay); (b) the lifecycle has no
       rule aborting incomplete multipart uploads (our code only puts whole objects); (c) a text of only U+200B or
       U+0000 is not "blank" (`trim` as Dart's does; the app and the server agree), a question for the owner if it
@@ -4258,7 +4355,7 @@ diff --git a/docs/Status.md b/docs/Status.md
       body with a repeated `text` key keeps the last (still one field).
  
  ## Before Cohort 1
-@@ -1778,6 +1820,24 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
+@@ -1778,6 +1822,33 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
  - D154 (the founder's by-eye correction): the Feedback box's border is the colour of the Settings value pills' border
    (`surfaceBorder`), light and dark (it was `fieldBorder`, which is clear in the dark theme). App tests 790, rows 776.
  
@@ -4279,6 +4376,15 @@ diff --git a/docs/Status.md b/docs/Status.md
 +  logging numbers only and the app keeping each night's beside it (Dev, and the founder's build later); prompts with
 +  fixed text first and the dreamer's words last, caching off until AWS's pages confirm it fits retention mode none;
 +  the founder's blind comparison planned, not built (plan Part 7).
++- D158 (owner): the plan's questions 21 to 28 take their leans; question 25 (prompt caching): built switched off,
++  and the Build chat asks AWS in writing (a case from the account) and carries the answer to the head.
++- The C19-P import (the design system, the product change record, the register; the plan's Task 0a) stopped: the
++  words generator refused `pending-filed` at the pending lines' row 2, since C19-P files MP·98 (the voice paused
++  without consent (a)) and MP·99 (the language names), the handles the pending lines give Life Context's consent
++  page's Back and Turn on. C19-P also retires EM·6 (onboarding's decline), gives MP·44 three values where Settings
++  has two, changes MP·67's English, and rules the dark `color.lifecontext.delete`. None of the readings' places or
++  values changed; the import waits for its own branch (plan Task 0b). The readings' screen gained MP·71 under each
++  reading, filed since C18-P and missed by the first plan.
 +
  ## Documents as last imported
  
@@ -4317,7 +4423,8 @@ Invented nights only (R2): type them from `fixtures/invented-nights.json`.
 2. **A night of two dreams, Life Context Off** (Settings): open it, tap Start Interpretation. Expected: "Preparing
    the readings..." under the dreams, then, within a few seconds: the line before the readings (MP·20), the green
    "The Readings" pill, and three bubbles from the left, each with a terracotta `[W13]` pill and the words
-   `[STAND-IN · 1]`, `· 2`, `· 3`. The header now shows a painting; Start Interpretation is gone; Add dreams stays.
+   `[STAND-IN · 1]`, `· 2`, `· 3`, and under each bubble, small and grey, "Made by AI". The header now shows a
+   painting; Start Interpretation is gone; Add dreams stays.
 3. **The jump buttons**: Readings brings "The Readings" to the top; Dreams brings "Dreams".
 4. **Back to the journal**: the night's row shows its painting. Open it again: the same readings, the same order.
 5. **The dark theme** (Night/Day mode, Night): the readings' bubbles in the bubble gradient, the words light.
@@ -4337,8 +4444,8 @@ Expected everywhere: nothing else changed. Anything different: stop, and bring w
 
 ### Task 10 · The full mutation runs (D126)
 
-Once, after Task 9 and before the merge: `python3 -I -B tool/app_mutations.py` (expected `app mutations: 852 run,
-852 caught`) and `python3 -I -B tool/server_mutations.py` (expected `server mutations: 173 run, 173 caught`, about
+Once, after Task 9 and before the merge: `python3 -I -B tool/app_mutations.py` (expected `app mutations: 854 run,
+854 caught`) and `python3 -I -B tool/server_mutations.py` (expected `server mutations: 173 run, 173 caught`, about
 35 minutes, serial).
 
 Then, before the merged build reaches the Cohort 0 app (docs/workflow.md (c) items 4 and 5): the owner exports each
@@ -4348,8 +4455,9 @@ SoulDreams Dev's alone.
 
 ## Part 4 · Questions (numbered; a blank is not a yes)
 
-Questions 1 to 20: **answered by D157, each its lean** (Q1 as Tasks 0a and 0b). Questions 21 to 28 come with the
-head's message 34 and are open.
+Questions 1 to 20: **answered by D157, each its lean** (Q1 as Tasks 0a and 0b). Questions 21 to 28, from the head's
+message 34: **answered by D158, each its lean** (Q25: off; the Build chat asks AWS in writing). Question 29 is new,
+from Task 0b.
 
 1. **The C19-P import.** Answered (D157): before the tasks, now Tasks 0a and 0b (three documents, the register last).
 2. **Scope: Start Interpretation goes straight to the readings** in this branch, on the night's page, with no
@@ -4417,11 +4525,15 @@ head's message 34 and are open.
     setup B (Part 7). Lean: yes.
 28. **No screen for the counts or the cost** in this branch; the founder's comparison export (Part 7) is the first
     place they leave the phone. Lean: yes.
+29. **MP·71's look** (Task 0b): under each reading's bubble, aligned with it, 6 pt below (`StandIns.aiMarkGap`), in
+    `type.button.small` and the summary's grey (`color.text.summary`), all stand-ins: the register says only
+    "quietly, under each reading", and the Design System names no role for it. Lean: as built, for the founder's eye;
+    and C19-P's import goes to its own branch (Task 0b).
 
 ## Part 5 · How this plan was proven
 
-The plan was proven twice: first as written (part one, head's message 33), then again whole after the amendment
-(D157 and the head's message 34). The blocks in Part 3 are the second proof's.
+The plan was proven three times: as written (part one, head's message 33); again whole after the amendment (D157 and
+the head's message 34); and again whole after Task 0b added MP·71. The blocks in Part 3 are the third proof's.
 
 1. **Built task by task in a copy of the tracked tree**, `.scratch/rp/build`, from `git archive` of `de0a315`, with
    the pinned Flutter (`app/.fvm`) and the server's installed packages. The amendment was built on the first
@@ -4441,7 +4553,7 @@ The plan was proven twice: first as written (part one, head's message 33), then 
    - Task 4, tests alone: `npm run check` fails, `ℹ tests 144`, `ℹ fail 9`; whole: clean, `ℹ tests 183`,
      `ℹ fail 0`; the empty `server/instructions/AWAITING-INSTRUCTIONS.md` is made by `git apply` (0 bytes).
    - Task 5, tests alone: the new test file does not load, `+802 -1`; whole: `No issues found!`, `+820`.
-   - Task 6, tests alone: `+702 -4`; whole: `No issues found!`, `+832`.
+   - Task 6, tests alone: `+702 -4`; whole: `No issues found!`, `+833`.
    - Task 7 applied. The replay's final tree is identical, file for file, to the build's, and `guards.py --walk` on
      it, and on every task's snapshot, prints `guards (walk): all passed`.
 4. **Mutations.**
@@ -4456,11 +4568,13 @@ The plan was proven twice: first as written (part one, head's message 33), then 
      and A898 (first numbering) followed the moved code; ten new rows for the counts in the night's file and five for
      the answer, Dev's keeping and the journal; then every app row of this branch was renumbered in task order
      (A838 to A913).
+   - Task 0b's MP·71: two new rows (A914, A915), and A905 and A907 follow `ReadingBubble`'s new column (the bubble
+     and its mark); a formatter's rewrap of three unrelated lines in `parts.dart` was put back.
    - G4 refused, twice, test names and row fragments of twelve words or more; each was shortened, test and row
      together, in every snapshot.
-   - **On the replay of the amended plan**: the app's `--files` of the eleven changed files: `app mutations: 291 run, 291 caught`; the server's rows
-     of the seven changed files: `55 run, 55 caught`.
-5. **Not proven here**: the C19-P import and what it changes (Tasks 0a, 0b); the deploy (Task 8; `cdk diff` against
+   - **On the replay of the plan as amended**: the app's `--files` of the twelve changed files: `app mutations: 304 run, 304 caught`; the server's
+     rows of the seven changed files (unchanged since the second proof): `55 run, 55 caught`.
+5. **Not proven here**: the C19-P import, which stopped and waits for its own branch (Tasks 0a, 0b); the deploy (Task 8; `cdk diff` against
    the account); the look on a phone, the dark theme and VoiceOver (Task 9); the storage rehearsal on a phone holding
    version 2 nights (Task 3). The full mutation runs are Task 10 (D126). `test_check_all.py` cannot run in a copy
    with no `.git` and was not run there; no guard or guard test changed. Nothing here reached our server, AWS,
