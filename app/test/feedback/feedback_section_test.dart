@@ -105,6 +105,19 @@ void main() {
     }
   });
 
+  // D154: the box's border is the Settings value pills' (the row's grey,
+  // `surfaceBorder`, which settings_page_test pins), light and dark, at rest
+  // and focused.
+  testWidgets("the box's border is the Settings pills' colour in each theme", (tester) async {
+    for (final (brightness, p) in [(Brightness.light, Palette.light), (Brightness.dark, Palette.dark)]) {
+      await show(tester, brightness: brightness);
+      final decoration = tester.widget<TextField>(find.byKey(FeedbackSection.fieldKey)).decoration!;
+      for (final border in [decoration.border, decoration.enabledBorder, decoration.focusedBorder]) {
+        expect((border! as OutlineInputBorder).borderSide.color, p.surfaceBorder, reason: '$brightness');
+      }
+    }
+  });
+
   testWidgets('the field takes at most 2,000 characters, as counted', (tester) async {
     await show(tester);
     final field = tester.widget<TextField>(find.byKey(FeedbackSection.fieldKey));

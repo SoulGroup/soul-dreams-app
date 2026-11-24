@@ -9,7 +9,8 @@
 // text stays and MP·105 shows. Either line goes when the dreamer types. The
 // text lives in the box only, never kept on the phone (R11). MP·105 and
 // MP·106 are pending lines (D153): their words show in SoulDreams Dev only
-// (R1). The card, field and button sizes are stand-ins (TO TRY).
+// (R1). The box's border is the Settings value pills' (D154). The card,
+// field and button sizes are stand-ins (TO TRY).
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -78,7 +79,7 @@ class _FeedbackSectionState extends State<FeedbackSection> {
     };
     final edge = OutlineInputBorder(
       borderRadius: BorderRadius.circular(Spacing.radius),
-      borderSide: BorderSide(color: p.fieldBorder),
+      borderSide: BorderSide(color: p.surfaceBorder),
     );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

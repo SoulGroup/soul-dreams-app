@@ -3394,6 +3394,10 @@ ROWS = [
      "  final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));",
      "  final feedback = liveFeedback(betaKey: '');",
      'test/journal/pages/journal_home_test.dart', 'SoulDreams Dev hands its phone check and recording to the list'),
+    ('A837', 'lib/feedback/feedback_section.dart',
+     '      borderSide: BorderSide(color: p.surfaceBorder),',
+     '      borderSide: BorderSide(color: p.fieldBorder),',
+     'test/feedback/feedback_section_test.dart', "the box's border is the Settings pills' colour in each theme"),
 ]
 
 

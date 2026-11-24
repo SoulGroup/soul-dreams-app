@@ -325,7 +325,7 @@ merge (this entry records it).
   region, no Help (R9). Feedback: below.
 - Feedback (D110; C18-P; D152; `app/lib/feedback/`, SoulDreams Dev only, built in `feedback`; TO TRY where a stand-in):
   on Settings after "What you've told Soul Dreams" and before MP·48, MP·49 in h2, then a white card with C4-P·8 in
-  the app's voice, the field (MP·46 its hint, the dreamer's voice, at most 2,000 characters as a person counts them,
+  the app's voice, the field (MP·46 its hint, the dreamer's voice, its border the Settings value pills' `surfaceBorder`, D154, at most 2,000 characters as a person counts them,
   no counter) and Submit (MP·47, `color.button.filled`, in the palette as `filledTop`, `filledBottom`, `filledText`).
   Empty or blank does nothing; before "I agree", the popup (MP·101) and nothing sent; while sending, the box is
   closed and a second Submit does nothing; sent, the box empties and MP·106 shows; not sent, the text stays and
@@ -368,7 +368,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 789 tests, and 775 mutation checks (A1 to A836; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 790 tests, and 776 mutation checks (A1 to A837; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -1773,6 +1773,10 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - Decided under D91 (after the Opus review of the route and the bucket, which found no defect): two test gaps
   closed in `0f6518d` (the body limit's edge, rows S136; the bucket variable's wiring, `wire` in `handler.ts`, rows
   S137, S138), re-reviewed, approved. Server tests 154 to 156, rows 130 to 133.
+- Task 9 (the owner's by-eye check and first reading) passed: every step; the reading gave 2 new, the bucket 0, the log
+  check kept 2 and the typed words 0.
+- D154 (the founder's by-eye correction): the Feedback box's border is the colour of the Settings value pills' border
+  (`surfaceBorder`), light and dark (it was `fieldBorder`, which is clear in the dark theme). App tests 790, rows 776.
 
 ## Documents as last imported
 
