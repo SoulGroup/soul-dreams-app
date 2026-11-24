@@ -121,35 +121,38 @@ void main() {
 
   // docs/workflow.md (c): a journal written in version 1 reads whole; a save
   // rewrites only its own night, as version 2, and loses nothing.
-  test('a version-1 journal reads whole; a save rewrites one night', () async {
-    final nights = nightsFromFixtures();
-    await files.open();
-    for (final n in nights) {
-      await files.write(
-        JournalStore.fileOf(n.id),
-        utf8.encode(jsonEncode({...jsonDecode(utf8.decode(encodeNight(n))) as Map<String, Object?>, 'version': 1})),
-      );
-    }
-    final before = files.everything();
-    final store = await JournalStore.open(files);
-    final read = await store.nights();
-    expect(read, nights);
-    expect(read.fold<int>(0, (sum, n) => sum + n.dreams.length), nights.fold<int>(0, (s, n) => s + n.dreams.length));
-    final changed = nights[1].withDreams([...nights[1].dreams, 'x']);
-    await store.save(changed);
-    final after = files.everything();
-    expect(after.keys.toSet(), before.keys.toSet());
-    for (final n in nights) {
-      final name = JournalStore.fileOf(n.id);
-      if (n == nights[1]) {
-        expect(jsonDecode(utf8.decode(after[name]!))['version'], 2);
-      } else {
-        expect(listEquals(after[name], before[name]), isTrue, reason: name);
+  // docs/workflow.md (c); D155 item 2: a journal of an older version reads
+  // whole and unread; a save rewrites only the night saved, as version 3.
+  for (final version in [1, 2]) {
+    test('a version-$version journal reads whole; one save rewrites one night', () async {
+      final nights = nightsFromFixtures();
+      await files.open();
+      for (final n in nights) {
+        final json = {...jsonDecode(utf8.decode(encodeNight(n))) as Map<String, Object?>, 'version': version};
+        await files.write(JournalStore.fileOf(n.id), utf8.encode(jsonEncode(json..remove('readings')..remove('usage'))));
       }
-    }
-    expect(await store.nights(), [for (final n in nights) n == nights[1] ? changed : n]);
-    expect(lines, isEmpty);
-  });
+      final before = files.everything();
+      final store = await JournalStore.open(files);
+      final read = await store.nights();
+      expect(read, nights);
+      expect(read.where((n) => n.readings != null), isEmpty);
+      expect(read.fold<int>(0, (sum, n) => sum + n.dreams.length), nights.fold<int>(0, (s, n) => s + n.dreams.length));
+      final changed = nights[1].withDreams([...nights[1].dreams, 'x']);
+      await store.save(changed);
+      final after = files.everything();
+      expect(after.keys.toSet(), before.keys.toSet());
+      for (final n in nights) {
+        final name = JournalStore.fileOf(n.id);
+        if (n == nights[1]) {
+          expect(jsonDecode(utf8.decode(after[name]!))['version'], 3);
+        } else {
+          expect(listEquals(after[name], before[name]), isTrue, reason: name);
+        }
+      }
+      expect(await store.nights(), [for (final n in nights) n == nights[1] ? changed : n]);
+      expect(lines, isEmpty);
+    });
+  }
 
   // D92 item 1: a recording's audio is kept in the journal's folder,
   // appended as it comes, read back in ranges.
