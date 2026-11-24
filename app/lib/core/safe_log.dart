@@ -119,6 +119,12 @@ enum LogEvent {
   /// The invented kept sentences were seeded (D134 item 5): the nights, then
   /// the sentences, as counts.
   previewSeeded,
+
+  /// Feedback (D152): kept by our server; not kept (the server's status, 0
+  /// for no answer, -1 for another failure, -2 for no server or beta key in
+  /// this build). Never a word of it (R3).
+  feedbackSent,
+  feedbackFailed,
 }
 
 abstract final class SafeLog {
