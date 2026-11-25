@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-25, in branch `c19p-import` (Product's C19-P imported and reconciled with the founder's D161; built; the owner's by-eye check, then the full mutation run, D126), by Claude Code.
+Last updated: 2026-11-25, in branch `painting` (the readings' plumbing, part two: the night's personal painting, D162; built and tested, the owner's storage rehearsal, key move, deploy and by-eye check next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -13,6 +13,20 @@ ruling D20 of 2026-11-09 for branch 2 is listed in `docs/plans/scaffold-2-app.md
 rulings given during each branch are listed in this file, one line each, under "Rulings during branch N".
 
 ## Current branch
+
+`painting` (D162; plan `docs/plans/painting.md`): the readings' plumbing, part two, the night's personal painting
+(D143, D145, D146, D123). In SoulDreams Dev, while Night images is Personal, a read night with no painting of its own
+asks our server's `POST /painting` with the beta key and nothing of the night (`{}`); the server's scenery step
+(the one model interface, its stand-in `stand-in-scenery`) names one fixed placeholder scene, the curated set's
+first, and Black Forest Labs' `flux-2-klein-4b` on `api.eu.bfl.ai` paints it in the one style at 1280 x 960 as a
+JPEG, which our code tags with the invisible AI tag (D123) and sends back; nothing is kept on the server, which logs
+the cost alone. While it is made, the night's header shows its curated painting with MP·81 ("New painting on the
+way"); the night's own painting replaces it when it comes, and is kept beside the night in the journal's folder
+(`painting-<id>.jpg`, written whole, deleted with the night; a storage change, docs/workflow.md (c)). A failure
+leaves the curated painting, silently, and is counted (`painting-<id>.tries`): the next opening of the night tries
+again, three tries at most. Random shows a curated painting, Off the gradient. The BFL key's permanent name is
+`/souldreams/bfl-key` (the owner's move); the Lambda's timeout is 60 seconds. `c19p-import` is merged (`main` at
+`399a199`).
 
 `c19p-import` (D161; plan `docs/plans/c19p-import.md`): Product's C19-P (the register, the Design System, Product's
 record) imported and reconciled with the founder's rulings. The pending Back and Turn on are MP·107 and MP·108, and
@@ -59,11 +73,12 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `c19p-import`: the owner's by-eye check (plan Task 5), the full mutation run (D126), then the merge, the owner's.
-  It changes no storage. Before `readings-plumbing`'s merged build reaches the Cohort 0 app, the owner's safety
-  export (docs/workflow.md (c) item 4).
-- `readings-plumbing`, part two: the painting (D143, D145, D146, D123; D155 items 1 and 3): its plan after part one's
-  merge.
+- `c19p-import` (merged): it changes no storage. Before `readings-plumbing`'s merged build, and `painting`'s, reach
+  the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
+- `painting`: the owner's storage rehearsal (plan Task 3), the key move and the deploy (Tasks 7 and 8), the by-eye
+  check (Task 9), the full mutation runs (D126), then the merge, the owner's. The night's image controls in its menu
+  (MP·78 to MP·80) are a later branch (D162 item 5); the scenery written by the readings' model comes with its
+  instructions (D143, R7).
 - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
   the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
   1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
@@ -257,6 +272,17 @@ merge (this entry records it).
   painted gradient (the dark theme's bubble gradient, both themes); in SoulDreams Dev a night is read when it holds
   its readings (`isRead`), in the other builds none is (`noneRead`), and SoulDreams Dev built with
   `--dart-define=PREVIEW_READ=true` shows every night as read, for the owner's review.
+- The night's own painting (D162; `app/lib/readings/painting.dart`; SoulDreams Dev only, `dev_only_test.dart`): while
+  Night images is Personal, a read night with no painting of its own and fewer than three failed tries is painted
+  once each time its page opens (`Painter`, one request per night at a time): one POST to our server's `painting`
+  with the beta key and `{}`, no user agent, 75 seconds; anything but 200 with a whole JPEG of at most 4 MiB is a
+  `PaintingFailure` (the status; 0 no answer; -1 not a JPEG; -2 no server or key). While it is made the header shows
+  MP·81 over the curated painting, as a live region, scaled down to its room; when it comes, the page and the row
+  show it (`PersonalPainting`, from its bytes, under the same overlays); a failure is counted and shows nothing.
+  The journal keeps it as `painting-<id>.jpg` beside the night (written whole, only while the night's file is
+  there), and the count as `painting-<id>.tries`, removed when a painting comes; deleting the night deletes both
+  first; at open, either one whose night is gone is swept (`paintingSwept`). Codes: `paintingMade` (bytes),
+  `paintingFailed` (status; -3 anything else), `paintingKeepFailed`.
 - The readings (head's message 33; `app/lib/readings/readings.dart`; SoulDreams Dev only, `dev_only_test.dart`):
   `postReading` (one POST to `Hosts.server` + `reading`, the beta key, `{"lang", "dreams", "kept"?}`, 30 seconds;
   anything but 200 with one to three whole readings fails: the status, 0 no answer, -1 unreadable, -2 no server or
@@ -345,8 +371,8 @@ merge (this entry records it).
   164 closed; D161 item 2).
   C19-P's MP·98 (the voice paused until consent) is shown nowhere: the microphone stays, with the popup (D161 item 3). Night images has no consent: Personal
   by default (D160: in a fresh journal and after Delete journal, with "I agree" or not), a read night its painting;
-  Off, one tap away in Settings, shows every night the gradient (`lookOf`'s `images`); Personal and Random keep
-  D110's look until the personal painting exists (D121 item 3).
+  Off, one tap away in Settings, shows every night the gradient (`lookOf`'s `images`); Random shows the curated
+  painting; Personal shows a read night's own painting once it has come (D162), the curated one until then.
 - Settings (main-path.md, Settings; D110; D121; D122; D125; D128; `settings_page.dart`; TO TRY where a stand-in): the
   settings button top left on the journal, on the search field's row, the field to its right and ending where the
   rows end (three drawn sliders in place of the gear, 41 in a 44 tap box, its own semantics node, spoken MP·25; the
@@ -413,7 +439,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 837 tests, and 859 mutation checks (A1 to A920; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 873 tests, and 913 mutation checks (A1 to A975; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -451,7 +477,16 @@ merge (this entry records it).
   are handed the instructions read once from `dist/src/instructions/` (`instructions.ts`; every `.md` but the
   placeholder, in name order), which `infra/dist.ts`
   copies from `server/instructions/` (R7: only the empty `AWAITING-INSTRUCTIONS.md`). No Bedrock call, no new
-  permission, the 10-second timeout unchanged.
+  permission.
+- `server/src/`: the night's painting (D162; `painting.ts`): POST `/painting` with the beta key and a body of `{}`
+  exactly (anything else 400, over 64 characters 413, `paintingRefused`) reads BFL's key (`/souldreams/bfl-key`),
+  asks the scenery step (`SCENERY_PROMPT`, nothing of the night; its stand-in names the curated set's first scene),
+  and paints `<scene>, <FRAME>, <STYLE>` with `flux-2-klein-4b` at 1280 x 960 as a JPEG on `api.eu.bfl.ai`, polling
+  every half second for 30 seconds at most, each request 10 seconds at most, the key sent only to BFL's own hosts
+  over https; the image must be a JPEG of that size, at most 4 MiB, holding no XMP packet of its own, and gets the AI
+  tag (`jpeg.ts`, moved from `trial/`). 200 with the JPEG as base64 (`isBase64Encoded`), `paintingGiven` with its
+  cost in millionths of a dollar; BFL or the scene failing 502, `paintingFailed` with its code. `STYLE` and `FRAME`
+  live in `painting.ts`; the trial's files import them.
 - `server/src/`: the front door (`door.ts`, head's message 14; D71): POST `/` with the beta key as a bearer token gets
   a short-lived Soniox key (200, `{key, expiresAt}`); a missing, wrong or misshapen key 401 with no body, before
   anything is read when misshapen; another method or path 404; Parameter Store failing 500; Soniox failing 502
@@ -466,14 +501,14 @@ merge (this entry records it).
   `tool/read_feedback.sh <profile>` (`aws s3 mv` into `~/SoulDreams-feedback/<day>/`, each file dated to its day). The beta key's check hashes both keys and compares them in constant time
   (`beta-key.ts`). The temporary key's request is exactly four fields: `transcribe_websocket`, 60 seconds to open,
   single use, 1800 seconds at most (`soniox.ts`, D71 Q10), sent to `api.eu.soniox.com` (`hosts.ts`). The two keys
-  are read from Parameter Store as SecureStrings (`parameters.ts`, `parameter-names.ts`); `handler.ts` wires them.
+  are read from Parameter Store as SecureStrings, with BFL's for the painting (`parameters.ts`, `parameter-names.ts`); `handler.ts` wires them.
   `safe-log.ts` (codes and numbers only). `server/infra/`: the CDK app, its account refusal and the stack.
   `npm run build` writes `dist/src` with the module marker beside the compiled files (D42 Q5).
-- The stack: one Lambda (`nodejs24.x`, arm64, CDK's default memory, a 10-second timeout, D71 Q20) behind its own
+- The stack: one Lambda (`nodejs24.x`, arm64, CDK's default memory, a 60-second timeout, D71 Q20, D162) behind its own
   function URL in eu-north-1, with no authentication of the URL's own (the beta key is checked in the code), no CORS,
   and the two permissions a public function URL needs (`InvokeFunctionUrl` and `InvokeFunction` through the URL;
   CDK 2.275.0 makes both); one output, the URL's address; logs kept 7 days, JSON, application INFO, system WARN; a
-  role that writes only to its own log group, reads the two parameters only, and decrypts only through Parameter
+  role that writes only to its own log group, reads the three parameters only, and decrypts only through Parameter
   Store; no access logs, tracing or environment; no reserved concurrency yet (D71 Q12); termination protection on
   (D42 Q4, Q7 to Q9). The CDK CLI's telemetry, notices and version reporting are off (D42 Q3). **Deployed once**, on
   2026-11-13 by the owner, to the workload account (stack `SoulDreamsServer`); its address is in `hosts.dart`.
@@ -491,14 +526,14 @@ merge (this entry records it).
   tests run with the server's, against fakes: no AWS, no network.
 - The curated set's painter (D147; `docs/plans/curated-set.md`), on the owner's Mac only: `server/trial/curated.ts`
   (paint, repaint, proof, ship; the USD 3 cap from BFL's own replies), `server/trial/scenes.ts` (the sixty invented
-  scenes and the sky) and `server/trial/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
+  scenes and the sky) and `server/src/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
   its names in `server/src/hosts.ts`, never fetched). macOS's `sips` makes each JPEG, and our code embeds the OS's own
   sRGB profile in it, since `sips` on macOS 26 writes none. Tested against fakes.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 184 tests, and
-  175 mutation checks (S1 to S180, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 203 tests, and
+  201 mutation checks (S1 to S206, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
   in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 175 run,
-  175 caught`); `check_all.sh` does not
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 201 run,
+  201 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1932,6 +1967,25 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   "Manual" (their rows follow). App 837 tests.
 - The founder accepts MP·109's Swedish, "Jag samtycker inte" (owner's brief, 2026-11-25): banked item 164 is closed.
   The documents repository was at `8a92a57` for the import.
+
+## Rulings during painting
+
+- `c19p-import` merged by the owner (`399a199`).
+- D162 (owner, the brainstorm): (1) while the painting is made, the night shows its curated painting with "New
+  painting on the way" (MP·81); the personal painting replaces it when it arrives; (2) a failed painting leaves the
+  curated one, silently, retried on the next opening of that night, up to 3 tries; (3) the painting is kept on the
+  phone in the journal's folder (protected, backup-excluded), deleted with its night (R11), nothing kept on our
+  server; a storage change under docs/workflow.md (c); (4) the BFL key moves from `/souldreams/trial/bfl-key` to a
+  permanent name (owner task); (5) the image controls in the night's menu are a later branch. Personal shows the
+  painting, Random a curated one, Off the gradient. D91 and D126 apply; the owner checks by eye only. BFL's training
+  opt-out was requested by email (2026-11-23).
+- Built as planned (`docs/plans/painting.md`, Part 1, "Decided under D91"); Part 4's questions and their answers
+  are listed there.
+- D163 (owner): Part 4's fifteen questions take their leans. Question 1: build as the rulings say; the difference
+  between the filed MP·70 and the rulings (BFL, our invisible tag) goes to Product through the head, and is settled
+  before any build a real dreamer uses paints. The owner's "Q3" names the BFL account's balance, which is the plan's question 10 (its question 3
+  is when a painting is asked for; both take their leans): the balance is kept small, with no automatic top-up,
+  until the spending counter comes.
 
 ## Documents as last imported
 
