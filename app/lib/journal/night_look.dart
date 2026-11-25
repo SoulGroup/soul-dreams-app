@@ -51,6 +51,9 @@ typedef ReadCheck = bool Function(Night night);
 /// The readings come later, so no night is read yet.
 bool noneRead(Night night) => false;
 
+/// Whether [night] holds its readings (D155 item 2): SoulDreams Dev's.
+bool isRead(Night night) => night.readings != null;
+
 /// Every night read: SoulDreams Dev's by-eye preview of a read night's look
 /// only, in a build made with --dart-define=PREVIEW_READ=true (D110).
 bool allRead(Night night) => true;

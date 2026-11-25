@@ -75,6 +75,8 @@ void main() {
       expect(files.where((f) => f.startsWith('lib/life_context/')), isEmpty);
       // Feedback (D152 item 5): Dev only for now.
       expect(files.where((f) => f.startsWith('lib/feedback/')), isEmpty);
+      // The readings (head's message 33): SoulDreams Dev only.
+      expect(files.where((f) => f.startsWith('lib/readings/')), isEmpty);
       expect(files, isNot(contains(pending)));
     });
   }
@@ -102,6 +104,7 @@ void main() {
       ]),
     );
     expect(files, containsAll(['lib/feedback/feedback.dart', 'lib/feedback/feedback_section.dart']));
+    expect(files, contains('lib/readings/readings.dart'));
   });
 
   // R8, D108: the journal's pages, which testers will get, carry only the

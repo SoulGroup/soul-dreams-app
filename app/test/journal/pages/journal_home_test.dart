@@ -161,6 +161,18 @@ void main() {
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).read, same(allRead));
   });
 
+  testWidgets("SoulDreams Dev's reading is handed to the journal; by default none", (tester) async {
+    JournalStore.newQueueForTests();
+    Future<({List<Reading> readings, List<ModelUsage>? usage})> send(Map<String, Object?> body) async =>
+        (readings: <Reading>[], usage: null);
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), readNight: send)));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).readNight, same(send));
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(key: UniqueKey(), files: agreed(MemoryJournalFiles()))));
+    await tester.pumpAndSettle();
+    expect(tester.widget<JournalPage>(find.byType(JournalPage)).readNight, isNull);
+  });
+
   testWidgets('by default no night is read', (tester) async {
     JournalStore.newQueueForTests();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
@@ -255,14 +267,19 @@ void main() {
       text,
       contains(
         'JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, '
-        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback)",
+        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback, readNight: readNight)",
       ),
     );
     // Every night read only in a build made for the by-eye preview (D110).
-    expect(text, contains("bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead"));
+    // Otherwise a night is read when it holds its readings (D155 item 2).
+    expect(text, contains("bool.fromEnvironment('PREVIEW_READ') ? allRead : isRead"));
     expect(text, contains("betaKey: const String.fromEnvironment('BETA_KEY')"));
     // Feedback, to our server with the same beta key (D152 item 5).
     expect(text, contains("final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));"));
+    // The readings, through our server with the same beta key (head's
+    // message 33: SoulDreams Dev only).
+    // Each night's calls' counts kept beside it (head's message 34).
+    expect(text, contains("liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage: true);"));
   });
 
   testWidgets('a folder that cannot open: a blank page, a code', (tester) async {

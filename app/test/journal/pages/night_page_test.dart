@@ -5,7 +5,10 @@
 // typing screen; Add dreams and Start Interpretation at the foot; the menu,
 // a bordered pill opening the phone's menu, holding delete, spoken as
 // MP·39, and above it the item an entry point gives (D107 item 1); one confirmation, Cancel first, Delete destructive; deleting
-// leaves nothing.
+// leaves nothing. The readings (head's message 33): Start Interpretation
+// reads the night with the page's reader (SoulDreams Dev's), AI·3 while it
+// waits, C4-P·6 alone when it fails; a read night shows MP·20, "The
+// Readings" (MP·36) and its readings, each under its tradition's label.
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
@@ -26,6 +29,7 @@ import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/journal/search.dart';
+import 'package:souldreams/readings/readings.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
@@ -88,6 +92,8 @@ void main() {
     String? query,
     bool images = true,
     bool agreed = true,
+    Reader? reader,
+    List<Reading>? readings,
   }) async {
     // The test's own 800 by 600, where the foot's two buttons do not fill
     // the row, or a phone.
@@ -107,6 +113,10 @@ void main() {
       );
       await h.store.save(n);
     }
+    if (readings != null) {
+      n = n.withReadings(readings);
+      await h.store.save(n);
+    }
     // A first read that fails leaves the page blank, with no picture.
     if (unread) files!.failReads = true;
     await h.pump(
@@ -120,6 +130,7 @@ void main() {
           images: images,
           query: query,
           agreed: agreed,
+          reader: reader,
         ),
       ),
       hour: hour,
@@ -690,10 +701,10 @@ void main() {
     expect(tester.getCenter(find.text(Lines.MP_38.text(Lang.en))).dx, closeTo(width / 2, 1));
   });
 
-  testWidgets('the three other jumps do nothing yet', (tester) async {
+  testWidgets('the Questions and Reflection jumps do nothing yet', (tester) async {
     await open(tester, read: (_) => true, key: 'long-dream-en');
     final at = tester.getRect(find.byKey(NightPage.dreamsKey));
-    for (final o in [Jump.questions, Jump.readings, Jump.reflection]) {
+    for (final o in [Jump.questions, Jump.reflection]) {
       await tester.tap(find.byKey(NightPage.jumpKey(o)));
       await tester.pumpAndSettle();
       expect(tester.getRect(find.byKey(NightPage.dreamsKey)), at);
@@ -947,5 +958,198 @@ void main() {
     expect(actions, findsNWidgets(2));
     expect(actions.first.hitTestable(), findsOneWidget);
     expect(actions.last.hitTestable(), findsOneWidget);
+  });
+
+  // The readings (head's message 33; D155 item 1). Placeholder readings, as
+  // the server's stand-in gives them: no tradition's words.
+  final three = [Reading(0, '[STAND-IN · 1]'), Reading(1, '[STAND-IN · 2]'), Reading(2, '[STAND-IN · 3]')];
+
+  // A reader whose answer waits for [answer]; each request kept.
+  ({Reader reader, List<Map<String, Object?>> sent, Completer<List<Reading>> Function() next}) held() {
+    final sent = <Map<String, Object?>>[];
+    var answer = Completer<List<Reading>>();
+    final reader = Reader((body) {
+      sent.add(body);
+      return answer.future.then((r) => (readings: r, usage: null));
+    }, () async => null);
+    return (
+      reader: reader,
+      sent: sent,
+      next: () => answer = Completer<List<Reading>>(),
+    );
+  }
+
+  testWidgets('Start Interpretation: AI·3 while it reads, then the readings, kept', (tester) async {
+    final r = held();
+    final answer = r.next();
+    await open(tester, reader: r.reader);
+    expect(find.byKey(NightPage.readingsKey, skipOffstage: false), findsNothing);
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pump();
+    await tester.pump();
+    expect(find.descendant(of: find.byKey(NightPage.waitingKey), matching: find.byType(AppLine)), findsOneWidget);
+    expect(tester.widget<AppLine>(find.byType(AppLine).last).text, Lines.AI_3.text(Lang.en));
+    expect(r.sent, [requestOf(n, null)]);
+    // A second tap while it reads sends nothing more.
+    await tester.tap(find.byKey(NightPage.startKey), warnIfMissed: false);
+    await tester.pump();
+    expect(r.sent, hasLength(1));
+    answer.complete(three);
+    await tester.pumpAndSettle();
+    expect(find.byKey(NightPage.waitingKey, skipOffstage: false), findsNothing);
+    expect(find.byKey(NightPage.readingsKey, skipOffstage: false), findsOneWidget);
+    for (final x in three) {
+      expect(find.text(x.text, skipOffstage: false), findsOneWidget);
+    }
+    expect((await h.journal.night(n.id))!.readings, three);
+    // Read: Start Interpretation is gone; Add dreams stays.
+    expect(find.byKey(NightPage.startKey), findsNothing);
+    expect(find.byKey(NightPage.addKey), findsOneWidget);
+  });
+
+  testWidgets('a failed reading: C4-P·6 alone, unread; Start Interpretation again', (tester) async {
+    final r = held();
+    final first = r.next();
+    await open(tester, reader: r.reader);
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pump();
+    first.completeError(const ReadingFailure(502));
+    await tester.pumpAndSettle();
+    expect(find.descendant(of: find.byKey(NightPage.failedKey), matching: find.byType(AppLine)), findsOneWidget);
+    expect(tester.widget<AppLine>(find.byType(AppLine).last).text, Lines.C4_P_6.text(Lang.en));
+    expect(find.byKey(NightPage.waitingKey, skipOffstage: false), findsNothing);
+    expect(find.byKey(NightPage.readingsKey, skipOffstage: false), findsNothing);
+    expect(find.text(Lines.MP_20.text(Lang.en), skipOffstage: false), findsNothing);
+    expect((await h.journal.night(n.id))!.readings, isNull);
+    final second = r.next();
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pump();
+    await tester.pump();
+    expect(find.byKey(NightPage.failedKey), findsNothing);
+    expect(find.byKey(NightPage.waitingKey), findsOneWidget);
+    second.complete(three.take(1).toList());
+    await tester.pumpAndSettle();
+    expect(find.byKey(NightPage.readingKey(0), skipOffstage: false), findsOneWidget);
+    expect(find.byKey(NightPage.readingKey(1), skipOffstage: false), findsNothing);
+  });
+
+  testWidgets('the waiting and failure lines are heard as they come', (tester) async {
+    final r = held();
+    final answer = r.next();
+    await open(tester, reader: r.reader);
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pump();
+    await tester.pump();
+    expect(tester.widget<Semantics>(find.byKey(NightPage.waitingKey)).properties.liveRegion, isTrue);
+    answer.completeError(const ReadingFailure(0));
+    await tester.pumpAndSettle();
+    expect(tester.widget<Semantics>(find.byKey(NightPage.failedKey)).properties.liveRegion, isTrue);
+  });
+
+  testWidgets('before agreeing, with a reader: the popup, nothing sent', (tester) async {
+    final r = held();
+    r.next();
+    await open(tester, wide: true, agreed: false, reader: r.reader);
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pumpAndSettle();
+    expect(find.text(PendingLines.MP_101.text(Lang.en)), findsOneWidget);
+    expect(r.sent, isEmpty);
+    expect(find.byKey(NightPage.waitingKey), findsNothing);
+  });
+
+  // A window tall enough to hold the whole night, so every part is built.
+  Future<void> tall(WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1170, 9000);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('a read night: MP·20, "The Readings", the readings in order, left', (tester) async {
+    await open(tester, readings: three, read: isRead);
+    await tall(tester);
+    final width = tester.getSize(find.byType(NightPage)).width;
+    final intro = find.text(Lines.MP_20.text(Lang.en));
+    final label = find.descendant(of: find.byKey(NightPage.readingsKey), matching: find.text(Lines.MP_36.text(Lang.en)));
+    expect(intro, findsOneWidget);
+    expect(label, findsOneWidget);
+    expect(tester.getCenter(label).dx, closeTo(width / 2, 1));
+    final tops = [
+      tester.getRect(find.text(n.dreams.last)).bottom,
+      tester.getRect(intro).top,
+      tester.getRect(label).top,
+      for (var i = 0; i < 3; i++) tester.getRect(find.byKey(NightPage.readingKey(i))).top,
+    ];
+    for (var i = 1; i < tops.length; i++) {
+      expect(tops[i], greaterThan(tops[i - 1]), reason: 'at $i');
+    }
+    for (var i = 0; i < 3; i++) {
+      final bubble = find.byKey(NightPage.readingKey(i));
+      final box = find.descendant(of: bubble, matching: find.byType(DecoratedBox)).first;
+      expect(tester.getRect(box).left, closeTo(Spacing.bubbleTradition.left, 1));
+      expect(tester.getRect(box).right, lessThanOrEqualTo(width - Spacing.bubbleTradition.right + 1));
+      expect(find.descendant(of: bubble, matching: find.text(three[i].text)), findsOneWidget);
+      expect(find.descendant(of: bubble, matching: find.text(lensLabel(Lines.W13, three[i].lens, Lang.en))), findsOneWidget);
+    }
+    // A reading's words in the readings' voice.
+    expect(tester.widget<Text>(find.text(three[0].text)).style!.fontFamily, TypeRoles.voiceReadings.family);
+    expect(find.byKey(NightPage.startKey), findsNothing);
+  });
+
+  testWidgets("a reading's label: the tradition's pill, in its gradient, white words", (tester) async {
+    await open(tester, readings: three.take(1).toList(), read: isRead);
+    await tall(tester);
+    final pill = find.descendant(of: find.byKey(NightPage.readingKey(0)), matching: find.byKey(ReadingBubble.labelKey));
+    final look = tester.widget<DecoratedBox>(pill).decoration as BoxDecoration;
+    expect((look.gradient! as LinearGradient).colors,
+        [LightColours.labelTradition.colour, LightColours.labelTradition.colourEnd]);
+    final words = tester.widget<Text>(find.descendant(of: pill, matching: find.byType(Text)));
+    expect(words.style!.color, LightColours.labelTradition.text);
+  });
+
+  // MP·71 (C18-P, C19-P): "Made by AI", quietly, under each reading only.
+  testWidgets('MP·71 under each reading, quiet, in its margin', (tester) async {
+    await open(tester, readings: three, read: isRead);
+    await tall(tester);
+    final marks = find.text(Lines.MP_71.text(Lang.en));
+    expect(marks, findsNWidgets(3));
+    for (var i = 0; i < 3; i++) {
+      final bubble = find.byKey(NightPage.readingKey(i));
+      final box = find.descendant(of: bubble, matching: find.byType(DecoratedBox)).first;
+      final mark = find.descendant(of: bubble, matching: find.byKey(ReadingBubble.markKey));
+      expect(tester.getRect(mark).top, greaterThan(tester.getRect(box).bottom));
+      expect(tester.getRect(mark).left, closeTo(Spacing.bubbleTradition.left, 1));
+      final words = tester.widget<Text>(find.descendant(of: mark, matching: find.byType(Text)));
+      expect(words.data, Lines.MP_71.text(Lang.en));
+      expect(words.style!.fontSize, TypeRoles.buttonSmall.size);
+      expect(words.style!.color, LightColours.textSummary.colour);
+    }
+    // None elsewhere on the page: not on the painting, not under a dream.
+    expect(find.descendant(of: find.byType(NightArt), matching: marks), findsNothing);
+  });
+
+  test("a tradition's label: W13's part at its place, else its handle", () {
+    expect(Lines.W13.written, isFalse);
+    expect(lensLabel(Lines.W13, 0, Lang.en), '[W13]');
+    expect(lensLabel(Lines.W13, 2, Lang.sv), '[W13]');
+    const filed = Line('W13', ['A', 'B'], ['C', 'D']);
+    expect(lensLabel(filed, 1, Lang.en), 'B');
+    expect(lensLabel(filed, 0, Lang.sv), 'C');
+    expect(lensLabel(filed, 2, Lang.en), '[W13]');
+  });
+
+  testWidgets('the Readings jump brings "The Readings" to the top', (tester) async {
+    await open(tester, read: isRead, readings: three, key: 'long-dream-en');
+    final list = tester.getRect(find.byType(ListView));
+    await tester.tap(find.byKey(NightPage.jumpKey(Jump.readings)));
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(NightPage.readingsKey)).top, closeTo(list.top, 1));
+  });
+
+  testWidgets('a read night at twice the text size: no overflow', (tester) async {
+    tester.platformDispatcher.textScaleFactorTestValue = 2;
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+    await open(tester, read: isRead, readings: three);
+    await tall(tester);
+    expect(find.byKey(NightPage.readingKey(2), skipOffstage: false), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }

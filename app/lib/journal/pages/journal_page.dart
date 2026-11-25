@@ -32,6 +32,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../feedback/feedback.dart';
+import '../../readings/readings.dart';
 import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
 import '../../life_context/life_context.dart';
@@ -63,6 +64,7 @@ class JournalPage extends StatefulWidget {
     this.images = true,
     this.agreed = true,
     this.feedback,
+    this.readNight,
   });
 
   final Journal journal;
@@ -105,6 +107,10 @@ class JournalPage extends StatefulWidget {
 
   /// Sends feedback from Settings (D152), or null: no Feedback section.
   final SendFeedback? feedback;
+
+  /// Reads a night through our server (head's message 33), or null: Start
+  /// Interpretation does nothing. SoulDreams Dev's only.
+  final SendNight? readNight;
 
   @override
   State<JournalPage> createState() => _JournalPageState();
@@ -192,6 +198,13 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     });
   }
 
+  // A night's reader: the night with what Life Context gives at that
+  // moment, nothing kept while it is off (D134).
+  Reader? get _reader => switch (widget.readNight) {
+    null => null,
+    final send => Reader(send, () => keptFor(widget.lifeContext)),
+  };
+
   Future<void> _push(Widget page) async {
     await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
     await _load();
@@ -207,6 +220,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
       read: widget.read,
       images: widget.images,
       agreed: widget.agreed,
+      reader: _reader,
     ),
   );
 
@@ -262,6 +276,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
           images: widget.images,
           agreed: widget.agreed,
           query: query,
+          reader: _reader,
         ),
       ),
     );

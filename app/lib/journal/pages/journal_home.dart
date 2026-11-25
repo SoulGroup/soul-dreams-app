@@ -32,6 +32,7 @@ import '../../core/app_line.dart' show wordAnimation;
 import '../../core/night_day.dart';
 import '../../core/safe_log.dart';
 import '../../feedback/feedback.dart';
+import '../../readings/readings.dart';
 import '../../life_context/life_context.dart';
 import '../../life_context/preview.dart';
 import '../../onboarding/onboarding.dart';
@@ -57,6 +58,7 @@ class JournalHome extends StatefulWidget {
     this.read = noneRead,
     this.preview = '',
     this.feedback,
+    this.readNight,
   });
 
   final JournalFiles files;
@@ -80,6 +82,9 @@ class JournalHome extends StatefulWidget {
 
   /// Sends feedback from Settings (D152), or null: no Feedback section.
   final SendFeedback? feedback;
+
+  /// Reads a night through our server (head's message 33), or null.
+  final SendNight? readNight;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -269,6 +274,7 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         images: _settings?.settings.images != NightImages.off,
         agreed: _settings?.agreed ?? true,
         feedback: widget.feedback,
+        readNight: widget.readNight,
       ),
     };
   }

@@ -7,7 +7,9 @@
 // Built with tool/preview_kept.py's file, it seeds the invented kept
 // sentences once, for the review of Life Context's page (D131 item 1).
 // Settings' Feedback section sends to our server with the same beta key
-// (D152 item 5: SoulDreams Dev only for now).
+// (D152 item 5: SoulDreams Dev only for now). Start Interpretation reads a
+// night through our server with it too (head's message 33: SoulDreams Dev
+// only, invented nights only); a night is read when it holds its readings.
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
@@ -22,6 +24,7 @@ import 'journal/channel_journal_files.dart';
 import 'journal/night_look.dart';
 import 'journal/pages/journal_home.dart';
 import 'journal/self_check.dart';
+import 'readings/readings.dart';
 import 'recording/connection.dart';
 import 'recording/record_microphone.dart';
 import 'recording/recording.dart';
@@ -43,14 +46,16 @@ void main() {
     connection: ChannelConnection(),
   );
   final feedback = liveFeedback(betaKey: const String.fromEnvironment('BETA_KEY'));
-  const read = bool.fromEnvironment('PREVIEW_READ') ? allRead : noneRead;
+  // Each night's calls' counts and cost kept beside it (head's message 34).
+  final readNight = liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage: true);
+  const read = bool.fromEnvironment('PREVIEW_READ') ? allRead : isRead;
   // The keyboard check (D50 1): only in a build made with
   // --dart-define=KEYBOARD_CHECK=true.
   runApp(
     SoulDreamsApp(
       home: const bool.fromEnvironment('KEYBOARD_CHECK')
           ? const KeyboardCheck()
-          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback),
+          : JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback, readNight: readNight),
     ),
   );
   if (check != null) unawaited(check);

@@ -16,20 +16,29 @@
 // (MP·38, centred, D112), in bubbles 30 from the screen's left edge and 10 from its
 // right (Spacing.bubbleDreamer), each opening the typing screen to edit
 // it; at the foot, "Add dreams" (MP·29) left and Start Interpretation
-// (EM·1) right, which does nothing yet (P3, as D71 Q3). A recording that
+// (EM·1) right, which reads the night with the page's reader, SoulDreams
+// Dev's only (head's message 33), and does nothing without one (P3, as D71
+// Q3); it is gone once the night is read. While the night is read, AI·3
+// shows under the dreams; a reading that fails shows the failure sentence
+// (C4-P·6) alone there, and the night stays unread (handover §5). A read
+// night shows, under its dreams, MP·20, "The Readings" (MP·36) and its
+// readings, each in the readings' bubble under its tradition's label (W13,
+// its handle until it has a line), with "Made by AI" (MP·71) quietly under
+// each. A recording that
 // waits to be turned into text shows nothing in its place and cannot be
 // tapped; while it is being turned into text, AI·6 shows in its place,
 // heard by a screen reader (D93 Q3; the shimmer is not built, a stand-in).
 // When its words come, the page shows them. On a read night, under the
 // header, four jump buttons (MP·77: Dreams, Questions, Readings,
-// Reflection; D119 item 4); Dreams brings "Dreams" into view, the
-// other three do nothing until their sections come with the readings. No
-// night is read yet. Not built: reading, and the space below the dreams
+// Reflection; D119 item 4); Dreams brings "Dreams" into view and Readings
+// "The Readings"; the other two do nothing until their sections come. Not
+// built: the mirror, the opening, the close, and the space below the dreams
 // with its field. Opened from a search, the night's first match shows in
 // Bold in its dream, found again on each read; gone when the page goes
 // (main-path.md, Search; D117 Q6).
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter/services.dart';
 
 import '../../core/app_line.dart';
@@ -40,6 +49,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
+import '../../readings/readings.dart';
 import '../../recording/recording.dart';
 import '../journal.dart';
 import '../night.dart';
@@ -52,6 +62,13 @@ import '../search.dart';
 import 'night_art.dart';
 import 'parts.dart';
 import 'typing_page.dart';
+
+/// A tradition's label: [line]'s part at [lens] (W13), or its handle while
+/// it has no line or no part there (R1).
+String lensLabel(Line line, int lens, Lang lang) {
+  final parts = line.parts(lang);
+  return line.written && lens < parts.length ? parts[lens] : '[${line.handle}]';
+}
 
 /// A read night's jump buttons, in MP·77's order (C18-P; D119 item 4).
 enum Jump {
@@ -75,6 +92,7 @@ class NightPage extends StatefulWidget {
     this.images = true,
     this.agreed = true,
     this.query,
+    this.reader,
   });
 
   static const menuKey = Key('night-menu');
@@ -84,6 +102,12 @@ class NightPage extends StatefulWidget {
   static const startKey = Key('night-start');
   static const transcribingKey = Key('night-transcribing');
   static const dreamsKey = Key('night-dreams');
+  static const readingsKey = Key('night-readings');
+  static const waitingKey = Key('night-reading-waits');
+  static const failedKey = Key('night-reading-failed');
+
+  /// The night's reading at [index].
+  static Key readingKey(int index) => ValueKey('reading-$index');
 
   /// A read night's jump button.
   static Key jumpKey(Jump jump) => ValueKey('jump-${jump.name}');
@@ -110,6 +134,10 @@ class NightPage extends StatefulWidget {
   /// The search this night was opened from, as searched, or null.
   final String? query;
 
+  /// How Start Interpretation reads the night: SoulDreams Dev's only (head's
+  /// message 33); null, and it does nothing.
+  final Reader? reader;
+
   @override
   State<NightPage> createState() => _NightPageState();
 }
@@ -123,6 +151,21 @@ class _NightPageState extends State<NightPage> {
   // The "Dreams" label, which its jump button brings into view.
   final _dreamsLabel = GlobalKey();
 
+  // "The Readings" label, which its jump button brings into view.
+  final _readingsLabel = GlobalKey();
+
+  // A reading under way, or the last one failed (handover §5).
+  bool _reading = false;
+  bool _failed = false;
+
+  // The part that scrolls: brought to its end, at once, when AI·3 comes, so
+  // it shows where the readings, or the failure sentence, will.
+  final _scroll = ScrollController();
+
+  void _toEnd() => WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (mounted && _scroll.hasClients) _scroll.jumpTo(_scroll.position.maxScrollExtent);
+  });
+
   @override
   void initState() {
     super.initState();
@@ -133,6 +176,7 @@ class _NightPageState extends State<NightPage> {
   @override
   void dispose() {
     widget.recording?.retries?.removeListener(_retried);
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -215,6 +259,30 @@ class _NightPageState extends State<NightPage> {
       return;
     }
     if (mounted) Navigator.of(context).pop();
+  }
+
+  // Start Interpretation: the popup before agreeing (D128); else, with a
+  // reader, the night read once at a time (head's message 33).
+  Future<void> _start() async {
+    if (!widget.agreed) {
+      showAgreementPopup(context);
+      return;
+    }
+    final reader = widget.reader;
+    final night = _night;
+    if (reader == null || night == null || _busy || _reading) return;
+    setState(() {
+      _reading = true;
+      _failed = false;
+    });
+    _toEnd();
+    final done = await interpret(widget.journal, reader, night);
+    if (!mounted) return;
+    setState(() {
+      _reading = false;
+      _failed = done == Interpreted.failed;
+    });
+    await _load();
   }
 
   // The entry point's item, with the night shown; not while a delete runs.
@@ -324,7 +392,7 @@ class _NightPageState extends State<NightPage> {
         children: [
           jump(Jump.dreams, [p.sectionTop, p.sectionBottom], _dreamsLabel),
           jump(Jump.questions, StandIns.jumpQuestions, null),
-          jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], null),
+          jump(Jump.readings, [tradition.colour!, tradition.colourEnd!], _readingsLabel),
           jump(Jump.reflection, [tag.colour!, tag.colourEnd!], null),
         ],
       ),
@@ -411,6 +479,10 @@ class _NightPageState extends State<NightPage> {
                 // The bubbles keep their own margins from the screen's edges
                 // (design-system.md §5); everything else keeps the page's.
                 child: ListView(
+                  controller: _scroll,
+                  // Every part laid out, so a jump reaches a section below
+                  // the screen (a night's page is short).
+                  scrollCacheExtent: const ScrollCacheExtent.pixels(100000),
                   padding: EdgeInsets.only(top: Spacing.nightHeader.top),
                   children: [
                     // A read night's jump buttons head the part that scrolls.
@@ -443,6 +515,7 @@ class _NightPageState extends State<NightPage> {
                         ),
                         const SizedBox(height: StandIns.bubbleGap),
                       ],
+                    ..._readings(n, p, side),
                   ],
                 ),
               ),
@@ -455,17 +528,13 @@ class _NightPageState extends State<NightPage> {
                       key: NightPage.addKey,
                       child: PlainButton(Lines.MP_29.text(appLanguage), onPressed: () => _type(null)),
                     ),
-                    right: KeyedSubtree(
-                      key: NightPage.startKey,
-                      // Nothing to start yet: the readings come later (P3, as D71
-                      // Q3); before agreeing, the popup (D128).
-                      child: PlainButton(
-                        Lines.EM_1.text(appLanguage),
-                        onPressed: () {
-                          if (!widget.agreed) showAgreementPopup(context);
-                        },
-                      ),
-                    ),
+                    // Gone once the night is read.
+                    right: n.readings != null
+                        ? const SizedBox.shrink()
+                        : KeyedSubtree(
+                            key: NightPage.startKey,
+                            child: PlainButton(Lines.EM_1.text(appLanguage), onPressed: _start),
+                          ),
                   ),
                 ),
               ),
@@ -474,5 +543,46 @@ class _NightPageState extends State<NightPage> {
         ),
       ),
     );
+  }
+
+  // Under the dreams: a read night's readings (MP·20, "The Readings", each
+  // reading); while one is read, AI·3; when it failed, C4-P·6 alone.
+  List<Widget> _readings(Night n, Palette p, EdgeInsets side) {
+    Widget line(Key key, Line said) => Padding(
+      padding: side,
+      child: Semantics(
+        key: key,
+        liveRegion: true,
+        child: AppLine(said.text(appLanguage), style: StandIns.voiceApp(p.text)),
+      ),
+    );
+    if (n.readings case final readings?) {
+      return [
+        const SizedBox(height: Spacing.turnApp),
+        Padding(padding: side, child: AppLine(Lines.MP_20.text(appLanguage), style: StandIns.voiceApp(p.text))),
+        const SizedBox(height: StandIns.gap),
+        Padding(
+          key: NightPage.readingsKey,
+          padding: side,
+          child: Align(
+            alignment: Alignment.center,
+            child: SectionLabel(key: _readingsLabel, Lines.MP_36.text(appLanguage)),
+          ),
+        ),
+        const SizedBox(height: Spacing.labelReadings),
+        for (final (i, r) in readings.indexed) ...[
+          ReadingBubble(
+            key: NightPage.readingKey(i),
+            label: lensLabel(Lines.W13, r.lens, appLanguage),
+            text: r.text,
+            mark: Lines.MP_71.text(appLanguage),
+          ),
+          const SizedBox(height: StandIns.bubbleGap),
+        ],
+      ];
+    }
+    if (_reading) return [const SizedBox(height: Spacing.turnApp), line(NightPage.waitingKey, Lines.AI_3)];
+    if (_failed) return [const SizedBox(height: Spacing.turnApp), line(NightPage.failedKey, Lines.C4_P_6)];
+    return const [];
   }
 }

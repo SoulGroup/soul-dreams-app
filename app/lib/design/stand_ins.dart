@@ -124,6 +124,9 @@ abstract final class StandIns {
   static const bubblePadding = EdgeInsets.symmetric(horizontal: 30, vertical: 30);
   static const double bubbleGap = 12;
 
+  /// Between a reading's bubble and its AI mark (MP·71) under it.
+  static const double aiMarkGap = 6;
+
   /// Inside the typing field, and around the typing screen's parts.
   static const fieldPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 14);
   static const double gap = 20;

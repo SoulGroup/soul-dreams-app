@@ -188,6 +188,64 @@ class DreamBubble extends StatelessWidget {
   }
 }
 
+/// A reading in the readings' bubble, from the left (Spacing.bubbleTradition;
+/// How the AI Appears §2, §3): white with the surface's edge in the light
+/// theme, the bubble gradient in the dark; its tradition's [label] on a pill
+/// in the tradition gradient, white words, above its [text] in the readings'
+/// voice. Under the bubble, quietly, its AI [mark] (MP·71), in the small
+/// button type and the summary's grey, both stand-ins. The space under the
+/// label is a stand-in (StandIns.gap), as is the mark's (StandIns.aiMarkGap).
+class ReadingBubble extends StatelessWidget {
+  const ReadingBubble({super.key, required this.label, required this.text, required this.mark});
+
+  static const labelKey = Key('reading-label');
+  static const markKey = Key('reading-mark');
+
+  final String label;
+  final String text;
+  final String mark;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = Palette.of(context);
+    const role = LightColours.labelTradition;
+    return Padding(
+      padding: Spacing.bubbleTradition,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DecoratedBox(
+            decoration: surface(p),
+            child: Padding(
+              padding: StandIns.bubblePadding,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  DecoratedBox(
+                    key: labelKey,
+                    decoration: _pill(role.colour!, role.colourEnd!),
+                    child: Padding(
+                      padding: StandIns.labelPadding,
+                      child: Text(label, style: TypeRoles.button.style(role.text!)),
+                    ),
+                  ),
+                  const SizedBox(height: StandIns.gap),
+                  Text(text, style: TypeRoles.voiceReadings.style(p.text)),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: StandIns.aiMarkGap),
+          KeyedSubtree(
+            key: markKey,
+            child: Text(mark, style: TypeRoles.buttonSmall.style(p.summary)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// A thin chevron, drawn as two strokes, pointing right, or left when
 /// [left] (head's message 20, items 4 and 9). Heard as nothing.
 class Chevron extends StatelessWidget {

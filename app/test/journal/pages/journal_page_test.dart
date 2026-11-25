@@ -25,6 +25,7 @@ import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/sky_mark.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
+import 'package:souldreams/readings/readings.dart';
 import 'package:souldreams/journal/sky.dart';
 import 'package:souldreams/words/lines.g.dart';
 import 'package:souldreams/words/pending.g.dart';
@@ -636,5 +637,51 @@ void main() {
     await tester.tap(find.byKey(JournalPage.newDreamKey));
     await tester.pumpAndSettle();
     expect(find.byType(TypingPage), findsOneWidget);
+  });
+
+  // The readings (head's message 33): given SoulDreams Dev's reading, a
+  // night opened from its row reads with Start Interpretation; back on the
+  // list, its row shows it read (its painting).
+  testWidgets("with a reading, Start Interpretation reads; the row shows it read", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    final sent = <Map<String, Object?>>[];
+    await h.pump(
+      tester,
+      JournalPage(
+        journal: h.journal,
+        read: isRead,
+        readNight: (body) async {
+          sent.add(body);
+          return (readings: [Reading(0, '[STAND-IN · 1]')], usage: null);
+        },
+      ),
+    );
+    final look = lookOf(n, read: true, paintings: NightArt.paintings);
+    expect(tester.widget<NightArt>(find.descendant(of: find.byKey(JournalPage.rowKey(n.id)), matching: find.byType(NightArt))).look,
+        const PaintedGradient());
+    await tester.tap(find.byKey(JournalPage.rowKey(n.id)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pumpAndSettle();
+    // Life Context absent: nothing kept is sent.
+    expect(sent, [requestOf(n, null)]);
+    expect((await h.journal.night(n.id))!.readings, [Reading(0, '[STAND-IN · 1]')]);
+    await tester.tap(find.byKey(BackControl.buttonKey));
+    await tester.pumpAndSettle();
+    expect(tester.widget<NightArt>(find.descendant(of: find.byKey(JournalPage.rowKey(n.id)), matching: find.byType(NightArt))).look,
+        look);
+  });
+
+  testWidgets('without a reading, Start Interpretation sends nothing', (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.pump(tester, JournalPage(journal: h.journal, read: isRead));
+    await tester.tap(find.byKey(JournalPage.rowKey(n.id)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(NightPage.startKey));
+    await tester.pumpAndSettle();
+    expect((await h.journal.night(n.id))!.readings, isNull);
+    expect(find.byKey(NightPage.waitingKey, skipOffstage: false), findsNothing);
   });
 }
