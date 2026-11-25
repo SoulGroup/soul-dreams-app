@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-25, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D159, head's message 34; built and tested, the storage rehearsal passed on the owner's phone; the owner's deploy, by-eye check and the full mutation runs next), by Claude Code.
+Last updated: 2026-11-25, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D160, head's message 34; built, deployed and checked by eye, both full mutation runs done; the merge, which is the owner's, next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -49,10 +49,10 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `readings-plumbing`, part one: the storage rehearsal on the phone (Task 3) passed (owner, 2026-11-25); the deploy
-  (Task 8), the by-eye check (Task 9), the full mutation runs once (D126), then the merge, which is the owner's. The
-  C19-P import (the design system, the product change record, the register) is not on this branch (D159): it waits
-  for its own branch.
+- `readings-plumbing`, part one: the storage rehearsal (Task 3), the deploy (Task 8) and the by-eye check (Task 9)
+  passed (owner, 2026-11-25) and the full mutation runs are done (D126); the merge is the owner's. The C19-P import
+  (the design system, the product change record, the register) is not on this branch (D159): it waits for its own
+  branch. Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
   Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
 - `readings-plumbing`, part two: the painting (D143, D145, D146, D123; D155 items 1 and 3): its plan after part one's
   merge.
@@ -331,9 +331,10 @@ merge (this entry records it).
   Disclosure & privacy page from Settings is then the text with one button at its end, MP·100, which gives both
   consents (`SettingsController.agree`), starts the recording and the retries, and goes; once agreed the page has
   no button. MP·66, MP·67, MP·68, MP·70, MP·95 to MP·97 and MP·9 are shown nowhere now. The word "consent" is on no
-  screen but one line: EM·6's Swedish, "Jag samtycker inte" (banked item 164). Night images has no consent: Off by
-  default, every night the gradient (`lookOf`'s `images`); Personal and Random keep D110's look until the personal
-  painting exists (D121 item 3).
+  screen but one line: EM·6's Swedish, "Jag samtycker inte" (banked item 164). Night images has no consent: Personal
+  by default (D160: in a fresh journal and after Delete journal, with "I agree" or not), a read night its painting;
+  Off, one tap away in Settings, shows every night the gradient (`lookOf`'s `images`); Personal and Random keep
+  D110's look until the personal painting exists (D121 item 3).
 - Settings (main-path.md, Settings; D110; D121; D122; D125; D128; `settings_page.dart`; TO TRY where a stand-in): the
   settings button top left on the journal, on the search field's row, the field to its right and ending where the
   rows end (three drawn sliders in place of the gear, 41 in a 44 tap box, its own semantics node, spoken MP·25; the
@@ -400,7 +401,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 835 tests, and 857 mutation checks (A1 to A918; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 837 tests, and 859 mutation checks (A1 to A920; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -1870,6 +1871,16 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
 - Task 3 (the storage rehearsal) passed on the owner's phone, 2026-11-25 (the simulator skipped): three invented nights
   (one dream, three dreams, a recording waiting) carried from `main` to `2a46989` whole; the waiting one was
   transcribed; editing and adding worked.
+- Task 8 (the deploy) and Task 9 (the by-eye check) passed (owner, 2026-11-25): only the function's code changed, the
+  same address; the readings, the painting (once Night images was switched on, it being Off then), the jump buttons,
+  reopening, the dark theme, the failure and its retry, older nights whole and large text; the log shows `modelUsage`
+  and `readingGiven` lines only.
+- D160 (founder): Night images defaults to Personal (On) after "I agree", in a fresh journal and after Delete journal;
+  Off stays one tap away in Settings (`Settings.images`; rows A919, A920; A513, A557, A621, A628 follow). The
+  default is the setting's, so a dreamer who declines also has Personal, which does nothing without readings; a
+  settings file that already holds Off keeps it.
+- The full mutation runs (D126), at `d6f6861`: `app mutations: 859 run, 859 caught` and `server mutations: 175 run,
+  175 caught`.
 - D91 reviews, Opus, of the storage change, the server's route and Life Context's gating, each fixed and re-proven
   where a defect or a test gap was found: the night file's tests (two "damaged" files that no longer were, the
   version check with no test of its own; `412f84a`, `6d37cd0`); Life Context turned Off while the kept sentences
