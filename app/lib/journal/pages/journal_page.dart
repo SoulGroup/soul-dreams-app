@@ -22,6 +22,7 @@
 // sky mark stays 140 down. Settings is handed Life Context, whose page opens
 // a night here as a row does (D131).
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 
@@ -32,6 +33,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../feedback/feedback.dart';
+import '../../readings/painting.dart';
 import '../../readings/readings.dart';
 import '../../words/lines.g.dart';
 import '../../recording/recording.dart';
@@ -65,6 +67,8 @@ class JournalPage extends StatefulWidget {
     this.agreed = true,
     this.feedback,
     this.readNight,
+    this.personal = false,
+    this.painter,
   });
 
   final Journal journal;
@@ -112,12 +116,21 @@ class JournalPage extends StatefulWidget {
   /// Interpretation does nothing. SoulDreams Dev's only.
   final SendNight? readNight;
 
+  /// Whether Night images is Personal (D162): a read night's row shows its
+  /// own painting once it has come.
+  final bool personal;
+
+  /// Asks for a read night's own painting, or null. SoulDreams Dev's only.
+  final Painter? painter;
+
   @override
   State<JournalPage> createState() => _JournalPageState();
 }
 
 class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   List<Night>? _nights;
+  // Each night's own painting, by its id, while Personal (D162).
+  Map<String, Uint8List> _paintings = const {};
   late Greeting _greeting = _greetingNow();
   late Sky _sky = _skyNow();
   late final Timer _clock;
@@ -183,8 +196,10 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
   // A failed read keeps what is shown and logs a code (D71 Q18, as D64).
   Future<void> _load() async {
     final List<Night> nights;
+    final Map<String, Uint8List> paintings;
     try {
       nights = await widget.journal.newestFirst();
+      paintings = widget.personal ? await widget.journal.paintings() : const {};
     } on Object {
       SafeLog.event(LogEvent.journalListFailed);
       return;
@@ -192,6 +207,7 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     if (!mounted) return;
     setState(() {
       _nights = nights;
+      _paintings = paintings;
       _greeting = _greetingNow();
       _sky = _skyNow();
       // Shown once: a night there ends it, even one deleted later.
@@ -221,6 +237,8 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
       images: widget.images,
       agreed: widget.agreed,
       reader: _reader,
+      personal: widget.personal,
+      painter: widget.painter,
     ),
   );
 
@@ -264,7 +282,13 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
     };
     Widget row(Night night) => _Row(
       night,
-      look: lookOf(night, read: widget.read(night), paintings: NightArt.paintings, images: widget.images),
+      look: lookOf(
+        night,
+        read: widget.read(night),
+        paintings: NightArt.paintings,
+        images: widget.images,
+        personal: _paintings[night.id],
+      ),
       line: contexts[night.id],
       onTap: () => _push(
         NightPage(
@@ -277,6 +301,8 @@ class _JournalPageState extends State<JournalPage> with WidgetsBindingObserver {
           agreed: widget.agreed,
           query: query,
           reader: _reader,
+          personal: widget.personal,
+          painter: widget.painter,
         ),
       ),
     );

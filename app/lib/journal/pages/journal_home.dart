@@ -32,6 +32,7 @@ import '../../core/app_line.dart' show wordAnimation;
 import '../../core/night_day.dart';
 import '../../core/safe_log.dart';
 import '../../feedback/feedback.dart';
+import '../../readings/painting.dart';
 import '../../readings/readings.dart';
 import '../../life_context/life_context.dart';
 import '../../life_context/preview.dart';
@@ -59,6 +60,7 @@ class JournalHome extends StatefulWidget {
     this.preview = '',
     this.feedback,
     this.readNight,
+    this.painter,
   });
 
   final JournalFiles files;
@@ -85,6 +87,9 @@ class JournalHome extends StatefulWidget {
 
   /// Reads a night through our server (head's message 33), or null.
   final SendNight? readNight;
+
+  /// Asks for a read night's own painting (D162), or null.
+  final Painter? painter;
 
   @override
   State<JournalHome> createState() => _JournalHomeState();
@@ -275,6 +280,8 @@ class _JournalHomeState extends State<JournalHome> with WidgetsBindingObserver {
         agreed: _settings?.agreed ?? true,
         feedback: widget.feedback,
         readNight: widget.readNight,
+        personal: _settings?.settings.images == NightImages.personal,
+        painter: widget.painter,
       ),
     };
   }

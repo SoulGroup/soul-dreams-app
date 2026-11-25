@@ -10,6 +10,7 @@
 // waits, C4-P·6 alone when it fails; a read night shows MP·20, "The
 // Readings" (MP·36) and its readings, each under its tradition's label.
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Theme;
@@ -29,6 +30,7 @@ import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
 import 'package:souldreams/journal/search.dart';
+import 'package:souldreams/readings/painting.dart';
 import 'package:souldreams/readings/readings.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/words/lines.g.dart';
@@ -94,6 +96,8 @@ void main() {
     bool agreed = true,
     Reader? reader,
     List<Reading>? readings,
+    bool personal = false,
+    Painter? painter,
   }) async {
     // The test's own 800 by 600, where the foot's two buttons do not fill
     // the row, or a phone.
@@ -131,6 +135,8 @@ void main() {
           query: query,
           agreed: agreed,
           reader: reader,
+          personal: personal,
+          painter: painter,
         ),
       ),
       hour: hour,
@@ -1151,5 +1157,154 @@ void main() {
     await tall(tester);
     expect(find.byKey(NightPage.readingKey(2), skipOffstage: false), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  // D162: a read night's own painting, while Personal. Its JPEG is one of
+  // the set's files, as bytes, standing in for the server's.
+  group("a read night's own painting", () {
+    final own = File('assets/paintings/03.jpg').readAsBytesSync();
+    final one = [Reading(0, '[STAND-IN · 1]')];
+
+    // A painter whose answers wait for the test; each request counted.
+    ({Painter painter, List<Completer<Uint8List>> asked}) painting() {
+      final asked = <Completer<Uint8List>>[];
+      return (
+        asked: asked,
+        painter: Painter(() {
+          final c = Completer<Uint8List>();
+          asked.add(c);
+          return c.future;
+        }),
+      );
+    }
+
+    NightLook look(WidgetTester tester) => tester.widget<NightArt>(find.byType(NightArt)).look;
+
+    testWidgets("MP·81 over the set's painting, then its own painting", (tester) async {
+      final p = painting();
+      await open(tester, readings: one, read: isRead, personal: true, painter: p.painter);
+      expect(p.asked, hasLength(1));
+      expect(look(tester), Painting(paintingFor(n.id, NightArt.paintings)));
+      expect(find.text(Lines.MP_81.text(Lang.en)), findsOneWidget);
+      final line = tester.getRect(find.text(Lines.MP_81.text(Lang.en)));
+      expect(tester.getRect(find.byType(NightArt)).contains(line.center), isTrue);
+      p.asked.single.complete(own);
+      await tester.pumpAndSettle();
+      expect(find.text(Lines.MP_81.text(Lang.en)), findsNothing);
+      expect((look(tester) as PersonalPainting).jpeg, own);
+      expect(await h.journal.painting(n.id), own);
+    });
+
+    testWidgets('MP·81 is heard as it comes', (tester) async {
+      final handle = tester.ensureSemantics();
+      final p = painting();
+      await open(tester, readings: one, read: isRead, personal: true, painter: p.painter);
+      expect(tester.getSemantics(find.byKey(NightPage.paintingKey)), matchesSemantics(isLiveRegion: true, label: Lines.MP_81.text(Lang.en)));
+      p.asked.single.complete(own);
+      await tester.pumpAndSettle();
+      handle.dispose();
+    });
+
+    testWidgets("a failure: the set's painting stays, silently; one try", (tester) async {
+      final p = painting();
+      await open(tester, readings: one, read: isRead, personal: true, painter: p.painter);
+      p.asked.single.completeError(const PaintingFailure(502));
+      await tester.pumpAndSettle();
+      expect(find.text(Lines.MP_81.text(Lang.en)), findsNothing);
+      expect(look(tester), Painting(paintingFor(n.id, NightArt.paintings)));
+      expect(await h.journal.paintTries(n.id), 1);
+      // Asked once while the page is open, though it loads again.
+      await tester.tap(find.text(n.dreams.first));
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(p.asked, hasLength(1));
+    });
+
+    testWidgets('the next opening of the night tries again', (tester) async {
+      final p = painting();
+      await open(tester, readings: one, read: isRead, personal: true, painter: p.painter);
+      p.asked.single.completeError(const PaintingFailure(0));
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Opener.openKey));
+      await tester.pumpAndSettle();
+      expect(p.asked, hasLength(2));
+      p.asked.last.complete(own);
+      await tester.pumpAndSettle();
+      expect((look(tester) as PersonalPainting).jpeg, own);
+    });
+
+    testWidgets('a night with its own painting: shown, nothing asked', (tester) async {
+      final p = painting();
+      await open(tester, readings: one, read: isRead, personal: true, painter: p.painter);
+      p.asked.single.complete(own);
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Opener.openKey));
+      await tester.pumpAndSettle();
+      expect(p.asked, hasLength(1));
+      expect((look(tester) as PersonalPainting).jpeg, own);
+      expect(find.text(Lines.MP_81.text(Lang.en)), findsNothing);
+    });
+
+    testWidgets("Random, Off, unread or no painter: nothing asked", (tester) async {
+      final p = painting();
+      for (final (readings, images, personal, painter) in [
+        (one, true, false, p.painter),
+        (one, false, true, p.painter),
+        (null, true, true, p.painter),
+        (one, true, true, null),
+      ]) {
+        await open(tester, readings: readings, read: isRead, images: images, personal: personal, painter: painter);
+        expect(find.text(Lines.MP_81.text(Lang.en)), findsNothing);
+        await tester.pumpWidget(const SizedBox());
+      }
+      expect(p.asked, isEmpty);
+    });
+
+    testWidgets('Random: its own painting is kept, the set shown', (tester) async {
+      await open(tester, readings: one, read: isRead);
+      await h.journal.keepPainting(n.id, own);
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(Opener.openKey));
+      await tester.pumpAndSettle();
+      expect(look(tester), Painting(paintingFor(n.id, NightArt.paintings)));
+    });
+
+    testWidgets('read by Start Interpretation, then painted', (tester) async {
+      final r = held();
+      final answer = r.next();
+      final p = painting();
+      await open(tester, read: isRead, reader: r.reader, personal: true, painter: p.painter);
+      expect(p.asked, isEmpty);
+      await tester.tap(find.byKey(NightPage.startKey));
+      await tester.pump();
+      answer.complete(three);
+      await tester.pumpAndSettle();
+      expect(p.asked, hasLength(1));
+      expect(find.text(Lines.MP_81.text(Lang.en)), findsOneWidget);
+      p.asked.single.complete(own);
+      await tester.pumpAndSettle();
+      expect((look(tester) as PersonalPainting).jpeg, own);
+    });
+
+    testWidgets('MP·81 at three times the text size: inside the header', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final p = painting();
+      await open(tester, readings: one, read: isRead, personal: true, painter: p.painter);
+      expect(tester.takeException(), isNull);
+      final header = tester.getRect(find.byType(NightArt));
+      for (final line in [find.byKey(NightPage.paintingKey), find.text(Lines.MP_81.text(Lang.en))]) {
+        final r = tester.getRect(line);
+        expect(header.contains(r.topLeft) && header.contains(r.bottomRight - const Offset(1, 1)), isTrue);
+      }
+      p.asked.single.complete(own);
+      await tester.pumpAndSettle();
+    });
   });
 }

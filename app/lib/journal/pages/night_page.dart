@@ -35,7 +35,15 @@
 // built: the mirror, the opening, the close, and the space below the dreams
 // with its field. Opened from a search, the night's first match shows in
 // Bold in its dream, found again on each read; gone when the page goes
-// (main-path.md, Search; D117 Q6).
+// (main-path.md, Search; D117 Q6). While Night images is Personal, a read
+// night with no painting of its own yet asks our server for one, once each
+// time its page opens and only with the page's painter (SoulDreams Dev's);
+// while it is made, the header shows the set's painting with "New painting
+// on the way" (MP·81) over it, heard as it comes; the night's own painting
+// replaces it when it arrives; a failure leaves the set's, silently (D162
+// items 1 and 2).
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
@@ -49,6 +57,7 @@ import '../../design/palette.dart';
 import '../../design/stand_ins.dart';
 import '../../design/tokens.g.dart';
 import '../../words/lines.g.dart';
+import '../../readings/painting.dart';
 import '../../readings/readings.dart';
 import '../../recording/recording.dart';
 import '../journal.dart';
@@ -58,6 +67,7 @@ import '../night_look.dart';
 import '../night_rules.dart';
 import '../row_text.dart';
 import '../../settings/agreement_popup.dart';
+import '../../settings/settings.dart';
 import '../search.dart';
 import 'night_art.dart';
 import 'parts.dart';
@@ -93,6 +103,8 @@ class NightPage extends StatefulWidget {
     this.agreed = true,
     this.query,
     this.reader,
+    this.personal = false,
+    this.painter,
   });
 
   static const menuKey = Key('night-menu');
@@ -105,6 +117,7 @@ class NightPage extends StatefulWidget {
   static const readingsKey = Key('night-readings');
   static const waitingKey = Key('night-reading-waits');
   static const failedKey = Key('night-reading-failed');
+  static const paintingKey = Key('night-painting-made');
 
   /// The night's reading at [index].
   static Key readingKey(int index) => ValueKey('reading-$index');
@@ -138,6 +151,14 @@ class NightPage extends StatefulWidget {
   /// message 33); null, and it does nothing.
   final Reader? reader;
 
+  /// Whether Night images is Personal (D162): the night's own painting is
+  /// shown, and asked for while it has none.
+  final bool personal;
+
+  /// How a read night's own painting is asked for: SoulDreams Dev's only;
+  /// null, and none is.
+  final Painter? painter;
+
   @override
   State<NightPage> createState() => _NightPageState();
 }
@@ -157,6 +178,12 @@ class _NightPageState extends State<NightPage> {
   // A reading under way, or the last one failed (handover §5).
   bool _reading = false;
   bool _failed = false;
+
+  // The night's own painting, while Personal (D162); whether it is being
+  // made; whether it was asked for since the page opened.
+  Uint8List? _own;
+  bool _making = false;
+  bool _asked = false;
 
   // The part that scrolls: brought to its end, at once, when AI·3 comes, so
   // it shows where the readings, or the failure sentence, will.
@@ -203,7 +230,37 @@ class _NightPageState extends State<NightPage> {
       _leave();
       return;
     }
-    setState(() => _night = n);
+    Uint8List? own;
+    if (widget.personal) {
+      try {
+        own = await widget.journal.painting(widget.id);
+      } on Object {
+        SafeLog.event(LogEvent.paintingKeepFailed);
+      }
+      if (!mounted) return;
+    }
+    setState(() {
+      _night = n;
+      _own = own;
+    });
+    _paint(n);
+  }
+
+  // A read night's own painting, asked for once each time the page opens,
+  // while Personal and while it has none (D162 items 1 and 2): MP·81 shows
+  // while it is made; when it comes, the page shows it.
+  void _paint(Night n) {
+    final painter = widget.painter;
+    if (painter == null || !widget.images || !widget.personal || _asked || !widget.read(n)) return;
+    _asked = true;
+    final made = painter.paint(widget.journal, n, NightImages.personal, sending: () {
+      if (mounted) setState(() => _making = true);
+    });
+    unawaited(made.then((done) async {
+      if (!mounted) return;
+      setState(() => _making = false);
+      if (done == Painted.made) await _load();
+    }));
   }
 
   // The page leaves by its own route: with a question or a typing screen
@@ -406,7 +463,9 @@ class _NightPageState extends State<NightPage> {
     const side = EdgeInsets.symmetric(horizontal: Spacing.pageSide);
     final top = MediaQuery.paddingOf(context).top;
     final read = n != null && widget.read(n);
-    final look = n == null ? null : lookOf(n, read: read, paintings: NightArt.paintings, images: widget.images);
+    final look = n == null
+        ? null
+        : lookOf(n, read: read, paintings: NightArt.paintings, images: widget.images, personal: _own);
     final query = widget.query;
     final found = n == null || query == null ? null : findIn(n, query);
     // Light time and battery over the header's picture, in both themes (D113);
@@ -446,6 +505,26 @@ class _NightPageState extends State<NightPage> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             controls,
+                            // MP·81 while the night's own painting is made
+                            // (D162 item 1), scaled down to its room.
+                            if (_making)
+                              Flexible(
+                                child: Padding(
+                                  padding: side,
+                                  child: Semantics(
+                                    key: NightPage.paintingKey,
+                                    liveRegion: true,
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: Text(
+                                        Lines.MP_81.text(appLanguage),
+                                        textAlign: TextAlign.center,
+                                        style: TypeRoles.button.style(NightArt.over),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             // The date takes the room under the controls and
                             // scales down to it, so a very large text size
                             // never overflows the header (D150: it is 55 pt).

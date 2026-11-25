@@ -104,7 +104,7 @@ void main() {
       ]),
     );
     expect(files, containsAll(['lib/feedback/feedback.dart', 'lib/feedback/feedback_section.dart']));
-    expect(files, contains('lib/readings/readings.dart'));
+    expect(files, containsAll(['lib/readings/readings.dart', 'lib/readings/painting.dart']));
   });
 
   // R8, D108: the journal's pages, which testers will get, carry only the

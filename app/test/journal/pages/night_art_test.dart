@@ -2,6 +2,8 @@
 // or one painting of the curated set (D147) covering its box from the
 // middle over the gradient; heard as nothing; the same in both themes. And
 // New Dream's sky, the set's strip (D112; D147 item 3).
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/design/tokens.g.dart';
@@ -66,6 +68,27 @@ void main() {
       child: NightArt(Painting(1), child: Text('19/11/2026')),
     ));
     expect(find.bySemanticsLabel('19/11/2026'), findsOneWidget);
+    handle.dispose();
+  });
+
+  // D162: a night's own painting, from its bytes, as the set's are drawn.
+  testWidgets("a night's own painting covers its box, silent, from its bytes", (tester) async {
+    final handle = tester.ensureSemantics();
+    final own = File('assets/paintings/01.jpg').readAsBytesSync();
+    final art = await pump(tester, PersonalPainting(own));
+    expect(art, paints..rect(rect: const Rect.fromLTWH(0, 0, 300, 64)));
+    final image = tester.widget<Image>(find.byType(Image));
+    final resized = image.image as ResizeImage;
+    expect(identical((resized.imageProvider as MemoryImage).bytes, own), isTrue);
+    expect(image.fit, BoxFit.cover);
+    expect(image.excludeFromSemantics, isTrue);
+    expect(resized.width, (300 * tester.view.devicePixelRatio).ceil());
+    expect(tester.getRect(find.byType(Image)), tester.getRect(find.byType(NightArt)));
+    expect(tester.getSemantics(find.byType(NightArt)).label, isEmpty);
+    // Darkened under a row's date as the set's paintings are (D149, D150).
+    await tester.pumpWidget(Center(child: SizedBox(width: 300, height: 64, child: NightArt(PersonalPainting(own), overlay: ArtOverlay.row))));
+    final dim = NightArt.overlayColour.withValues(alpha: NightArt.rowOverlayAlpha);
+    expect(find.byWidgetPredicate((w) => w is ColoredBox && w.color == dim), findsOneWidget);
     handle.dispose();
   });
 

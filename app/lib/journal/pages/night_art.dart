@@ -1,6 +1,7 @@
 // A night's picture (D110; head's messages 24 and 25): the painted gradient
-// for an unread night, or one painting of the curated set shipped in the
-// app for a read one (D147): sixty paintings in `assets/paintings/`, each
+// for an unread night, or for a read one its own painting from our server
+// (D162), kept on the phone, or one painting of the curated set shipped in
+// the app (D147): sixty paintings in `assets/paintings/`, each
 // fingerprinted (G2) and carrying the invisible AI tag (D123), shown to
 // cover its box from the middle, so a row shows a thin band and the header a
 // wide crop. The gradient lies beneath, so nothing flashes while a painting
@@ -72,8 +73,9 @@ class NightArt extends StatelessWidget {
         fit: StackFit.passthrough,
         children: [
           Positioned.fill(child: CustomPaint(painter: _GradientPainter())),
-          if (look is Painting) Positioned.fill(child: _Cover(asset(look.index))),
-          if (look is Painting && overlay != null)
+          if (look is Painting) Positioned.fill(child: _Cover(AssetImage(asset(look.index)))),
+          if (look is PersonalPainting) Positioned.fill(child: _Cover(MemoryImage(look.jpeg))),
+          if (look is! PaintedGradient && overlay != null)
             Positioned.fill(
               child: switch (overlay!) {
                 ArtOverlay.row => const _Dim(),
@@ -87,19 +89,19 @@ class NightArt extends StatelessWidget {
   }
 }
 
-/// An image of the set covering its box from the middle, decoded no larger
-/// than the box needs on this screen, and silent.
+/// A painting covering its box from the middle, decoded no larger than the
+/// box needs on this screen, and silent.
 class _Cover extends StatelessWidget {
-  const _Cover(this.asset);
+  const _Cover(this.image);
 
-  final String asset;
+  final ImageProvider image;
 
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, box) {
       final width = (box.maxWidth * MediaQuery.devicePixelRatioOf(context)).ceil();
       return Image(
-        image: ResizeImage.resizeIfNeeded(width > 0 ? width : null, null, AssetImage(asset)),
+        image: ResizeImage.resizeIfNeeded(width > 0 ? width : null, null, image),
         fit: BoxFit.cover,
         alignment: Alignment.center,
         excludeFromSemantics: true,
@@ -163,7 +165,7 @@ class NightSky extends StatelessWidget {
     fit: StackFit.passthrough,
     children: [
       Positioned.fill(child: CustomPaint(painter: _GradientPainter())),
-      const Positioned.fill(child: _Cover(asset)),
+      const Positioned.fill(child: _Cover(AssetImage(asset))),
       const Positioned.fill(child: _Dim()),
       child ?? const SizedBox.expand(),
     ],

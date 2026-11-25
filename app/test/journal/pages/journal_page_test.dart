@@ -25,6 +25,7 @@ import 'package:souldreams/journal/pages/parts.dart';
 import 'package:souldreams/journal/pages/sky_mark.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/journal/row_text.dart';
+import 'package:souldreams/readings/painting.dart';
 import 'package:souldreams/readings/readings.dart';
 import 'package:souldreams/journal/sky.dart';
 import 'package:souldreams/words/lines.g.dart';
@@ -497,6 +498,36 @@ void main() {
     await tester.tap(row);
     await tester.pumpAndSettle();
     expect(tester.widget<NightPage>(find.byType(NightPage)).images, isFalse);
+  });
+
+  // D162: while Personal, a read night's row shows its own painting once
+  // it has come, and its page is handed Personal and the painter; while
+  // Random, the set's.
+  testWidgets("Personal: a read row shows the night's own painting", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    final own = File('assets/paintings/02.jpg').readAsBytesSync();
+    await h.journal.keepPainting(n.id, own);
+    final painter = Painter(() async => throw const PaintingFailure(0));
+    await h.pump(tester, JournalPage(journal: h.journal, read: (_) => true, personal: true, painter: painter));
+    final row = find.byKey(JournalPage.rowKey(n.id));
+    final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
+    expect((art.look as PersonalPainting).jpeg, own);
+    await tester.tap(row);
+    await tester.pumpAndSettle();
+    final page = tester.widget<NightPage>(find.byType(NightPage));
+    expect(page.personal, isTrue);
+    expect(page.painter, same(painter));
+  });
+
+  testWidgets("Random: a read row shows the set's painting, not its own", (tester) async {
+    final h = await Harness.make();
+    final n = await keep(h, 'two-dreams-en', stockholm(2026, 6, 2, 23));
+    await h.journal.keepPainting(n.id, File('assets/paintings/02.jpg').readAsBytesSync());
+    await h.pump(tester, JournalPage(journal: h.journal, read: (_) => true));
+    final row = find.byKey(JournalPage.rowKey(n.id));
+    final art = tester.widget<NightArt>(find.descendant(of: row, matching: find.byType(NightArt)));
+    expect(art.look, Painting(paintingFor(n.id, NightArt.paintings)));
   });
 
   // D110: naming a night is removed; a name kept from before is not shown.

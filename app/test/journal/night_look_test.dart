@@ -1,6 +1,8 @@
 // A night's look (D110; head's message 25): a read night shows one painting
 // of the set, chosen from its id alone; an unread night, or no set, the
 // painted gradient.
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/journal/night.dart';
 import 'package:souldreams/journal/night_look.dart';
@@ -62,5 +64,19 @@ void main() {
 
   test("the preview's check calls every night read", () {
     expect(allRead(nightWith(a)), isTrue);
+  });
+
+  // D162: while Personal, a read night's own painting, once it has come.
+  test("a read night's own painting, given: shown instead of the set's", () {
+    final own = Uint8List.fromList([1, 2, 3]);
+    expect(lookOf(nightWith(a), read: true, paintings: 4, personal: own), PersonalPainting(own));
+    expect(lookOf(nightWith(a), read: true, paintings: 0, personal: own), PersonalPainting(own));
+    expect(PersonalPainting(own) == PersonalPainting(Uint8List.fromList([1, 2, 3])), isFalse);
+  });
+
+  test('its own painting: never on an unread night, nor while Off', () {
+    final own = Uint8List.fromList([1, 2, 3]);
+    expect(lookOf(nightWith(a), read: false, paintings: 4, personal: own), const PaintedGradient());
+    expect(lookOf(nightWith(a), read: true, paintings: 4, images: false, personal: own), const PaintedGradient());
   });
 }

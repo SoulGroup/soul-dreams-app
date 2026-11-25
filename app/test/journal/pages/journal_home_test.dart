@@ -20,6 +20,7 @@ import 'package:souldreams/journal/pages/journal_home.dart';
 import 'package:souldreams/journal/pages/journal_page.dart';
 import 'package:souldreams/journal/pages/typing_page.dart';
 import 'package:souldreams/onboarding/onboarding.dart';
+import 'package:souldreams/readings/painting.dart';
 import 'package:souldreams/recording/recording.dart';
 import 'package:souldreams/settings/consents.dart';
 import 'package:souldreams/settings/settings.dart';
@@ -173,6 +174,18 @@ void main() {
     expect(tester.widget<JournalPage>(find.byType(JournalPage)).readNight, isNull);
   });
 
+  // D162; D160: Night images starts as Personal; the page is told so, and
+  // is handed SoulDreams Dev's painter.
+  testWidgets("Personal is handed to the journal, with Dev's painter", (tester) async {
+    JournalStore.newQueueForTests();
+    final painter = Painter(() async => throw const PaintingFailure(0));
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()), painter: painter)));
+    await tester.pumpAndSettle();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.personal, isTrue);
+    expect(page.painter, same(painter));
+  });
+
   testWidgets('by default no night is read', (tester) async {
     JournalStore.newQueueForTests();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
@@ -267,7 +280,8 @@ void main() {
       text,
       contains(
         'JournalHome(files: files, after: check, recording: recording, nightAction: const FounderExport().action, '
-        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback, readNight: readNight)",
+        "read: read, preview: const String.fromEnvironment('PREVIEW_KEPT'), feedback: feedback, readNight: readNight, "
+        'painter: painter)',
       ),
     );
     // Every night read only in a build made for the by-eye preview (D110).
@@ -280,6 +294,8 @@ void main() {
     // message 33: SoulDreams Dev only).
     // Each night's calls' counts kept beside it (head's message 34).
     expect(text, contains("liveReading(betaKey: const String.fromEnvironment('BETA_KEY'), keepUsage: true);"));
+    // A read night's own painting, through our server with the same key (D162).
+    expect(text, contains("final painter = Painter(livePainting(betaKey: const String.fromEnvironment('BETA_KEY')));"));
   });
 
   testWidgets('a folder that cannot open: a blank page, a code', (tester) async {
@@ -569,6 +585,7 @@ void main() {
     await tester.pumpAndSettle();
     final page = tester.widget<JournalPage>(find.byType(JournalPage));
     expect(page.images, isTrue);
+    expect(page.personal, isFalse);
     expect(page.settings!.settings.images, NightImages.random);
     expect(wordAnimation, isFalse);
     expect(Theme.of(tester.element(find.byType(JournalPage))).brightness, Brightness.dark);
