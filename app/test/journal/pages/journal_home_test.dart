@@ -579,10 +579,10 @@ void main() {
     expect(tester.widget<NightDayChoice>(find.byType(NightDayChoice)).mode.value, NightDayMode.automatic);
   });
 
-  // D57 Q15: a mode found at start is instant. Manual Night kept, Word
+  // D57 Q15: a mode found at start is instant. Night kept, Word
   // Animation on (the default), the hour's own theme light: the journal
   // opens dark with no five-second fade.
-  testWidgets('a Manual mode kept shows at once when the journal opens', (tester) async {
+  testWidgets('a Night mode kept shows at once when the journal opens', (tester) async {
     JournalStore.newQueueForTests();
     final files = answered(MemoryJournalFiles(), {Consent.readings: true});
     files.files[JournalStore.settingsFile] = encodeSettings(const Settings(nightDay: NightDayMode.night));

@@ -201,26 +201,33 @@ void main() {
     expect(kept(JournalStore.settingsFile)['length'], 'threeMonths');
   });
 
-  // The stop's question 5: Manual keeps the theme on screen; the toggle
-  // switches it and sets Manual (Design System §6).
-  testWidgets('Night/Day: Manual keeps the theme; the toggle switches it', (tester) async {
+  // C19-P's MP·44 (D161 item 4): Automatic, Day or Night, three choices;
+  // the toggle switches the theme and sets Day or Night (Design System §6).
+  testWidgets('Night/Day: Day and Night set the theme; the toggle switches it', (tester) async {
     final c = await open(tester, hour: 12);
     Brightness now() => Theme.of(tester.element(find.byType(SettingsPage))).brightness;
+    await choose(tester, SettingRow.nightDay, 2);
+    expect(c.settings.nightDay, NightDayMode.night);
+    expect(shown(tester, SettingRow.nightDay), 'Night');
+    expect(now(), Brightness.dark);
     await choose(tester, SettingRow.nightDay, 1);
     expect(c.settings.nightDay, NightDayMode.day);
-    expect(shown(tester, SettingRow.nightDay), 'Manual');
+    expect(shown(tester, SettingRow.nightDay), 'Day');
+    expect(now(), Brightness.light);
     await hit(tester, find.byKey(SettingsPage.toggleKey));
     await tester.pumpAndSettle();
     expect(c.settings.nightDay, NightDayMode.night);
+    expect(shown(tester, SettingRow.nightDay), 'Night');
     expect(now(), Brightness.dark);
     await choose(tester, SettingRow.nightDay, 0);
     expect(c.settings.nightDay, NightDayMode.automatic);
+    expect(shown(tester, SettingRow.nightDay), 'Automatic');
     expect(now(), Brightness.light);
-    // Tapped while Automatic: Manual, the other theme.
+    // Tapped while Automatic: the other theme, as Night.
     await hit(tester, find.byKey(SettingsPage.toggleKey));
     await tester.pumpAndSettle();
     expect(c.settings.nightDay, NightDayMode.night);
-    expect(shown(tester, SettingRow.nightDay), 'Manual');
+    expect(shown(tester, SettingRow.nightDay), 'Night');
     expect(tester.getSemantics(find.byKey(SettingsPage.toggleKey)).label, en(Lines.MP_45));
     // It shows what it switches to (D125 item 7): the sun in the dark theme,
     // at the toggle's size; tapped, the day.
@@ -267,13 +274,20 @@ void main() {
     expect(Theme.of(tester.element(find.byType(SettingsPage))).brightness, Brightness.light);
   });
 
-  // Manual keeps the theme on screen, the dark one too.
-  testWidgets('Manual chosen in the dark theme keeps the dark', (tester) async {
+  // Day chosen at night turns the theme light, whatever the hour, and is
+  // kept; Night keeps the dark (D161 item 4).
+  testWidgets('Day chosen in the dark theme turns it light', (tester) async {
     final c = await open(tester, hour: 23);
+    Brightness now() => Theme.of(tester.element(find.byType(SettingsPage))).brightness;
+    expect(now(), Brightness.dark);
     await choose(tester, SettingRow.nightDay, 1);
+    expect(c.settings.nightDay, NightDayMode.day);
+    expect(kept(JournalStore.settingsFile)['nightDay'], 'day');
+    expect(now(), Brightness.light);
+    await choose(tester, SettingRow.nightDay, 2);
     expect(c.settings.nightDay, NightDayMode.night);
     expect(kept(JournalStore.settingsFile)['nightDay'], 'night');
-    expect(Theme.of(tester.element(find.byType(SettingsPage))).brightness, Brightness.dark);
+    expect(now(), Brightness.dark);
   });
 
   // D125 item 8: Night images asks nothing: any choice is a setting, kept as
@@ -320,7 +334,7 @@ void main() {
 
   // D127 item 1: after "I agree" both consents are given, so Life Context is
   // On; turning it Off asks nothing (D134), and turning it On again shows its
-  // page, Back and Turn on (MP·98, MP·99).
+  // page, Back and Turn on (MP·107, MP·108).
   testWidgets('Life Context On after I agree; Off, then On again', (tester) async {
     final c = await open(tester, given: const {Consent.readings: true, Consent.lifeContext: true});
     expect(shown(tester, SettingRow.lifeContext), 'On');
@@ -330,8 +344,8 @@ void main() {
     expect(shown(tester, SettingRow.lifeContext), 'Off');
     await choose(tester, SettingRow.lifeContext, 0);
     expect(find.byType(ConsentPage), findsOneWidget);
-    expect(find.text(PendingLines.MP_98.text(appLanguage)), findsOneWidget);
-    expect(find.text(PendingLines.MP_99.text(appLanguage)), findsOneWidget);
+    expect(find.text(PendingLines.MP_107.text(appLanguage)), findsOneWidget);
+    expect(find.text(PendingLines.MP_108.text(appLanguage)), findsOneWidget);
     await hit(tester, find.byKey(TurnOnChoice.keyOf(false)));
     await tester.pumpAndSettle();
     expect(c.consents.given(Consent.lifeContext), isFalse);
@@ -404,7 +418,7 @@ void main() {
     expect(find.byKey(SettingsPage.agreeKey), findsNothing);
     expect(find.text(en(Lines.MP_66)), findsNothing);
     expect(find.text(en(Lines.MP_30)), findsNothing);
-    expect(find.text(en(Lines.EM_6)), findsNothing);
+    expect(find.text(PendingLines.MP_109.text(appLanguage)), findsNothing);
   });
 
   // D110: one confirmation; then everything goes, back to the welcome.

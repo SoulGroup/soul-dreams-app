@@ -65,6 +65,10 @@ AS_ROLE = re.compile(r'^as color\.[a-z.]+: (.+)$')
 # C18-P: "as color.x", the value of a role above it in the same theme.
 AS_SAME = re.compile(r'^as (color\.[a-z.]+)$')
 AS_LIGHT = 'as in the light theme'
+# C19-P: "#hex, as in the light theme (a ruling): prose", a solid colour
+# that must be the light theme's own for the role; the rest is prose the
+# generator does not use, and holds no bracket.
+AS_LIGHT_SAID = re.compile('^' + HEXC + ', ' + AS_LIGHT + r' \([^()\[\]]+\): [^()\[\]]+$')
 SCALAR = re.compile(r'^(\d+)(?:, in both themes)?$')
 BOX = re.compile(r'^(\d+)px above and below, (\d+)px left and right$')
 SIDES = re.compile(r'^(\d+)px from the left edge, (\d+)px from the right$')
@@ -218,6 +222,12 @@ def read_colours(lines, heading, light=None):
             if light is None or role not in light:
                 raise DesignError('as-unknown', line)
             v, notes = light[role][0], [AS_LIGHT]
+        elif AS_LIGHT_SAID.match(value):
+            if light is None or role not in light:
+                raise DesignError('as-unknown', line)
+            v, notes = {'colour': AS_LIGHT_SAID.match(value).group(1)}, [AS_LIGHT]
+            if light[role][0] != v:
+                raise DesignError('as-differs', line)
         else:
             v, notes = colour_value(value, line)
         seen[role] = (v, notes)

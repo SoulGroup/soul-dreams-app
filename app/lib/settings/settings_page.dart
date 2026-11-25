@@ -2,13 +2,13 @@
 // D122; D128), reached from the journal's gear, in SoulDreams Dev only: the
 // back control top left; the quick toggle top centre (MP·45), showing what it
 // switches to, a moon in the light theme and a sun in the dark, which
-// switches the theme in half a second and sets Night/Day mode to Manual
-// (D125 items 6 and 7); MP·25 in h2; then six rows, each its name and a
+// switches the theme in half a second and sets Night/Day mode to Day or
+// Night (D125 items 6 and 7; D161 item 4); MP·25 in h2; then six rows, each its name and a
 // value pill, every pill one size and every row one height (D125 item 4),
 // the gap from a pill's right edge to its row's equal to the gap above and
 // below it (D128 item 6), opening the phone's menu: Language (EM·9; English
 // only, its name owed, D121 item 1), Word Animation (MP·26), Night images
-// (MP·85), Night/Day mode (MP·44), Life Context (MP·83) and Life Context
+// (MP·85), Night/Day mode (MP·44: Automatic, Day or Night, C19-P), Life Context (MP·83) and Life Context
 // length (MP·84); then the row opening "What you've told Soul Dreams"
 // (MP·86, its flag; D121 item 2; D131), its name and a chevron; then "Read
 // disclosure & privacy" (MP·48) and "Delete journal" (EM·11) in the
@@ -119,7 +119,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (mounted) setState(() {});
   }
 
-  // The theme the dreamer is heading for: Manual's own, since the theme on
+  // The theme the dreamer is heading for: Day's or Night's own, since the theme on
   // screen lags a fade by half its length and a second tap would undo
   // nothing; Automatic's is the one shown.
   bool get _dark => switch (_c.settings.nightDay) {
@@ -149,7 +149,8 @@ class _SettingsPageState extends State<SettingsPage> {
       ) ==
       true;
 
-  // The quick toggle: the other theme, Manual (Design System §6).
+  // The quick toggle: the other theme, as Day or Night (Design System §6;
+  // D161 item 4).
   void _toggle() => _c.change(_c.settings.copyWith(nightDay: _dark ? NightDayMode.day : NightDayMode.night));
 
   void _wordAnimation(int i) => _c.change(_c.settings.copyWith(wordAnimation: i == 0));
@@ -157,10 +158,8 @@ class _SettingsPageState extends State<SettingsPage> {
   // Night images asks nothing: it is a setting, with no consent (D125 item 8).
   void _nightImages(int i) => _c.change(_c.settings.copyWith(images: NightImages.values[i]));
 
-  // Manual keeps the theme on screen (the stop's question 5).
-  void _nightDay(int i) => _c.change(
-    _c.settings.copyWith(nightDay: i == 0 ? NightDayMode.automatic : (_dark ? NightDayMode.night : NightDayMode.day)),
-  );
+  // Automatic, Day or Night, in MP·44's order (C19-P; D161 item 4).
+  void _nightDay(int i) => _c.change(_c.settings.copyWith(nightDay: NightDayMode.values[i]));
 
   // Before the dreamer has agreed, the popup, nothing changed (D128 item 3);
   // On shows Life Context's page; Off asks nothing: it pauses, and nothing is
@@ -279,7 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               row(SettingRow.wordAnimation, Lines.MP_26, s.wordAnimation ? 0 : 1, _wordAnimation),
               row(SettingRow.nightImages, Lines.MP_85, s.images.index, _nightImages),
-              row(SettingRow.nightDay, Lines.MP_44, s.nightDay == NightDayMode.automatic ? 0 : 1, _nightDay),
+              row(SettingRow.nightDay, Lines.MP_44, s.nightDay.index, _nightDay),
               row(SettingRow.lifeContext, Lines.MP_83, c.given(Consent.lifeContext) ? 0 : 1, _lifeContext),
               row(SettingRow.length, Lines.MP_84, s.length.index, _length),
               if (widget.lifeContext case final life?)

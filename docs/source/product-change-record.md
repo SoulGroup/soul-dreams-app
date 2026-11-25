@@ -2728,3 +2728,171 @@ original hash all printed nothing or matched. The word check is not run on the r
   these versions; change-record.md by the record as read.
 
 ---
+
+## C19-P — The providers' terms in the consents and the disclosure; MP·68, MP·70, W27·2 and W27·6 written; the voice paused without consent (a); the language names; Night/Day mode's values; EM·6 retired; "I agree" in the consent pair; MP·66 to rewrite; the AI mark under readings only; Inter for Inter Display; the delete icon kept; five founder-ruled departures and a shortfall; the files as filed before archived; the hash C18-P could not state
+
+**Filed 2026-11-23, by this machine.** *Drafted by Product & Design's C19-P Filing chat, briefed by Head of Product & Design (its brief, its message 2, and its message 3 answering the chat's message 1) [RELAYED, Head of Product & Design]. It unblocks the builds: no tester or founder build ships while a shown line holds a sentence still owed in braces (D121, founder-ruled; Technology Message 27 [RELAYED]), and after this filing no shown line does. This filing is the register and the Design System, nothing more. The filing script refused unless every file it reads was at the hash the repository showed on 2026-11-22, and every check printed nothing on a test copy of the repository built from the project mirror.*
+
+**1. THE METHOD.** The founder's lean check, as C16-P item 1 records it. **What this filing read** [READ]: Interpretation's
+record through C160-I, at `57644c167efb5221053c479e88ae46459eac8190dfa866582027941e546d078c`, and in it C159-I items 1 and 5; every Product file it changes or checks,
+each at its hash at commit ac3a013 (the founder's state output of 2026-11-22). Not read here, and [RELAYED, Head
+of Product & Design] for what this filing takes from them: Technology Messages 22, 26 and 27; technology/providers-terms.md
+(not attached to this filing's chat); the founder's approvals and rulings of 2026-11-21 and 2026-11-22 in Product's head
+chat, D118, D121 and D122 among them.
+
+**2. THE LINES AND THE WORDS RULE.** Every line this filing writes was drafted in Product's head chat under the words
+rule (C155-I item 7) and approved by the founder on 2026-11-21 or 2026-11-22 [RELAYED, Head of Product & Design]. Each
+is copied verbatim into the register and named there in its flag; this record does not restate them. They are: MP·44,
+MP·67's English, MP·68, MP·70, W27·2, W27·6's opening, MP·98 and MP·99.
+
+**3. THE PROVIDERS' TERMS, IN THE REGISTER** (Technology Messages 26 and 27 [RELAYED, Head of Product & Design]).
+- **MP·68, the readings consent, is written.** Its braced sentence is filled from Technology Message 26's fact on
+  Amazon. It now also names the words Life Context keeps and a spoken dream's recording going to Soniox, because
+  refusing it pauses recording by voice (Technology Message 27 item 1). Its must names all three.
+- **MP·70, the night images consent, is written.** Its braced sentence is filled from Technology Message 26's fact on
+  Google. Its sentence on the AI is "Every painting is made by AI." (item 6 below).
+- **W27·2 is written,** with a Personal painting's words leaving. **W27·6 is written:** only its opening changed, to
+  name what is painted.
+- **No shown line holds a sentence still owed.** The register's check accepts one only in a row that is to rewrite,
+  and none of those holds one now [READ, the register searched for braces outside the known slots].
+
+**4. NEW PLACES AND CHANGED VALUES** (founder-approved 2026-11-21 [RELAYED, Head of Product & Design]).
+- **MP·98,** the voice paused while consent (a) is not given, shown where the microphone would be.
+- **MP·99,** the language names, each in its own language, the values of EM·9.
+- **MP·44** takes Night/Day mode's values, Automatic, Day and Night, where it held Automatic and Manual. Its must is
+  rewritten to match; no new handle. main-path.md's Settings still names Manual until its next pass.
+- **The check,** product/check-places-register.sh, taught MP·98 and MP·99. Nothing else. It was
+  `7e2e0c4aeaacc7430dfd9ce3edee154033e38a904f0059cd1f7ad9bb25c33a56` and is `c3f9b18ef15c398c1b0959b7a324facbba4d2f6ad94402d4ff9e45c8419c8bd2`.
+
+**5. THE CONSENT PAGE** (founder-ruled 2026-11-21 [RELAYED, Head of Product & Design]).
+- **EM·6 retires as a separate place.** Each consent has its own decline, in MP·67. Onboarding has no back control
+  (Technology Message 22 item 4), so nothing leads back to the disclosure's first page. The consent page ends with
+  Next alone, centred, active once all three consents are answered. C127-I I7 is Interpretation's, and is named for it.
+- **MP·67's English** is "I agree / I don't agree"; the Swedish is unchanged.
+- **MP·66 is to rewrite.** It says saying no to one consent changes nothing else, and refusing consent (a) now pauses
+  the voice (item 6). The line stands until rewritten. This was not in the brief; the C19-P Filing chat marked it, as
+  the register marks any shown line no longer true, and it is the founder's to word.
+
+**6. FIVE FOUNDER-RULED DEPARTURES, A SHORTFALL AND A CHANGE TO C140-I ITEM 1,** each named for Interpretation and, where marked, for counsel
+before public launch (C159-I item 5) [the rulings RELAYED, Head of Product & Design; C159-I READ].
+- **The consent pair's words.** "I agree" where C159-I item 5 has "I consent" (founder-ruled 2026-11-21). For
+  Interpretation and counsel.
+- **Consent (a) pauses the voice** (D122). C159-I item 5 asks that each consent be refusable with nothing else
+  changing. For Interpretation and counsel.
+- **No mark on the paintings** (founder-ruled 2026-11-22). C159-I item 5 has "readings and images said to be made by
+  AI, images machine-marked". MP·71 now shows under each reading only, never on a painting; MP·70 says every painting
+  is made by AI. The app adds no mark; Google's Personal paintings carry Google's own [RELAYED]. For Interpretation
+  and counsel.
+- **The other-people line.** The founder removes it from Product's documents everywhere, not only from the consent
+  (C18-P recorded the consent's). Both of C159-I item 1's places are covered: the consent text and where the dreamer
+  writes about life. No line or must in any Product document holds it, so nothing is removed [READ, the register, the
+  Design System, main-path.md, the handover and How the AI Appears searched]. For Interpretation and counsel.
+- **The delete icon** keeps terracotta #8F3D24 in both themes, below the 3:1 an icon needs on the dark surface (1.45:1
+  and 2.02:1 [READ, recomputed here]). A departure from the Principles' WCAG 2.2 AA floor (§3), for the founder to
+  judge on his phone in Cohort 0. This record is enough for the trial; the Principles change only if the choice stands
+  at Cohort 1.
+- **A shortfall, not a ruling.** Technology Message 26 gives no duration for the content Amazon's safety systems keep.
+  C159-I item 5 asks for "providers' retention stated". For Interpretation. Product asks Technology in its next batch;
+  MP·68 is revisited before Cohort 1.
+- **W27·2 changes what C140-I item 1 says,** that a night's words leave only to be read: a Personal painting's words now
+  leave too (C159-I item 3). Its must cites C159-I and Technology Message 27 beside C140-I. For Interpretation.
+
+**7. A KNOWN GAP FOR COHORT 0.** Nothing goes to Google until Google approves the abuse-monitoring exception
+(founder-ruled 2026-11-21; Technology Message 26 item 3 [RELAYED]). Until then Personal shows a painting from the
+curated set, and nothing tells the dreamer so. MP·70's flag says it; it is closed, or given a line, before Cohort 1.
+
+**8. THE PLACES REGISTER,** at product/places-register.md and .csv. Changed: MP·44, MP·66, MP·67, MP·68, MP·70, MP·71,
+EM·6, W27·2 and W27·6. New: MP·98 and MP·99. Nothing else changed. **The counts** [READ, `bash
+product/check-places-register.sh --count`]:
+
+    places 205
+    screen Every Screen 2
+    screen Onboarding 43
+    screen Recording 18
+    screen The Mirror 9
+    screen The Opening 11
+    screen The Readings & Close 35
+    screen The Journal 25
+    screen Settings 26
+    screen Not on a screen yet 36
+    status retired 40
+    status written 141
+    status written, in its parts 1
+    status merged into W27·6 1
+    status to rewrite 2
+    status paused 2
+    status composed (stand-in written) 10
+    status English written, Swedish to write 2
+    status no line: prohibition 1
+    status composed, no stand-in 3
+    status no line: by decision 2
+
+**9. product/design-system.md.**
+- **Inter for Inter Display** (founder-ruled, D118 [RELAYED, Head of Product & Design]). type.voice.dreamer and
+  type.row.date, the three voices' paragraph and the italic's fallback name Inter, with the filed sizes,
+  letter-spacing and line-height.
+- **The delete icon,** #8F3D24 in the dark theme as in the light, and Life Context's contrast paragraph says so (item 6).
+
+**10. THREE FILES ARCHIVED WHOLE,** each in an archive note. The new versions take their paths.
+
+| File | sha256 |
+|---|---|
+| Original, product/places-register.md | `e2dfee48acd6e532cf86cabad6354c74109fc2ca9e9154f0cd9e91327320737d` |
+| Archived, archive/places-register-superseded-2026-11-23-at-C19-P.md, note included | `dca592be2781367aa6b4b0c381de9f6ec297bf8c68cc270498d1e7d85a7bb2ef` |
+| Original, product/places-register.csv | `cd523e7d69591369ef7dabf54495e35981614a54ae00033e95002e7925ae2c97` |
+| Archived, archive/places-register-superseded-2026-11-23-at-C19-P.csv, note included | `2c64cb72d459b2f5c8589249ce8514ea214a977926a8c2278dc7449e22cb04d8` |
+| Original, product/design-system.md | `1c41ff6b3b920af7afb7413200f8c1d5a2b9d131d9eb0efe8140ce4309780b61` |
+| Archived, archive/design-system-superseded-2026-11-23-at-C19-P.md, note included | `f5c1f8828d81ae8cd937b0e6eee5e47b1276fc725d9c7d7baf13bc62f8150901` |
+
+Each of these prints its original's hash, and printed it at filing [READ, by the filing script]:
+
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/places-register-superseded-2026-11-23-at-C19-P.md | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/places-register-superseded-2026-11-23-at-C19-P.csv | shasum -a 256
+    sed '1,/^=== ORIGINAL TEXT BELOW, UNCHANGED ===$/d' archive/design-system-superseded-2026-11-23-at-C19-P.md | shasum -a 256
+
+**11. THE FILES NOW.** Their hashes at filing [READ, by the filing script]:
+
+| File | sha256 |
+|---|---|
+| product/places-register.md | `ad24ef15001ec2e0dd0e5aee4f3fda9a2a0e7cd0800effd3e83c8ded9abb0751` |
+| product/places-register.csv | `01328992898907cb8c40cae1b12a5293657ce8c1143676f73e2de90ff7d4071a` |
+| product/design-system.md | `1a07ffc3c3fbc48a1c9abfba7b5fa1074da4f53b6eda2a74ccc3e89cdebfd4e6` |
+| product/check-places-register.sh | `c3f9b18ef15c398c1b0959b7a324facbba4d2f6ad94402d4ff9e45c8419c8bd2` |
+
+**12. THE HASH C18-P COULD NOT STATE.** At ac3a013 this record was `2ff467173047adaec86b116eb3e7c82e9b02846b9dda444fd4d93d9da78996d9` [READ, by the filing script: the
+file at that commit hashes so, and ac3a013 is the commit that last changed it before this one]. This record still
+cannot state its own current hash; the filing script prints it, and the next Product filing records it.
+
+**13. CHECKED BEFORE FILING** [READ, by the filing script]: the tree clean; the new paths absent; Interpretation's record
+as read, through C160-I at `57644c167efb5221053c479e88ae46459eac8190dfa866582027941e546d078c`, the exact start of the record at filing; the Requirements List, the
+Principles and every Product file read at its hash at ac3a013. Product's heading check, the map's check, the
+register's check as amended, product/check-principles.sh on How the AI Appears and the Design System, and each archive
+note's original hash all printed nothing or matched. The word check is not run on the register, as at every earlier
+filing.
+
+**WHAT DEPENDED ON THIS.**
+
+- **Technology.** One message from Head of Product & Design after the push: MP·68, MP·70, W27·2 and W27·6 filed, so no
+  shown line holds a braced sentence (D121); MP·98 and MP·99 new; MP·44's values; EM·6 retired and the consent page's
+  Next; MP·67's English; MP·71 under readings only, never on a painting, and no mark added to any painting; Inter for
+  Inter Display; the delete icon #8F3D24 in both themes; MP·66 to rewrite, still shown. Asked back: how long Amazon's
+  safety systems keep flagged content.
+- **Interpretation.** In Product's next weekly batch: the five departures and the shortfall (item 6); EM·6's retirement
+  and C127-I I7; W27·2's change to what C140-I item 1 says; MP·66 to rewrite.
+- **Counsel, before public launch** (C159-I item 5). MP·66, MP·67, MP·68, MP·70, MP·71, MP·98; W27·2 and W27·6; the
+  departures marked for counsel in item 6.
+- **The founder.** MP·66's next text, before Cohort 1; the delete icon on his phone in Cohort 0; the Personal gap,
+  closed or given a line before Cohort 1 (item 7); MP·68 when Technology gives the duration.
+- **The next Product filing, before Cohort 1.** C18-P's list, carried, and now: main-path.md's pass also naming
+  Technology Message 27's consent flows (items 3, 6, 7 and 10), MP·44's values, EM·6's retirement and the consent page's
+  Next, MP·98; the handover's pass naming the same flows, the voice paused without consent (a), and MP·71 under readings
+  only; the Experience Map, where EM·6 still stands as a moment's place.
+- **Interpretation's entries filed after this filing was drafted.** Not read for it. At filing, the record read,
+  through C160-I, was the exact start of the record [READ, by the filing script]. Each is read at the next Product
+  filing:
+
+- None.
+
+- **The project mirrors.** places-register.md and .csv, design-system.md and product-change-record.md are replaced by
+  these versions.
+

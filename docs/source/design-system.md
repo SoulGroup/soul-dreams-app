@@ -42,18 +42,20 @@ of the size; letter spacing is in em.
 | type.h5 | Sorts Mill Goudy | Regular | 20px | 1.2 | −0.01em | None: naming a night is removed (C18-P) |
 | type.h6 | Inter | Semibold | 18px | 1.4 | −0.02em | None: it named a Help resource, and there is no Help page (C147-I; C153-I) |
 | type.voice.app | Bellefair | Regular | 22px | 1.5 | −0.04em | The app's voice: the app's lines; onboarding's text; the mirror until confirmed |
-| type.voice.dreamer | Inter Display | Regular | 16px | 1.5 | 0.02em | The dreamer's voice: the dreamer's words |
+| type.voice.dreamer | Inter | Regular | 16px | 1.5 | 0.02em | The dreamer's voice: the dreamer's words |
 | type.voice.readings | Sorts Mill Goudy | Regular | 18px | 1.5 | −0.02em | The traditions' voice: the readings, the arc, the series question |
-| type.row.date | Inter Display | Semibold | 20px | [to set in Framer] | [to set in Framer] | A journal row's date, white, over the night's image |
+| type.row.date | Inter | Semibold | 20px | [to set in Framer] | [to set in Framer] | A journal row's date, white, over the night's image |
 | type.button | Inter | Regular | 14px | 1.4 | −0.02em | Buttons, placeholders, instructions, section labels, the line above the input field, the date under a name, a row's summary |
 | type.button.small | Inter | Regular | 12px | 1.4 | −0.01em | Tradition labels, dream tags |
 
 **The three voices** (founder-ruled 2026-11-20 [RELAYED, Head of Product & Design]; C18-P): the app's voice Bellefair, the dreamer's
-voice Inter Display, the traditions' voice Sorts Mill Goudy. They replace Sorts Mill Goudy, Nunito and Habibi.
+voice Inter, the traditions' voice Sorts Mill Goudy. They replace Sorts Mill Goudy, Nunito and Habibi. The dreamer's
+voice and a row's date are Inter where they were Inter Display, with the filed sizes, letter-spacing and line-height
+(founder-ruled, D118 [RELAYED, Head of Product & Design]; C19-P).
 
 **The italic.** Used only for the dreamer's own words quoted inside a reading or a reflection (How the AI Appears
 §2.3). Inside a reading it is Sorts Mill Goudy's true italic (founder-ruled 2026-11-20). Inside a reflection it is the
-italic of the voice the words sit in; where that face has no true italic, the dreamer voice's italic, Inter Display
+italic of the voice the words sit in; where that face has no true italic, the dreamer voice's italic, Inter
 Italic, is used instead. [ASSUMED] Bellefair has no true italic; the founder checks it in Framer. A slanted regular face
 is never used.
 
@@ -105,7 +107,7 @@ is never used.
 | color.lifecontext.box | as color.surface |
 | color.lifecontext.text | #F5F5EC |
 | color.lifecontext.date | #ABAB93 |
-| color.lifecontext.delete | #D0775A [proposed by C18-P, for the founder to approve: #8F3D24 fails here] |
+| color.lifecontext.delete | #8F3D24, as in the light theme (founder-ruled 2026-11-21; C19-P): below 3:1 here, a departure from the Principles' floor |
 | color.label.questions | [to try: read from the founder's screens] |
 
 **One colour shared by three roles.** The record button, the tradition labels and the destructive control share the
@@ -132,8 +134,10 @@ page [READ, the same computation].
 **Life Context's page** [READ, the C18-P Filing chat's computation, 2026-11-21, WCAG 2.2 relative luminance]. Light: the
 date, #767676 on the pure white box, 4.54:1; the delete icon, #8F3D24 on white, 7.34:1, where an icon needs 3:1
 (SC 1.4.11). Dark: the date, #ABAB93, already the dark button's lighter end, on each end of the surface gradient,
-4.56:1 and 6.35:1. The delete icon #8F3D24 fails on the dark surface, 1.45:1 and 2.02:1; #D0775A passes, 3.28:1 and
-4.58:1, and is proposed, not ruled.
+4.56:1 and 6.35:1. The delete icon #8F3D24 fails on the dark surface, 1.45:1 and 2.02:1 [READ, recomputed by the C19-P Filing
+chat]. It keeps #8F3D24 in both themes (founder-ruled 2026-11-21 [RELAYED, Head of Product & Design]; C19-P): a founder-ruled departure
+from the AA floor the Principles set (§3), for the founder to judge on his phone in Cohort 0. The Principles change
+only if the choice stands at Cohort 1. C18-P's proposed #D0775A, 3.28:1 and 4.58:1, is not used.
 
 **Words over a picture** (founder-ruled 2026-11-21 [RELAYED, Head of Product & Design]): white, with a soft dark shadow behind them, so they
 read on any painting. No ratio can be stated for a picture that changes; the shadow's size and strength are [to set in

@@ -1,6 +1,4 @@
 handle,place,status,english,swedish,given
-MP·98,Life Context's consent page: the button that goes back without turning it on,pending,Back,Tillbaka,"the founder, 2026-11-22 (D125 item 9); handle proposed to Product"
-MP·99,Life Context's consent page: the button that turns it on,pending,Turn on,Slå på,"the founder, 2026-11-22 (D125 item 9); handle proposed to Product"
 MP·100,Onboarding's second disclosure page: the agree button (disclosure and the readings consent),pending,I agree,Jag godkänner,"the founder, 2026-11-22 (D127); handle proposed to Product"
 MP·101,A popup when a feature needing agreement is tapped before the dreamer has agreed,pending,"To use this, go to Settings, tap “Read disclosure & privacy”, then tap “I agree”.","För att använda detta, gå till Inställningar, tryck på ”Läs om sekretess och personlig data” och sedan på ”Jag godkänner”.","the founder, 2026-11-22 (D128); handle proposed to Product"
 MP·102,The popup's button that closes it (MP·101),pending,OK,OK,"the founder, 2026-11-22 (D128); handle proposed to Product"
@@ -8,3 +6,6 @@ MP·103,"What you've told Soul Dreams, selecting sentences: the tick that ends s
 MP·104,"What you've told Soul Dreams, while Life context is Off: the line shown instead of the lists",pending,Turn on Life Context in Settings to use this. It gives the readings of your dreams context from your waking life.,Slå på Livssammanhang i Inställningar för att använda det här. Det ger tolkningarna av dina drömmar en bakgrund från ditt vakna liv.,"the founder, 2026-11-22 (D133); handle proposed to Product"
 MP·105,"Settings, Feedback: a send that failed (the text stays in the box)",pending,Couldn't send just now. Your words are still here.,Det gick inte att skicka just nu. Dina ord finns kvar här.,"the founder, 2026-11-24 (D152); handle proposed to Product"
 MP·106,"Settings, Feedback: a send that succeeded (the box is emptied)",pending,Thank you. Your feedback has been sent.,Tack. Din feedback har skickats.,"the founder, 2026-11-24 (D152); handle proposed to Product"
+MP·107,Life Context's consent page: the button that goes back without turning it on,pending,Back,Tillbaka,"the founder, 2026-11-22 (D125 item 9); handle proposed to Product; renumbered from MP·98 at C19-P (D161 item 1)"
+MP·108,Life Context's consent page: the button that turns it on,pending,Turn on,Slå på,"the founder, 2026-11-22 (D125 item 9); handle proposed to Product; renumbered from MP·99 at C19-P (D161 item 1)"
+MP·109,Onboarding's second disclosure page: the button that declines (beside MP·100),pending,I don't agree,Jag samtycker inte,"the founder (D161 item 2; D127; D128): EM·6's last filed words (C18-P), EM·6 retired at C19-P; handle proposed to Product"

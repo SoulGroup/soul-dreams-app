@@ -1,7 +1,7 @@
 // Onboarding (main-path.md, Onboarding; D103): the welcome, the note, the
 // age question, the under-18 card, and the disclosure's first layer on two
 // pages. The second ends with MP·58, which opens the full page, the text
-// only, with back; then EM·6 "I don't agree" left and MP·100 "I agree" right,
+// only, with back; then MP·109 "I don't agree" left (EM·6's words, D161 item 2) and MP·100 "I agree" right,
 // equal, neither chosen beforehand (D127 item 1): "I agree" gives the readings
 // and Life Context consents, "I don't agree" gives neither, a private journal.
 // Every word is the register's, or a pending line's; a part with no line shows
@@ -27,6 +27,9 @@ Finder said(Line line) => find.text(w(line));
 
 /// MP·100, a pending line: its handle here, its words in SoulDreams Dev only.
 Finder iAgree() => find.text(PendingLines.MP_100.text(appLanguage));
+
+/// MP·109, a pending line since C19-P retired EM·6 (D161 item 2).
+Finder iDont() => find.text(PendingLines.MP_109.text(appLanguage));
 
 /// The full page's own scrolling list.
 Finder full() => find.descendant(of: find.byType(DisclosurePage), matching: find.byType(Scrollable)).first;
@@ -151,16 +154,16 @@ void main() {
     for (final line in [Lines.MP_66, Lines.MP_67, Lines.MP_68, Lines.MP_69, Lines.MP_70, Lines.MP_30]) {
       expect(said(line), findsNothing, reason: line.handle);
     }
-    // The foot: EM·6 left, MP·100 right, side by side, below the page's words.
-    expect(said(Lines.EM_6), findsOneWidget);
+    // The foot: MP·109 left, MP·100 right, side by side, below the page's words.
+    expect(iDont(), findsOneWidget);
     expect(iAgree(), findsOneWidget);
-    expect(tester.getCenter(said(Lines.EM_6)).dy, closeTo(tester.getCenter(iAgree()).dy, 1));
-    expect(tester.getCenter(said(Lines.EM_6)).dx, lessThan(tester.getCenter(iAgree()).dx));
+    expect(tester.getCenter(iDont()).dy, closeTo(tester.getCenter(iAgree()).dy, 1));
+    expect(tester.getCenter(iDont()).dx, lessThan(tester.getCenter(iAgree()).dx));
     final ys = [for (final line in [Lines.MP_57, Lines.MP_58]) tester.getTopLeft(said(line)).dy];
     expect(ys, [...ys]..sort());
-    expect(tester.getTopLeft(said(Lines.EM_6)).dy, greaterThan(ys.last));
+    expect(tester.getTopLeft(iDont()).dy, greaterThan(ys.last));
     // Equal, neither chosen beforehand: the same kind of button, the same look.
-    final no = find.ancestor(of: said(Lines.EM_6), matching: find.byType(PlainButton)).first;
+    final no = find.ancestor(of: iDont(), matching: find.byType(PlainButton)).first;
     final yes = find.ancestor(of: iAgree(), matching: find.byType(PlainButton)).first;
     expect(tester.getSize(no).height, tester.getSize(yes).height);
     expect(tester.getSemantics(no).flagsCollection.isSelected, tester.getSemantics(yes).flagsCollection.isSelected);
@@ -173,9 +176,10 @@ void main() {
     await start(tester);
     await toFull(tester);
     expect(find.byType(TurnOnChoice), findsNothing);
-    for (final line in [Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_30, Lines.EM_6]) {
+    for (final line in [Lines.MP_66, Lines.MP_68, Lines.MP_69, Lines.MP_30]) {
       expect(said(line), findsNothing, reason: line.handle);
     }
+    expect(iDont(), findsNothing);
     expect(iAgree(), findsNothing);
     expect(find.byType(BackControl), findsOneWidget);
     expect(agreed, 0);
@@ -354,8 +358,8 @@ void main() {
     await start(tester);
     await toDisclosure(tester);
     await tap(tester, Lines.MP_30);
-    await tester.tap(said(Lines.EM_6));
-    await tester.tap(said(Lines.EM_6));
+    await tester.tap(iDont());
+    await tester.tap(iDont());
     await tester.pumpAndSettle();
     expect(agreed, 1);
     expect(answers, {Consent.readings: false, Consent.lifeContext: false});
@@ -408,7 +412,7 @@ void main() {
     expect(tester.takeException(), isNull);
     // The foot's two buttons shrink their words to stay on one row.
     expect(iAgree(), findsOneWidget);
-    expect(said(Lines.EM_6), findsOneWidget);
+    expect(iDont(), findsOneWidget);
     await tap(tester, Lines.MP_58);
     expect(tester.takeException(), isNull);
   });

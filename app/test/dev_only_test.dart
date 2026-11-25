@@ -81,7 +81,7 @@ void main() {
     });
   }
 
-  // C17-P filed every pending line; MP·98 and MP·99 (D125 item 9) are pending
+  // C17-P filed every pending line; MP·107 and MP·108 (D125 item 9; D161 item 1) are pending
   // again, on Life Context's consent page: SoulDreams Dev reaches them.
   test('SoulDreams Dev reaches the journal pages', () {
     final files = reached('lib/main_dev.dart');

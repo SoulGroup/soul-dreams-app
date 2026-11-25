@@ -9,7 +9,7 @@ void main() {
   test('each setting line gives its name and choices, both languages', () {
     for (final (line, count) in [
       (Lines.MP_26, 2),
-      (Lines.MP_44, 2),
+      (Lines.MP_44, 3),
       (Lines.MP_83, 2),
       (Lines.MP_84, 4),
       (Lines.MP_85, 3),

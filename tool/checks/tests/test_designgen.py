@@ -262,6 +262,27 @@ class Generate(unittest.TestCase):
         self.refused(doc(dark=[r('color.page', '#0F0D29'), r('color.box', 'as color.surface')]), 'as-unknown')
         self.refused(doc(light=LIGHT_ROWS + [r('color.page', '[to try: again]')]), 'role-repeated')
 
+    def test_c19p_a_colour_said_as_in_the_light_theme(self):
+        said = '%s, %s (ruled by a zebra): below the floor'
+        light = LIGHT_ROWS + [r('color.lc.delete', '#8F3D24')]
+        dark = DARK_ROWS + [r('color.lc.delete', said % ('#8F3D24', designgen.AS_LIGHT))]
+        t = text(doc(light=light, dark=dark))
+        dk = t[t.index('abstract final class DarkColours'):t.index('abstract final class Spacing')]
+        self.assertIn('static const lcDelete = ColourRole(colour: Color(0xFF8F3D24));', dk)
+        for word in ('zebra', 'floor'):
+            self.assertNotIn(word, t)
+
+    def test_c19p_a_colour_said_as_light_must_be_it(self):
+        said = '%s, %s (ruled by a zebra): below the floor'
+        light = LIGHT_ROWS + [r('color.lc.delete', '#8F3D24')]
+        other = [r('color.lc.delete', said % ('#D0775A', designgen.AS_LIGHT))]
+        self.refused(doc(light=light, dark=other), 'as-differs')
+        alone = [r('color.lc.delete', said % ('#8F3D24', designgen.AS_LIGHT))]
+        self.refused(doc(dark=alone), 'as-unknown')
+        for odd in ('%s, %s: below the floor', '%s, %s (a [zebra]): below', '%s, %s (ruled): below (it)'):
+            row = [r('color.lc.delete', odd % ('#8F3D24', designgen.AS_LIGHT))]
+            self.refused(doc(light=light, dark=row), 'colour-form')
+
     def test_refusal_names_the_line(self):
         data = doc(light=[r('color.page', '#F5F5EC'), r('color.odd', '#12')])
         line = data.decode('utf-8').split('\n').index(r('color.odd', '#12')) + 1

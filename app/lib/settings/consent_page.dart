@@ -1,6 +1,6 @@
 // Life Context's own page, from Settings (D110; D122; D125 item 9; D128):
-// MP·69 over two buttons, Back on the left and Turn on on the right (MP·98
-// and MP·99, pending lines: their words show in SoulDreams Dev only, R1),
+// MP·69 over two buttons, Back on the left and Turn on on the right (MP·107
+// and MP·108, pending lines, renumbered at C19-P, D161 item 1: their words show in SoulDreams Dev only, R1),
 // equally prominent, neither chosen beforehand, a tap answering at once. Back
 // and the back control give nothing; Turn on gives Life Context. It is the
 // only page of its kind: there is no consent to give or withdraw anywhere
@@ -30,8 +30,8 @@ class TurnOnChoice extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget one(bool given, String text) => _Choice(key: keyOf(given), text: text, onTap: () => onChoose(given));
     return ButtonRow(
-      left: one(false, PendingLines.MP_98.text(appLanguage)),
-      right: one(true, PendingLines.MP_99.text(appLanguage)),
+      left: one(false, PendingLines.MP_107.text(appLanguage)),
+      right: one(true, PendingLines.MP_108.text(appLanguage)),
     );
   }
 }

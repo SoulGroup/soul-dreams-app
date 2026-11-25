@@ -1,7 +1,7 @@
 // No tester or founder build may show an unfilled braced sentence
 // (docs/Status.md, "Before Cohort 1" item 4; D119 item 2; D122, Q1 (B)). A
 // place "to rewrite" is built as written, and a sentence still owed in it
-// stays whole in braces (MP·68, MP·70). SoulDreams Dev shows them as filed
+// stays whole in braces (none since C19-P). SoulDreams Dev shows them as filed
 // (D122): this test fails the moment any file that main.dart or
 // main_founder.dart reaches (following imports, as dev_only_test.dart does)
 // names a place whose line holds a brace that is not one of the generator's
@@ -10,6 +10,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:souldreams/words/lines.g.dart';
+import 'package:souldreams/words/pending.g.dart';
 
 import '../dev_only_test.dart' show reached;
 
@@ -57,16 +58,17 @@ void main() {
   });
 
   /// The places [names] holds whose line, in either language, has a brace
-  /// outside the slots.
-  List<String> bracedIn(Set<String> names) => [
-    for (final l in Lines.all.where((l) => names.contains(dartName(l))))
+  /// outside the slots, looked for in [lines], every filed line unless given.
+  List<String> bracedIn(Set<String> names, [Iterable<Line> lines = Lines.all]) => [
+    for (final l in lines.where((l) => names.contains(dartName(l))))
       if (Lang.values.any((lang) => l.parts(lang).any(braced))) l.handle,
   ];
 
-  // D128 item 4: the word "consent" is on no screen. One filed line still
-  // shown holds it, in Swedish only: EM·6 "Jag samtycker inte" (onboarding's
-  // "I don't agree"), for Product to reword (filed lines are not changed
-  // here). MP·67, MP·95 and MP·96 hold it too and are shown nowhere now.
+  // D128 item 4: the word "consent" is on no screen. No filed line shown
+  // holds it since C19-P retired EM·6; its words stand as the pending MP·109
+  // (D161 item 2), whose Swedish "Jag samtycker inte" holds it, for Product
+  // to reword. MP·67, MP·95 and MP·96 hold it too and are shown nowhere now,
+  // nor is C19-P's MP·98, the voice paused (D161 item 3).
   test('no shown line says consent, but the one named for Product', () {
     final word = RegExp('consent|samtycke', caseSensitive: false);
     final seen = named(reached('lib/main_dev.dart'));
@@ -74,9 +76,10 @@ void main() {
       for (final l in Lines.all)
         if (seen.contains(dartName(l)) && Lang.values.any((lang) => l.parts(lang).any(word.hasMatch))) l.handle,
     ];
-    expect(shown, ['EM·6']);
-    expect(Lines.EM_6.parts(Lang.en).any(word.hasMatch), isFalse);
-    for (final unshown in ['MP_67', 'MP_95', 'MP_96']) {
+    expect(shown, isEmpty);
+    expect(word.hasMatch(PendingLines.MP_109.text(Lang.sv, flavor: 'dev')), isTrue);
+    expect(word.hasMatch(PendingLines.MP_109.text(Lang.en, flavor: 'dev')), isFalse);
+    for (final unshown in ['MP_67', 'MP_95', 'MP_96', 'MP_98']) {
       expect(seen, isNot(contains(unshown)));
     }
   });
@@ -92,9 +95,12 @@ void main() {
     expect(seen, isNot(contains('MP_70')));
     expect(seen, isNot(contains('all')), reason: 'a screen reaching Lines.all would hide what it shows');
     expect(bracedIn(seen), isEmpty);
-    // No braced sentence is shown on any screen now; the helper itself is
-    // proved on the filed ones, MP·68 and MP·70 ("to rewrite"), by name.
-    expect(bracedIn({'MP_68', 'MP_70'}), ['MP·68', 'MP·70']);
+    // No braced sentence is shown on any screen, and none is filed since
+    // C19-P; the helper itself is proved on two made-up lines, by name.
+    const owed = Line('X·1', ['a {b}'], ['c']);
+    const slot = Line('X·2', ['a {n}'], ['c {n}']);
+    expect(bracedIn({'X_1', 'X_2'}, [owed, slot]), ['X·1']);
+    expect(bracedIn({'X_2'}, [owed, slot]), isEmpty);
     expect(bracedIn({'MP_11', 'MP_76'}), isEmpty);
   });
 

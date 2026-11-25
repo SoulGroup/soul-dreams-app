@@ -1,5 +1,5 @@
 // Life Context's own page, from Settings (D122; D125 item 9; D128): MP·69 over
-// Back on the left and Turn on on the right (MP·98, MP·99, pending lines);
+// Back on the left and Turn on on the right (MP·107, MP·108, pending lines);
 // only Turn on gives Life Context; Back and the back control give nothing.
 import 'dart:ui' show Tristate;
 
@@ -49,7 +49,7 @@ void main() {
     });
   }
 
-  // D125 item 9: Back on the left and Turn on on the right (MP·98 and MP·99:
+  // D125 item 9: Back on the left and Turn on on the right (MP·107 and MP·108:
   // pending lines, their words show in SoulDreams Dev only, a handle elsewhere
   // and in these tests). Equally prominent, neither chosen beforehand.
   testWidgets('Life Context: Back left, Turn on right, equally prominent', (tester) async {
@@ -62,8 +62,8 @@ void main() {
     await tester.pumpAndSettle();
     final back = find.byKey(TurnOnChoice.keyOf(false));
     final turnOn = find.byKey(TurnOnChoice.keyOf(true));
-    expect(find.descendant(of: back, matching: find.text(PendingLines.MP_98.text(appLanguage))), findsOneWidget);
-    expect(find.descendant(of: turnOn, matching: find.text(PendingLines.MP_99.text(appLanguage))), findsOneWidget);
+    expect(find.descendant(of: back, matching: find.text(PendingLines.MP_107.text(appLanguage))), findsOneWidget);
+    expect(find.descendant(of: turnOn, matching: find.text(PendingLines.MP_108.text(appLanguage))), findsOneWidget);
     expect(tester.getCenter(back).dy, tester.getCenter(turnOn).dy);
     expect(tester.getCenter(back).dx, lessThan(tester.getCenter(turnOn).dx));
     // Neither is filled beforehand: the same look, one size each.
@@ -76,11 +76,11 @@ void main() {
   });
 
   test('the two buttons: their words in Dev, handles elsewhere', () {
-    expect(PendingLines.MP_98.text(Lang.en, flavor: 'dev'), 'Back');
-    expect(PendingLines.MP_98.text(Lang.sv, flavor: 'dev'), 'Tillbaka');
-    expect(PendingLines.MP_99.text(Lang.en, flavor: 'dev'), 'Turn on');
-    expect(PendingLines.MP_99.text(Lang.sv, flavor: 'dev'), 'Slå på');
-    expect(PendingLines.MP_98.text(Lang.en, flavor: 'tester'), '[MP·98]');
-    expect(PendingLines.MP_99.text(Lang.en, flavor: 'founder'), '[MP·99]');
+    expect(PendingLines.MP_107.text(Lang.en, flavor: 'dev'), 'Back');
+    expect(PendingLines.MP_107.text(Lang.sv, flavor: 'dev'), 'Tillbaka');
+    expect(PendingLines.MP_108.text(Lang.en, flavor: 'dev'), 'Turn on');
+    expect(PendingLines.MP_108.text(Lang.sv, flavor: 'dev'), 'Slå på');
+    expect(PendingLines.MP_107.text(Lang.en, flavor: 'tester'), '[MP·107]');
+    expect(PendingLines.MP_108.text(Lang.en, flavor: 'founder'), '[MP·108]');
   });
 }

@@ -96,16 +96,16 @@ void main() {
     await tester.pump();
   });
 
-  // D122: Manual, Day or Night, whatever the hour; set from a page under the
+  // D122; MP·44 (C19-P): Day or Night, whatever the hour; set from a page under the
   // app, it fades over five seconds while the app is open.
-  test('Manual holds its theme whatever the hour', () {
+  test('Day or Night holds its theme whatever the hour', () {
     expect(isNight(NightDayMode.day, DateTime(2026, 6, 10, 23)), isFalse);
     expect(isNight(NightDayMode.night, DateTime(2026, 6, 10, 12)), isTrue);
     expect(isNight(NightDayMode.automatic, DateTime(2026, 6, 10, 23)), isTrue);
     expect(isNight(NightDayMode.automatic, DateTime(2026, 6, 10, 12)), isFalse);
   });
 
-  testWidgets('Manual set while open fades, and holds through the hours', (tester) async {
+  testWidgets('Night set while open fades, and holds through the hours', (tester) async {
     var now = DateTime(2026, 6, 10, 12);
     await tester.pumpWidget(SoulDreamsApp(clock: () => now));
     expect(pageOf(tester), light);

@@ -1,6 +1,6 @@
 // Night/Day mode (design-system.md §6; main-path.md, Settings; P14; D56;
 // D122): Automatic, dark from 21:00 and light from 08:00 by the phone's
-// local time now; or Manual, Day or Night, as the dreamer set it. The clock
+// local time now; or Day, or Night, as the dreamer set it (MP·44, C19-P). The clock
 // turning the hour while the app is open fades over five seconds, easing in
 // and out (head's message 20, item 13); a change the dreamer makes, the
 // quick toggle or the mode, takes half a second (D125 item 6); with Word
@@ -17,8 +17,8 @@ import 'package:flutter/material.dart';
 
 import 'app_line.dart' show wordAnimation;
 
-/// Night/Day mode (MP·44): Automatic, or Manual, Day or Night
-/// (main-path.md, Settings).
+/// Night/Day mode (MP·44): Automatic, Day or Night, in the line's
+/// order (C19-P; D161 item 4).
 enum NightDayMode { automatic, day, night }
 
 /// Dark from 21:00 to 08:00, by the wall clock.

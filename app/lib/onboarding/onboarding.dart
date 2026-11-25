@@ -3,7 +3,7 @@
 // first layer on two pages (C14-P item 1; the plan's question 2 for which
 // part stands on which page). The second ends with MP·58, which opens the
 // full disclosure page, the text only, with its own back control (D127 item
-// 1); then, at the foot, EM·6 "I don't agree" left and MP·100 "I agree"
+// 1); then, at the foot, MP·109 "I don't agree" (EM·6's words, a pending line since C19-P retired EM·6, D161 item 2) left and MP·100 "I agree"
 // right, a pending line, equal, neither chosen beforehand. "I agree"
 // accepts the disclosure and gives the readings (a) and Life Context (b)
 // consents (C159-I item 5; D127 amends MP·83's "never on before consent");
@@ -216,7 +216,7 @@ class _OnboardingState extends State<Onboarding> {
   Widget? _foot() => switch (_step) {
     _Step.underAge => null,
     _Step.more => ButtonRow(
-      left: PlainButton(Lines.EM_6.text(appLanguage), onPressed: () => _decide(false)),
+      left: PlainButton(PendingLines.MP_109.text(appLanguage), onPressed: () => _decide(false)),
       right: PlainButton(PendingLines.MP_100.text(appLanguage), onPressed: () => _decide(true)),
     ),
     _ => _one(PlainButton(Lines.MP_30.text(appLanguage), onPressed: _next)),
