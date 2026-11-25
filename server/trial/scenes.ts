@@ -4,10 +4,10 @@
 // rejects any on the contact sheet; a rejected one is painted again from
 // the same scene with a new seed. Each prompt is its scene, the framing and
 // the one style (STYLE, D146), in that order.
-import { STYLE } from './measure.ts';
+import { FRAME, STYLE } from '../src/painting.ts';
 
-/** The framing every painting shares: the subject in the middle band (D147 item 2). */
-export const FRAME = 'wide view, the subject across the middle band, no text';
+// The framing every painting shares (D147 item 2) lives with the server's painting now.
+export { FRAME };
 
 /** New Dream's night sky (D112; D147 item 3): no moon, which is drawn in code. */
 export const SKY_SCENE = 'a deep blue night sky of small soft stars, no moon';

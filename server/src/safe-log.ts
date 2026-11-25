@@ -26,6 +26,12 @@ export const LOG_EVENTS = [
   // in STEPS and MODELS), its input, output, cache-read and cache-written
   // tokens, and its cost in millionths of a dollar. Numbers only.
   'modelUsage',
+  // A night's painting (D162): given (with its cost in millionths of a
+  // dollar); refused (with its status, 400 or 413); failed (with its code,
+  // painting.ts's PaintingFailure, -7 anything else). Never a word.
+  'paintingGiven',
+  'paintingRefused',
+  'paintingFailed',
 ] as const;
 export type LogEvent = (typeof LOG_EVENTS)[number];
 

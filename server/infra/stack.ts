@@ -2,8 +2,9 @@
 // one Lambda in eu-north-1 behind its own function URL, with no
 // authentication of the URL's own (the beta key is checked in the code),
 // its logs kept 7 days, with no access logs, no tracing and no identifier;
-// its one variable is the feedback bucket's name. It reads two SecureStrings
-// the owner makes, and puts feedback in its bucket, and nothing else. No
+// its one variable is the feedback bucket's name. It reads three
+// SecureStrings the owner makes, and puts feedback in its bucket, and
+// nothing else. No
 // reserved concurrency yet (D71 Q12: the account's quota must allow it
 // first; a first-deploy checklist line returns it).
 //
@@ -48,7 +49,7 @@ export class ServerStack extends Stack {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     });
     logGroup.grantWrite(role);
-    // The two keys, by name, and their decryption through Parameter Store
+    // The three keys, by name, and their decryption through Parameter Store
     // only (D69).
     role.addToPrincipalPolicy(
       new iam.PolicyStatement({
@@ -88,8 +89,9 @@ export class ServerStack extends Stack {
       loggingFormat: lambda.LoggingFormat.JSON,
       applicationLogLevelV2: lambda.ApplicationLogLevel.INFO,
       systemLogLevelV2: lambda.SystemLogLevel.WARN,
-      // A cold start, then Parameter Store, then Soniox or S3 (D71 Q20).
-      timeout: Duration.seconds(10),
+      // A cold start, then Parameter Store, then Soniox or S3 (D71 Q20); a
+      // painting waits for BFL up to 30 seconds, each request up to 10 (D162).
+      timeout: Duration.seconds(60),
       environment: { [FEEDBACK_BUCKET_VARIABLE]: feedback.bucketName },
     });
     const url = fn.addFunctionUrl({ authType: lambda.FunctionUrlAuthType.NONE });

@@ -31,6 +31,9 @@ test('the events are these', () => {
     'readingRefused',
     'readingFailed',
     'modelUsage',
+    'paintingGiven',
+    'paintingRefused',
+    'paintingFailed',
   ]);
 });
 

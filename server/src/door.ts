@@ -2,14 +2,16 @@
 // Lambda function URL with no authentication of its own, and the beta key
 // checked here. POST / with the beta key as a bearer token gets a
 // short-lived Soniox key; POST /feedback with it keeps one feedback
-// (feedback.ts); POST /reading with it reads one night (reading.ts);
-// anything else gets nothing. It reads the method, the path and one header,
-// and the body only for feedback and a reading, after the key: never the
-// caller's network address or any other header. It logs codes and numbers
-// only (R3, R4).
+// (feedback.ts); POST /reading with it reads one night (reading.ts); POST
+// /painting with it paints one night's picture from nothing of the night
+// (painting.ts, D162); anything else gets nothing. It reads the method, the
+// path and one header, and the body only for feedback, a reading and a
+// painting, after the key: never the caller's network address or any other
+// header. It logs codes and numbers only (R3, R4).
 import { isBetaKeyShape, sameKey } from './beta-key.ts';
 import { parseFeedback, utcDay } from './feedback.ts';
-import { BETA_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from './parameter-names.ts';
+import { PaintingFailure, paintingRefused, type Painted } from './painting.ts';
+import { BETA_KEY_PARAMETER, BFL_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from './parameter-names.ts';
 import { parseReading, type Read, type ReadingRequest } from './reading.ts';
 import { safeLog } from './safe-log.ts';
 import { SonioxFailure, type TemporaryKey } from './soniox.ts';
@@ -26,6 +28,8 @@ export interface Reply {
   readonly statusCode: number;
   readonly headers?: Readonly<Record<string, string>>;
   readonly body?: string;
+  /** The body is an image's bytes, as base64 (the painting). */
+  readonly isBase64Encoded?: boolean;
 }
 
 export interface DoorDeps {
@@ -36,11 +40,13 @@ export interface DoorDeps {
   readonly keepFeedback: (day: string, text: string) => Promise<void>;
   /** One night's readings and the calls that made them (head's messages 33, 34). */
   readonly readNight: (request: ReadingRequest) => Promise<Read>;
+  /** One night's painting, with BFL's key (D162). */
+  readonly paintNight: (bflKey: string) => Promise<Painted>;
   readonly now: () => Date;
 }
 
 const BEARER = 'Bearer ';
-const PATHS = new Set(['/', '/feedback', '/reading']);
+const PATHS = new Set(['/', '/feedback', '/reading', '/painting']);
 
 export function makeDoor(deps: DoorDeps): (event: DoorEvent) => Promise<Reply> {
   return async (event) => {
@@ -63,7 +69,8 @@ async function answer(event: DoorEvent, deps: DoorDeps): Promise<Reply> {
   const refused = await checkBetaKey(event, deps);
   if (refused !== undefined) return refused;
   if (path === '/') return issueKey(deps);
-  return path === '/feedback' ? takeFeedback(event, deps) : giveReading(event, deps);
+  if (path === '/feedback') return takeFeedback(event, deps);
+  return path === '/reading' ? giveReading(event, deps) : givePainting(event, deps);
 }
 
 // The request's body, as text.
@@ -156,5 +163,36 @@ async function giveReading(event: DoorEvent, deps: DoorDeps): Promise<Reply> {
     statusCode: 200,
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({ readings: read.readings, usage: read.usage }),
+  };
+}
+
+// One night's painting (D162): a request holding nothing, BFL's key, the
+// painting; 200 with the JPEG alone. Its cost alone is logged (R3).
+async function givePainting(event: DoorEvent, deps: DoorDeps): Promise<Reply> {
+  const refused = paintingRefused(bodyOf(event));
+  if (refused !== null) {
+    safeLog('paintingRefused', [refused]);
+    return { statusCode: refused };
+  }
+  let bflKey: string;
+  try {
+    bflKey = await deps.readParameter(BFL_KEY_PARAMETER);
+  } catch {
+    safeLog('parameterFailed');
+    return { statusCode: 500 };
+  }
+  let painted: Painted;
+  try {
+    painted = await deps.paintNight(bflKey);
+  } catch (failure) {
+    safeLog('paintingFailed', [failure instanceof PaintingFailure ? failure.code : -7]);
+    return { statusCode: 502 };
+  }
+  safeLog('paintingGiven', [painted.cost]);
+  return {
+    statusCode: 200,
+    headers: { 'content-type': 'image/jpeg' },
+    body: painted.jpeg.toString('base64'),
+    isBase64Encoded: true,
   };
 }

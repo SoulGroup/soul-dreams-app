@@ -1,9 +1,9 @@
-// What the curated set's painter reads and writes inside its images
-// (D147), in plain bytes, with no package: a PNG's size; a JPEG's size,
+// What the curated set's painter (D147) and the server's personal painting
+// (D162) read and write inside their images, in plain bytes, with no package: a PNG's size; a JPEG's size,
 // its colour profile and its AI tag; and the tag itself, written by our
 // own code (D123): an XMP packet naming the IPTC digital source type
 // "trainedAlgorithmicMedia", in an APP1 segment after the JPEG's start.
-import { AI_SOURCE_TYPE, XMP_HEADER, XMP_IPTC_EXT, XMP_RDF } from '../src/hosts.ts';
+import { AI_SOURCE_TYPE, XMP_HEADER, XMP_IPTC_EXT, XMP_RDF } from './hosts.ts';
 
 export interface Size {
   readonly width: number;

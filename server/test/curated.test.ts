@@ -27,7 +27,7 @@ import {
   sipsConvert,
   type SetState,
 } from '../trial/curated.ts';
-import { aiTagged, hasSrgb, jpegSize, withAiTag } from '../trial/jpeg.ts';
+import { aiTagged, hasSrgb, jpegSize, withAiTag } from '../src/jpeg.ts';
 import { STYLE } from '../trial/measure.ts';
 import { FRAME, SCENES, SKY_SCENE, scenePrompt, skyPrompt } from '../trial/scenes.ts';
 import { KEY, fakeApi, fakeConvert, fakeJpeg, fakePng, fakeProfile } from './curated-fakes.ts';

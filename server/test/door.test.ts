@@ -1,13 +1,15 @@
 // The front door (head's message 14; D71; D152; head's message 33): POST /
 // with the beta key gets a short-lived Soniox key; POST /feedback with it
-// keeps one feedback; POST /reading with it reads one night; anything else
-// gets nothing, with one code. It never touches the caller's address or
-// another header, and reads a body only for feedback and a reading, after
-// the key (R3, R4).
+// keeps one feedback; POST /reading with it reads one night; POST /painting
+// with it paints one night's picture from nothing of the night (D162);
+// anything else gets nothing, with one code. It never touches the caller's
+// address or another header, and reads a body only for feedback, a reading
+// and a painting, after the key (R3, R4).
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import { type DoorDeps, type DoorEvent, makeDoor } from '../src/door.ts';
-import { BETA_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from '../src/parameter-names.ts';
+import { PaintingFailure } from '../src/painting.ts';
+import { BETA_KEY_PARAMETER, BFL_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from '../src/parameter-names.ts';
 import { type ReadingRequest, STAND_IN_READINGS } from '../src/reading.ts';
 
 // The stand-in's one call, as the readings step reports it.
@@ -17,6 +19,8 @@ import { SonioxFailure } from '../src/soniox.ts';
 
 const KEY = 'Ab0'.repeat(16);
 const PROJECT = 'project-key-in-a-test';
+const PAINTED = Buffer.from([0xff, 0xd8, 1, 2, 0xff, 0xd9]);
+const BFL = 'invented-bfl-key';
 const ISSUED = { key: 'snx_temp_test', expiresAt: '2026-11-13T12:00:00Z' };
 
 let lines: string[] = [];
@@ -39,16 +43,17 @@ interface Calls {
   soniox: string[];
   kept: [string, string][];
   nights: ReadingRequest[];
+  painted: string[];
 }
 
 function deps(over: Partial<DoorDeps> = {}): { deps: DoorDeps; calls: Calls } {
-  const calls: Calls = { read: [], soniox: [], kept: [], nights: [] };
+  const calls: Calls = { read: [], soniox: [], kept: [], nights: [], painted: [] };
   return {
     calls,
     deps: {
       readParameter: async (name) => {
         calls.read.push(name);
-        return name === BETA_KEY_PARAMETER ? KEY : PROJECT;
+        return name === BETA_KEY_PARAMETER ? KEY : name === BFL_KEY_PARAMETER ? BFL : PROJECT;
       },
       temporaryKey: async (project) => {
         calls.soniox.push(project);
@@ -60,6 +65,10 @@ function deps(over: Partial<DoorDeps> = {}): { deps: DoorDeps; calls: Calls } {
       readNight: async (request) => {
         calls.nights.push(request);
         return { readings: STAND_IN_READINGS, usage: USAGE };
+      },
+      paintNight: async (bflKey) => {
+        calls.painted.push(bflKey);
+        return { jpeg: PAINTED, cost: 14000 };
       },
       now: () => NOW,
       ...over,
@@ -146,6 +155,9 @@ test('another method or path: 404, nothing read', async () => {
     ['GET', '/reading'],
     ['POST', '/reading/'],
     ['POST', '/readings'],
+    ['GET', '/painting'],
+    ['POST', '/painting/'],
+    ['POST', '/paintings'],
   ] as const) {
     const d = deps();
     lines = [];
@@ -340,5 +352,72 @@ test('a reading: Parameter Store failing: 500, nothing read', async () => {
   });
   assert.deepEqual(await makeDoor(d.deps)(event('POST', '/reading', `Bearer ${KEY}`, night)), { statusCode: 500 });
   assert.deepEqual(d.calls.nights, []);
+  assert.deepEqual(lines, ['parameterFailed']);
+});
+
+test('a painting: 200, the JPEG as base64, its cost, nothing sent', async () => {
+  const d = deps();
+  const reply = await makeDoor(d.deps)(event('POST', '/painting', `Bearer ${KEY}`, '{}'));
+  assert.deepEqual(reply, {
+    statusCode: 200,
+    headers: { 'content-type': 'image/jpeg' },
+    body: PAINTED.toString('base64'),
+    isBase64Encoded: true,
+  });
+  assert.deepEqual(d.calls.read, [BETA_KEY_PARAMETER, BFL_KEY_PARAMETER]);
+  assert.deepEqual(d.calls.painted, [BFL]);
+  assert.deepEqual(lines, ['paintingGiven 14000']);
+});
+
+test('a painting: a bad key refused before the body is read', async () => {
+  for (const authorization of [undefined, `Bearer ${KEY.slice(0, 47)}1`]) {
+    const d = deps();
+    lines = [];
+    assert.deepEqual(await makeDoor(d.deps)(event('POST', '/painting', authorization)), { statusCode: 401 });
+    assert.deepEqual(d.calls.painted, []);
+  }
+});
+
+test('a painting: a body that holds anything is refused', async () => {
+  for (const [body, status] of [
+    ['{"dreams":["a"]}', 400],
+    ['', 400],
+    [`{${' '.repeat(80)}}`, 413],
+  ] as const) {
+    const d = deps();
+    lines = [];
+    assert.deepEqual(await makeDoor(d.deps)(event('POST', '/painting', `Bearer ${KEY}`, body)), { statusCode: status });
+    assert.deepEqual(d.calls.painted, []);
+    assert.deepEqual(d.calls.read, [BETA_KEY_PARAMETER]);
+    assert.deepEqual(lines, [`paintingRefused ${status}`]);
+  }
+});
+
+test('a painting failing: 502 and its code, never its message', async () => {
+  for (const [failure, code] of [
+    [new PaintingFailure(-2), -2],
+    [new PaintingFailure(402), 402],
+    [new Error('invented failure text'), -7],
+  ] as const) {
+    const d = deps({
+      paintNight: async () => {
+        throw failure;
+      },
+    });
+    lines = [];
+    assert.deepEqual(await makeDoor(d.deps)(event('POST', '/painting', `Bearer ${KEY}`, '{}')), { statusCode: 502 });
+    assert.deepEqual(lines, [`paintingFailed ${code}`]);
+  }
+});
+
+test("a painting: Parameter Store failing: 500, nothing painted", async () => {
+  const d = deps({
+    readParameter: async (name) => {
+      if (name === BFL_KEY_PARAMETER) throw new Error('invented failure text');
+      return KEY;
+    },
+  });
+  assert.deepEqual(await makeDoor(d.deps)(event('POST', '/painting', `Bearer ${KEY}`, '{}')), { statusCode: 500 });
+  assert.deepEqual(d.calls.painted, []);
   assert.deepEqual(lines, ['parameterFailed']);
 });

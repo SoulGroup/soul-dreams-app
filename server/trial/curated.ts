@@ -20,7 +20,7 @@ import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync,
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { paintOnce, type Clock, type Send } from './bfl.ts';
-import { aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile, type Size } from './jpeg.ts';
+import { aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile, type Size } from '../src/jpeg.ts';
 import { SCENES, scenePrompt, skyPrompt } from './scenes.ts';
 
 export const MODEL = 'flux-2-klein-4b';

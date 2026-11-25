@@ -10,11 +10,13 @@ import {
   PRICES,
   PROMPT_CACHING,
   SETUP,
+  STAND_IN_SCENERY,
   STAND_IN_TEXT,
   STEPS,
   callModel,
   costOf,
   standInCaller,
+  standInSceneryCaller,
 } from '../src/models.ts';
 import { setSink } from '../src/safe-log.ts';
 
@@ -34,9 +36,11 @@ const prompt = { fixed: ['instructions'], words: '{"dreams":["a"]}' };
 
 test('the steps, and one setting naming each step its model', () => {
   assert.deepEqual(STEPS, ['opening', 'readings', 'checks', 'scenery', 'recurrence']);
-  assert.deepEqual(MODELS, ['stand-in']);
+  assert.deepEqual(MODELS, ['stand-in', 'stand-in-scenery']);
   assert.deepEqual(Object.keys(SETUP), [...STEPS]);
-  for (const step of STEPS) assert.deepEqual(SETUP[step], { model: 'stand-in' });
+  for (const step of STEPS) {
+    assert.deepEqual(SETUP[step], { model: step === 'scenery' ? 'stand-in-scenery' : 'stand-in' });
+  }
   assert.ok(Object.isFrozen(SETUP));
 });
 
@@ -51,7 +55,7 @@ test("a call goes to its step's model, prompt and caching switch", async () => {
     return { text: 'x', usage: { input: 10, output: 2, cacheRead: 3, cacheWrite: 4 } };
   };
   const setup = { ...SETUP, readings: { model: 'stand-in' as const, reasoningCap: 64 } };
-  const answer = await callModel('readings', prompt, { setup, callers: { 'stand-in': caller }, caching: false });
+  const answer = await callModel('readings', prompt, { setup, callers: { 'stand-in': caller, 'stand-in-scenery': standInSceneryCaller }, caching: false });
   assert.deepEqual(seen, [[{ model: 'stand-in', reasoningCap: 64 }, prompt, false]]);
   assert.deepEqual(answer, {
     text: 'x',
@@ -61,12 +65,13 @@ test("a call goes to its step's model, prompt and caching switch", async () => {
 
 test('each call logs its step, model, tokens and cost, numbers only', async () => {
   const caller: Caller = async () => ({ text: 'never logged', usage: { input: 7, output: 5, cacheRead: 1, cacheWrite: 2 } });
-  await callModel('scenery', prompt, { setup: SETUP, callers: { 'stand-in': caller }, caching: false });
-  assert.deepEqual(lines, ['modelUsage 3 0 7 5 1 2 0']);
+  await callModel('scenery', prompt, { setup: SETUP, callers: { 'stand-in': standInCaller, 'stand-in-scenery': caller }, caching: false });
+  assert.deepEqual(lines, ['modelUsage 3 1 7 5 1 2 0']);
 });
 
 test('the cost: each count at its price, in millionths', () => {
   assert.deepEqual(PRICES['stand-in'], { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+  assert.deepEqual(PRICES['stand-in-scenery'], { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
   const price = { input: 4, output: 20, cacheRead: 1, cacheWrite: 5 };
   assert.equal(costOf(price, { input: 1000, output: 100, cacheRead: 10, cacheWrite: 2 }), 4000 + 2000 + 10 + 10);
 });
@@ -75,7 +80,9 @@ test("a model failing: the call fails, nothing logged", async () => {
   const caller: Caller = async () => {
     throw new Error('invented failure text');
   };
-  await assert.rejects(callModel('readings', prompt, { setup: SETUP, callers: { 'stand-in': caller }, caching: false }));
+  await assert.rejects(
+    callModel('readings', prompt, { setup: SETUP, callers: { 'stand-in': caller, 'stand-in-scenery': caller }, caching: false }),
+  );
   assert.deepEqual(lines, []);
 });
 
@@ -83,5 +90,12 @@ test('the stand-in: the same placeholder, zero tokens, whatever asked', async ()
   const one = await standInCaller({ model: 'stand-in' }, prompt, false);
   const two = await standInCaller({ model: 'stand-in' }, { fixed: [], words: 'other' }, true);
   assert.deepEqual(one, { text: STAND_IN_TEXT, usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } });
+  assert.deepEqual(two, one);
+});
+
+test("the scenery stand-in: one fixed scene, zero tokens, whatever asked", async () => {
+  const one = await standInSceneryCaller({ model: 'stand-in-scenery' }, prompt, false);
+  const two = await standInSceneryCaller({ model: 'stand-in-scenery' }, { fixed: [], words: '' }, true);
+  assert.deepEqual(one, { text: STAND_IN_SCENERY, usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 } });
   assert.deepEqual(two, one);
 });

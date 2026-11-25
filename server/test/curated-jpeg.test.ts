@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { AI_SOURCE_TYPE } from '../src/hosts.ts';
 import { SRGB_PROFILE } from '../trial/curated.ts';
-import { aiPacket, aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile } from '../trial/jpeg.ts';
+import { aiPacket, aiTagged, hasSrgb, jpegSize, pngSize, withAiTag, withProfile } from '../src/jpeg.ts';
 import { fakeJpeg, fakePng, fakeProfile, segment } from './curated-fakes.ts';
 
 test("a PNG's size from its header; anything else is none", () => {

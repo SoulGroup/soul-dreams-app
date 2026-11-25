@@ -1,6 +1,8 @@
 // The image trial's requests and its arithmetic (D135, D136). The six
 // prompts are invented scenery, with no person and nothing from any
 // dream (R2). Every price is read from AWS's Price List (see PRICES).
+import { STYLE } from '../src/painting.ts';
+
 export type ModelKey = 'flux' | 'sdxl';
 
 // not-dreamer-facing: the trial's invented scenery, one per painting.
@@ -12,7 +14,8 @@ export const SCENES = [
   'an olive grove on rolling hills under a yellow sun',
   'a stone bridge over a calm canal at night',
 ] as const;
-export const STYLE = 'Van Gogh style oil painting, thick impasto brushstrokes, no people';
+// The one style (D146) lives with the server's painting now.
+export { STYLE };
 
 export function prompt(index: number): string {
   const scene = SCENES[index];

@@ -12,8 +12,8 @@ import { safeLog } from './safe-log.ts';
 export const STEPS = ['opening', 'readings', 'checks', 'scenery', 'recurrence'] as const;
 export type Step = (typeof STEPS)[number];
 
-/** The models with a caller. Claude's are added with their caller. */
-export const MODELS = ['stand-in'] as const;
+/** The models with a caller: the stand-ins'. Claude's are added with their caller. */
+export const MODELS = ['stand-in', 'stand-in-scenery'] as const;
 export type ModelName = (typeof MODELS)[number];
 
 /** A step's model, with its reasoning capped in tokens where it has one. */
@@ -29,7 +29,7 @@ export const SETUP: Setup = Object.freeze({
   opening: { model: 'stand-in' },
   readings: { model: 'stand-in' },
   checks: { model: 'stand-in' },
-  scenery: { model: 'stand-in' },
+  scenery: { model: 'stand-in-scenery' },
   recurrence: { model: 'stand-in' },
 });
 
@@ -63,6 +63,7 @@ export type Price = Usage;
 
 export const PRICES: Readonly<Record<ModelName, Price>> = Object.freeze({
   'stand-in': { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+  'stand-in-scenery': { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 });
 
 /** One call's counts and cost (millionths of a dollar), as the phone keeps them. */
@@ -109,5 +110,18 @@ export const STAND_IN_TEXT = JSON.stringify({ readings: STAND_IN_READINGS });
 
 export const standInCaller: Caller = async () => ({
   text: STAND_IN_TEXT,
+  usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+});
+
+/**
+ * The scenery step's stand-in (D143; D162): one fixed placeholder scene,
+ * the curated set's first (`trial/scenes.ts`, read by the owner), the same
+ * whatever it is asked; it reads nothing of the prompt and counts no tokens.
+ */
+// not-dreamer-facing: a scenery prompt for the image model, never shown.
+export const STAND_IN_SCENERY = 'a wheat field at dawn under a pale gold sky';
+
+export const standInSceneryCaller: Caller = async () => ({
+  text: STAND_IN_SCENERY,
   usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
 });

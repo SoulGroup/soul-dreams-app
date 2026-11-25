@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import * as hosts from '../src/hosts.ts';
 
-test("Soniox's EU REST host only", () => {
+test("Soniox's and Black Forest Labs' EU hosts only", () => {
   assert.deepEqual(Object.keys(hosts).sort(), [
     'AI_SOURCE_TYPE',
     'BFL_API_URL',
@@ -14,7 +14,7 @@ test("Soniox's EU REST host only", () => {
     'XMP_IPTC_EXT',
     'XMP_RDF',
   ]);
-  assert.deepEqual(hosts.HOSTS, ['api.eu.soniox.com']);
+  assert.deepEqual(hosts.HOSTS, ['api.eu.soniox.com', 'api.eu.bfl.ai']);
   assert.ok(Object.isFrozen(hosts.HOSTS));
 });
 
@@ -25,13 +25,13 @@ test('the temporary-key address is on that host, over https', () => {
   assert.equal(url.pathname, '/v1/auth/temporary-api-key');
 });
 
-test("the image test's address is the EU endpoint's, not the server's", () => {
+test("BFL's address is the EU endpoint's, a host of the server", () => {
   const url = new URL(hosts.BFL_API_URL);
   assert.equal(url.protocol, 'https:');
   assert.equal(url.host, 'api.eu.bfl.ai');
   assert.equal(url.pathname, '/v1');
   assert.ok(url.host.endsWith(hosts.BFL_HOST_SUFFIX));
-  assert.equal(hosts.HOSTS.includes(url.host), false);
+  assert.ok(hosts.HOSTS.includes(url.host));
 });
 
 test("the AI tag's names: IPTC's and Adobe's, no server host", () => {

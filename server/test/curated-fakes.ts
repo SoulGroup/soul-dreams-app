@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import type { Clock, Reply, Send } from '../trial/bfl.ts';
 import type { Convert } from '../trial/curated.ts';
-import { pngSize } from '../trial/jpeg.ts';
+import { pngSize } from '../src/jpeg.ts';
 
 export const KEY = 'invented-key-0123456789';
 const POLLING = 'https://api.eu.bfl.ai/v1/get_result?id=';

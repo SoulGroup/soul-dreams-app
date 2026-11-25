@@ -44,12 +44,12 @@ test('eu-north-1, termination protection on', () => {
   assert.equal(stack.terminationProtection, true);
 });
 
-test('Node 24 on arm64, its own handler, 10 seconds', () => {
+test('Node 24 on arm64, its own handler, 60 seconds', () => {
   template.hasResourceProperties('AWS::Lambda::Function', {
     Runtime: 'nodejs24.x',
     Architectures: ['arm64'],
     Handler: 'handler.handler',
-    Timeout: 10,
+    Timeout: 60,
   });
 });
 
@@ -162,7 +162,7 @@ test("two outputs: the URL and the feedback bucket", () => {
   template.hasOutput('Url', { Value: { 'Fn::GetAtt': [Match.stringLikeRegexp('^HandlerFunctionUrl'), 'FunctionUrl'] } });
 });
 
-test('the role: its log group, the two keys, putting feedback', () => {
+test('the role: its log group, the three keys, putting feedback', () => {
   assert.equal(only('AWS::IAM::Role').Properties?.['ManagedPolicyArns'], undefined);
   // No inline policy on the role either (D44 a).
   assert.equal(only('AWS::IAM::Role').Properties?.['Policies'], undefined);
@@ -177,7 +177,7 @@ test('the role: its log group, the two keys, putting feedback', () => {
         {
           Action: 'ssm:GetParameter',
           Effect: 'Allow',
-          Resource: ['beta-key', 'soniox-key'].map((name) => ({
+          Resource: ['beta-key', 'soniox-key', 'bfl-key'].map((name) => ({
             'Fn::Join': [
               '',
               ['arn:', { Ref: 'AWS::Partition' }, ':ssm:eu-north-1:', { Ref: 'AWS::AccountId' }, `:parameter/souldreams/${name}`],
