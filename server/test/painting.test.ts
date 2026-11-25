@@ -10,6 +10,7 @@ import {
   type BflReply,
   type BflSend,
   type Clock,
+  fetchSend,
   FRAME,
   GIVE_UP_MS,
   MILLIONTHS_PER_CREDIT,
@@ -254,4 +255,20 @@ test('a night whose scene is none: nothing painted', async () => {
     -6,
   );
   assert.equal(painted, 0);
+});
+
+test('a redirect is never followed, so the key stays put', async () => {
+  const real = globalThis.fetch;
+  const seen: (RequestInit | undefined)[] = [];
+  globalThis.fetch = (async (_url: unknown, init?: RequestInit) => {
+    seen.push(init);
+    return new Response('{}', { status: 200 });
+  }) as typeof fetch;
+  try {
+    await fetchSend(POLLING, { method: 'GET', headers: { 'x-key': KEY } });
+  } finally {
+    globalThis.fetch = real;
+  }
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0]?.redirect, 'error');
 });

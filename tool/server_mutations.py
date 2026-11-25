@@ -586,6 +586,8 @@ ROWS = [
      'test', 'the role: its log group, the three keys, putting feedback'),
     ('S206', 'src/parameter-names.ts', "'/souldreams/bfl-key'", "'/souldreams/trial/bfl-key'",
      'test', 'the role: its log group, the three keys, putting feedback'),
+    ('S207', 'src/painting.ts', "redirect: 'error'", "redirect: 'follow'",
+     'test', 'a redirect is never followed, so the key stays put'),
 ]
 
 

@@ -214,9 +214,12 @@ export async function paintNight(
   return { jpeg: made.jpeg, cost: Math.round(made.credits * MILLIONTHS_PER_CREDIT) };
 }
 
-/** Node's fetch, each request waiting [REQUEST_MS] at most. */
+/**
+ * Node's fetch, each request waiting [REQUEST_MS] at most. A redirect is
+ * refused, never followed: BFL's key goes only to the address checked.
+ */
 export const fetchSend: BflSend = async (url, init) => {
-  const r = await fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_MS) });
+  const r = await fetch(url, { ...init, redirect: 'error', signal: AbortSignal.timeout(REQUEST_MS) });
   return { status: r.status, json: () => r.json(), bytes: async () => Buffer.from(await r.arrayBuffer()) };
 };
 
