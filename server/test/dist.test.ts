@@ -1,12 +1,13 @@
-// The Lambda's code folder (D42 Q5): the compiled code alone, with the
-// module marker beside it. `npm test` builds it first.
+// The Lambda's code folder (D42 Q5): the compiled code, with the module
+// marker and the model's instructions folder beside it (head's message 33).
+// `npm test` builds it first.
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
 import { test } from 'node:test';
 
 const CODE = new URL('../dist/src/', import.meta.url);
 
-test('the compiled files and the marker, nothing else', () => {
+test('the compiled files, the marker and the instructions, nothing else', () => {
   const files = readdirSync(CODE, { recursive: true }).map(String).sort();
   assert.deepEqual(files, [
     'beta-key.js',
@@ -15,9 +16,14 @@ test('the compiled files and the marker, nothing else', () => {
     'feedback.js',
     'handler.js',
     'hosts.js',
+    'instructions',
+    'instructions.js',
+    'instructions/AWAITING-INSTRUCTIONS.md',
+    'models.js',
     'package.json',
     'parameter-names.js',
     'parameters.js',
+    'reading.js',
     'safe-log.js',
     'soniox.js',
   ]);
@@ -41,5 +47,9 @@ test("imports: its own, Node's, and the two AWS clients", () => {
       if (!from.startsWith('./')) outside.add(from);
     }
   }
-  assert.deepEqual([...outside].sort(), ['@aws-sdk/client-s3', '@aws-sdk/client-ssm', 'node:crypto']);
+  assert.deepEqual([...outside].sort(), ['@aws-sdk/client-s3', '@aws-sdk/client-ssm', 'node:crypto', 'node:fs']);
+});
+
+test('the instructions folder is copied whole, the placeholder empty', () => {
+  assert.equal(readFileSync(new URL('instructions/AWAITING-INSTRUCTIONS.md', CODE), 'utf8'), '');
 });

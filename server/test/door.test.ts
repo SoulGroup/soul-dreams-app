@@ -1,12 +1,17 @@
-// The front door (head's message 14; D71; D152): POST / with the beta key
-// gets a short-lived Soniox key; POST /feedback with it keeps one feedback;
-// anything else gets nothing, with one code. It never touches the caller's
-// address or another header, and reads a body only for feedback, after the
-// key (R3, R4).
+// The front door (head's message 14; D71; D152; head's message 33): POST /
+// with the beta key gets a short-lived Soniox key; POST /feedback with it
+// keeps one feedback; POST /reading with it reads one night; anything else
+// gets nothing, with one code. It never touches the caller's address or
+// another header, and reads a body only for feedback and a reading, after
+// the key (R3, R4).
 import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import { type DoorDeps, type DoorEvent, makeDoor } from '../src/door.ts';
 import { BETA_KEY_PARAMETER, SONIOX_KEY_PARAMETER } from '../src/parameter-names.ts';
+import { type ReadingRequest, STAND_IN_READINGS } from '../src/reading.ts';
+
+// The stand-in's one call, as the readings step reports it.
+const USAGE = [{ step: 'readings', model: 'stand-in', input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0 }] as const;
 import { setSink } from '../src/safe-log.ts';
 import { SonioxFailure } from '../src/soniox.ts';
 
@@ -33,10 +38,11 @@ interface Calls {
   read: string[];
   soniox: string[];
   kept: [string, string][];
+  nights: ReadingRequest[];
 }
 
 function deps(over: Partial<DoorDeps> = {}): { deps: DoorDeps; calls: Calls } {
-  const calls: Calls = { read: [], soniox: [], kept: [] };
+  const calls: Calls = { read: [], soniox: [], kept: [], nights: [] };
   return {
     calls,
     deps: {
@@ -50,6 +56,10 @@ function deps(over: Partial<DoorDeps> = {}): { deps: DoorDeps; calls: Calls } {
       },
       keepFeedback: async (day, text) => {
         calls.kept.push([day, text]);
+      },
+      readNight: async (request) => {
+        calls.nights.push(request);
+        return { readings: STAND_IN_READINGS, usage: USAGE };
       },
       now: () => NOW,
       ...over,
@@ -133,6 +143,9 @@ test('another method or path: 404, nothing read', async () => {
     ['GET', '/feedback'],
     ['POST', '/feedback/'],
     ['POST', '/Feedback'],
+    ['GET', '/reading'],
+    ['POST', '/reading/'],
+    ['POST', '/readings'],
   ] as const) {
     const d = deps();
     lines = [];
@@ -257,5 +270,75 @@ test('feedback: Parameter Store failing: 500, nothing kept', async () => {
   });
   assert.deepEqual(await makeDoor(d.deps)(event('POST', '/feedback', `Bearer ${KEY}`, feedback('a'))), { statusCode: 500 });
   assert.deepEqual(d.calls.kept, []);
+  assert.deepEqual(lines, ['parameterFailed']);
+});
+
+const night = JSON.stringify({ lang: 'sv', dreams: ['Ett hus vid vattnet.'], kept: [] });
+
+test('a reading: 200, the readings, the night as sent, its count', async () => {
+  const d = deps();
+  const reply = await makeDoor(d.deps)(event('POST', '/reading', `Bearer ${KEY}`, night));
+  assert.deepEqual(reply, {
+    statusCode: 200,
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ readings: STAND_IN_READINGS, usage: USAGE }),
+  });
+  assert.deepEqual(d.calls.nights, [{ lang: 'sv', dreams: ['Ett hus vid vattnet.'], kept: [] }]);
+  assert.deepEqual(d.calls.read, [BETA_KEY_PARAMETER]);
+  assert.deepEqual(d.calls.soniox, []);
+  assert.deepEqual(d.calls.kept, []);
+  assert.deepEqual(lines, ['readingGiven 3']);
+});
+
+test('a reading: a base64 body is read as its text', async () => {
+  const d = deps();
+  const body = Buffer.from(night, 'utf8').toString('base64');
+  assert.equal((await makeDoor(d.deps)(event('POST', '/reading', `Bearer ${KEY}`, body, true))).statusCode, 200);
+  assert.deepEqual(d.calls.nights[0]?.dreams, ['Ett hus vid vattnet.']);
+});
+
+test('a reading: a bad key refused before the body is read', async () => {
+  for (const authorization of [`Bearer ${KEY.slice(0, 47)}1`, undefined, 'Bearer short']) {
+    const d = deps();
+    lines = [];
+    assert.deepEqual(await makeDoor(d.deps)(event('POST', '/reading', authorization)), { statusCode: 401 });
+    assert.deepEqual(d.calls.nights, []);
+    assert.deepEqual(lines, ['keyRefused']);
+  }
+});
+
+test('a reading: refused, nothing read, its status logged', async () => {
+  for (const [body, status] of [
+    ['', 400],
+    [JSON.stringify({ lang: 'en', dreams: [] }), 400],
+    [JSON.stringify({ lang: 'en', dreams: ['a'], id: 'x' }), 400],
+    [JSON.stringify({ lang: 'en', dreams: ['a'.repeat(262144)] }), 413],
+  ] as const) {
+    const d = deps();
+    lines = [];
+    assert.deepEqual(await makeDoor(d.deps)(event('POST', '/reading', `Bearer ${KEY}`, body)), { statusCode: status });
+    assert.deepEqual(d.calls.nights, []);
+    assert.deepEqual(lines, [`readingRefused ${status}`]);
+  }
+});
+
+test('a reading: the model failing: 502 and a code', async () => {
+  const d = deps({
+    readNight: async () => {
+      throw new Error('invented failure text');
+    },
+  });
+  assert.deepEqual(await makeDoor(d.deps)(event('POST', '/reading', `Bearer ${KEY}`, night)), { statusCode: 502 });
+  assert.deepEqual(lines, ['readingFailed']);
+});
+
+test('a reading: Parameter Store failing: 500, nothing read', async () => {
+  const d = deps({
+    readParameter: async () => {
+      throw new Error('invented failure text');
+    },
+  });
+  assert.deepEqual(await makeDoor(d.deps)(event('POST', '/reading', `Bearer ${KEY}`, night)), { statusCode: 500 });
+  assert.deepEqual(d.calls.nights, []);
   assert.deepEqual(lines, ['parameterFailed']);
 });

@@ -5,6 +5,8 @@ import assert from 'node:assert/strict';
 import { afterEach, beforeEach, test } from 'node:test';
 import type { PutInput } from '../src/feedback-store.ts';
 import { handler, wire } from '../src/handler.ts';
+import { type Caller, STAND_IN_TEXT } from '../src/models.ts';
+import { STAND_IN_READINGS } from '../src/reading.ts';
 import { setSink } from '../src/safe-log.ts';
 
 const KEY = 'Ab0'.repeat(16);
@@ -86,4 +88,50 @@ test('no bucket named: feedback fails with 502 and nothing is sent', async () =>
   assert.deepEqual(await sendFeedback(door), { statusCode: 502 });
   assert.deepEqual(puts, []);
   assert.deepEqual(lines, ['feedbackFailed']);
+});
+
+// The wiring of a reading (head's messages 33 and 34): the readings step's
+// model, through the one interface, handed the instructions read from the
+// folder beside the code, first, and the night last.
+test("a reading goes to its step's model with the folder's instructions", async () => {
+  const seen: unknown[] = [];
+  const caller: Caller = async (choice, prompt, cache) => {
+    seen.push([choice, prompt, cache]);
+    return { text: JSON.stringify({ readings: [{ lens: 1, text: '[x]' }] }), usage: { input: 3, output: 2, cacheRead: 0, cacheWrite: 0 } };
+  };
+  const door = wire({}, async () => {}, async () => KEY, { 'stand-in': caller }, () => [{ name: 'a.md', text: 'b' }]);
+  const reply = await door({
+    rawPath: '/reading',
+    headers: { authorization: `Bearer ${KEY}` },
+    body: JSON.stringify({ lang: 'en', dreams: ['A red door.'] }),
+    requestContext: { http: { method: 'POST' } },
+  });
+  assert.deepEqual(reply.statusCode, 200);
+  assert.deepEqual(JSON.parse(reply.body ?? ''), {
+    readings: [{ lens: 1, text: '[x]' }],
+    usage: [{ step: 'readings', model: 'stand-in', input: 3, output: 2, cacheRead: 0, cacheWrite: 0, cost: 0 }],
+  });
+  const night = JSON.stringify({ lang: 'en', dreams: ['A red door.'], kept: [] });
+  assert.deepEqual(seen, [[{ model: 'stand-in' }, { fixed: ['b'], words: night }, false]]);
+  assert.deepEqual(lines, ['modelUsage 1 0 3 2 0 0 0', 'readingGiven 1']);
+});
+
+test('the handler reads with the stand-in, and the instructions once', async () => {
+  let reads = 0;
+  const door = wire({}, async () => {}, async () => KEY, undefined, () => {
+    reads++;
+    return [];
+  });
+  const send = () =>
+    door({
+      rawPath: '/reading',
+      headers: { authorization: `Bearer ${KEY}` },
+      body: JSON.stringify({ lang: 'sv', dreams: ['x'] }),
+      requestContext: { http: { method: 'POST' } },
+    });
+  const first = await send();
+  await send();
+  assert.equal(reads, 1);
+  assert.deepEqual(JSON.parse(first.body ?? '').readings, STAND_IN_READINGS);
+  assert.equal(JSON.parse(STAND_IN_TEXT).readings.length, 3);
 });

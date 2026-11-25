@@ -27,6 +27,10 @@ test('the events are these', () => {
     'feedbackKept',
     'feedbackRefused',
     'feedbackFailed',
+    'readingGiven',
+    'readingRefused',
+    'readingFailed',
+    'modelUsage',
   ]);
 });
 

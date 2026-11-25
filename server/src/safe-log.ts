@@ -17,6 +17,15 @@ export const LOG_EVENTS = [
   'feedbackKept',
   'feedbackRefused',
   'feedbackFailed',
+  // A night's readings (head's message 33): given (with their count);
+  // refused (with its status, 400 or 413); the model failing. Never a word.
+  'readingGiven',
+  'readingRefused',
+  'readingFailed',
+  // Every model call (head's message 34): its step and model (their places
+  // in STEPS and MODELS), its input, output, cache-read and cache-written
+  // tokens, and its cost in millionths of a dollar. Numbers only.
+  'modelUsage',
 ] as const;
 export type LogEvent = (typeof LOG_EVENTS)[number];
 
