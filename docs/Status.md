@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-24, in branch `feedback` (the Feedback section of Settings and its server change, D152, D153; built and tested, the owner's deploy, by-eye check and first reading next), by Claude Code.
+Last updated: 2026-11-25, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D159, head's message 34; built and tested, the storage rehearsal passed on the owner's phone; the owner's deploy, by-eye check and the full mutation runs next), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -14,13 +14,24 @@ rulings given during each branch are listed in this file, one line each, under "
 
 ## Current branch
 
-`feedback`: the Feedback section of Settings and its server change (D110; C18-P; D152; plan `docs/plans/feedback.md`).
-Settings in SoulDreams Dev gains MP·49, a card with C4-P·8, a field (MP·46 as its hint, at most 2,000 characters)
-and Submit (MP·47). A feedback goes to our server's `POST /feedback` with the beta key and the text alone; the
-server puts the text in a private, encrypted bucket in eu-north-1 under its UTC day, deleted after 90 days; the owner
-reads it with `tool/read_feedback.sh`, which moves it to his Mac and deletes it from the bucket. Before "I agree",
-Submit shows the popup (MP·101); a failed send keeps the text and shows MP·105, a sent one empties the box and shows
-MP·106, the owner's pending lines (D153). The plan's questions are its Part 4.
+`readings-plumbing`, part one: the reading (head's message 33; D155; plan `docs/plans/readings-plumbing.md`). In
+SoulDreams Dev, Start Interpretation on a night's page sends the night (its language, its dreams in words and, only
+while Life Context is On, the sentences it keeps, D134) to our server's `POST /reading` with the beta key; the server
+hands it to its stand-in model, which answers three fixed placeholder readings marked `[STAND-IN · n]`, the same for
+every night, reading nothing of it. AI·3 shows while it waits; the readings are kept in the night, which is then
+read (its painting, its jump buttons); a failure shows C4-P·6 alone and the night stays unread. A read night shows
+MP·20, "The Readings" (MP·36) and its readings, each under its tradition's label, `[W13]` until W13 has a line,
+with "Made by AI" (MP·71) quietly under each. The
+night's file is version 3 (D155 item 2, docs/workflow.md (c)). The model's instructions drop in as files in
+`server/instructions/`, which holds only the empty placeholder `AWAITING-INSTRUCTIONS.md` (R7). Every model call goes
+through one interface, each step's model named in one setting (`server/src/models.ts`, `SETUP`), its tokens and cost
+counted and logged as numbers, and kept beside the night's readings in SoulDreams Dev (head's message 34); prompts put
+fixed text first and the dreamer's words last, and prompt caching is off until AWS's pages say it fits retention mode
+none. Part two, the painting (D143, D145, D146, D123), is planned after this part's merge; the founder's blind
+comparison (head's message 34 item 4) is planned, not built. Also D156: a feedback of invisible characters only is
+blank.
+
+`feedback` is merged (`de0a315`), its by-eye check and first reading passed (Task 9).
 
 `curated-set` is merged (`4a22d1a`): the curated set of night paintings (D147, with D149 to D151). Its Status was not
 updated at the merge (this entry records it).
@@ -38,8 +49,13 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `feedback`: the owner's answers to the plan's Part 4, the package (Task 1), the build, the deploy (Task 8), the by-eye
-  check and the first reading (Task 9), the full mutation runs once (D126), then the merge, which is the owner's.
+- `readings-plumbing`, part one: the storage rehearsal on the phone (Task 3) passed (owner, 2026-11-25); the deploy
+  (Task 8), the by-eye check (Task 9), the full mutation runs once (D126), then the merge, which is the owner's. The
+  C19-P import (the design system, the product change record, the register) is not on this branch (D159): it waits
+  for its own branch.
+  Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
+- `readings-plumbing`, part two: the painting (D143, D145, D146, D123; D155 items 1 and 3): its plan after part one's
+  merge.
 - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
   the full pass, D98) and the full mutation run was done: `app mutations: 726 run, 726 caught` at `46d5ebd` (9 min
   1 s on the owner's Mac, parallel). The Product questions are banked (items 167 and 169).
@@ -81,8 +97,11 @@ merge (this entry records it).
 - The fonts (D49 a): Tangerine, Sorts Mill Goudy, Inter (Regular and SemiBold, the 18pt statics), Nunito (Regular,
   Italic) and Habibi, static TTFs with their OFL licences in `app/assets/fonts/`, each listed in `fingerprints.txt`
   (G2), declared in `pubspec.yaml`. The owner's download; never fetched at run time (R10).
-- The journal's store (D49 b, c), with no screen yet: `app/lib/journal/`. One JSON file per night, format version 2
-  (version 1 still read; D93 Q2: a dream is told in words or a recording waiting, `{"waiting", "from"}`),
+- The journal's store (D49 b, c), with no screen yet: `app/lib/journal/`. One JSON file per night, format version 3
+  (versions 1 and 2 still read; D93 Q2: a dream is told in words or a recording waiting, `{"waiting", "from"}`;
+  D155 item 2: `readings`, null while unread, else one to three `{"lens", "text"}`; head's message 34: `usage`,
+  each model call's `{"step", "model", "input", "output", "cacheRead", "cacheWrite", "cost"}`, beside the readings
+  only, where the build keeps them),
   in `Library/Application Support/Journal`; the folder excluded from backup; the folder and every file with complete
   file protection, through the Swift channel in `AppDelegate.swift`. A save writes a temporary file, flushes it to the
   disk (F_FULLFSYNC, else fsync) and renames it; a failed save removes its own temporary file. Every store operation
@@ -227,8 +246,21 @@ merge (this entry records it).
   other three do nothing until the readings); everything below as before. Naming is removed: a name kept in a file
   is not shown (the store's field stays; the export still writes it). A night's picture (`journal/night_look.dart`,
   `pages/night_art.dart`): a read night's painting chosen from its id alone, nothing stored; an unread night's the
-  painted gradient (the dark theme's bubble gradient, both themes); no night is read yet (`noneRead`), and
-  SoulDreams Dev built with `--dart-define=PREVIEW_READ=true` shows every night as read, for the owner's review.
+  painted gradient (the dark theme's bubble gradient, both themes); in SoulDreams Dev a night is read when it holds
+  its readings (`isRead`), in the other builds none is (`noneRead`), and SoulDreams Dev built with
+  `--dart-define=PREVIEW_READ=true` shows every night as read, for the owner's review.
+- The readings (head's message 33; `app/lib/readings/readings.dart`; SoulDreams Dev only, `dev_only_test.dart`):
+  `postReading` (one POST to `Hosts.server` + `reading`, the beta key, `{"lang", "dreams", "kept"?}`, 30 seconds;
+  anything but 200 with one to three whole readings fails: the status, 0 no answer, -1 unreadable, -2 no server or
+  key; the answer's `usage` kept only by `liveReading(keepUsage: true)`, SoulDreams Dev's), `keptFor` (Life
+  Context's Recent list while On, nothing while Off, D134), `interpret` (a night already read
+  or with no dream in words is not sent; the readings kept with `Journal.keepReadings`, a night's first kept; codes
+  `readingRead`, `readingFailed`, `readingKeepFailed`). On the night's page: Start Interpretation (EM·1) reads with
+  the page's reader, AI·3 (`waitingKey`, brought into view) while it waits, C4-P·6 (`failedKey`) alone on a
+  failure; a read night shows MP·20, MP·36 and each reading in `ReadingBubble` (`parts.dart`: the readings'
+  bubble from the left, its tradition's pill, the readings' voice, MP·71 under it in `type.button.small` and the
+  summary's grey, stand-ins), and no Start Interpretation; the Readings jump
+  brings "The Readings" to the top; the list lays out every part (`scrollCacheExtent`).
   The curated set (D147): sixty paintings in `app/assets/paintings/`, each covering its box from the middle over
   the gradient, decoded no larger than the box needs; New Dream's sky is the set's strip, under the row's
   40% (D150). The words Product owes show as provisional
@@ -368,7 +400,7 @@ merge (this entry records it).
 - Values the Design System leaves unset are named stand-ins in `app/lib/design/stand_ins.dart`, matched by eye to the
   founder's screenshots (`docs/reference/screens/`, fingerprinted, G2) and corrected by the founder in Cohort 0
   (P13).
-- The app's analyzer baseline: `No issues found!`. The app has 790 tests, and 776 mutation checks (A1 to A837; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
+- The app's analyzer baseline: `No issues found!`. The app has 835 tests, and 857 mutation checks (A1 to A918; A418 to A422, A424 to A426, A429, A781 (D149), A24ah,
   A24ar, A24as, A55, A73, A80 to A83, A86 to A88, A94, A99, A128 to A130, A142, A207, A213, A223, A252 to A255, A270,
   A277, A278, A281, A288, A291, A300, A301, A302, A313, A363, A375, A507, A518, A521, A526, A527, A530, A537, A538, A539, A540, A541, A543, A546, A549, A550, A553, A554, A558, A566, A574, A575, A578, A583, A585 to A600, A610, A623, A624, A626, A627, A629, A633, A634, A635, A645, A646, A369 and A409 to A411
   dropped, each with its reason in the file; with the rows A24a to
@@ -394,6 +426,19 @@ merge (this entry records it).
   2.1147.0 (D42 Q1, Q14), and `@aws-sdk/client-ssm` and `@aws-sdk/client-s3` at the owner's version, for their types only: the Lambda runtime
   carries its own SDK, and the Lambda's code folder holds no package (D71 Q13 a). The owner installs them; Claude Code's settings deny every install, and it runs `npm ci
   --offline` only through `check_all.sh` (D42 Q13).
+- `server/src/`: the readings (head's message 33): POST `/reading` with the beta key and a JSON body of `lang`
+  (`en` or `sv`), `dreams` (one or more non-blank strings) and, optionally, `kept` (strings), at most 262,144
+  characters, gets 200 `{readings, usage}` from the readings step (`reading.ts`): its prompt the instructions first
+  and the night last, its model's text parsed as one to three readings, its call's counts and cost; with the
+  stand-in, three fixed `[STAND-IN · n]` readings and zero tokens; a body that is not that 400, too long 413
+  (`readingRefused` with the status), the model failing or its text not readings 502 (`readingFailed`), given
+  `readingGiven` with the count. Every model call goes through `callModel` (`models.ts`, head's message 34): the step's
+  model from `SETUP` (opening, readings, checks, scenery, recurrence; each the stand-in now), its caller, its tokens
+  and cost (`PRICES`, millionths of a dollar) logged as `modelUsage` numbers; `PROMPT_CACHING` false. The steps
+  are handed the instructions read once from `dist/src/instructions/` (`instructions.ts`; every `.md` but the
+  placeholder, in name order), which `infra/dist.ts`
+  copies from `server/instructions/` (R7: only the empty `AWAITING-INSTRUCTIONS.md`). No Bedrock call, no new
+  permission, the 10-second timeout unchanged.
 - `server/src/`: the front door (`door.ts`, head's message 14; D71): POST `/` with the beta key as a bearer token gets
   a short-lived Soniox key (200, `{key, expiresAt}`); a missing, wrong or misshapen key 401 with no body, before
   anything is read when misshapen; another method or path 404; Parameter Store failing 500; Soniox failing 502
@@ -436,11 +481,11 @@ merge (this entry records it).
   scenes and the sky) and `server/trial/jpeg.ts` (sizes, the sRGB profile and the AI tag, written by our own code;
   its names in `server/src/hosts.ts`, never fetched). macOS's `sips` makes each JPEG, and our code embeds the OS's own
   sRGB profile in it, since `sips` on macOS 26 writes none. Tested against fakes.
-- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 156 tests, and
-  133 mutation checks (S1 to S138, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
+- The server's analyzer baseline: `npm run check` prints only its header and exits 0. The server has 184 tests, and
+  175 mutation checks (S1 to S180, S42 retired with the budget resource, D138, S82 to S85 with the style test, D146)
   in `tool/server_mutations.py`, run by
-  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 133 run,
-  133 caught`); `check_all.sh` does not
+  hand from the repository root with `python3 -I -B tool/server_mutations.py` (expected: `server mutations: 175 run,
+  175 caught`); `check_all.sh` does not
   call it (D43 Q3). It first runs the type check and the tests on the unbroken server, and stops with
   `server mutations: FAILED (the unbroken server fails)`, exit 1, if either fails (the final review, `2fbaad6`).
 
@@ -1142,8 +1187,24 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
      policy (termination protection is on; the other protections and the 90 days stay); (b) the lifecycle has no
      rule aborting incomplete multipart uploads (our code only puts whole objects); (c) a text of only U+200B or
      U+0000 is not "blank" (`trim` as Dart's does; the app and the server agree), a question for the owner if it
-     matters; (d) a base64 body is decoded before the 65,536 check, which Lambda's own 6 MB limit bounds; (e) a
+     matters (closed for the app by D156: such a text is blank and not sent; the server still keeps it); (d) a base64 body is decoded before the 65,536 check, which Lambda's own 6 MB limit bounds; (e) a
      body with a repeated `text` key keeps the last (still one field).
+174. The Opus reviews of readings-plumbing (D91; notes, no defect left open): (a) the app's 30 seconds is a limit on
+     each phase (connect, send, reply, body), not one deadline, so a very slow server could keep the dreamer waiting
+     about a minute or more; (b) `interpret` sends the night the page holds, which the page reloads after each typing
+     screen and retry; (c) a lost race still logs `readingRead` with its count and returns read; (d) `lens` has no
+     upper bound, on the phone or the server (the page falls back to the handle past W13's parts); (e) the server's
+     `callModel` does not refuse a Caller's negative or fractional counts, and `PRICES` as whole millionths of a
+     dollar per token cannot hold a real cache rate (0.5 or 6.25 millionths): price per million tokens with one
+     rounding, when Claude's callers join; (f) a folder holding only the placeholder gives an empty instruction set
+     and the reading goes ahead, right for the stand-in, but the Claude caller must refuse it; (g) the server's
+     dreams count as blank by `trim` only, and `kept` entries may be empty; (h) a wrong key sent with a valid night
+     is not proven unread by a test, and the missing instructions folder is tested at the reader, not through the
+     door; (i) `instructions.test.ts` and `dist.test.ts` list the placeholder as the folder's only file, so the
+     owner's import of real instruction files changes them with it; (j) an older build skips version 3 nights (it
+     does not delete them); (k) the old-format night tests are made from the current encoder, not from fixed files,
+     and the store-level version 2 test holds no waiting recording; (l) a lone surrogate in a reading's text comes
+     back as U+FFFD, as dreams' do.
 
 ## Before Cohort 1
 
@@ -1777,6 +1838,44 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   check kept 2 and the typed words 0.
 - D154 (the founder's by-eye correction): the Feedback box's border is the colour of the Settings value pills' border
   (`surfaceBorder`), light and dark (it was `fieldBorder`, which is clear in the dark theme). App tests 790, rows 776.
+
+## Rulings during readings-plumbing
+
+- `feedback` merged by the owner (`de0a315`).
+- D155 (owner, the brainstorm): (1) a large plan is split, first the reading (request, answer, night read), then the
+  painting; (2) the night file gains its readings as a storage change under docs/workflow.md (c), with the owner's
+  rehearsal on the phone; (3) the BFL key moves to a permanent Parameter Store name (owner task); (4) owed words
+  show as handles, listed for the head. D91 and D126 apply.
+- D156 (owner, on banked item 173 (c)): a feedback text of invisible characters only (zero-width spaces, U+0000 and
+  the like) counts as blank and is not sent (`feedback.dart`: whitespace, `Cc` and `Default_Ignorable_Code_Point`;
+  row A838).
+- D157 (owner): the plan's Part 4 questions take their leans (Q2 straight to the readings for now; Q8 the Recent
+  window sent while On; Q15 D156 on the app only; Q19 the storage change ships alone, with the safety export before
+  the founder's app). Added from the head's message 34 (2026-11-24, from Organisation's business-model.md): one
+  interface for every model call, the model per step in one setting; token counts and cost per call, the server
+  logging numbers only and the app keeping each night's beside it (Dev, and the founder's build later); prompts with
+  fixed text first and the dreamer's words last, caching off until AWS's pages confirm it fits retention mode none;
+  the founder's blind comparison planned, not built (plan Part 7).
+- D158 (owner): the plan's questions 21 to 28 take their leans; question 25 (prompt caching): built switched off,
+  and the Build chat asks AWS in writing (a case from the account) and carries the answer to the head.
+- The C19-P import (the design system, the product change record, the register; the plan's Task 0a) stopped: the
+  words generator refused `pending-filed` at the pending lines' row 2, since C19-P files MP·98 (the voice paused
+  without consent (a)) and MP·99 (the language names), the handles the pending lines give Life Context's consent
+  page's Back and Turn on. C19-P also retires EM·6 (onboarding's decline), gives MP·44 three values where Settings
+  has two, changes MP·67's English, and rules the dark `color.lifecontext.delete`. None of the readings' places or
+  values changed; the import waits for its own branch (plan Task 0b). The readings' screen gained MP·71 under each
+  reading, filed since C18-P and missed by the first plan.
+- D159 (owner): the C19-P import is not on this branch (the tree is back to C18-P, and Task 0a and 0b are done); the
+  plan's question 29 (MP·71's look, under each reading, stand-ins) takes its lean.
+- Task 3 (the storage rehearsal) passed on the owner's phone, 2026-11-25 (the simulator skipped): three invented nights
+  (one dream, three dreams, a recording waiting) carried from `main` to `2a46989` whole; the waiting one was
+  transcribed; editing and adding worked.
+- D91 reviews, Opus, of the storage change, the server's route and Life Context's gating, each fixed and re-proven
+  where a defect or a test gap was found: the night file's tests (two "damaged" files that no longer were, the
+  version check with no test of its own; `412f84a`, `6d37cd0`); Life Context turned Off while the kept sentences
+  are read, which sent them (the check is repeated after the read), and an unreadable reply logging 0 for -1 (rows
+  A916 to A918, A877 repointed; `3cc84a1`); the server's limit in characters and a reading's text a string (rows S179,
+  S180; `ac5a949`). Row A890 sits in Task 5's block but breaks Task 6's code, so it is caught only from Task 6 on.
 
 ## Documents as last imported
 
