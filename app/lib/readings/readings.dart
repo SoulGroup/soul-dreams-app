@@ -84,8 +84,12 @@ Future<NightAnswer> postReading(Uri server, String betaKey, Map<String, Object?>
     request.contentLength = bytes.length;
     request.add(bytes);
     final reply = await request.close().timeout(_wait);
-    answer = await utf8.decodeStream(reply).timeout(_wait);
     if (reply.statusCode != 200) throw ReadingFailure(reply.statusCode);
+    try {
+      answer = await utf8.decodeStream(reply).timeout(_wait);
+    } on FormatException {
+      throw const ReadingFailure(-1);
+    }
   } on ReadingFailure {
     rethrow;
   } on Object {
@@ -118,7 +122,10 @@ SendNight liveReading({required String betaKey, String server = Hosts.server, bo
 /// the Recent window, word for word; while off, or with none, nothing.
 Future<List<String>?> keptFor(LifeContext? life) async {
   if (life == null || !life.on) return null;
-  return [for (final k in await life.recent()) k.text];
+  final recent = await life.recent();
+  // Off may have come while the sentences were read: nothing goes (D134).
+  if (!life.on) return null;
+  return [for (final k in recent) k.text];
 }
 
 /// Reads a night: its request made at the moment of reading.

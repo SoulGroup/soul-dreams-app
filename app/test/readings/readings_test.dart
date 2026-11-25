@@ -32,6 +32,9 @@ final class FakeServer {
   final HttpServer _server;
   final requests = <({String method, String path, Map<String, List<String>> headers, String body})>[];
   int status = 200;
+
+  /// When set, the reply's bytes as they are (not text), instead of [reply].
+  List<int>? rawReply;
   String reply = jsonEncode({
     'readings': [
       {'lens': 0, 'text': '[one]'},
@@ -55,7 +58,11 @@ final class FakeServer {
     final body = await utf8.decodeStream(request);
     requests.add((method: request.method, path: request.uri.path, headers: headers, body: body));
     request.response.statusCode = status;
-    request.response.write(reply);
+    if (rawReply case final raw?) {
+      request.response.add(raw);
+    } else {
+      request.response.write(reply);
+    }
     await request.response.close();
   }
 
@@ -128,6 +135,15 @@ void main() {
       final gone = server.url;
       await server.stop();
       expect(await failure(postReading(gone, beta, {})), 0);
+    });
+
+    test('a reply that is not text: -1, or its own status', () async {
+      final server = await FakeServer.start();
+      addTearDown(server.stop);
+      server.rawReply = [0xff, 0xfe, 0x00];
+      expect(await failure(postReading(server.url, beta, {})), -1);
+      server.status = 502;
+      expect(await failure(postReading(server.url, beta, {})), 502);
     });
 
     test('an answer that is not one to three whole readings: -1', () async {
@@ -208,6 +224,15 @@ void main() {
       expect(await keptFor(life), isNull);
       await settings.answer(Consent.lifeContext, true);
       expect(await keptFor(life), passages.first.sentences);
+    });
+
+    test('Off while the kept sentences are read: nothing is sent', () async {
+      final (_, settings, life, nights) = await open();
+      await life.capture(nights.first.id, passages.first.text);
+      final asked = keptFor(life);
+      final off = settings.answer(Consent.lifeContext, false);
+      expect(await asked, isNull);
+      await off;
     });
 
     test('no Life Context: nothing kept is sent', () async {
