@@ -119,7 +119,9 @@ void main() {
     ];
     final ys = [for (final n in names) tester.getCenter(find.text(n)).dy];
     expect(ys, [...ys]..sort());
-    expect(shown(tester, SettingRow.language), owedLanguage);
+    // MP·99 names the language in its own words; English only (D121 item 1).
+    expect(shown(tester, SettingRow.language), 'English');
+    expect([for (final l in Lang.values) languageName(l)], Lines.MP_99.parts(Lang.sv));
     // Each pill is heard as its row's name, then its value.
     final pill = tester.getSemantics(find.byKey(SettingsPage.valueKey(SettingRow.wordAnimation)));
     expect([pill.label, pill.value], ['Word Animation', 'On']);

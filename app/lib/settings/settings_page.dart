@@ -7,7 +7,7 @@
 // value pill, every pill one size and every row one height (D125 item 4),
 // the gap from a pill's right edge to its row's equal to the gap above and
 // below it (D128 item 6), opening the phone's menu: Language (EM·9; English
-// only, its name owed, D121 item 1), Word Animation (MP·26), Night images
+// only, D121 item 1, named in its own words, MP·99, C19-P), Word Animation (MP·26), Night images
 // (MP·85), Night/Day mode (MP·44: Automatic, Day or Night, C19-P), Life Context (MP·83) and Life Context
 // length (MP·84); then the row opening "What you've told Soul Dreams"
 // (MP·86, its flag; D121 item 2; D131), its name and a chevron; then "Read
@@ -52,9 +52,9 @@ import 'setting_line.dart';
 import 'settings.dart';
 import 'settings_controller.dart';
 
-/// The language's name, owed by Product: a visible placeholder (R1; the
-/// stop's question 4).
-const owedLanguage = '[owed·language]';
+/// [lang]'s name in its own language: MP·99 names them in [Lang]'s order,
+/// "English / Svenska", the same in both (C19-P).
+String languageName(Lang lang) => Lines.MP_99.parts(appLanguage)[lang.index];
 
 /// Which row a key names.
 enum SettingRow { language, wordAnimation, nightImages, nightDay, lifeContext, length }
@@ -272,7 +272,7 @@ class _SettingsPageState extends State<SettingsPage> {
               _Row(
                 row: SettingRow.language,
                 name: Lines.EM_9.text(appLanguage),
-                choices: const [owedLanguage],
+                choices: [languageName(appLanguage)],
                 chosen: 0,
                 onChoose: (_) {},
               ),
