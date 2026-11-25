@@ -1,4 +1,4 @@
-# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S138, D152; S139 to S161, head's message 33; S162 to S178, head's message 34), run by hand from the repository
+# The server's mutation checks (D43 Q3; S17 to S30, D71; S31 to S85, D135, D138, D139, D141, D144; S86 to S109, D147; S110 to S138, D152; S139 to S161, head's message 33; S162 to S178, head's message 34; S179 and S180, the review, D91), run by hand from the repository
 # root: python3 -I -B tool/server_mutations.py
 # First the unbroken server, copied, must pass its type check and tests.
 # Then each row breaks one thing in a copy of server/ in the temporary
@@ -519,6 +519,16 @@ ROWS = [
     ('S178', 'src/reading.ts', "ask('readings',",
      "ask('opening',",
      'test', 'a night read: the readings step, prompt, readings, one call'),
+    # The review of the server's reading (D91): characters, not bytes; text a string.
+    ('S179', 'src/reading.ts', 'if (body.length > READING_BODY_LIMIT)',
+     'if (Buffer.byteLength(body) > READING_BODY_LIMIT)',
+     'test', 'the limit counts characters, not bytes'),
+    ('S180', 'src/reading.ts',
+     "typeof words !== 'string' || words === '') return null;\n"
+     '    readings.push({ lens: lens as number, text: words });',
+     "words === '') return null;\n"
+     '    readings.push({ lens: lens as number, text: words as string });',
+     'test', "the model's answer: one to three whole readings, or null"),
 ]
 
 

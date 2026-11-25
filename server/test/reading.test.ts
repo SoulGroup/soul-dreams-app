@@ -52,6 +52,13 @@ test('a body over the limit: 413, unread', () => {
   assert.deepEqual(parseReading(`${at} `), { refused: 413 });
 });
 
+test('the limit counts characters, not bytes', () => {
+  const at = night({ dreams: ['å'.repeat(READING_BODY_LIMIT - night({ dreams: [''] }).length)] });
+  assert.equal(at.length, READING_BODY_LIMIT);
+  assert.ok(Buffer.byteLength(at) > READING_BODY_LIMIT);
+  assert.ok('request' in parseReading(at));
+});
+
 test("the prompt: the instructions first, in their order; the night last", () => {
   const request = { lang: 'sv' as const, dreams: ['Ett hus.'], kept: ['En mening.'] };
   const p = promptFor([{ name: 'a.md', text: 'one' }, { name: 'b.md', text: 'two' }], request);
@@ -73,6 +80,9 @@ test("the model's answer: one to three whole readings, or null", () => {
     JSON.stringify({ readings: [{ lens: -1, text: '[x]' }] }),
     JSON.stringify({ readings: [{ lens: 1.5, text: '[x]' }] }),
     JSON.stringify({ readings: [{ lens: 1, text: '' }] }),
+    JSON.stringify({ readings: [{ lens: 1, text: 7 }] }),
+    JSON.stringify({ readings: [null] }),
+    JSON.stringify({ readings: 'x' }),
     JSON.stringify({ readings: [{ lens: 1, text: '[x]', more: 1 }] }),
     JSON.stringify({ readings: r(1), more: 1 }),
   ]) {
