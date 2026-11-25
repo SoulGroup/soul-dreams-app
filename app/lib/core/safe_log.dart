@@ -137,6 +137,14 @@ enum LogEvent {
   /// A night's personal painting or its count of failed tries, left by a
   /// night whose file is gone, removed when the journal opens (D162 item 3).
   paintingSwept,
+
+  /// A night's personal painting (D162): made, with its size in bytes; a
+  /// painting that failed, with the server's status (0 no answer, -1 not a
+  /// JPEG, -2 no server or key, -3 anything else); the journal failing to
+  /// read or keep it or its count.
+  paintingMade,
+  paintingFailed,
+  paintingKeepFailed,
 }
 
 abstract final class SafeLog {
