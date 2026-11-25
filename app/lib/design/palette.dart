@@ -5,8 +5,8 @@
 // journal row's grey border is a stand-in from stand_ins.dart (D115). Life
 // Context's page (§2, §3, color.lifecontext.*): a kept sentence's box, its
 // words and its date; the light box's edge is the surface's (the founder's
-// screen), and the dark delete icon a stand-in, #D0775A, proposed by C18-P
-// and not yet approved; its list labels take color.tag.dream (a stand-in
+// screen), and the dark delete icon #D0775A, the founder's ruling against
+// C19-P's #8F3D24, which fails 3:1 on the dark box (D161 item 5; StandIns); its list labels take color.tag.dream (a stand-in
 // read from the founder's screen). Feedback's Submit takes
 // color.button.filled (C11-P; D152).
 import 'package:flutter/material.dart';

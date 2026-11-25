@@ -142,9 +142,11 @@ abstract final class StandIns {
 
   /// Life Context's page (D110; D131; the founder's screen, TO TRY): inside
   /// a kept sentence's box, the space between its words and its date, the
-  /// edit and delete icons and their tap boxes, and the dark theme's delete
-  /// icon, #D0775A, proposed by C18-P for the founder to approve (#8F3D24
-  /// fails on the dark box).
+  /// edit and delete icons and their tap boxes. The dark theme's delete icon
+  /// is #D0775A, the founder's ruling (D161 item 5), not C19-P's filed
+  /// #8F3D24 (`DarkColours.lifecontextDelete`): on the dark box #8F3D24 is
+  /// 1.45:1 and 2.02:1, below the 3:1 an icon needs (WCAG 2.2 SC 1.4.11);
+  /// #D0775A is 3.28:1 and 4.58:1 (design-system.md, §4). For Product.
   static const keptPadding = EdgeInsets.symmetric(horizontal: 6, vertical: 14);
   static const double keptDateGap = 4;
   static const double keptIcon = 20;

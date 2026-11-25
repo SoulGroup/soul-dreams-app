@@ -176,14 +176,16 @@ void main() {
     expect(Palette.light.keptTop, LightColours.lifecontextBox.colour);
   });
 
-  testWidgets('the dark theme: the dark box, its date, the proposed delete', (tester) async {
+  testWidgets('the dark theme: the dark box, its date, the founder\'s delete', (tester) async {
     await open(tester, dark: true);
     final k = (await kept()).first;
     final icon = tester.widget<Icon>(
       find.descendant(of: find.byKey(LifeContextPage.deleteKey(k.id)), matching: find.byType(Icon)),
     );
+    // D161 item 5: the founder keeps #D0775A, not C19-P's filed #8F3D24.
     expect(icon.color, StandIns.keptDeleteDark);
     expect(StandIns.keptDeleteDark, const Color(0xFFD0775A));
+    expect(DarkColours.lifecontextDelete.colour, const Color(0xFF8F3D24));
     final date = find.descendant(
       of: find.byKey(LifeContextPage.sentenceKey(k.id)),
       matching: find.text(shownDate(k.day)),
