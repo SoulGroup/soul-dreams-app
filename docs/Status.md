@@ -1,6 +1,6 @@
 # Status — SoulDreams app
 
-Last updated: 2026-11-25, in branch `readings-plumbing` (the readings with a stand-in model, part one: the reading, D155 to D160, head's message 34; built, deployed and checked by eye, both full mutation runs done; the merge, which is the owner's, next), by Claude Code.
+Last updated: 2026-11-25, in branch `c19p-import` (Product's C19-P imported and reconciled with the founder's D161; built; the owner's by-eye check, then the full mutation run, D126), by Claude Code.
 
 *No matter where you are on your journey, the steps you take are equally important.*
 
@@ -13,6 +13,16 @@ ruling D20 of 2026-11-09 for branch 2 is listed in `docs/plans/scaffold-2-app.md
 rulings given during each branch are listed in this file, one line each, under "Rulings during branch N".
 
 ## Current branch
+
+`c19p-import` (D161; plan `docs/plans/c19p-import.md`): Product's C19-P (the register, the Design System, Product's
+record) imported and reconciled with the founder's rulings. The pending Back and Turn on are MP·107 and MP·108, and
+"I don't agree" is the pending MP·109, EM·6's last filed words, EM·6 being retired at C19-P (D161 items 1 and 2);
+C19-P's MP·98 (the voice paused) is shown nowhere (D161 item 3); Night/Day mode offers Automatic, Day and Night,
+the quick toggle setting Day or Night (D161 item 4); Language shows MP·99's "English"; the dark delete icon keeps
+#D0775A against the filed #8F3D24 (D161 item 5). The rest of C19-P is words only: W27·2, W27·6 (shown in the
+disclosure), MP·66 to rewrite, MP·67, MP·68, MP·70 (shown nowhere) and MP·71 (as shown); the design values add
+the dark `color.lifecontext.delete`, which nothing shows. `readings-plumbing` part one is merged (`main` at
+`c72fca2`).
 
 `readings-plumbing`, part one: the reading (head's message 33; D155; plan `docs/plans/readings-plumbing.md`). In
 SoulDreams Dev, Start Interpretation on a night's page sends the night (its language, its dreams in words and, only
@@ -49,11 +59,9 @@ merge (this entry records it).
 
 ## Road ahead
 
-- `readings-plumbing`, part one: the storage rehearsal (Task 3), the deploy (Task 8) and the by-eye check (Task 9)
-  passed (owner, 2026-11-25) and the full mutation runs are done (D126); the merge is the owner's. The C19-P import
-  (the design system, the product change record, the register) is not on this branch (D159): it waits for its own
-  branch. Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
-  Before the merged build reaches the Cohort 0 app, the owner's safety export (docs/workflow.md (c) item 4).
+- `c19p-import`: the owner's by-eye check (plan Task 5), the full mutation run (D126), then the merge, the owner's.
+  It changes no storage. Before `readings-plumbing`'s merged build reaches the Cohort 0 app, the owner's safety
+  export (docs/workflow.md (c) item 4).
 - `readings-plumbing`, part two: the painting (D143, D145, D146, D123; D155 items 1 and 3): its plan after part one's
   merge.
 - `life-context` (merged): the owner's by-eye review passed (plan Task 7, with D133 and D134; VoiceOver waits for
@@ -289,13 +297,15 @@ merge (this entry records it).
   stops the generator (`pending-filed`). Since C17-P none is pending: the file holds its header only, and nothing in
   `lib/` imports `pending.g.dart` (a test in `test/words/` keeps the Dev-only rule proved on a line built there).
 - Waiting statuses (D109): "English written, Swedish to write" (W12, W13) has no line, as "to write"; the readings
-  branch revisits them. "to rewrite" (D119) is built as written, a stand-in, until rewritten (W27·2, W27·6, MP·68,
-  MP·70, C125-I·3); a sentence still owed, whole in braces with a capital (MP·68, MP·70), shows as written.
+  branch revisits them. "to rewrite" (D119) is built as written, a stand-in, until rewritten (MP·66 and C125-I·3
+  since C19-P); a sentence still owed, whole in braces, would show as written: none is filed since C19-P.
 - Design values: `Spacing.pageSide` (30) and `Spacing.journalRow` (12) are filed at C17-P and replace the stand-ins
   `StandIns.pageSide` and `rowGap` (the same values). §5's second table, the controls, is prose and not generated.
   At C18-P (D118): `TypeRoles.rowDate` (Inter SemiBold 20) carries a row's date; a line or letter "[to set in
   Framer]" is null, the font's own; a colour "[to try ...]" or "[proposed ...]" has no constant
-  (`color.label.questions`, the dark `color.lifecontext.delete`), one "[owed: ...]" keeps its value.
+  (`color.label.questions`), one "[owed: ...]" keeps its value. At C19-P: "#hex, as in the light theme (a ruling):
+  prose" is read as the light value, and stops the generator if it differs (`as-differs`); the dark
+  `color.lifecontext.delete` is #8F3D24 there, and the app keeps #D0775A (D161 item 5; `StandIns.keptDeleteDark`).
 - The journal's greeting (C18-P; D119 item 4): MP·72 to MP·75 by the part of the day, from 05:00, 11:00, 17:00
   and 21:00, one line of the part's four a day, in turn; a night after midnight keeps the line of the evening it
   began on (the day counted under D91). New Dream is MP·11; a read night's jump buttons are MP·77's four parts.
@@ -314,8 +324,8 @@ merge (this entry records it).
   goes. The query is never kept or logged (R3).
 - The agreement (C159-I item 5; D110; D121; D122; D125 items 2 and 8; D127 item 1; D128; `redesign-c`;
   `app/lib/settings/`, SoulDreams Dev only). Onboarding's second page ends with the disclosure parts, MP·58
-  ("Read everything", optional, opening the full disclosure page, the text only, with back), then at the foot EM·6
-  "I don't agree" left and MP·100 "I agree" right (a pending line), equal, neither chosen beforehand. "I agree"
+  ("Read everything", optional, opening the full disclosure page, the text only, with back), then at the foot MP·109
+  "I don't agree" left (a pending line, EM·6's last filed words, D161 item 2) and MP·100 "I agree" right (a pending line), equal, neither chosen beforehand. "I agree"
   accepts the disclosure and gives the readings (a) and Life Context (b) together, so Life Context is On from
   then; "I don't agree" gives neither and the journal opens as a private journal. D127 amends MP·83's "never on
   before consent" and C159-I's separate consents; the Build chat carries it to the head. There is no withdrawing
@@ -331,7 +341,9 @@ merge (this entry records it).
   Disclosure & privacy page from Settings is then the text with one button at its end, MP·100, which gives both
   consents (`SettingsController.agree`), starts the recording and the retries, and goes; once agreed the page has
   no button. MP·66, MP·67, MP·68, MP·70, MP·95 to MP·97 and MP·9 are shown nowhere now. The word "consent" is on no
-  screen but one line: EM·6's Swedish, "Jag samtycker inte" (banked item 164). Night images has no consent: Personal
+  screen but one line: the pending MP·109's Swedish, "Jag samtycker inte", which the founder accepts (banked item
+  164 closed; D161 item 2).
+  C19-P's MP·98 (the voice paused until consent) is shown nowhere: the microphone stays, with the popup (D161 item 3). Night images has no consent: Personal
   by default (D160: in a fresh journal and after Delete journal, with "I agree" or not), a read night its painting;
   Off, one tap away in Settings, shows every night the gradient (`lookOf`'s `images`); Personal and Random keep
   D110's look until the personal painting exists (D121 item 3).
@@ -340,12 +352,12 @@ merge (this entry records it).
   rows end (three drawn sliders in place of the gear, 41 in a 44 tap box, its own semantics node, spoken MP·25; the
   sky mark stays 140 down). The page: the back control, the quick toggle top centre (MP·45), which shows what it
   switches to, a moon in the light theme drawn in the dark page colour and a sun in the dark, switches the theme in
-  half a second and sets Manual (the 5 s fade stays for the clock's 21:00 and 08:00, `NightDay.fade`; a change the
+  half a second and sets Day or Night (D161 item 4; the 5 s fade stays for the clock's 21:00 and 08:00, `NightDay.fade`; a change the
   dreamer makes takes `NightDay.quickFade`); MP·25 in h2; six rows of one height, each a white rounded row with a
   value pill, all one width, its border the row's grey, the gap from its right edge to the row's equal to the gap above
   and below it (D128 item 6; inside it the value and its chevron are centred, as before D127), opening the phone's
-  menu: Language (EM·9, `[owed·language]`, one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44; Manual keeps
-  the theme shown), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure) and
+  menu: Language (EM·9, MP·99's "English", one choice), Word Animation (MP·26), Night images (MP·85), Night/Day mode (MP·44:
+  Automatic, Day or Night, C19-P; D161 item 4), Life Context (MP·83), Life Context length (MP·84); then MP·48 (the full disclosure) and
   Delete journal (EM·11, `color.destructive`); no Give or Withdraw row (D128 item 2). Life Context On shows its
   page (`ConsentPage`), Off asks nothing (D134), and before the dreamer has agreed either shows the popup instead;
   Night images asks nothing; Delete journal asks C4-P·4 once, then everything goes and onboarding starts again. The setting lines are read by
@@ -1134,7 +1146,7 @@ Banked in redesign-c (D91; none changes what the dreamer sees beyond D110, D121 
      (2) item 4: of the filed lines shown, only EM·6 holds the word, in Swedish, "Jag samtycker inte" (English "I
      don't agree" is fine): the owner takes it to Product to reword; MP·67 ("I consent" / "I don't consent"), MP·95 ("Withdraw consent" /
      "Give consent") and MP·96 hold it too and are shown nowhere now (a test, `shown_lines_test.dart`, keeps the
-     list at EM·6); (3) the popup (MP·101, MP·102) is on the microphone, Start Interpretation (still doing nothing
+     list at EM·6, MP·109 since C19-P; closed at c19p-import: the founder accepts "Jag samtycker inte"); (3) the popup (MP·101, MP·102) is on the microphone, Start Interpretation (still doing nothing
      once agreed, as before) and Life Context's row, in the typing screen, a night and Settings; the readings'
      "only on Start Interpretation" waits on the readings being built; (4) a journal that has (a) not given from an
      earlier build (a withdrawn or refused one) is "not agreed" now: everything visible, the popup, and MP·100 at the
@@ -1207,6 +1219,21 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
      and the store-level version 2 test holds no waiting recording; (l) a lone surrogate in a reading's text comes
      back as U+FFFD, as dreams' do.
 
+Banked in c19p-import (D91; for Product, through the head; nothing a dreamer sees changes beyond D161):
+
+175. For Product (D161): (a) the pending handles: C19-P filed MP·98 and MP·99 over the two the pending lines held,
+     so Back and Turn on are now MP·107 and MP·108, and the founder keeps EM·6's "I don't agree" as MP·109; Product
+     to file all ten pending lines (MP·100 to MP·109) under handles it confirms; (b) EM·6's retirement and the
+     consent page's "Next alone" do not stand in the app: onboarding's foot is "I don't agree" / "I agree" (D127,
+     D128; D161 item 2); (c) C19-P's MP·98 is not shown: the microphone stays, a tap before "I agree" shows the
+     popup MP·101 (D128; D161 item 3), so MP·66 and MP·68's flags (refusing (a) pauses the voice) describe a screen
+     the app does not have; (d) the dark delete icon stays #D0775A, against C19-P item 6's #8F3D24, which is 1.45:1
+     and 2.02:1 on the dark surface where an icon needs 3:1 (D161 item 5): a filing to match, or the founder's look
+     on his phone; (e) MP·99 is read as one name per language, in the order English, Svenska, and Language shows
+     the app's own (English only, D121 item 1); (f) the word "consent" is still on one screen, MP·109's Swedish; the
+     founder accepts it ("Jag samtycker inte", banked item 164 closed, the owner's brief, 2026-11-25), so nothing is
+     asked of Product here.
+
 ## Before Cohort 1
 
 1. No tester build while `app/assets/words/pending-lines.csv` holds any line (the owner's ruling on Task 2's review,
@@ -1216,8 +1243,8 @@ Banked in image-trial (D91; nothing a dreamer sees changes):
    line: none since C17-P (D106 3). `Onboarding.missing` lists them (every part shown, MP·57 included), and a test in
    `dev_only_test.dart` fails if either entry point reaches `lib/onboarding/` while it is not empty.
 4. No tester or founder build may show an unfilled braced sentence (D119 item 2: a place "to rewrite" is built as
-   written, and a sentence still owed in it stays whole in braces, as MP·68 and MP·70 do). SoulDreams Dev shows both
-   in the three consents, as filed (D122, Q1 (B)). `test/words/shown_lines_test.dart` fails if any file that
+   written, and a sentence still owed in it stays whole in braces, as MP·68 and MP·70 did until C19-P). None is filed since C19-P
+   (D122, Q1 (B)). `test/words/shown_lines_test.dart` fails if any file that
    `main.dart` or `main_founder.dart` reaches (following imports, as `dev_only_test.dart` does) names a place whose
    line, in either language, holds a `{` or `}` that is not one of the four slots (`{n}`, `{pointed image}`,
    `{tradition}`, `{read image}`). Onboarding reaches neither app until a later ruling (D103 item 1).
@@ -1252,9 +1279,10 @@ message 20 and built in `journal-design`, except the night's page's field in 10,
 
 Lines given and approved, shown in SoulDreams Dev only until Product registers them (D58 Q11):
 
-- MP·98 "Back" / "Tillbaka" and MP·99 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
+- MP·107 "Back" / "Tillbaka" and MP·108 "Turn on" / "Slå på", on Life Context's consent page in Settings (the
   founder, 2026-11-22, D125 item 9; the owner wrote them in `pending-lines.csv`; handles proposed to Product, banked
-  item 162); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164); MP·103 "Done" / "Klar" (the tick that ends selecting on Life Context's page) and MP·104 (the line shown there while Life Context is Off) (the founder, D133; handles proposed to Product). MP·105 (Feedback, a send that failed) and MP·106 (Feedback, a send that worked), added to `pending-lines.csv` by the owner (D153; D152 item 4; plan `docs/plans/feedback.md`, Part 4; handles proposed to Product). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
+  item 162; first MP·98 and MP·99, renumbered when C19-P filed those handles, D161 item 1); MP·109 "I don't
+  agree" / "Jag samtycker inte", onboarding's decline, EM·6's last filed words (D161 item 2; banked item 175); MP·100 "I agree" / "Jag godkänner", on onboarding's second page and at the end of Settings' Disclosure & privacy page (D127 item 1; D128 item 3; banked item 163); MP·101 (the popup's words) and MP·102 "OK" / "OK" (D128 item 3; banked item 164); MP·103 "Done" / "Klar" (the tick that ends selecting on Life Context's page) and MP·104 (the line shown there while Life Context is Off) (the founder, D133; handles proposed to Product). MP·105 (Feedback, a send that failed) and MP·106 (Feedback, a send that worked), added to `pending-lines.csv` by the owner (D153; D152 item 4; plan `docs/plans/feedback.md`, Part 4; handles proposed to Product). MP·60 to MP·65 were filed at C17-P, word for word as pending (checked in `c17p-import`).
 
 ## Rulings during branch 2
 
@@ -1888,21 +1916,39 @@ Lines given and approved, shown in SoulDreams Dev only until Product registers t
   A916 to A918, A877 repointed; `3cc84a1`); the server's limit in characters and a reading's text a string (rows S179,
   S180; `ac5a949`). Row A890 sits in Task 5's block but breaks Task 6's code, so it is caught only from Task 6 on.
 
+## Rulings during c19p-import
+
+- D161 (founder; the owner's brief for this branch): (1) the pending MP·98 "Back" and MP·99 "Turn on" move to the
+  next handles above C19-P's highest, MP·107 and MP·108, by one owner's paste that renames, re-fingerprints and
+  regenerates; MP·100 to MP·106 do not clash; (2) EM·6, retired at C19-P, keeps its last filed words as the pending
+  MP·109 (D127, D128); (3) C19-P's MP·98 (the voice paused "until you give consent") is not shown: D128 keeps the
+  microphone and the MP·101 popup; (4) Night/Day mode adopts MP·44's Automatic, Day and Night as three choices;
+  the quick toggle stays; (5) the dark delete icon keeps #D0775A: C19-P's #8F3D24 is 1.45:1 on the dark surface;
+  every other change adopted, or a question where it contradicts a founder ruling. D91 and D126 apply; the owner
+  checks by eye only.
+- The design generator reads C19-P's "#hex, as in the light theme (...): ..." (rows in `tool/checks/tests/
+  mutations.py`, 108 now; 289 guard tests, 287 without `test_check_all`'s two). Row A480 dropped (no filed braced
+  line to reach; the helper is proved on made-up lines, A545); rows A921 to A925 new; four tests renamed from
+  "Manual" (their rows follow). App 837 tests.
+- The founder accepts MP·109's Swedish, "Jag samtycker inte" (owner's brief, 2026-11-25): banked item 164 is closed.
+  The documents repository was at `8a92a57` for the import.
+
 ## Documents as last imported
 
-Imported by the owner at the documents repository's `ac3a013`, in branch `redesign-b` (C18-P and C160-I); the
+Imported by the owner in branch `c19p-import` (C19-P: the register, the Design System and Product's record), at the
+documents repository's `8a92a57`; before it, at the documents repository's `ac3a013`, in branch `redesign-b` (C18-P and C160-I); the
 others unchanged since C17-P's import (`d8d71c3`, branch `c17p-import`). The ordinal
 is the owning department's filing. Each line: path, ordinal, first 12 hex digits of the sha256, as in
 `docs/source/SOURCES`.
 
 - `app/assets/words/founder-lists-for-technology.md`, C13-P, `4326cfcc5cb8`
-- `app/assets/words/places-register.csv`, C18-P, `cd523e7d6959`
-- `docs/source/design-system.md`, C18-P, `1c41ff6b3b92`
+- `app/assets/words/places-register.csv`, C19-P, `013289928989`
+- `docs/source/design-system.md`, C19-P, `1a07ffc3c3fb`
 - `docs/source/experience-map.md`, C16-P, `3c8878f6f03b`
 - `docs/source/how-the-ai-appears.md`, C17-P, `80618ad95378`
 - `docs/source/interpretation-change-record.md`, C160-I, `57644c167efb`
 - `docs/source/main-path.md`, C16-P, `6d503665ef9e`
-- `docs/source/product-change-record.md`, C18-P, `2ff467173047`
+- `docs/source/product-change-record.md`, C19-P, `505abf1c8ae1`
 - `docs/source/product-principles.md`, C16-P, `1f8992a7ec51`
 - `docs/source/requirements-list.md`, C11-P, `22f742c740ab`
 - `docs/source/technical-answers.md`, C5-T, `c6b1d05a56a0`
