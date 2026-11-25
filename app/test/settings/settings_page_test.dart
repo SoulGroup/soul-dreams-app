@@ -124,7 +124,7 @@ void main() {
     final pill = tester.getSemantics(find.byKey(SettingsPage.valueKey(SettingRow.wordAnimation)));
     expect([pill.label, pill.value], ['Word Animation', 'On']);
     expect(shown(tester, SettingRow.wordAnimation), 'On');
-    expect(shown(tester, SettingRow.nightImages), 'Off');
+    expect(shown(tester, SettingRow.nightImages), 'Personal');
     expect(shown(tester, SettingRow.nightDay), 'Automatic');
     expect(shown(tester, SettingRow.lifeContext), 'Off');
     expect(shown(tester, SettingRow.length), '2 weeks');
@@ -277,11 +277,12 @@ void main() {
   });
 
   // D125 item 8: Night images asks nothing: any choice is a setting, kept as
-  // one, and no consent page or dialog stands in front of it.
-  testWidgets('Night images asks nothing: Off by default, any choice at once', (tester) async {
+  // one, and no consent page or dialog stands in front of it; D160: it
+  // starts as Personal, and Off is one choice away.
+  testWidgets('Night images asks nothing: Personal by default, any choice at once', (tester) async {
     final c = await open(tester);
-    expect(shown(tester, SettingRow.nightImages), 'Off');
-    expect(c.settings.images, NightImages.off);
+    expect(shown(tester, SettingRow.nightImages), 'Personal');
+    expect(c.settings.images, NightImages.personal);
     await choose(tester, SettingRow.nightImages, 1);
     expect(find.byType(ConsentPage), findsNothing);
     expect(find.byType(CupertinoAlertDialog), findsNothing);

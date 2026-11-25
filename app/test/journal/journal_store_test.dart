@@ -569,7 +569,7 @@ void main() {
     await store.keepConsents(Consents.answered({Consent.readings: true}, DateTime.utc(2026)));
     final before = files.everything();
     expect(await store.settings(), isNull);
-    expect(const Settings().images, NightImages.off);
+    expect(const Settings().images, NightImages.personal);
     const s = Settings(wordAnimation: false, nightDay: NightDayMode.night, images: NightImages.random, length: LifeContextLength.threeMonths);
     await store.keepSettings(s);
     expect(await (await JournalStore.open(files)).settings(), s);
@@ -608,7 +608,7 @@ void main() {
     await files.write(JournalStore.settingsFile, utf8.encode('{"version":2,$good}'));
     expect((await store.settings())!.images, NightImages.personal);
     await files.write(JournalStore.settingsFile, utf8.encode('{"version":2,${good.replaceFirst("personal", "off")}}'));
-    expect(await store.settings(), const Settings());
+    expect(await store.settings(), const Settings(images: NightImages.off));
   });
 
   // D125 item 8: a version 1 settings file chose a painting for while consent

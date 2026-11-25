@@ -598,13 +598,53 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  // MP·85, D125 item 8: Night images is Off until it is chosen: every night
-  // the gradient.
-  testWidgets('Night images is Off by default', (tester) async {
+  // MP·85, D125 item 8, D160: Night images is Personal until it is chosen
+  // otherwise: a read night shows its painting.
+  testWidgets('Night images is Personal by default', (tester) async {
     JournalStore.newQueueForTests();
     await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: agreed(MemoryJournalFiles()))));
     await tester.pumpAndSettle();
-    expect(tester.widget<JournalPage>(find.byType(JournalPage)).images, isFalse);
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.images, isTrue);
+    expect(page.settings!.settings.images, NightImages.personal);
+  });
+
+  // D160: Off stays a choice: kept, followed when the journal opens, every
+  // night the gradient.
+  testWidgets('Night images Off, chosen: every night the gradient', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = agreed(MemoryJournalFiles());
+    files.files[JournalStore.settingsFile] = encodeSettings(const Settings(images: NightImages.off));
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files)));
+    await tester.pumpAndSettle();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.images, isFalse);
+    expect(page.settings!.settings.images, NightImages.off);
+  });
+
+  // D160: after Delete journal, "I agree" again: Personal, as in a fresh
+  // journal; the Off that was chosen went with the journal.
+  testWidgets('after Delete journal, "I agree" gives Personal again', (tester) async {
+    JournalStore.newQueueForTests();
+    final files = agreed(MemoryJournalFiles());
+    files.files[JournalStore.settingsFile] = encodeSettings(const Settings(images: NightImages.off));
+    await tester.pumpWidget(SoulDreamsApp(home: JournalHome(files: files, recording: counted([]))));
+    await tester.pumpAndSettle();
+    final first = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(first.images, isFalse);
+    await first.journal.deleteAll();
+    await tester.pumpAndSettle();
+    expect(find.byType(Onboarding), findsOneWidget);
+    tester.widget<Onboarding>(find.byType(Onboarding)).onAgreed(
+      const {Consent.readings: true, Consent.lifeContext: true},
+    );
+    await tester.pump();
+    await tester.pump();
+    final page = tester.widget<JournalPage>(find.byType(JournalPage));
+    expect(page.images, isTrue);
+    expect(page.settings!.settings.images, NightImages.personal);
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(seconds: 11));
   });
 
   testWidgets('settings that cannot be read: the defaults, a code', (tester) async {
@@ -620,7 +660,8 @@ void main() {
   });
 
   // D122, D125 item 8: the two answers from onboarding are kept as given,
-  // with the day; Night images stays Off, no consent behind it.
+  // with the day; Night images is Personal by default (D160), no consent
+  // behind it.
   testWidgets('the two answers are kept as given', (tester) async {
     JournalStore.newQueueForTests();
     final files = MemoryJournalFiles();
@@ -632,8 +673,8 @@ void main() {
     await tester.pumpAndSettle();
     final page = tester.widget<JournalPage>(find.byType(JournalPage));
     expect(page.recording, isNull);
-    expect(page.images, isFalse);
-    expect(page.settings!.settings.images, NightImages.off);
+    expect(page.images, isTrue);
+    expect(page.settings!.settings.images, NightImages.personal);
     final kept = decodeConsents(files.files[JournalStore.consentFile]!)!;
     expect([for (final c in Consent.values) kept.given(c)], [false, true]);
   });

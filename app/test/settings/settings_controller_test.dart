@@ -123,11 +123,12 @@ void main() {
     expect(told, 1);
   });
 
-  // D125 item 8: Night images is a setting with no consent behind it: Off by
-  // default, any choice kept as a setting alone, the consents untouched.
-  test('Night images is a setting: Off by default, no consent kept', () async {
+  // D125 item 8: Night images is a setting with no consent behind it, any
+  // choice kept as a setting alone, the consents untouched; D160: Personal
+  // by default.
+  test('Night images is a setting: Personal by default, no consent kept', () async {
     final (c, f) = await make();
-    expect(c.settings.images, NightImages.off);
+    expect(c.settings.images, NightImages.personal);
     await c.change(c.settings.copyWith(images: NightImages.random));
     expect(c.settings.images, NightImages.random);
     expect(kept(f, JournalStore.settingsFile)['images'], 'random');

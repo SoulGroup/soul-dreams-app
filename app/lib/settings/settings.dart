@@ -2,8 +2,8 @@
 // MP·26, MP·44, MP·84, MP·85; D110; D121; D122; D125 item 8), in plain Dart,
 // kept on the phone in the journal's folder (R11; docs/workflow.md (c)):
 // Word Animation, on by default (D110); Night/Day mode, Automatic by
-// default, or Manual, Day or Night; Night images, Off by default, or
-// Personal or Random, with no consent behind it (D125 item 8); Life
+// default, or Manual, Day or Night; Night images, Personal by default
+// (D160), or Random or Off, with no consent behind it (D125 item 8); Life
 // Context's length, 2 weeks by default (C159-I item 1), remembered now and
 // used once Life Context is built (D121 item 2). Whether Life Context is on
 // is consent (b), kept with the consents (`consents.dart`), never here.
@@ -26,7 +26,7 @@ final class Settings {
   const Settings({
     this.wordAnimation = true,
     this.nightDay = NightDayMode.automatic,
-    this.images = NightImages.off,
+    this.images = NightImages.personal,
     this.length = LifeContextLength.twoWeeks,
   });
 

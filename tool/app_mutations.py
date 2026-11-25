@@ -3,7 +3,7 @@
 # During a task, only chosen rows (D95): --rows A1,A7 or --files lib/a.dart,lib/b.dart
 # Parallel by default (D129), each worker in its own copy of app/ in
 # $TMPDIR: --jobs N sets the workers; --serial runs as before D129.
-# Expected: every row "caught" (A1 to A918, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
+# Expected: every row "caught" (A1 to A920, A418 to A422, A424 to A426, A429 and A781 dropped (curated-set, D149: the date's shade is gone), A369 and A409 to A411 dropped (curated-set, D147: the placeholder paintings and the code-drawn stars are gone), A551, A552, A710 and A711 dropped (life-context, D134: Off pauses, so Settings asks nothing at Off and deletes nothing), A744 dropped (D134 item 5: the seed no longer depends on Life Context being on), A610 dropped (an equivalent change: a row's least height is the pill's own 44 and its padding), A518, A521, A540, A553, A554, A558, A574, A575, A583, A585 to A600, A629, A635, A645 and A646 dropped (redesign-c, D128: there is no withdrawing, no consent row or readings page, no idle wait; D127's pill inside is gone), A288, A291, A537, A538, A539, A543, A546, A623, A624, A626, A627, A633 and A634 dropped (redesign-c, D127: the consents left onboarding and its full page, "I don't agree" no longer goes back, Next is gone), A301, A302, A526, A527, A530, A541, A549, A550, A566 and A578 dropped (redesign-c, D125: the first empty journal's pointer and arrow, the night images consent and the gear's spacing are gone), A277, A278, A281, A300 and A507 dropped (redesign-c, D121 item 5,
 # D122: withdrawing no longer removes the consent or returns to the start, so its rows went; the journal's deletion
 # takes the audio, so A300's retry cannot follow, and A518 holds the cut on a withdrawal; A544 holds A507's
 # answers), A363 dropped (redesign-b, D119: the owed handles are filed, owed.dart is gone), A24ah, A24ar, A24as, A252 to A255 and A270 dropped (redesign-a, D110: naming, the record button, the row's summary and chevron are gone, and the night's page no longer stands under BelowTapBox, which A271 still covers), A375 dropped (D112: New Dream stands on a night sky, not the painted gradient; A408 holds it), A313 dropped (c17p-import: every part shown is filed, so an empty `missing` is the real one; back when a part loses its line), A207 and A223 dropped (D97), A213 dropped (the kick's offline check went; the loop's is A219), A55 dropped (D74.3), A73, A83 and A142 dropped (D88), A80 and A81 dropped (Task 16e), A86 to A88 and A99 dropped (D87), A94 dropped (D86), A82 and A128 to A130 dropped (D90), with the rows A24a to A24au of
@@ -2283,7 +2283,7 @@ ROWS = [
     ('A513', 'lib/journal/pages/journal_home.dart',
      'images: _settings?.settings.images != NightImages.off,',
      'images: true,',
-     'test/journal/pages/journal_home_test.dart', 'Night images is Off by default'),
+     'test/journal/pages/journal_home_test.dart', 'Night images Off, chosen: every night the gradient'),
     ('A514', 'lib/journal/pages/journal_home.dart',
      '    wordAnimation = controller.settings.wordAnimation;\n',
      '',
@@ -2387,7 +2387,7 @@ ROWS = [
     ('A557', 'lib/settings/settings_page.dart',
      'Lines.MP_85, s.images.index, _nightImages),',
      'Lines.MP_85, 0, _nightImages),',
-     'test/settings/settings_page_test.dart', 'Night images asks nothing: Off by default, any choice at once'),
+     'test/settings/settings_page_test.dart', 'Night images asks nothing: Personal by default, any choice at once'),
     ('A559', 'lib/settings/settings_page.dart',
      'choices: const [owedLanguage],',
      'choices: const [owedLanguage, owedLanguage],',
@@ -2559,9 +2559,9 @@ ROWS = [
      'images: images,',
      'test/journal/journal_store_test.dart', 'version 1 settings beside a consents file with (c) not given'),
     ('A621', 'lib/settings/settings.dart',
-     '    this.images = NightImages.off,',
      '    this.images = NightImages.personal,',
-     'test/settings/settings_controller_test.dart', 'Night images is a setting: Off by default, no consent kept'),
+     '    this.images = NightImages.off,',
+     'test/settings/settings_controller_test.dart', 'Night images is a setting: Personal by default, no consent kept'),
     ('A622', 'lib/settings/settings.dart',
      "    'version': 2,",
      "    'version': 1,",
@@ -2573,7 +2573,7 @@ ROWS = [
     ('A628', 'lib/settings/settings_page.dart',
      'copyWith(images: NightImages.values[i]));',
      'copyWith(images: NightImages.values[0]));',
-     'test/settings/settings_page_test.dart', 'Night images asks nothing: Off by default, any choice at once'),
+     'test/settings/settings_page_test.dart', 'Night images asks nothing: Personal by default, any choice at once'),
     # redesign-c, D125 (review): a yes to the retired consent (c) with no settings file; Next accepted.
     ('A630', 'lib/journal/journal_store.dart',
      '      if (consents == null || decodeConsents(consents)?.retiredImages != true) return null;',
@@ -3737,6 +3737,15 @@ ROWS = [
      '    try {\n      answer = await utf8.decodeStream(reply).timeout(_wait);\n    } on FormatException {\n'
      '      throw const ReadingFailure(-1);\n    }\n    if (reply.statusCode != 200) throw ReadingFailure(reply.statusCode);\n',
      'test/readings/readings_test.dart', 'a reply that is not text: -1, or its own status'),
+    # D160: Night images starts as Personal, in a journal opened with no settings and after "I agree".
+    ('A919', 'lib/journal/pages/journal_home.dart',
+     '    if (mounted) _enter(consents, const Settings());',
+     '    if (mounted) _enter(consents, const Settings(images: NightImages.off));',
+     'test/journal/pages/journal_home_test.dart', 'after Delete journal, "I agree" gives Personal again'),
+    ('A920', 'lib/journal/pages/journal_home.dart',
+     'settings ?? const Settings());',
+     'settings ?? const Settings(images: NightImages.off));',
+     'test/journal/pages/journal_home_test.dart', 'Night images is Personal by default'),
 ]
 
 
