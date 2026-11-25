@@ -380,7 +380,8 @@ void main() {
     await pumpEventQueue();
     gated.hold.complete();
     await Future.wait([saving, deleting]);
-    expect(gated.log, ['rename:start', 'rename:end', 'delete:start', 'delete:start']);
+    // The painting, its count, their temporary files, then the night's two.
+    expect(gated.log, ['rename:start', 'rename:end', for (var i = 0; i < 6; i++) 'delete:start']);
     expect(files.everything(), isEmpty);
     expect(await store.nights(), isEmpty);
   });
@@ -773,5 +774,126 @@ void main() {
     }), isFalse);
     expect(called, isFalse);
     expect(files.everything()[JournalStore.fileOf(a.id)], encodeNight(b));
+  });
+
+  // A read night's personal painting (D162 item 3): beside its night,
+  // written whole, deleted with it, swept when its night is gone.
+  group('paintings', () {
+    final jpeg = Uint8List.fromList([0xff, 0xd8, 1, 2, 3, 0xff, 0xd9]);
+
+    test('a painting is kept whole beside its night, its tries forgotten', () async {
+      final store = await JournalStore.open(files);
+      final [first, second, ...] = nightsFromFixtures();
+      await store.save(first);
+      await store.save(second);
+      await store.countPaintTry(first.id);
+      expect(await store.keepPainting(first.id, jpeg), isTrue);
+      expect(await store.painting(first.id), jpeg);
+      expect(await store.painting(second.id), isNull);
+      expect(await store.paintTries(first.id), 0);
+      expect(files.everything().keys.toSet(), {
+        JournalStore.fileOf(first.id),
+        JournalStore.fileOf(second.id),
+        JournalStore.paintingOf(first.id),
+      });
+      expect(await store.paintings(), {first.id: jpeg});
+    });
+
+    test('a night that is gone keeps no painting and no tries', () async {
+      final store = await JournalStore.open(files);
+      final id = nightsFromFixtures().first.id;
+      expect(await store.keepPainting(id, jpeg), isFalse);
+      expect(await store.countPaintTry(id), isFalse);
+      expect(files.everything(), isEmpty);
+    });
+
+    test('failed tries counted one by one; a damaged count is none', () async {
+      final store = await JournalStore.open(files);
+      final first = nightsFromFixtures().first;
+      await store.save(first);
+      expect(await store.paintTries(first.id), 0);
+      for (final n in [1, 2, 3]) {
+        expect(await store.countPaintTry(first.id), isTrue);
+        expect(await store.paintTries(first.id), n);
+      }
+      for (final damaged in ['', '0', 'x', '-1', '12345']) {
+        await files.write(JournalStore.triesOf(first.id), utf8.encode(damaged));
+        expect(await store.paintTries(first.id), 0, reason: damaged);
+      }
+    });
+
+    test("deleting a night deletes its painting and tries, no other's", () async {
+      final store = await JournalStore.open(files);
+      final [first, second, ...] = nightsFromFixtures();
+      await store.save(first);
+      await store.save(second);
+      await store.keepPainting(first.id, jpeg);
+      await store.keepPainting(second.id, jpeg);
+      await store.countPaintTry(first.id);
+      await files.write(JournalStore.tempPrefix + JournalStore.paintingOf(first.id), jpeg);
+      await store.delete(first.id);
+      expect(files.everything().keys.toSet(), {JournalStore.fileOf(second.id), JournalStore.paintingOf(second.id)});
+      expect(await store.painting(first.id), isNull);
+    });
+
+    test('at open, paintings and counts of gone nights are swept', () async {
+      await files.open();
+      final first = nightsFromFixtures().first;
+      final loose = '4' * 32;
+      await files.write(JournalStore.fileOf(first.id), encodeNight(first));
+      for (final id in [first.id, loose]) {
+        await files.write(JournalStore.paintingOf(id), jpeg);
+        await files.write(JournalStore.triesOf(id), utf8.encode('1'));
+      }
+      final store = await JournalStore.open(files);
+      expect(files.everything().keys.toSet(), {
+        JournalStore.fileOf(first.id),
+        JournalStore.paintingOf(first.id),
+        JournalStore.triesOf(first.id),
+      });
+      expect(lines, ['paintingSwept', 'paintingSwept']);
+      await files.write(JournalStore.paintingOf(loose), jpeg);
+      expect(await store.paintings(), {first.id: jpeg});
+    });
+
+    test('a painting cut short leaves none and no temporary file', () async {
+      final broken = BrokenRename(Directory('${dir.path}/Journal'));
+      final store = await JournalStore.open(broken);
+      final first = nightsFromFixtures().first;
+      await broken.write(JournalStore.fileOf(first.id), encodeNight(first));
+      await broken.write(JournalStore.triesOf(first.id), utf8.encode('2'));
+      await expectLater(store.keepPainting(first.id, jpeg), throwsA(isA<FileSystemException>()));
+      expect(broken.everything().keys.toSet(), {JournalStore.fileOf(first.id), JournalStore.triesOf(first.id)});
+      expect(await store.paintTries(first.id), 2);
+    });
+
+    test('deleting the journal takes the paintings and the tries', () async {
+      final store = await JournalStore.open(files);
+      final first = nightsFromFixtures().first;
+      await store.save(first);
+      await store.keepPainting(first.id, jpeg);
+      await store.countPaintTry(first.id);
+      await store.deleteAll();
+      expect(files.everything(), isEmpty);
+    });
+
+    // docs/workflow.md (c) item 1: every invented night, counted before
+    // and after, reads back the same beside its painting.
+    test('paintings beside every invented night change no night', () async {
+      final store = await JournalStore.open(files);
+      final nights = nightsFromFixtures();
+      for (final n in nights) {
+        await store.save(n);
+      }
+      final before = files.everything();
+      for (final n in nights) {
+        await store.keepPainting(n.id, jpeg);
+      }
+      expect(await store.nights(), hasLength(nights.length));
+      expect((await store.nights()).toSet(), nights.toSet());
+      final after = files.everything();
+      expect(after.length, before.length * 2);
+      before.forEach((name, bytes) => expect(listEquals(after[name], bytes), isTrue, reason: name));
+    });
   });
 }

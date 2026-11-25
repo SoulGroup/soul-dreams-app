@@ -34,6 +34,14 @@
 // everything made from it); at open, sentences whose night's file is gone
 // are removed. A kept file that does not read is shown as nothing kept and
 // replaced by the next change.
+//
+// A read night's personal painting (D162 item 3) is kept here too, beside
+// its night: `painting-<id>.jpg`, the JPEG our server sent, written whole
+// and renamed, and only while the night's file is here; and, while none has
+// come, `painting-<id>.tries`, how many tries failed. Deleting the night
+// deletes both first, then the night (X11); at open, either one whose
+// night's file is gone is deleted. Nothing of a painting is kept anywhere
+// else, on the phone or on our server.
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -49,6 +57,8 @@ import 'night.dart';
 final _nightFile = RegExp(r'^night-([0-9a-f]{32})\.json$');
 final _id = RegExp(r'^[0-9a-f]{32}$');
 final _audioFile = RegExp(r'^audio-([0-9a-f]{32})-(0|[1-9][0-9]{0,9})\.pcm$');
+final _paintingFile = RegExp(r'^painting-([0-9a-f]{32})\.(jpg|tries)$');
+final _triesText = RegExp(r'^[1-9][0-9]{0,3}$');
 // How a night's file names a waiting recording (encodeNight's own form).
 final _named = RegExp(r'"waiting":"([0-9a-f]{32})"');
 
@@ -109,9 +119,22 @@ final class JournalStore {
     return 'audio-$id-$start.pcm';
   }
 
-  /// Opens the folder, and removes what an interrupted save left, and any
+  /// The name of night [id]'s personal painting (D162 item 3).
+  static String paintingOf(String id) {
+    if (!_id.hasMatch(id)) throw ArgumentError('id');
+    return 'painting-$id.jpg';
+  }
+
+  /// The name of the file counting night [id]'s failed paintings.
+  static String triesOf(String id) {
+    if (!_id.hasMatch(id)) throw ArgumentError('id');
+    return 'painting-$id.tries';
+  }
+
+  /// Opens the folder, and removes what an interrupted save left, any
   /// audio no night names (an interrupted recording, or a night deleted
-  /// before its audio was).
+  /// before its audio was), and any painting or count of tries whose
+  /// night's file is gone.
   static Future<JournalStore> open(JournalFiles files) => _run(() async {
     await files.open();
     for (final name in await files.list()) {
@@ -136,9 +159,17 @@ final class JournalStore {
         SafeLog.event(LogEvent.audioSwept);
       }
     }
+    final nights = {for (final name in names) ?_nightFile.firstMatch(name)?[1]};
+    for (final name in names) {
+      final m = _paintingFile.firstMatch(name);
+      if (m != null && !nights.contains(m[1])) {
+        await files.delete(name);
+        SafeLog.event(LogEvent.paintingSwept);
+      }
+    }
     final store = JournalStore._(files);
     try {
-      await store._sweepKept({for (final name in names) ?_nightFile.firstMatch(name)?[1]});
+      await store._sweepKept(nights);
     } on Object {
       // Swept again at the next opening.
       SafeLog.event(LogEvent.keptDeleteFailed);
@@ -234,8 +265,9 @@ final class JournalStore {
     return true;
   });
 
-  /// Deletes the night's file, the temporary file of a save of it, and the
-  /// audio of every recording of it still waiting (D92 item 4).
+  /// Deletes the night's file, the temporary file of a save of it, the
+  /// audio of every recording of it still waiting (D92 item 4), and its
+  /// painting and count of tries (D162 item 3), these first.
   Future<void> delete(String id) => _run(() => _delete(id));
 
   Future<void> _delete(String id) async {
@@ -243,6 +275,10 @@ final class JournalStore {
     final kept = await _readKept();
     final rest = [for (final k in kept) if (k.night != id) k];
     if (rest.length != kept.length) await _writeKept(rest);
+    for (final made in [paintingOf(id), triesOf(id)]) {
+      await _files.delete(made);
+      await _files.delete(tempPrefix + made);
+    }
     final bytes = await _files.read(name);
     await _files.delete(name);
     await _files.delete(tempPrefix + name);
@@ -317,6 +353,52 @@ final class JournalStore {
       if (_audioFile.firstMatch(bare)?[1] == id) await _files.delete(name);
     }
   }
+
+  /// Night [id]'s personal painting, or null when none has come (D162).
+  Future<Uint8List?> painting(String id) => _run(() => _files.read(paintingOf(id)));
+
+  /// Every night's personal painting, by the night's id, for the nights
+  /// whose file is here.
+  Future<Map<String, Uint8List>> paintings() => _run(() async {
+    final names = await _files.list();
+    final out = <String, Uint8List>{};
+    for (final name in names) {
+      final m = _paintingFile.firstMatch(name);
+      if (m == null || m[2] != 'jpg' || !names.contains(fileOf(m[1]!))) continue;
+      final bytes = await _files.read(name);
+      if (bytes != null) out[m[1]!] = bytes;
+    }
+    return out;
+  });
+
+  /// Keeps [jpeg] as night [id]'s painting, written whole, and forgets its
+  /// failed tries, when that night's file is here. Returns whether it was.
+  Future<bool> keepPainting(String id, Uint8List jpeg) => _run(() async {
+    if (await _files.size(fileOf(id)) == null) return false;
+    await _whole(paintingOf(id), jpeg);
+    await _files.delete(triesOf(id));
+    return true;
+  });
+
+  /// How many of night [id]'s paintings failed: 0 with no count, or one
+  /// that does not read.
+  Future<int> paintTries(String id) => _run(() => _tries(id));
+
+  Future<int> _tries(String id) async {
+    final bytes = await _files.read(triesOf(id));
+    if (bytes == null) return 0;
+    final text = utf8.decode(bytes, allowMalformed: true);
+    return _triesText.hasMatch(text) ? int.parse(text) : 0;
+  }
+
+  /// Counts one more failed painting of night [id], when that night's file
+  /// is here. Returns whether it was.
+  Future<bool> countPaintTry(String id) => _run(() async {
+    if (await _files.size(fileOf(id)) == null) return false;
+    final tries = await _tries(id) + 1;
+    await _whole(triesOf(id), utf8.encode(tries.toString()));
+    return true;
+  });
 
   /// Deletes every entry in the journal's folder, whatever its name.
   Future<void> deleteAll() => _run(() => _files.deleteAll());

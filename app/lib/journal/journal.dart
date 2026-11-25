@@ -18,7 +18,10 @@
 //   the day it was said; edited (only the kept copy, D131 item 2), deleted
 //   one by one, several, or all; and swept when past the Recent window.
 //   Whether Life Context is on is decided above (`LifeContext`), not here.
+// - A read night's personal painting (D162 item 3), and how many of its
+//   tries failed, kept beside it and deleted with it.
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier, listEquals;
 
@@ -128,6 +131,22 @@ final class Journal {
   /// read keeps its first. Returns whether the night was there.
   Future<bool> keepReadings(String id, List<Reading> readings, {List<ModelUsage>? usage}) =>
       _store.update(id, (n) => n.readings == null ? n.withReadings(readings, usage: usage) : n);
+
+  /// Night [id]'s personal painting, or null while it has none (D162).
+  Future<Uint8List?> painting(String id) => _store.painting(id);
+
+  /// Every night's personal painting, by the night's id.
+  Future<Map<String, Uint8List>> paintings() => _store.paintings();
+
+  /// Keeps night [id]'s personal painting. Returns whether the night was
+  /// there: a night deleted meanwhile keeps nothing.
+  Future<bool> keepPainting(String id, Uint8List jpeg) => _store.keepPainting(id, jpeg);
+
+  /// How many of night [id]'s paintings failed (D162 item 2).
+  Future<int> paintTries(String id) => _store.paintTries(id);
+
+  /// Counts one more failed painting of night [id].
+  Future<bool> countPaintTry(String id) => _store.countPaintTry(id);
 
   /// Deletes the night, and everything of it (X11).
   Future<void> delete(String id) => _store.delete(id);

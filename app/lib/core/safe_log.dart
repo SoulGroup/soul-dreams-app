@@ -133,6 +133,10 @@ enum LogEvent {
   readingRead,
   readingFailed,
   readingKeepFailed,
+
+  /// A night's personal painting or its count of failed tries, left by a
+  /// night whose file is gone, removed when the journal opens (D162 item 3).
+  paintingSwept,
 }
 
 abstract final class SafeLog {
