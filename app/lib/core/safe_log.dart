@@ -125,6 +125,14 @@ enum LogEvent {
   /// this build). Never a word of it (R3).
   feedbackSent,
   feedbackFailed,
+
+  /// A night read (head's message 33), with its readings' count; a reading
+  /// that failed, with the server's status (0 no answer, -1 an unreadable
+  /// answer, -2 no server or key, -3 anything else); its readings that could
+  /// not be kept in the night.
+  readingRead,
+  readingFailed,
+  readingKeepFailed,
 }
 
 abstract final class SafeLog {

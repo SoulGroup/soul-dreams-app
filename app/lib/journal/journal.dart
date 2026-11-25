@@ -123,6 +123,12 @@ final class Journal {
     return best;
   }
 
+  /// Keeps [readings] in night [id], which is then read (D155 item 2), with
+  /// their calls' [usage] where kept (head's message 34); a night already
+  /// read keeps its first. Returns whether the night was there.
+  Future<bool> keepReadings(String id, List<Reading> readings, {List<ModelUsage>? usage}) =>
+      _store.update(id, (n) => n.readings == null ? n.withReadings(readings, usage: usage) : n);
+
   /// Deletes the night, and everything of it (X11).
   Future<void> delete(String id) => _store.delete(id);
 
